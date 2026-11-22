@@ -1,6 +1,18 @@
 # Research state
 
-Updated: 2026-11-04. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
+Updated: 2026-11-22. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
+
+## TinyLlama on FlashProve (dense-model patches) — proposed, CPU-checked
+
+2026-11-22. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed) adds
+three pinned patches on FlashProve `9e2bdd8`
+([`research/probes/flashprove/tinyllama/`](probes/flashprove/tinyllama/README.md)). They let a dense model
+such as TinyLlama-1.1B reach the verifier's standard form, give the provers and CPU tools the
+constants for width 2,048, and leave the worst-case check out under `-public-weights`.
+`make verify-flashprove-tinyllama` checks them on the CPU and passed on Linux and macOS, including
+a TinyLlama-shaped planning check with placeholder scales; the prover patch compiles with nvcc
+([evidence](evidence/flashprove-tinyllama-2026-11-22.json)). No proof, no GPU run. Next: a TinyLlama kit (scale tools for a dense `llama` file, calibration, GGUF
+export), then the CPU check that FlashProve's integer TinyLlama gives SASH's answer.
 
 ## SASH and FlashProve comparison — recorded
 

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+Propose dense TinyLlama on pinned FlashProve
+([decision 0094](docs/decisions/0094-flashprove-tinyllama.md), proposed): three pinned patches
+under `research/probes/flashprove/tinyllama/` and `make verify-flashprove-tinyllama`, a CPU check that runs
+upstream's stored proofs and altered copies through the unpatched and the patched verifier and
+requires equal results. It also checks that a TinyLlama-shaped parameter file passes the patched
+verifier's planner. The prover patch compiles with nvcc 13.2.86 but has not run, and no TinyLlama
+proof exists. `make verify-flashprove` (decision 0093) is unchanged.
+
 Add FlashProve as a pinned external proof backend for Mixture-of-Experts models:
 `make verify-flashprove` checks the stored upstream proofs on a Mac, and
 `make e2e-flashprove` proves upstream's synthetic small kit on one HF H200

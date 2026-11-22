@@ -3247,3 +3247,40 @@ small stored proof 0.62 s, fresh H200 proof 0.63 s, full-size proof 7.88 s
 `check_proof.py` timings (1.45 s, 7.99 s) and this re-timing. The FlashProve
 decision is renumbered 0092 → 0093 because #181 merged its Slurm decision as
 0092 first. No spend.
+
+## 2026-11-21: dense TinyLlama patches for pinned FlashProve (proposed), CPU checks
+
+Hypothesis: three small pinned patches on FlashProve `9e2bdd8` let a dense model (NE 0) reach
+the verifier's standard parameter form without changing any check of a proof's bytes, and give the
+provers and the CPU tools the constants for width 2,048 and head width 64 (#186, option 3; decision
+0094, proposed). Pass criterion: `make verify-flashprove-tinyllama` passes; on upstream's two stored
+proofs and 99 altered copies, every `cp_verify` call of the patched build equals the unpatched
+build's apart from the build digest and timed fields; upstream's standard-form test with the dense
+cases passes, and fails on the unpatched build exactly in the five dense cases.
+
+Result: passed on Linux, upstream `verifier/build.sh` with g++ 13.3, x86_64
+([decision 0094](../docs/decisions/0094-flashprove-tinyllama.md),
+[evidence](evidence/flashprove-tinyllama-2026-11-22.json)). 108 of 108 calls equal; 99 of 99 altered
+sets rejected; patched verifier source digest `6f7ac148...`. Other runs:
+- the `integer_model` CPU suite on the patched tree: 947 passed, 0 failed;
+- `weight_sums/tests/run_tests.sh`: 24 steps passed; the two `make_model` steps end with SIGILL
+  (no SHA-NI on that CPU).
+Three earlier-revision runs on macOS also passed. No GPU, no proof, no spend; the prover patch is
+not compiled. Synthetic inputs only.
+
+## 2026-11-22: TinyLlama-shaped planning and the first nvcc build of the patches (proposed)
+
+Hypothesis: with the patches of decision 0094 (proposed), the verifier's planner admits a dense
+parameter file at TinyLlama-1.1B's shape (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22
+layers, vocabulary 32,000, rotary base 10,000, T = 64) in the standard parameter form, the unpatched
+build refuses it, and the prover patch compiles with upstream's nvcc 13.2.86. Pass criterion: check
+6 of `make verify-flashprove-tinyllama` passes on Linux and macOS together with every earlier check,
+and upstream's `prover/build.sh serving_cp_commit` and `serving_cp_prove` exit 0 on the patched source.
+
+Result: passed ([evidence](evidence/flashprove-tinyllama-2026-11-22.json)). The target passed on
+Linux (g++ 13.3, 1478 s, beside the nvcc build) and macOS (Apple clang 17, 495 s), 108 of 108
+calls equal on each. The planner admits the TinyLlama-shaped file, its three tables match their
+digests, and the unpatched build answers `NO: policy-tables`. Its figures for that file (a proof of
+at most 14,061,196 bytes; 126.21 bits by the compiled bound) are of placeholder scales and lines, not
+a measurement. nvcc built `serving_cp_commit` (1,530 s) and `serving_cp_prove` (3,558 s) without a
+GPU; every warning is in a file no patch changes. Neither program has run. No kit, no proof, no spend.
