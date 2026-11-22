@@ -24,16 +24,11 @@ import struct
 import sys
 from pathlib import Path
 
-tree, out = Path(sys.argv[1]), Path(sys.argv[2])
-sys.path[:0] = [str(tree / "scales"), str(tree / "verifier/tests")]
-import forest_lines  # noqa: E402
-import policy_tables  # noqa: E402
-
-BASE = tree / "prover/examples/target_full_f2"
 LAYERS = 22
 RECORD = 13  # words of one layer's record in KL.bin; the last is the flag for rotary positions
 # TinyLlama/TinyLlama-1.1B-Chat-v1.0 config.json: hidden 2048, 32 heads of 64, 4 KV heads,
-# intermediate 5632, 22 layers, vocabulary 32000, rope_theta 10000. ll 1: 2 divides 22.
+# intermediate 5632, 22 layers, vocabulary 32000, rope_theta 10000. ll 1: 2 divides 22 (the full
+# kit's ll 2 would need 4 to). patches.json pins this shape; the harness and a test compare them.
 SHAPE = dict(lt=6, L=LAYERS, ll=1, d=2048, H=32, G=4, dh=64, f=5632, V=32000, theta0_lo=10000)
 DENSE = dict(NE=0, hr=0, wb_gs=0, wb_us=0, wb_gr=0, wb_ur=0, wb_dnr=0, wb_r=0)
 # Lines whose full-kit value the verifier refuses at this shape (verifier/docs/parameter-file.md).
@@ -46,8 +41,12 @@ FORCED = {
     "iotaH_0": 0,  # n - dT of the output head's calls, 0 at V 32000 (shape-call-H-*)
     "iotaH_1": 0,
     "iotaH_2": 0,
-    "ranges-part": 13,  # a part may read no more rows than the matrix has (parameters-not-admitted)
+    # The largest value admitted: from 15 a part reads more rows than the matrix has, and at 14 a
+    # single mask row of once-ranges has a code of a larger rate than its folded rows (both
+    # parameters-not-admitted).
+    "ranges-part": 13,
 }
+BASE = "prover/examples/target_full_f2"
 MOE_SEGMENTS = {"XR", "LR", "LT", "DD", "LH", "SEL", "L3", "CLR", "MR", "G0", "CG"}
 
 
@@ -58,8 +57,18 @@ def put(lines, name, value):
     lines[hits[0]] = f"{name} {value}"
 
 
-def policy():
-    lines = (BASE / "policy.txt").read_text().splitlines()
+def upstream(tree):
+    """Upstream's verifier/tests/forest_lines.py and scales/policy_tables.py, from the tree."""
+    sys.path[:0] = [str(tree / "scales"), str(tree / "verifier/tests")]
+    import forest_lines
+    import policy_tables
+
+    return forest_lines, policy_tables
+
+
+def policy(tree):
+    forest_lines, policy_tables = upstream(tree)
+    lines = (tree / BASE / "policy.txt").read_text().splitlines()
     for name, value in (SHAPE | DENSE | FORCED).items():
         put(lines, name, value)
     lines = [x for x in lines if x.split(" ")[0] not in ("rcl", "gcl")]
@@ -87,8 +96,8 @@ def policy():
     return lines[:at] + tables + lines[at:]
 
 
-def scales():
-    data = (BASE / "KL.bin").read_bytes()
+def scales(tree):
+    data = (tree / BASE / "KL.bin").read_bytes()
     words = struct.unpack(f"<{len(data) // 4}I", data)
     if len(words) != 48 * RECORD + 72:  # 48 layer records, then 3 words for each of 24 MoE layers
         sys.exit("tinyllama_plan.py: the full kit's KL.bin is not as expected")
@@ -99,9 +108,10 @@ def scales():
 
 
 if __name__ == "__main__":
+    tree, out = Path(sys.argv[1]), Path(sys.argv[2])
     if out.exists():
         sys.exit(f"tinyllama_plan.py: {out} exists")
-    lines, kl = policy(), scales()
+    lines, kl = policy(tree), scales(tree)
     out.mkdir(parents=True)
     (out / "policy.txt").write_text("\n".join(lines) + "\n")
     (out / "KL.bin").write_bytes(kl)

@@ -129,7 +129,7 @@ at the pinned commit, byte for byte.
 ## Checks
 
 `make verify-flashprove-tinyllama` (CPU, synthetic test files only, no model weights, no paid compute; about
-7 minutes on an M-series Mac and about 1 GB of disk while it runs) does this, in order:
+8 to 9 minutes on an M-series Mac and about 1 GB of disk while it runs) does this, in order:
 
 1. checks the manifest's upstream revision, and each patch's size and SHA-256, copying the checked
    bytes into the run folder;
@@ -151,7 +151,7 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
 | the provers' parameter-file reader, built from the patched source | admits the upstream kit, the dense kit and the dense kit with three digests; refuses four digests at NE 0, `tsig` for `trope`, and no `tsig` with experts (`policy-tables`) |
 | fold constants in the 4 patched implementations | equal to each other, to the pins and to an exact derivation |
 | `weight_sums` (patched) against upstream's exact oracle | the same sums at 5,120/128 (seed 1) and 2,048/64 (seeds 1 and 100) |
-| a dense parameter file and `KL.bin` at TinyLlama-1.1B's shape, from [`tinyllama_plan.py`](tinyllama_plan.py) (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22 layers, vocabulary 32,000, rotary base 10,000, T = 64) | the patched build's planner (`-plan arrays`, `request`, `accounting`) admits it in the standard parameter form, with its three tables matching their digests. Both calls must print the planner's whole ending in upstream's order (the standard-form line can only be missing after it) and name the same files (`h_par`, `configuration`). The unpatched build refuses it with `policy-tables` alone, as its last line |
+| a dense parameter file and `KL.bin` at TinyLlama-1.1B's shape, from [`tinyllama_plan.py`](tinyllama_plan.py) (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22 layers, vocabulary 32,000, rotary base 10,000, T = 64) | the patched build's planner (`-plan arrays`, `request`, `accounting`) admits it in the standard parameter form, with its three tables matching their digests. Both calls must print the planner's whole ending in upstream's order (the standard-form line can only be missing after it) and name the same files (`h_par`, `configuration`). The unpatched build refuses it with `policy-tables` alone, as its last line. Without its digest lines, the unpatched build finds exactly `routed-experts`, `both-clamps` and `table-digests` unmet, and the patched build only `table-digests`. The shape, `h_par` and `configuration` must equal the pins in `patches.json` |
 
 **Current revision** (patched verifier digest `6f7ac148…`, the patch hashes in `patches.json`):
 **passed on Linux and on macOS** on 2026-11-22, every row above as required
@@ -170,14 +170,17 @@ Also at this revision, on the same Linux host:
 - **nvcc 13.2.86** (no GPU): upstream's `verifier/build.sh`, then `prover/build.sh serving_cp_commit`,
   `serving_cp_prove`, `cp_commit` and `cp_prove`, built both production programs and both test
   builds from the patched source (exit 0; 26, 59, 20 and 46 minutes). Every compiler warning is in a
-  file that no patch changes. No program has run;
+  file that no patch changes. No program has run. Without a GPU, `build.sh` built its compiler
+  sample but could not run it (status 77), so it checked the compiler by its version only. The build
+  records name the sources' digest `0fa9c1ff…`, which upstream's `build.sh` computes from the
+  sources and anyone can recompute from the pinned archive with the three patches applied;
 - the `integer_model` CPU suite (`pytest -m "not vllm and not prover"`, Python 3.13, torch
   2.13.0+cpu) on the patched tree: 947 passed, 0 failed, 16 skipped (4 need a GPU, 12
   `transformers`);
 - `weight_sums/tests/run_tests.sh`: 24 steps passed, among them both programs' refusal suites and
   every oracle step. The two `make_model` steps end with SIGILL, because that CPU has no SHA-NI;
 - Hallmark's `make check`: one failure, `tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]`,
-  which fails on upstream `main` on that host too (4 of 5 runs); the branch touches neither it nor
+  which fails on Hallmark's `main` on that host too (4 of 5 runs); the branch touches neither it nor
   `src/`. Every other step passed, as did `make package-check` (uv 0.9.18), `check-guard` and
   `check-comparison`. On macOS the whole pytest suite passes (2,258 passed, 0 failed).
 
@@ -233,8 +236,8 @@ as noted.
   `weight_sums` on synthetic files, and the planner on `tinyllama_plan.py`'s file. A planning status
   checks no proof.
   - That file's scales are the full kit's, and the lines that the shape forces away from the full
-    kit's values (`la`, `lB`, `lmS`, `kFD`, `iotaA_0`, `iotaH_0` to `iotaH_2`, `ranges-part`) were set
-    from the verifier's own refusals. They are placeholders, not a fitted kit; `cp_prove` asks more of
+    kit's values (`ll`, which 22 layers force from 2 to 1; `la`, `lB`, `lmS`, `kFD`, `iotaA_0`,
+    `iotaH_0` to `iotaH_2`, `ranges-part`) were set from the verifier's own rules and refusals. They are placeholders, not a fitted kit; `cp_prove` asks more of
     some of them (`lmS` among them) and has not planned this file.
   - Its sizes and bits from `-plan accounting` are those of placeholder lines and are no measurement.
   - No dense GGUF has been read by `integer_model`; that comes with the TinyLlama kit.

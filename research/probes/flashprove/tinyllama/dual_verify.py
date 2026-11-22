@@ -82,19 +82,19 @@ def run(binary):
 def main():
     upstream, patched = os.environ["DUAL_UPSTREAM"], os.environ["DUAL_PATCHED"]
     digests = os.environ["DUAL_UPSTREAM_DIGEST"], os.environ["DUAL_PATCHED_DIGEST"]
-    (code_u, out_u, err_u), (code_d, out_d, err_d) = run(upstream), run(patched)
+    (code_u, out_u, err_u), (code_p, out_p, err_p) = run(upstream), run(patched)
     same = (
-        code_u == code_d
-        and normal(out_u, digests[0]) == normal(out_d, digests[1])
-        and normal(err_u, digests[0]) == normal(err_d, digests[1])
+        code_u == code_p
+        and normal(out_u, digests[0]) == normal(out_p, digests[1])
+        and normal(err_u, digests[0]) == normal(err_p, digests[1])
     )
     with open(os.environ["DUAL_LOG"], "a", encoding="utf-8") as log:
         log.write(
-            json.dumps(dict(arguments=sys.argv[1:], exit_codes=[code_u, code_d], same=same)) + "\n"
+            json.dumps(dict(arguments=sys.argv[1:], exit_codes=[code_u, code_p], same=same)) + "\n"
         )
-    sys.stdout.buffer.write(out_d)
-    sys.stderr.buffer.write(err_d)
-    sys.exit(code_d if same else 99)
+    sys.stdout.buffer.write(out_p)
+    sys.stderr.buffer.write(err_p)
+    sys.exit(code_p if same else 99)
 
 
 if __name__ == "__main__":

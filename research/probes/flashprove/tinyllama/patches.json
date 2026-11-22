@@ -51,5 +51,32 @@
       "2048,64",
       100
     ]
-  ]
+  ],
+  "tinyllama_plan": {
+    "shape": {
+      "lt": 6,
+      "L": 22,
+      "ll": 1,
+      "d": 2048,
+      "H": 32,
+      "G": 4,
+      "dh": 64,
+      "f": 5632,
+      "NE": 0,
+      "V": 32000,
+      "theta0_lo": 10000
+    },
+    "h_par": "252ffdf7478c1d69609b5412dd1a540d66aac0916fd29298da52a5cbcc6cb8b9",
+    "configuration": "f7fd2f25691d8c4712549b600d541add91c0aa669892d26fcba552dab9b86ccc",
+    "unmet_without_digests": {
+      "patched": [
+        "table-digests"
+      ],
+      "unpatched": [
+        "routed-experts",
+        "both-clamps",
+        "table-digests"
+      ]
+    }
+  }
 }

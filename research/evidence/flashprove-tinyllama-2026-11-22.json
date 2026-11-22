@@ -244,7 +244,7 @@
       "ruff_format_mypy_spec_conformance_admission": "pass (spec, conformance and admission run on their own, since make stops at the pytest failure)",
       "pytest": "2229 passed, 1 failed, 114 skipped",
       "failed": "tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]",
-      "failed_note": "flaky on that host: fails 4 of 5 runs on upstream main e2cc6d6 too; it rewrites a file with bytes of the same length, and the host's file times do not always change. An earlier run on 2026-11-21 failed tests/test_manifests.py::test_file_changed_during_read[abd] instead, which fails 3 of 3 on upstream main there. The branch touches neither src/ nor these tests"
+      "failed_note": "flaky on that host: fails 4 of 5 runs on Hallmark's main e2cc6d6 too; it rewrites a file with bytes of the same length, and the host's file times do not always change. An earlier run on 2026-11-21 failed tests/test_manifests.py::test_file_changed_during_read[abd] instead, which fails 3 of 3 on Hallmark's main there. The branch touches neither src/ nor these tests"
     },
     "integer_model_cpu_suite": {
       "date": "2026-11-21",
@@ -355,6 +355,15 @@
     "compiler_sample": "built, not run: status 77, no GPU (build.sh then checks the compiler by version only)",
     "least_available_memory_mib": 4647,
     "not_run": "neither program ran: they need an H100-class GPU (sm_90a)",
-    "logs": "kept outside the repository, since they hold the build host's paths; the exit codes, times and warning counts above are copied from them"
+    "logs": "kept outside the repository, since they hold the build host's paths; the exit codes, times and warning counts above are copied from them",
+    "log_sha256": {
+      "verifier.log": "954a70c190b0eb6ef3012393285b89e570d45839e4de960aabd76539a43eb873",
+      "serving_cp_commit.log": "e7847158348aaf62669fc948d66ef0196edce0c1fd8b0df4f2f7487ba01d386b",
+      "serving_cp_prove.log": "ebeacc078abdf90459dc7b914bb057b449501b893df09cb814272c7a2dd19970",
+      "cp_commit.log": "8ba858575fafcf3200ed6b9c332821d01a652533306b27323fbe9f4a8093ae06",
+      "cp_prove.log": "23d639f99be2f06d39ae7452516c64ebea35d81e483493036b4936e032b64d1d"
+    },
+    "build_record_sources_note": "upstream prover/build.sh's source digest over the pinned archive with the three patches applied; recomputable without nvcc",
+    "warnings_baseline": "not measured: no unpatched nvcc build was made here, so the counts are not compared with upstream's"
   }
 }

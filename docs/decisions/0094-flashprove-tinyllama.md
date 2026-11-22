@@ -15,7 +15,7 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
 - **Option 2, TinyLlama as a 1-expert MoE: rejected.** NE 1 is refused: NE is 0 or a power of two from
   2 (`verifier/docs/parameter-file.md`).
   - Padding TinyLlama to width 5,120 with four zero experts passes the unchanged verifier's planning
-    check (local probe, no proof).
+    check (a local probe, not in the repository; no proof).
   - But every #187 number would then be a 5,120-wide model's. The padded route needs new scale tools
     anyway, since upstream's refuse rotary base 10,000. Lean covers neither route
     (`lean/GAPS.md`: one model size).
@@ -69,7 +69,9 @@ builds both verifiers and requires:
   Linux, without a GPU. No program has run.
 - **TinyLlama's shape, planning only.** A dense parameter file at TinyLlama-1.1B's shape, with
   placeholder scales, passes the patched planner in the standard parameter form; the unpatched build
-  refuses it for its three table digests.
+  refuses it for its three table digests. Without those digests, the unpatched build finds exactly
+  `routed-experts`, `both-clamps` and `table-digests` unmet there, and the patched build only
+  `table-digests`: at this shape the patch changes admission and nothing else that the planner sees.
 
 The current revision passed it on 2026-11-22 on Linux (upstream `verifier/build.sh`, g++ 13.3) and
 on macOS (Apple clang 17, built as `make verify-flashprove` builds it;

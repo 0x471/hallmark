@@ -20,7 +20,7 @@ exists yet.
 | Command | What it does | Needs |
 |---|---|---|
 | `make verify-flashprove` | Builds `cp_verify`, checks the two stored upstream proofs, runs 99 rejection cases | Mac or Linux, a C++17 compiler, about 5 GB RAM, no GPU, no spend |
-| `make verify-flashprove-tinyllama` | Proposed (decision 0094): builds the unpatched and the patched `cp_verify` and checks the TinyLlama patches against upstream's proofs and tests ([details](../research/probes/flashprove/tinyllama/README.md#checks)) | Mac or Linux, a C++17 compiler, about 1 GB of disk, no GPU, no spend |
+| `make verify-flashprove-tinyllama` | Proposed (decision 0094): builds the unpatched and the patched `cp_verify` and checks the TinyLlama patches against upstream's proofs and tests ([details](../research/probes/flashprove/tinyllama/README.md#checks)) | Mac or Linux, a C++17 compiler, git, about 5 GB RAM and 1 GB of disk, no GPU, no spend |
 | `make e2e-flashprove GPU_CREDIT_BALANCE_USD=…` | Builds the prover, commits to and proves the small synthetic kit on one HF H200, rechecks the proof here | `HF_TOKEN`, prepaid HF credit; worst case USD 3.27 |
 | `make compare-provers FLASHPROVE_RUN=…` | Re-times `cp_verify` on three proofs and gathers the recorded SASH and FlashProve figures | A passed `e2e-flashprove` run; no spend |
 

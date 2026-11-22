@@ -348,6 +348,12 @@ THREE_TABLES = (
 )
 NOT_STANDARD = re.compile(r"^plan: not the standard parameter form", re.M)
 NO_POLICY = re.compile(r"^plan: the policy's kind is ", re.M)
+UNMET = re.compile(
+    r"^plan: not the standard parameter form \((.*)\): no run with these public inputs can be a "
+    r"verification \(at best status \d+\)$",
+    re.M,
+)
+DIGEST_LINE = re.compile(r"^(tsilu|tsig|trope|texp)[0-7] ")
 PROOF_BYTES = re.compile(r"^length: proof: at most (\d+) bytes", re.M)
 BITS = re.compile(r"^accounting: as one number, by the compiled bound: ([0-9.]+) bits", re.M)
 # The last lines of a planning call that reached the planner's end (planEndH in upstream's
@@ -376,9 +382,10 @@ def stdout_of(args, log):
     return done.returncode, done.stdout
 
 
-def planner_ending(text, name):
+def planner_ending(text, name, unmet=(), three_tables=True):
     """(h_par, configuration) from a planning call's last lines, after checking their order and
-    form, that the standard form is met, and that the three tables match their digests."""
+    form, that the standard form misses exactly the conditions `unmet` (none: it is met), and
+    whether the three tables match their digests."""
     lines = text.splitlines()
     starts = [i for i, x in enumerate(lines) if x.startswith("plan: profile ")]
     require(len(starts) == 1, f"{name}: not one line 'plan: profile'")
@@ -392,9 +399,14 @@ def planner_ending(text, name):
     require(all(x.startswith("plan: ") for x in middle), f"{name}: an unexpected planner line")
     found = [pattern.fullmatch(x) for pattern, x in zip(ENDING, last, strict=True)]
     require(all(found), f"{name}: the planner's last lines are not as expected")
-    require(not NOT_STANDARD.search(text), f"{name}: not in the standard parameter form")
+    if unmet:
+        missed = UNMET.findall(text)
+        once = len(NOT_STANDARD.findall(text)) == 1
+        require(once and missed == [", ".join(unmet)], f"{name}: unmet {missed}, not {list(unmet)}")
+    else:
+        require(not NOT_STANDARD.search(text), f"{name}: not in the standard parameter form")
     require(not NO_POLICY.search(text), f"{name}: every call would end NO: policy")
-    require(THREE_TABLES in middle, f"{name}: the three tables do not match their digests")
+    require((THREE_TABLES in middle) == three_tables, f"{name}: the three tables' digest line")
     return found[1].group(1), found[2].group(1)
 
 
@@ -454,9 +466,30 @@ def check_tinyllama_plan(tree, output, verifiers):
     )
     require(code == 4, f"-plan accounting: status {code}")
     summary = planning_summary(accounting, calls["patched"][1], calls["upstream"][1])
-    shape = ("lt", "L", "d", "H", "G", "dh", "f", "NE", "V", "theta0_lo")
-    lines = dict(x.split(" ", 1) for x in policy if x.split(" ")[0] in shape)
-    return dict(shape={k: int(lines[k]) for k in shape}, **summary, unpatched="policy-tables")
+    pin = PINS["tinyllama_plan"]
+    values = dict(x.split(" ") for x in policy if len(x.split(" ")) == 2)
+    shape = {k: int(values[k]) for k in pin["shape"]}
+    require(shape == pin["shape"], f"the generated file's shape is {shape}")
+    ids = (summary["h_par"], summary["configuration"])
+    require(
+        ids == (pin["h_par"], pin["configuration"]), "the generated files are not the pinned ones"
+    )
+    # The same file without its digest lines: the unpatched build must miss exactly the three
+    # conditions that the patch changes at NE 0, and the patched build only the digests.
+    bare = output / "tinyllama-plan-no-digests"
+    bare.mkdir()
+    for name in ("KL.bin", "layout.txt"):
+        shutil.copyfile(folder / name, bare / name)
+    (bare / "policy.txt").write_text("".join(x + "\n" for x in policy if not DIGEST_LINE.match(x)))
+    unmet = {}
+    for key, verifier in (("patched", patched), ("unpatched", upstream)):
+        log = output / f"tinyllama-no-digests-{key}.log"
+        code, text = stdout_of([verifier, "-plan", "accounting", bare, 128], log)
+        want = pin["unmet_without_digests"][key]
+        require(code == 4, f"{key} build without digests: status {code}")
+        planner_ending(text, f"{key} build without digests", unmet=want, three_tables=False)
+        unmet[key] = want
+    return dict(shape=shape, **summary, unpatched="policy-tables", unmet_without_digests=unmet)
 
 
 def verify(output):
@@ -510,7 +543,7 @@ def main():
             source=fp.PIN,
             patches=PINS,
             host=dict(system=platform.system(), machine=platform.machine()),
-            prover_patch_compiled=False,
+            prover_compiled_by_this_run=False,
             synthetic_inputs_only=True,
             qualified_backend=False,
             hiding_claim=False,

@@ -266,11 +266,16 @@ THREE = (
 )
 PLANNED = [
     "accounting: as one number, by the compiled bound: 126.21 bits, proof of work counted"
-    " (without it: 96.23 bits)",
+    " (without it: 96.23 bits): the largest L such that a prover with at most 2^L hash calls,"
+    " the verifier's counted in, succeeds with probability at most (its calls) / 2^L",
     "length: proof: at most 14061196 bytes, 13617133 on average over the drawn positions",
     "plan: profile 4: the profile rules out no result",
-    "accounting: one-time files: the plan of a key: 53 closeness rounds rest on the theorem",
-    "accounting: one-time files: the plan of an entry: 23 closeness rounds rest on the theorem",
+    "accounting: one-time files: the plan of a key: 53 closeness rounds rest on the theorem on"
+    " codes (ePrint 2025/2055, Thm 4.6), taken as given, 0 on the bound within a third of the"
+    " distance; the table has a record",
+    "accounting: one-time files: the plan of an entry: 23 closeness rounds rest on the theorem on"
+    " codes (ePrint 2025/2055, Thm 4.6), taken as given, 0 on the bound within a third of the"
+    " distance; the table has a record",
     "plan: lidb 28",
     "plan: nminH 27",
     "plan: a value of the residual stream has five limbs (line xl)",
@@ -286,6 +291,9 @@ NOT_STANDARD = (
     " can be a verification (at best status 14)"
 )
 REFUSED = "NO: policy-tables\n"
+POLICY_KIND = (
+    "plan: the policy's kind is X: every whole call under this parameter file ends NO: policy"
+)
 
 
 def text(lines):
@@ -327,9 +335,7 @@ def changed(at, new):
         (PLANNED, changed("plan: lidb", [NOT_STANDARD]), [], "standard parameter form"),
         (
             PLANNED,
-            changed(
-                "plan: lidb", ["plan: the policy's kind is X: every whole call ends NO: policy"]
-            ),
+            changed("plan: lidb", [POLICY_KIND]),
             [],
             "NO: policy",
         ),
@@ -350,3 +356,41 @@ def test_tinyllama_planning_summary_refuses(accounting, planned, control, why):
     refused = text(control) if control else REFUSED
     with pytest.raises(ValueError, match=why):
         harness.planning_summary(text(accounting), text(planned), refused)
+
+
+def test_the_generator_writes_the_pinned_shape():
+    import tinyllama_plan
+
+    shape = tinyllama_plan.SHAPE | {"NE": tinyllama_plan.DENSE["NE"]}
+    assert shape == harness.PINS["tinyllama_plan"]["shape"]
+
+
+# The same TinyLlama-shaped file without its digest lines, as the unpatched build plans it.
+UNMET_THREE = (
+    "plan: not the standard parameter form (routed-experts, both-clamps, table-digests): no run"
+    " with these public inputs can be a verification (at best status 14)"
+)
+BARE = changed(THREE, [UNMET_THREE])
+WITHOUT_DIGESTS = harness.PINS["tinyllama_plan"]["unmet_without_digests"]
+
+
+def test_planner_ending_names_the_unmet_conditions():
+    unmet = WITHOUT_DIGESTS["unpatched"]
+    ids = harness.planner_ending(text(BARE), "bare", unmet=unmet, three_tables=False)
+    assert ids == (H_PAR, CONFIGURATION)
+
+
+@pytest.mark.parametrize(
+    ("lines", "unmet", "three_tables"),
+    [
+        (BARE, WITHOUT_DIGESTS["patched"], False),
+        (BARE, (), False),
+        (BARE, WITHOUT_DIGESTS["unpatched"], True),
+        (BARE, ["routed-experts", "table-digests", "both-clamps"], False),
+        (changed(THREE, [UNMET_THREE, UNMET_THREE]), WITHOUT_DIGESTS["unpatched"], False),
+        (PLANNED, WITHOUT_DIGESTS["unpatched"], True),
+    ],
+)
+def test_planner_ending_refuses_other_unmet_conditions(lines, unmet, three_tables):
+    with pytest.raises(ValueError):
+        harness.planner_ending(text(lines), "bare", unmet=unmet, three_tables=three_tables)
