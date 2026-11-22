@@ -1,0 +1,185 @@
+diff --git a/verifier/src/cp_verify.cpp b/verifier/src/cp_verify.cpp
+index 18de720..dd421aa 100644
+--- a/verifier/src/cp_verify.cpp
++++ b/verifier/src/cp_verify.cpp
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): a model without routed experts (NE 0) can be in
++// the standard parameter form. Each change is marked "Hallmark dense patch".
+ 
+ // Terms: docs/glossary.md. The words and short names of these sources: verifier/docs/source-map.md.
+ 
+@@ -863,9 +865,15 @@ struct PolScan {
+   bool lidbSeen = false, nminHSeen = false, egSeen = false, smaxSeen = false, xlSeen = false;
+   /* The 4 DW optional lines of the parameter file, tsilu0 to texp<DW - 1>, hold the digests of the
+      four public tables, DW words each, in the order SILU, FS (SIG if the line gcl is absent), the
+-     RoPE table, the softmax table. tblAt counts the lines read: after the scan it is 0 or TBLW. */
++     RoPE table, the softmax table. tblAt is the place in these 4 DW lines (Hallmark dense patch: the
++     count of lines read, unless tsig is skipped as below): after the scan it is 0 or TBLW. */
+   u32 tblPol[4][DW] = {};
+   size_t tblAt = 0;
++  /* Hallmark dense patch: a model without routed experts (NE 0) forms no sigmoid table, so its file
++     leaves out the DW lines tsig0 .. tsig<DW - 1>. The scan then moves tblAt from DW to 2 DW at the
++     line trope0 and sets tblNoSig: a full set still ends at TBLW, and tblPol[1] stays 0, which
++     nothing compares at NE 0. polLayout() takes three digests only at NE 0, four only above it. */
++  bool tblNoSig = false;
+   vector<u32> polWordsH;
+ };
+ // Writes word i of the statement.
+@@ -1100,7 +1108,8 @@ static void polScan(PolScan &PS, const string &polB) {
+       }
+       /* Optional lines with the digests of the four public tables, DW words each:
+        * verifier/docs/parameter-file.md, "9. Optional lines" and "Digests of the public tables".
+-       * tblHeld() compares them. That all four exist is tested after the scan (`polLayout`): here
++       * tblHeld() compares them. Which of them must exist (all four; Hallmark dense patch: at NE 0 the
++       * three other than tsig) is tested after the scan (`polLayout`): here
+        * h is still the parse of the skeleton (`polSkeleton`), in which the word NE is not
+        * written. */
+       if (!strncmp(line, "tsilu", 5) || !strncmp(line, "tsig", 4) || !strncmp(line, "trope", 5) ||
+@@ -1110,6 +1119,7 @@ static void polScan(PolScan &PS, const string &polB) {
+             !polCallsA.empty() || !polCallsH.empty() || !scanned() || val > 0xFFFFFFFFull)
+           refuse("policy-tables");
+         oneSpelling();
++        if (tblAt == DW && !strcmp(name, "trope0")) tblAt = 2 * DW, PS.tblNoSig = true; // dense patch
+         if (string(TB[tblAt / DW]) + std::to_string(tblAt % DW) != name) refuse("policy-tables");
+         tblPol[tblAt / DW][tblAt % DW] = (u32)val;
+         tblAt++;
+@@ -1190,8 +1200,10 @@ static Lay polLayout(PolScan &PS) {
+   for (auto &c : y.calls)
+     if (c.c.kappa != 5) refuse("hid-planes-" + c.c.name);
+   // The tables' lines (DW for each of the four) are accepted only if all four tables are computed,
+-  // so that every digest is compared: that is with MoE layers.
+-  if (PS.tblAt && !h.NE) refuse("policy-tables");
++  // so that every digest is compared: that is with MoE layers. Hallmark dense patch: without them
++  // (NE 0) the sigmoid table is not formed, and the lines must be the other three tables', no more:
++  // every table formed has its digest compared, and every digest given is compared.
++  if (PS.tblAt && (PS.tblNoSig ? h.NE != 0 : h.NE == 0)) refuse("policy-tables");
+   return y;
+ }
+ // Requested bits: an integer from 0 to 1,000,000. A program that links this unit passes a double.
+@@ -2395,8 +2407,13 @@ static int runStage(const StageInputs &in) {
+         onePlacement = placedAlike(layoutH.find(l, "M" + std::to_string(linksH[l].tl->pxMat[i])),
+                                    layoutH.find(0, "M" + std::to_string(linksH[0].tl->pxMat[i])));
+     }
++  // Hallmark dense patch: a model without routed experts (NE 0) can be in the standard form too. It
++  // has no router, and the scan refuses the lines rcl and gcl at NE 0 (policy-rcl, policy-gcl), so
++  // neither routed-experts nor both-clamps is asked of it; table-digests is met by the digests of the
++  // three tables that it forms (polLayout()). Every other condition is asked as before.
++  const bool dense = h.NE == 0;
+   string notServed =
+-      servedForm({h.NE > 0, residualStreamLimbs == 5, RCL && GCL, h.toksrc == 1, layoutP != nullptr,
++      servedForm({true /* routed-experts: met at NE 0 as well */, residualStreamLimbs == 5, (RCL && GCL) || dense, h.toksrc == 1, layoutP != nullptr,
+                     tblAt == TBLW, !egSeen && !smaxSeen, h.Sx < 32, h.D == 2048, oneShift, onePlacement,
+                     h.Sx == 12 && h.rx == 8, rotaryServed(h.theta0, dh, h.lt),
+                     normShifts, twoCodesH,
+@@ -2450,7 +2467,10 @@ static int runStage(const StageInputs &in) {
+     if (RCL) printf("plan: the router's logits are clamped (line rcl)\n");
+     if (GCL) printf("plan: the input of the SiLU table is clamped (line gcl)\n");
+     if (residualStreamLimbs == 5) printf("plan: a value of the residual stream has five limbs (line xl)\n");
+-    if (tblAt == TBLW)
++    if (tblAt == TBLW && PS.tblNoSig)
++      printf("plan: this program's three public tables match the parameter file's digests (lines tsilu0 .. texp%u, no tsig)\n",
++             DW - 1);
++    else if (tblAt == TBLW)
+       printf("plan: this program's four public tables match the parameter file's digests (lines tsilu0 .. texp%u)\n",
+              DW - 1);
+     // The statement's length in words, and the place of y in it; words are counted from 0.
+diff --git a/verifier/src/vf_common.h b/verifier/src/vf_common.h
+index 6081a4e..15ec78d 100644
+--- a/verifier/src/vf_common.h
++++ b/verifier/src/vf_common.h
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): a model without routed experts (NE 0) can be in
++// the standard parameter form. Each change is marked "Hallmark dense patch".
+ 
+ // Terms: docs/glossary.md.
+ 
+@@ -551,12 +553,13 @@ static constexpr bool TEST_BUILD = false;
+ // a small example configuration, ends at best with NOT-A-VERIFICATION; a stage's second-to-last
+ // line ("result:") lists the conditions that it finds unmet. A field is true if met.
+ struct Served {
+-  bool experts;        // NE above 0
++  bool experts;        // NE above 0; Hallmark dense patch: met at NE 0 as well, so never missed
+   bool fiveLimbs;      // line xl
+-  bool clamps;         // lines rcl, gcl
++  bool clamps;         // lines rcl, gcl; Hallmark dense patch: met at NE 0, where both are refused
+   bool promptSource;   // toksrc 1
+   bool placementTable; // the configuration directory contains a layout file
+-  bool tableDigests;   // the 4 DW lines for the digests of the four public tables
++  bool tableDigests;   // the 4 DW lines for the digests of the four public tables (at NE 0: 3 DW,
++                       // no tsig; Hallmark dense patch)
+   bool noRangeWords;   // neither line eg nor smax
+   bool threeBytes;     // three bytes for a remainder of the division in attention
+   bool ringDegree;     // D = 2,048: the committed matrix's rows are rounded up to a multiple of D
+diff --git a/verifier/tests/served_form_test.py b/verifier/tests/served_form_test.py
+index dddd15c..9695d7c 100755
+--- a/verifier/tests/served_form_test.py
++++ b/verifier/tests/served_form_test.py
+@@ -1,6 +1,7 @@
+ #!/usr/bin/env python3
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): cases for a model without routed experts.
+ 
+ # Terms: docs/glossary.md.
+ 
+@@ -31,10 +32,12 @@ met. "--list" prints every case with what it changes and what is expected, one o
+   - "met": exit status 4 and no line "plan: not ..": a control, which changes the same values and
+     violates nothing (the case none.kit changes nothing).
+ Conditions without a case in which that condition alone is not met:
+-  - routed-experts: the verifier accepts the digest lines of the four public tables all or none,
+-    and rejects them unless the model has routed experts (policy-tables). So table-digests is not
+-    met either. Without routed experts it also rejects the clamps' lines rcl
+-    and gcl, so both-clamps is not met either. Cases show the three rejections;
++  - routed-experts: under Hallmark's dense patch it is met at NE 0 as well, and so is both-clamps
++    (the verifier rejects the clamps' lines rcl and gcl without routed experts). The digest lines
++    are then those of the three tables that a dense model forms, without tsig: all three or none.
++    The four tables' lines are rejected at NE 0, and the three tables' lines above it
++    (policy-tables). Cases show these
++    rejections, the three digests compared one by one, and a dense kit that meets every condition;
+   - prompt-source, three-bytes: the verifier rejects the files of their cases;
+   - placement-table: without a layout file the planning call is rejected (plan-layout).
+ Two parts of rotary-table have no case: lt (log2 of a request's tokens) at most 10, dh (a head's
+@@ -370,6 +373,12 @@ def the_cases(verifier, kit, work):
+         name, value = digests[i].split(" ")
+         return with_digests(digests[:i] + ["%s %d" % (name, int(value) ^ 1)] + digests[i + 1 :])
+ 
++    three = [x for x in digests if not x.startswith("tsig")]  # Hallmark dense patch: SiLU, RoPE, softmax
++
++    def flipped(lines, i):
++        name, value = lines[i].split(" ")
++        return lines[:i] + ["%s %d" % (name, int(value) ^ 1)] + lines[i + 1 :]
++
+     def kit_with(lines=None, words_kl=None, table=placed):
+         return lambda: (good if lines is None else lines(), scales if words_kl is None else words_kl, table() if callable(table) else table)
+ 
+@@ -384,10 +393,17 @@ def the_cases(verifier, kit, work):
+         ("profile", "prof-19", "prof 19 and nothing else", kit_with(lambda: put("prof", 19)), 0, "policy-profile"),
+         ("routed-experts", "NE-0", "NE 0 and nothing else", kit_with(lambda: put("NE", 0)), 0, "header-absent-class"),
+         ("routed-experts", "dense", "NE 0 with all that follows from it: no router, no experts' weight kinds, no clamps, no digest lines; the layout file made again",
+-         no_experts, 0, ("routed-experts", "both-clamps", "table-digests")),
++         no_experts, 0, ("table-digests",)),  # Hallmark dense patch: upstream misses routed-experts, both-clamps too
+         ("routed-experts", "dense-with-digests", "the same with the kit's digest lines", lambda: and_lines(no_experts, digests, behind_digests), 0, "policy-tables"),
+         ("routed-experts", "dense-with-gcl", "the same with the line gcl 1", lambda: and_lines(no_experts, ["gcl 1"], "xl "), 0, "policy-gcl"),
+         ("routed-experts", "dense-with-rcl", "the same with the line rcl 1", lambda: and_lines(no_experts, ["rcl 1"], "xl "), 0, "policy-rcl"),
++        # Hallmark dense patch: the digest lines of the three tables that a dense model forms (no tsig).
++        ("routed-experts", "dense-three-digests", "the same with the kit's digest lines of SiLU, RoPE and softmax, no tsig", lambda: and_lines(no_experts, three, behind_digests), 0, "met"),
++        ("routed-experts", "dense-three-silu-altered", "the same, one bit of the last word of the SiLU table's digest", lambda: and_lines(no_experts, flipped(three, 7), behind_digests), 0, "table-digest-silu"),
++        ("routed-experts", "dense-three-rope-altered", "the same, one bit of a word of the rotary tables' digest", lambda: and_lines(no_experts, flipped(three, 13), behind_digests), 0, "table-digest-rope"),
++        ("routed-experts", "dense-three-exp-altered", "the same, one bit of the last word of the softmax table's digest", lambda: and_lines(no_experts, flipped(three, 23), behind_digests), 0, "table-digest-exp"),
++        ("routed-experts", "dense-three-last-missing", "the same, the last of the three digests' lines missing", lambda: and_lines(no_experts, three[:-1], behind_digests), 0, "policy-tables"),
++        ("routed-experts", "dense-sig-for-rope", "the same, the lines tsig in place of trope", lambda: and_lines(no_experts, digests[:16] + digests[24:], behind_digests), 0, "policy-tables"),
+         ("five-limbs", "no-xl", "no line xl; the layout file made again", lambda: anew("five-limbs", put("xl", None), scales), 0, ("five-limbs",)),
+         ("both-clamps", "no-gcl", "no line gcl, its two segments removed from the call lines, the lines iota_q fitted, the table digest lines computed again; the layout file made again",
+          lambda: anew("both-clamps", tables_anew(forest_fitted(segments_out(put("gcl", None), "G0", "CG")), "gcl"), scales), 0, ("both-clamps",)),
+@@ -402,6 +418,7 @@ def the_cases(verifier, kit, work):
+         ("table-digests", "rope-altered", "one bit of a word of the rotary tables' digest", kit_with(lambda: altered(21)), 0, "table-digest-rope"),
+         ("table-digests", "exp-altered", "one bit of the last word of the softmax table's digest", kit_with(lambda: altered(31)), 0, "table-digest-exp"),
+         ("table-digests", "last-missing", "the last of the digest lines missing", kit_with(lambda: with_digests(digests[:-1])), 0, "policy-tables"),
++        ("table-digests", "no-tsig", "the lines tsig missing, with routed experts (Hallmark dense patch)", kit_with(lambda: with_digests(three)), 0, "policy-tables"),
+         ("table-digests", "two-swapped", "two of the digest lines in the other order", kit_with(lambda: with_digests(digests[:4] + [digests[5], digests[4]] + digests[6:])), 0, "policy-tables"),
+         ("table-digests", "behind-a-call", "the digest lines behind the first line call",
+          kit_with(lambda: with_digests([behind_digests] + digests)[: good.index(digests[0]) + 1 + len(digests)] + good[good.index(behind_digests) + 1 :]), 0, "policy-tables"),

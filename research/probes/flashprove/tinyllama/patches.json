@@ -1,0 +1,55 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-patches/1",
+  "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+  "apply_order": [
+    "verifier.patch",
+    "prover.patch",
+    "tools.patch"
+  ],
+  "patches": {
+    "verifier.patch": {
+      "sha256": "b78c47e5d552a22c6174d2449e0bb165badc7d9c552db744bf424fbf7e524f8d",
+      "bytes": 14123
+    },
+    "prover.patch": {
+      "sha256": "b84de422c0ffbdf0854c397d4d951f8934503dac6d918e87fbaeffc07ce38dff",
+      "bytes": 21735
+    },
+    "tools.patch": {
+      "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040",
+      "bytes": 37858
+    }
+  },
+  "verifier_source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52",
+  "fold_constants": {
+    "5120,128": [
+      "0x3F8F1BBD",
+      "0x3DCA62C2"
+    ],
+    "2048,64": [
+      "0x3FB504F3",
+      "0x3E3504F3"
+    ]
+  },
+  "served_form_cases_only_the_patch_meets": [
+    "routed-experts.dense",
+    "routed-experts.dense-three-digests",
+    "routed-experts.dense-three-silu-altered",
+    "routed-experts.dense-three-rope-altered",
+    "routed-experts.dense-three-exp-altered"
+  ],
+  "weight_sums_oracle_cases": [
+    [
+      "5120,128",
+      1
+    ],
+    [
+      "2048,64",
+      1
+    ],
+    [
+      "2048,64",
+      100
+    ]
+  ]
+}

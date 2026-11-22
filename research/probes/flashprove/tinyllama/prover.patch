@@ -1,0 +1,356 @@
+diff --git a/prover/common/cp_files.h b/prover/common/cp_files.h
+index 5db04f2..5220201 100644
+--- a/prover/common/cp_files.h
++++ b/prover/common/cp_files.h
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): the comment on isk.txt's line ranges. The change is
++// marked "Hallmark dense patch".
+ 
+ // Terms: docs/glossary.md.
+ 
+@@ -609,7 +611,8 @@ static inline bool read_key(const std::string &path, Key &key) {
+ // configuration files that have this digest, no prompt can drive a value of the forward pass out of
+ // its range (prover/weights_commitment/worst_case.cuh). cp_prove starts only if the line has h_par
+ // of its own configuration files (Prover::the_ranges_are_guarded() in prover/prover/isk.cuh); a
+-// test build's cp_prove also starts if the line "seed test" is present.
++// test build's cp_prove also starts if the line "seed test" is present. Hallmark dense patch: any
++// build's cp_prove also starts without the line under "seed public".
+ // seed test: cp_commit read the seed from a file given with the test option -test-seed, so nothing
+ // is hidden. A production build has no -test-seed, and its cp_prove rejects a commitment that has
+ // the line [cp-isk-seed-test]. Its cp_commit has the same check in the code for a call that adds
+diff --git a/prover/common/parameter_file.h b/prover/common/parameter_file.h
+index 36921cb..f3540f6 100644
+--- a/prover/common/parameter_file.h
++++ b/prover/common/parameter_file.h
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): a model without routed experts (NE 0) may give the
++// digests of its three public tables, without tsig. Each change is marked "Hallmark dense patch".
+ 
+ // Terms: docs/glossary.md.
+ 
+@@ -182,8 +184,12 @@ inline std::string parse(const std::string &bytes, Parameters &p) {
+     if (!optional_line(name)) return why;
+   // Each of the four public tables' digests takes DW lines: TBLW = 4 DW (prover/common/setting.h).
+   const bool tables = value_line("tsilu0", ""); // public tables' digests: all TBLW lines or none
++  // (Hallmark dense patch: or the 3 DW lines other than tsig, see below)
+   if (!why.empty()) return why;
+-  for (int i = 1; tables && i < TBLW; i++)
++  for (int i = 1; tables && i < TBLW; i++) {
++    // Hallmark dense patch: the lines tsig may be left out, the RoPE table's lines then follow SiLU's.
++    // Which form needs which model is a rule of limit_missed() ("policy-tables").
++    if (i == DW && next < text.size() && !text[next].compare(0, 7, "trope0 ")) i = 2 * DW;
+     if (!value_line(std::string(i < DW       ? "tsilu"
+                                 : i < 2 * DW ? "tsig"
+                                 : i < 3 * DW ? "trope"
+@@ -191,6 +197,7 @@ inline std::string parse(const std::string &bytes, Parameters &p) {
+                         std::to_string(i % DW),
+                     "policy-tables"))
+       return why;
++  }
+   int kinds_begun = 0; // 1: a call line has been read; 2: a callA line; 3: a callH line
+   for (; next < text.size(); next++) {
+     Parameters::Call words(1);
+@@ -398,8 +405,10 @@ inline std::string limit_missed(const Parameters &p) {
+        "nminH must be above nmin; for nmin itself, leave the line out"},
+       {!p.has("smax") || v("smax") == 2047 || v("smax") == 1023 || v("smax") == 511 || v("smax") == 255,
+        "policy-gate-table", "smax", "smax must be 2047, 1023, 511 or 255"},
+-      {!p.has("tsilu0") || experts, "policy-tables", "tsilu0",
+-       "the tables' digest lines need a model with experts"},
++      // Hallmark dense patch: four tables' digests with experts, the three other than tsig without.
++      {!p.has("tsilu0") || experts == p.has("tsig0"), "policy-tables", "tsilu0",
++       experts ? "with experts the tables' digest lines must include tsig0 .. (all four tables)"
++               : "without experts the tables' digest lines must leave out tsig0 .. (three tables)"},
+       {wide("theta0") != 0, "shape-theta0", "theta0_lo", "theta0 (theta0_lo + 2^32 theta0_hi) must not be 0"},
+       {v("KF") + 14 >= v("MF"), "policy-norm-F", "KF", "KF must be at least MF - 14"},
+       {wide("epsF") >= 1 && wide("epsF") >> 59 == 0, "policy-norm-F", "epsF_lo",
+diff --git a/prover/hash_commitment/hf_commit.cu b/prover/hash_commitment/hf_commit.cu
+index c533af9..663e6f6 100644
+--- a/prover/hash_commitment/hf_commit.cu
++++ b/prover/hash_commitment/hf_commit.cu
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): under -public-weights the worst-case check, a
++// hiding safeguard, is left out unless asked for. Each change is marked "Hallmark dense patch".
+ 
+ // Terms: docs/glossary.md.
+ 
+@@ -126,6 +128,8 @@
+ // (what that shows and does not: prover/weights_commitment/worst_case.cuh), isk.txt gets the line
+ // "ranges <h_par>", which cp_prove requires. Only a call with -test-seed, which no production build
+ // has, can omit both: nothing is hidden, and isk.txt says "seed test": only test builds accept it.
++// Hallmark dense patch: so can a call with -public-weights, without -worst-case: nothing is hidden,
++// isk.txt says "seed public", and cp_prove then takes the commitment without the line ranges.
+ #include "hash_commitment/hf_commit_derivation_check.cuh" // first: it defines the macro through which the shared headers call it
+ #include "common/setting.h"
+ #include "weights_commitment/lent_memory.h" // before every header that allocates GPU memory
+@@ -994,6 +998,10 @@ static int cp_commit_main(int argc, char **argv) {
+ #ifndef SERVING_BUILD
+   if (O.from_weights && !O.worst_case) printf("cp_commit: a test's run: the worst-case check is left out, and isk.txt gets no line ranges\n");
+ #endif
++  // Hallmark dense patch: -public-weights exists in the serving build alone.
++  if (O.from_weights && !O.worst_case && O.public_seed)
++    printf("cp_commit: -public-weights (Hallmark dense patch): the worst-case check is left out, and isk.txt gets no line ranges; "
++           "nothing is hidden, and a request may end \"failed\" where a value leaves its range\n");
+   static PinnedWeights &weights = *new PinnedWeights;
+   weights.joined_cut_bytes = O.piece_bytes;
+   auto begin = now();
+diff --git a/prover/hash_commitment/hf_commit_weights.cuh b/prover/hash_commitment/hf_commit_weights.cuh
+index 18a3174..20c0569 100644
+--- a/prover/hash_commitment/hf_commit_weights.cuh
++++ b/prover/hash_commitment/hf_commit_weights.cuh
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): the conversion's two constants also for width 2,048
++// and head width 64. Each change is marked "Hallmark dense patch".
+ 
+ // Terms: docs/glossary.md.
+ 
+@@ -116,6 +118,21 @@ struct PinnedWeights : WeightWalker {
+         fprintf(stderr, "cp_commit: the model file and the parameter file give different numbers of layers\n");
+         exit(2);
+       }
++      // Hallmark dense patch: the conversion's constants follow the file's width and head width
++      // (FoldSource::open), and the tensor sizes cannot tell some head widths apart (dh 64 with H 32,
++      // G 4 has the rows of dh 128 with H 16, G 2). So, as cp_prove's reader does (GgufSource::open),
++      // the file must give the parameter file's width, head width and layers with experts.
++      if (!source.made_up) {
++        if (source.file.embedding_length != (u64)sh.d || source.file.key_length != (u64)sh.dh) {
++          fprintf(stderr, "cp_commit: the model file and the parameter file give different widths or head widths\n");
++          exit(2);
++        }
++        for (int l = 0; l < sh.L; l++)
++          if (source.file.has("blk." + std::to_string(l) + ".ffn_gate_exps.weight") != (sh.moeMode && (l & 1))) {
++            fprintf(stderr, "cp_commit: layer %d has routed experts in only one of the model file and the parameter file\n", l);
++            exit(2);
++          }
++      }
+     }
+     for (const rf::UnitW &u : shape->Y.U) {
+       const auto names = rf::unit_tensors(u, sh.moeMode && (u.l & 1));
+@@ -280,7 +297,7 @@ struct PinnedWeights : WeightWalker {
+                       "takes at most 24; nothing is written\n", t.name.c_str(), t.e);
+       exit(2);
+     }
+-    const ::fold::Reads rd = ::fold::reads(kind);
++    const ::fold::Reads rd = ::fold::reads(kind, source.constants);
+     if (!rd.norm[0]) return;
+     const ::gguf::Tensor &norm = source.file.at(blk + rd.norm + ".weight");
+     if (norm.type != ::gguf::F32 || norm.cells() != g.dims[0]) {
+diff --git a/prover/prover/isk.cuh b/prover/prover/isk.cuh
+index fd6fc47..def0874 100644
+--- a/prover/prover/isk.cuh
++++ b/prover/prover/isk.cuh
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): under -public-weights the worst-case check, a
++// hiding safeguard, is left out unless asked for. Each change is marked "Hallmark dense patch".
+ 
+ // Terms: docs/glossary.md.
+ 
+@@ -344,6 +346,14 @@ inline int Prover::the_ranges_are_guarded() {
+     return 0;
+   }
+ #endif
++  // Hallmark dense patch: under "seed public" (read_isk() has checked that -public-weights is given
++  // then, and only then) cp_commit leaves the check out unless it was asked for. Nothing is hidden, so
++  // a "failed" that depends on the weights tells nothing that the public weights do not. A line ranges
++  // that is there must still have these files' h_par.
++  if (isk_ranges.empty() && !args.public_weights.empty()) {
++    printf("# isk.txt has no line ranges, and isk.txt says \"seed public\": in this run \"failed\" may depend on the weights, which are public\n");
++    return 0;
++  }
+   if (!isk_ranges.empty() && isk_ranges == cp::digest_hex(parameters_hash_words.data(), parameters_hash_words.size())) return 0;
+   printf("refused (ranges-not-guarded): isk.txt has no line ranges for these configuration files. cp_commit's first form writes the "
+          "line when its worst-case check has passed; its second form never adds it: make the commitment again\n");
+diff --git a/prover/weights_blocks/gguf_source.cuh b/prover/weights_blocks/gguf_source.cuh
+index 7397920..d0d79e4 100644
+--- a/prover/weights_blocks/gguf_source.cuh
++++ b/prover/weights_blocks/gguf_source.cuh
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): the conversion's two constants also for width 2,048
++// and head width 64. Each change is marked "Hallmark dense patch".
+ 
+ // GgufSource: the BlockSource (weight reader's interface) that reads a model from the GGUF files
+ // ("shards") in one directory, checks them against `shape` and copies tensors to the GPU as
+@@ -20,14 +22,16 @@ struct GgufSource : BlockSource {
+   Shape shape; // the expected shape, from the prover's parameter file; set it before open()
+ 
+   // Exits with a message if a file is missing or malformed, or the model and `shape` disagree.
+-  // The widths 5120 and 128 are fixed because the constants in fold::reads() assume them.
++  // The widths are fixed because the constants of fold::reads() are known for few: 5120 and 128, and
++  // (Hallmark dense patch) 2048 and 64 (fold::constants()).
+   // All files are opened through one directory handle (gguf::Model::open_folder(),
+   // prover/weights_commitment/gguf_file.h), so `shards`, an earlier listing, is used only in
+   // messages; it must not be empty.
+   void open(const std::string &setup_dir, const std::vector<std::string> &shards) {
+     file_.open_folder(setup_dir);
+-    if (file_.embedding_length != 5120 || file_.key_length != 128)
+-      stop("only models of width 5120 and head width 128 are supported", shards[0]);
++    constants_ = fold::constants(file_.embedding_length, file_.key_length); // Hallmark dense patch
++    if (!constants_.c_word)
++      stop("only models of width 5120 and head width 128, or of width 2048 and head width 64, are supported", shards[0]);
+     if ((uint64_t)shape.d != file_.embedding_length || (uint64_t)shape.dh != file_.key_length ||
+         (uint64_t)shape.layers != file_.block_count)
+       stop("the model has " + std::to_string(file_.block_count) + " layers of width " +
+@@ -117,7 +121,7 @@ struct GgufSource : BlockSource {
+   // gives the norm and c_word, c_0's binary32 bit pattern. Cached per (norm, c_word).
+   // gamma is defined in docs/model.md, "11.4 From a decoded value to an integer" (there gamma_k).
+   const float *gain(int stream, int layer) override {
+-    const fold::Reads reads = fold::reads(kind(stream, layer));
++    const fold::Reads reads = fold::reads(kind(stream, layer), constants_);
+     if (!reads.norm[0]) return nullptr;
+     const std::string n =
+         (stream == 14 ? std::string() : "blk." + std::to_string(layer) + ".") + reads.norm + ".weight";
+@@ -125,7 +129,7 @@ struct GgufSource : BlockSource {
+     if (gamma) return gamma;
+     const gguf::Tensor &g = file_.at(n);
+     if (g.type != gguf::F32 || g.cells() != file_.embedding_length)
+-      stop("the norm must have 5120 values of type F32", n);
++      stop("the norm must have " + std::to_string(file_.embedding_length) + " values of type F32", n);
+     // The gains pass through a page-locked staging buffer and are zeroed there: they are weights.
+     CK(cudaEventSynchronize(staged_[0]));
+     file_.read(g, 0, g.bytes(), stage_[0]);
+@@ -223,6 +227,7 @@ private:
+   }
+ 
+   gguf::Model file_;
++  fold::Constants constants_; // set by open() (Hallmark dense patch)
+   std::map<std::string, int> exponent_;
+   int embedding_exponent_ = 0;
+   uint8_t *stage_[2] = {nullptr, nullptr}, *room_ = nullptr;
+diff --git a/prover/weights_commitment/arguments.h b/prover/weights_commitment/arguments.h
+index 042ba07..330564e 100644
+--- a/prover/weights_commitment/arguments.h
++++ b/prover/weights_commitment/arguments.h
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): under -public-weights the worst-case check, a
++// hiding safeguard, is left out unless asked for. Each change is marked "Hallmark dense patch".
+ 
+ // Terms: docs/glossary.md.
+ 
+@@ -113,7 +115,10 @@ struct Opt {
+   // the forward pass that the check bounds, can any prompt drive a value out of its range? If the
+   // check fails, cp_commit exits with status 7, before the seed is drawn. Every run of the first
+   // form runs it, except a test run with -test-seed (under which nothing is hidden) and neither
+-  // -worst-case nor -worst-case-table.
++  // -worst-case nor -worst-case-table. Hallmark dense patch: nor a run with -public-weights, under
++  // which nothing is hidden either, unless -worst-case or -worst-case-table is given; there a request
++  // may then end "failed" if a value leaves its range (scales/worst-case-bounds.md: soundness does
++  // not rest on the check).
+   bool worst_case = false;
+   // -worst-case-table (first form only): a new file for the check's full table, readable by its
+   // owner only, because its numbers are computed from the weights. Empty: not given.
+@@ -191,7 +196,8 @@ struct Opt {
+         "pass that the check bounds a prompt can drive the value out of its range. When the check has passed, isk.txt gets the line ranges, without which "
+         "cp_prove does not start. -worst-case-table: the check's table, a line for each site and layer, goes into a new file for "
+         "its owner only; its numbers are computed from the weights, so keep it as secret as isk. -worst-case: "
+-        SERVING_OR("it changes nothing", "makes the check under -test-seed too; elsewhere it changes nothing") ".\n"
++        SERVING_OR("makes the check under -public-weights too, where it is otherwise left out (Hallmark dense patch); elsewhere it changes nothing",
++                   "makes the check under -test-seed too; elsewhere it changes nothing") ".\n"
+         "-keep-for-the-audit (not with -leaves): the 32 fresh bytes of the key file's making and of each entry's are kept in <isk>/audit, for the audit with the key, which destroys them before it says yes. Together with the seed they "
+         "open every mask in key.bin and the entries: until that yes nothing of the commitment leaves, and no cp_prove is started on isk (docs/operators-duties.md, \"The audit with the key\").\n"
+         SERVING_OR("-public-weights <file of 32 bytes>: for public weights only: with this option the weights are NOT hidden: whoever has the 32-byte file can work out every mask. "
+@@ -341,7 +347,7 @@ struct Opt {
+     if (from_weights ? config.empty() || leaves_M < 1 || first_given || sweep
+                    : !config.empty() || !(leaves_given || M_given || first_given) || keep_level >= 0 || worst_case || !worst_case_table.empty() || keep_for_the_audit || public_seed)
+       return false;
+-    worst_case = from_weights && (!test_seed || worst_case || !worst_case_table.empty());
++    worst_case = from_weights && ((!test_seed && !public_seed) || worst_case || !worst_case_table.empty()); // Hallmark dense patch: && !public_seed
+     M = M_given ? (uint32_t)leaves_M : 0, first = first_given ? (uint32_t)first_leaf : 0;
+     if (leaves && strcmp(leaves, "none")) {
+       const char *const dots = strstr(leaves, "..");
+diff --git a/prover/weights_commitment/fold_source.cuh b/prover/weights_commitment/fold_source.cuh
+index e609e91..ae0af09 100644
+--- a/prover/weights_commitment/fold_source.cuh
++++ b/prover/weights_commitment/fold_source.cuh
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): the conversion's two constants also for width 2,048
++// and head width 64. Each change is marked "Hallmark dense patch".
+ 
+ // Terms: docs/glossary.md.
+ 
+@@ -118,6 +120,7 @@ __global__ void k_made_up_integers(u64 seed, int stream, int bits, u64 base, siz
+ // fault: 4 bytes in GPU memory where fold::gains() sets bits of fold::Fault (fold_weights.cuh).
+ struct FoldSource {
+   ::gguf::Model file;
++  ::fold::Constants constants; // the conversion's two constants, set by open() (Hallmark dense patch)
+   std::map<std::string, std::pair<int, std::string>> sums; // from a tensor's name to (e, SHA-256)
+   int eres = 11;
+   unsigned *fault = nullptr;
+@@ -133,8 +136,9 @@ struct FoldSource {
+   // descriptor (gguf::Model::open_folder(), gguf_file.h). Exits with code 2 if it rejects a file.
+   void open(const std::string &setup) {
+     file.open_folder(setup);
+-    if (file.embedding_length != 5120 || file.key_length != 128) {
+-      fprintf(stderr, "the two constants of the conversion to integers are valid only for d = 5,120 and dh = 128\n");
++    constants = ::fold::constants(file.embedding_length, file.key_length); // Hallmark dense patch
++    if (!constants.c_word) {
++      fprintf(stderr, "the two constants of the conversion to integers are known only for d = 5,120 and dh = 128, and for d = 2,048 and dh = 64\n");
+       exit(2);
+     }
+     FILE *f = file.side("wsums.txt");
+diff --git a/prover/weights_commitment/fold_weights.cuh b/prover/weights_commitment/fold_weights.cuh
+index 35e07f3..00bc86a 100644
+--- a/prover/weights_commitment/fold_weights.cuh
++++ b/prover/weights_commitment/fold_weights.cuh
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): the conversion's two constants also for width 2,048
++// and head width 64. Each change is marked "Hallmark dense patch".
+ 
+ // Terms: docs/glossary.md.
+ 
+@@ -171,19 +173,32 @@ __global__ void integers(const uint8_t *bytes, uint32_t type, uint64_t first, ui
+     w[i] = (Int)x;
+   }
+ }
+-// The norm whose gains multiply a tensor ("": none), and c_0, the c of gains(): sqrt(d) / 64,
+-// for attn_q also divided by sqrt(dh); right only for width d = 5,120 and head dimension dh = 128.
++// Hallmark dense patch: c_0, the c of gains(), is RN32(sqrt(d) / 2^t), t the largest integer with
++// 4^t <= d, so that 1 <= c_0 < 2 (scales/README.md, "The exponent of each cell", step 2); for
++// attn_q it is sqrt(d) / 2^t / sqrt(dh), rounded once. As binary32 bit patterns, for the admitted
++// pairs (d, dh) only: upstream's (5,120, 128), where t = 6, and (2,048, 64) of TinyLlama-1.1B, where
++// t = 5 and the two are sqrt(2) and sqrt(2) / 8. c_word 0: the pair is not admitted.
++struct Constants {
++  uint32_t c_word = 0, c_query_word = 0;
++};
++inline Constants constants(uint64_t d, uint64_t dh) {
++  if (d == 5120 && dh == 128) return {0x3F8F1BBDu, 0x3DCA62C2u};
++  if (d == 2048 && dh == 64) return {0x3FB504F3u, 0x3E3504F3u};
++  return {};
++}
++// The norm whose gains multiply a tensor ("": none), and c_0 (constants() above), for attn_q
++// also divided by sqrt(dh).
+ struct Reads {
+   const char *norm;
+   uint32_t c_word;
+ };
+-inline Reads reads(const std::string &kind) {
+-  if (kind == "attn_q") return {"attn_norm", 0x3DCA62C2u};
+-  if (kind == "attn_k" || kind == "attn_v") return {"attn_norm", 0x3F8F1BBDu};
++inline Reads reads(const std::string &kind, const Constants &c) {
++  if (kind == "attn_q") return {"attn_norm", c.c_query_word};
++  if (kind == "attn_k" || kind == "attn_v") return {"attn_norm", c.c_word};
+   for (const char *k :
+        {"ffn_gate", "ffn_up", "ffn_gate_inp", "ffn_gate_shexp", "ffn_up_shexp", "ffn_gate_exps", "ffn_up_exps"})
+-    if (kind == k) return {"ffn_norm", 0x3F8F1BBDu};
+-  if (kind == "output") return {"output_norm", 0x3F8F1BBDu};
++    if (kind == k) return {"ffn_norm", c.c_word};
++  if (kind == "output") return {"output_norm", c.c_word};
+   return {"", 0};
+ }
+ 

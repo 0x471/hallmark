@@ -1,0 +1,646 @@
+diff --git a/integrations/vllm/integer_model/integer_model/block_weights.py b/integrations/vllm/integer_model/integer_model/block_weights.py
+index 19c88f4..b7311a4 100644
+--- a/integrations/vllm/integer_model/integer_model/block_weights.py
++++ b/integrations/vllm/integer_model/integer_model/block_weights.py
+@@ -1,5 +1,8 @@
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): the two values of c_0 also for width 2,048 and head
++# dimension 64. Each change is marked
++# "Hallmark dense patch".
+ 
+ # Adapted from gguf-py 0.19.0, the Python package gguf of the llama.cpp project: decoded_values
+ # (from the classes Q4_K, Q5_K, Q6_K, Q8_0 and BF16 of gguf/quants.py, and from its dequantize for
+@@ -305,6 +308,19 @@ class _Kind:
+ # The two values of c_0. d is the model's width and dh is the head dimension.
+ _C0 = 0x3F8F1BBD  # RN32(sqrt(d) / 64) for d = 5,120
+ _C0_QUERY = 0x3DCA62C2  # RN32(sqrt(d) / 64 / sqrt(dh)) for d = 5,120 and dh = 128
++# Hallmark dense patch: the pairs (d, dh) of the rule, each with its two values of c_0:
++# RN32(sqrt(d) / 2^t), t the largest integer with 4^t <= d, and RN32(sqrt(d) / 2^t / sqrt(dh)).
++# The first pair's are _C0 and _C0_QUERY, which the table _KINDS below names; _c0() gives a model's.
++_SHAPES = {
++    (5120, 128): (_C0, _C0_QUERY),
++    (2048, 64): (0x3FB504F3, 0x3E3504F3),  # RN32(sqrt(2048) / 32) = RN32(sqrt(2)), RN32(sqrt(2) / 8)
++}
++
++
++def _c0(p: Parameters, named: int) -> int:
++    """Hallmark dense patch: the model's value of c_0 for a row of _KINDS that names _C0 or _C0_QUERY."""
++    norm, query = _SHAPES[(p.d, p.dh)]
++    return query if named == _C0_QUERY else norm
+ 
+ # The keys are the names of WeightSource.matrix, and "Emb" for the embedding.
+ _KINDS = {
+@@ -597,11 +613,11 @@ class GgufBlocks:
+                 )
+                 head = metadata.get(prefix + "attention.key_length", 128)
+                 # As in _read_shard, the values are not printed.
+-                if (width, head) != (5120, 128):
++                if (width, head) not in _SHAPES:  # Hallmark dense patch: not only (5120, 128)
+                     raise WeightsRejected(
+-                        f"{shard}: the metadata do not give width 5,120 and head dimension 128. "
+-                        "The conversion rule is defined only for these. This must be the model's "
+-                        "first file, which holds the metadata."
++                        f"{shard}: the metadata do not give width 5,120 and head dimension 128, or "
++                        "width 2,048 and head dimension 64. The conversion rule is defined only for "
++                        "these. This must be the model's first file, which holds the metadata."
+                     )
+                 if (width, head, layers) != (p.d, p.dh, p.L):
+                     raise WeightsRejected(
+@@ -783,7 +799,8 @@ class GgufBlocks:
+             return None
+         stored = torch.empty(4 * self._p.d, dtype=torch.uint8)
+         self._read(self._tensors[norm], 0, 4 * self._p.d, stored)
+-        constant = torch.tensor([_KINDS[name].constant], dtype=torch.int32).view(torch.float32)
++        word = _c0(self._p, _KINDS[name].constant)  # Hallmark dense patch
++        constant = torch.tensor([word], dtype=torch.int32).view(torch.float32)
+         return stored.view(torch.float32) * constant
+ 
+     def blocks(self, name: str, layer: int | None, rows: range) -> torch.Tensor:
+diff --git a/integrations/vllm/integer_model/integer_model/parameters.py b/integrations/vllm/integer_model/integer_model/parameters.py
+index f541e27..0baa901 100644
+--- a/integrations/vllm/integer_model/integer_model/parameters.py
++++ b/integrations/vllm/integer_model/integer_model/parameters.py
+@@ -1,5 +1,8 @@
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): a model without routed experts (NE 0), with the digests of its
++# three public tables (no tsig). Each change is marked
++# "Hallmark dense patch".
+ 
+ """The public parameters of the integer model.
+ 
+@@ -76,10 +79,6 @@ _ONLY_VALUE = {
+ # is one below the smallest value.
+ _RANGE_IF_PRESENT = {"lidb": (23, 30)}
+ _MOST_CALL_LINES = {"call": 8, "callH": 6}
+-_NO_EXPERTS = (
+-    "NE is 0, a model without routed experts. A parameter file for such a model cannot carry the "
+-    "digests of the public tables, which this package requires."
+-)
+ _NO_DIGESTS = (
+     " The 32 lines tsilu0 to texp7 carry the digests of the public tables. Without them nothing "
+     "shows that this machine's tables are those of the proved model. scales/policy_tables.py "
+@@ -189,7 +188,8 @@ class Parameters:
+ 
+         Stricter than the verifier:
+         - only prof 20, the profile with attention;
+-        - the 32 lines with the public tables' digests are required, and with them NE > 0;
++        - the lines with the public tables' digests are required: all 32 with NE > 0, and (Hallmark
++          dense patch) the 24 other than tsig0 .. tsig7 with NE 0, a model without routed experts;
+         - theta0 must be 10,000 or 500,000, dh <= 128 and lt <= 10 (otherwise the verifier ends at
+           best with NOT-A-VERIFICATION: its condition `rotary-table`);
+         - eps must be below 2^48 (the verifier, without the line xl: below 2^59);
+@@ -253,8 +253,10 @@ class Parameters:
+                 KF=line("KF"),
+                 seed=long_line("seed"),
+                 layers=layers,
+-                table_digests={
+-                    name: [line(f"{name}{i}") for i in range(8)] for name in _TABLE_DIGEST_LINES
++                table_digests={  # Hallmark dense patch: without tsig at NE 0
++                    name: [line(f"{name}{i}") for i in range(8)]
++                    for name in _TABLE_DIGEST_LINES
++                    if f"{name}0" in value
+                 },
+                 s=line("s"),
+             )
+@@ -524,12 +526,20 @@ def _read_lines(parameter_file: Path, data: bytes) -> dict[str, int]:
+                 f"prof is {value[name]}, expected {_ONLY_VALUE[name]}, the profile with attention.",
+             )
+         if name == "NE" and value[name] == 0:
+-            reject(number, _NO_EXPERTS)
++            # Hallmark dense patch: a model without routed experts forms no sigmoid table, so its
++            # file has the digests of the other three tables only, as cp_verify then requires.
++            expected = [wanted for wanted in expected if not wanted.startswith("tsig")]
+         if name == "lidb":
+             expected.insert(0, "nminH?")
+     missing = [wanted for wanted in expected if not wanted.endswith("?")]
+     if missing:
+         hint = _NO_DIGESTS if missing[0] == "tsilu0" else ""
++        if missing[0] == "tsilu0" and value.get("NE") == 0:  # Hallmark dense patch
++            hint = (
++                " Without routed experts the 24 lines tsilu0 .. tsilu7, trope0 .. trope7 and texp0 .."
++                " texp7 carry the digests of the three public tables; scales/policy_tables.py does"
++                " not write them for NE 0."
++            )
+         reject(first + len(value), f"expected the line {missing[0]}.{hint}")
+ 
+     kinds = []
+@@ -554,9 +564,15 @@ def _read_lines(parameter_file: Path, data: bytes) -> dict[str, int]:
+                 f"{most}."
+             )
+ 
++    # Hallmark dense patch: without routed experts the weight kinds that only experts have are
++    # absent, and their lines must be 0, as cp_verify and the provers require (header-absent-kind).
++    absent = {"wb_gs", "wb_us", "wb_gr", "wb_ur", "wb_dnr", "wb_r"} if value.get("NE") == 0 else set()
+     for name, only in _ONLY_VALUE.items():
++        only = 0 if name in absent else only
+         if name in value and value[name] != only:
+             raise ParameterError(f"{parameter_file}: {name} is {value[name]}, expected {only}.")
++    if absent and value.get("hr") != 0:  # Hallmark dense patch: no router, as header-absent-class
++        raise ParameterError(f"{parameter_file}: hr is {value.get('hr')}, expected 0 without routed experts.")
+     if value.get("eg") == 8 or value.get("smax") == 4095:
+         raise ParameterError(
+             f"{parameter_file}: eg 8 and smax 4095 are the defaults and must be omitted."
+diff --git a/integrations/vllm/integer_model/integer_model/tables.py b/integrations/vllm/integer_model/integer_model/tables.py
+index f568445..0313d06 100644
+--- a/integrations/vllm/integer_model/integer_model/tables.py
++++ b/integrations/vllm/integer_model/integer_model/tables.py
+@@ -1,5 +1,7 @@
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): no sigmoid table's digest without routed experts (NE 0). Each change is marked
++# "Hallmark dense patch".
+ 
+ """The five public tables of the integer model, and the digests that pin them.
+ 
+@@ -278,6 +280,8 @@ def make_tables(p: Parameters, device: torch.device) -> Tables:
+         "texp": ("softmax table", softmax),
+     }
+     for name, (table, words) in hashed.items():
++        if name == "tsig" and p.NE == 0:
++            continue  # Hallmark dense patch: a model without routed experts reads no sigmoid table
+         if table_digest(words) != p.table_digests[name]:
+             raise ParameterError(
+                 f"The {table} computed on this machine does not match its digest in the parameter "
+diff --git a/integrations/vllm/integer_model/tests/test_parameter_file.py b/integrations/vllm/integer_model/tests/test_parameter_file.py
+index 539481f..af0874c 100644
+--- a/integrations/vllm/integer_model/tests/test_parameter_file.py
++++ b/integrations/vllm/integer_model/tests/test_parameter_file.py
+@@ -1,5 +1,7 @@
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): cases for a model without routed experts. Each change is
++# marked "Hallmark dense patch".
+ 
+ # Terms: docs/glossary.md.
+ 
+@@ -184,7 +186,13 @@ PARAMETER_FILE_VARIANTS = {
+         NEITHER,
+         "listed is 1, expected 0",
+     ),
+-    "no_routed_experts": (with_lines({"NE": 0}), NEITHER, "NE is 0, a model without routed"),
++    # Hallmark dense patch: NE 0 is read, but then the lines tsig0 .. tsig7 must be absent.
++    "no_routed_experts": (with_lines({"NE": 0}), NEITHER, "expected the line trope0, found tsig0"),
++    "routed_experts_without_tsig": (
++        lambda text: re.sub(r"^tsig\d+ \d+\n", "", text, flags=re.MULTILINE),
++        NEITHER,
++        "expected the line tsig0, found trope0",
++    ),
+     # The format has none of these four lines. cp_verify rejects hb, oxc and magic as
+     # `policy-call-line` (verifier/src/cp_verify.cpp).
+     "temp_after_xl": (
+@@ -996,3 +1004,80 @@ def test_a_layers_norms_have_the_bound_of_the_final_norm(M, K, layer, tmp_path):
+         read_with_scales(tmp_path, layer, **{M: 34, K: 20})
+     scales = read_with_scales(tmp_path, layer, **{M: 34, K: 21}).layers[layer]
+     assert (getattr(scales, M), getattr(scales, K)) == (34, 21)
++
++
++# Hallmark dense patch: a model without routed experts (NE 0). target_small_f2 made dense as
++# cp_verify's verifier/tests/served_form_test.py makes its kit dense: no router (hr 0), the weight
++# widths of the kinds that only experts have set to 0, no lines rcl and gcl, no sigmoid table's
++# digest (tsig0 .. tsig7), and KL.bin without the three words of each MoE layer. The digests of the
++# other three tables do not depend on these lines, so the example's are kept.
++_EXPERTS_ONLY_WIDTHS = ("wb_gs", "wb_us", "wb_gr", "wb_ur", "wb_dnr", "wb_r")
++
++
++def _dense_text() -> str:
++    text = with_lines({"NE": 0, "hr": 0, **dict.fromkeys(_EXPERTS_ONLY_WIDTHS, 0)})(EXAMPLE.read_text())
++    text = with_line(with_line(text, "rcl", ""), "gcl", "")
++    return re.sub(r"^tsig\d+ \d+\n", "", text, flags=re.MULTILINE)
++
++
++def _read_dense(text: str, folder: pathlib.Path) -> Parameters:
++    layers = int(re.search(r"^L (\d+)$", text, flags=re.MULTILINE)[1])
++    (folder / "KL.bin").write_bytes((EXAMPLE.parent / "KL.bin").read_bytes()[: 4 * 13 * layers])
++    (folder / "policy.txt").write_text(text)
++    return Parameters.read(folder / "policy.txt")
++
++
++def test_a_dense_parameter_file_is_read(tmp_path):
++    """Hallmark dense patch: NE 0 with the three tables' digests is read, and the three tables
++    computed on this machine match them."""
++    p = _read_dense(_dense_text(), tmp_path)
++    assert p.NE == 0 and not p.router_clamp and not p.gate_clamp
++    assert sorted(p.table_digests) == ["texp", "trope", "tsilu"]
++    assert not any(p.has_experts(layer) for layer in range(p.L))
++    make_tables(p, torch.device("cpu"))
++
++
++@pytest.mark.parametrize(
++    "change, message",
++    [
++        (lambda text: text.replace("trope0 ", "tsig0 1\ntrope0 "), "expected the line trope0, found tsig0"),
++        (lambda text: with_line(text, "wb_gs", "wb_gs 13\n"), "wb_gs is 13, expected 0"),
++        (lambda text: with_line(text, "wb_r", "wb_r 13\n"), "wb_r is 13, expected 0"),
++        (lambda text: with_line(text, "hr", "hr 1\n"), "hr is 1, expected 0"),
++        (lambda text: re.sub(r"^t(silu|rope|exp)\d+ \d+\n", "", text, flags=re.M), "the 24 lines"),
++        (lambda text: with_line(text, "texp7", ""), "expected the line texp7"),
++        (lambda text: text.replace("xl ", "gcl 1\nxl "), "rcl and gcl need a model with experts"),
++    ],
++    ids=["with_tsig", "wb_gs_13", "wb_r_13", "hr_1", "no_digests", "texp7_missing", "with_gcl"],
++)
++def test_a_dense_parameter_file_is_rejected(change, message, tmp_path):
++    """Hallmark dense patch: the dense file with one change that cp_verify and the provers reject."""
++    with pytest.raises(ParameterError, match=message):
++        _read_dense(change(_dense_text()), tmp_path)
++
++
++@pytest.mark.parametrize("table", ["tsilu", "trope", "texp"])
++def test_a_dense_parameter_file_with_an_altered_digest_is_rejected(table, tmp_path):
++    """Hallmark dense patch: at NE 0 each of the three digests is still compared."""
++    text = re.sub(rf"^{table}0 (\d+)$", lambda m: f"{table}0 {int(m[1]) ^ 1}", _dense_text(), flags=re.MULTILINE)
++    with pytest.raises(ParameterError, match="does not match its digest"):
++        make_tables(_read_dense(text, tmp_path), torch.device("cpu"))
++
++
++def test_the_provers_reader_on_the_dense_parameter_file(provers_reader, tmp_path):
++    """Hallmark dense patch: the provers' reader admits the dense file, and rejects it with tsig."""
++    (tmp_path / "policy.txt").write_text(_dense_text())
++    assert provers_reader(tmp_path / "policy.txt") == "admitted"
++    (tmp_path / "policy.txt").write_text(_dense_text().replace("trope0 ", "tsig0 1\ntrope0 "))
++    assert provers_reader(tmp_path / "policy.txt").startswith("policy-tables")
++
++
++@pytest.mark.parametrize(
++    "shape, words", [((5120, 128), (0x3F8F1BBD, 0x3DCA62C2)), ((2048, 64), (0x3FB504F3, 0x3E3504F3))]
++)
++def test_the_two_values_of_c0_by_shape(shape, words):
++    """Hallmark dense patch: block_weights._c0 gives each admitted shape's c_0 and c_0 / sqrt(dh)."""
++    from integer_model.block_weights import _C0, _C0_QUERY, _c0
++
++    p = dataclasses.make_dataclass("Shape", ["d", "dh"])(*shape)
++    assert (_c0(p, _C0), _c0(p, _C0_QUERY)) == words
+diff --git a/weight_sums/tests/oracle.py b/weight_sums/tests/oracle.py
+index 61d2a78..ea22e66 100644
+--- a/weight_sums/tests/oracle.py
++++ b/weight_sums/tests/oracle.py
+@@ -1,5 +1,7 @@
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): WEIGHT_SUMS_ORACLE_SHAPE=2048,64 writes a model of width
++# 2,048 and head dimension 64, with the two constants derived here. Each change is marked "Hallmark dense patch".
+ 
+ # Parts of this file are adapted from ggml (llama.cpp), which is under the MIT License. That project's notice, which
+ # applies to those parts:
+@@ -394,6 +396,36 @@ def decoded_values(storage_type, data):
+ WIDTH, HEAD_DIMENSION = 5120, 128  # the only model width and head dimension for which the two constants below are right
+ NORM_CONSTANT = from_bits(0x3F8F1BBD, 8, 23)  # RN32(sqrt(5120) / 64)
+ QUERY_CONSTANT = from_bits(0x3DCA62C2, 8, 23)  # RN32(sqrt(5120) / 64 / sqrt(128))
++
++
++def rn32_sqrt(q):
++    """Hallmark dense patch: RN32(sqrt(q)) for an exact q > 0 whose root is a normal binary32 number,
++    by exact comparisons alone. The root is in [2^e, 2^(e + 1)) with e = exponent_of(q) // 2."""
++    step = TWO ** (exponent_of(q) // 2 - 23)
++    m = q / (step * step)  # sqrt(m) = sqrt(q) / step, the root in units of the last place
++    r = math.isqrt(m.numerator // m.denominator)  # r <= sqrt(m) < r + 1
++    half = Fraction(2 * r + 1, 2)
++    if m == half * half:
++        raise ValueError("a tie")  # sqrt(m) = r + 1/2: never so for the shapes below
++    return (r if m < half * half else r + 1) * step
++
++
++def rule_constants(width, head_dimension):
++    """Hallmark dense patch: the two constants by the rule: RN32(sqrt(width) / 2^t), t the largest
++    integer with 4^t <= width, and RN32(sqrt(width) / 2^t / sqrt(head_dimension))."""
++    t = 0
++    while 4 ** (t + 1) <= width:
++        t += 1
++    return rn32_sqrt(Fraction(width, 4 ** t)), rn32_sqrt(Fraction(width, 4 ** t * head_dimension))
++
++
++# Hallmark dense patch: the derivation gives upstream's two words, and the environment variable
++# WEIGHT_SUMS_ORACLE_SHAPE (default 5120,128) chooses the shape of the synthetic model.
++assert rule_constants(5120, 128) == (NORM_CONSTANT, QUERY_CONSTANT)
++WIDTH, HEAD_DIMENSION = (int(n) for n in os.environ.get("WEIGHT_SUMS_ORACLE_SHAPE", "5120,128").split(","))
++if (WIDTH, HEAD_DIMENSION) not in ((5120, 128), (2048, 64)):
++    sys.exit("oracle.py: WEIGHT_SUMS_ORACLE_SHAPE must be 5120,128 or 2048,64")
++NORM_CONSTANT, QUERY_CONSTANT = rule_constants(WIDTH, HEAD_DIMENSION)
+ LARGEST_INTEGER = 4095  # of a matrix
+ EXPONENTS = range(-100, 101)  # the exponents that a matrix may have, and the values that e_res may have
+ SMALLEST_MULTIPLIER = TWO ** -100  # a multiplier is 0 or at least this in absolute value
+@@ -456,7 +488,7 @@ def model_shape(metadata):
+     if width is None or layers is None:
+         raise Rejected(CONTAINER, "the first shard's metadata lack %sembedding_length or %sblock_count as an unsigned "
+                        "integer" % (shown(prefix), shown(prefix)))
+-    if width != WIDTH or head_dimension not in (None, HEAD_DIMENSION):
++    if width != WIDTH or (128 if head_dimension is None else head_dimension) != HEAD_DIMENSION:  # Hallmark dense patch
+         raise Rejected(BOUND, "the rule is defined for the width %d and the head dimension %d only, and the metadata "
+                        "give %d and %s" % (WIDTH, HEAD_DIMENSION, width, head_dimension))
+     return layers
+@@ -914,6 +946,10 @@ def synthetic_norm(draws, level):
+     for constant, b in steps_at.items():
+         power = TWO ** (level + tilts[b] + exponent_of(constant))
+         g = rn32(power / constant)
++        if rn32(g * constant) != power:  # Hallmark dense patch: at the shape 2048,64 a neighbour of g may be needed
++            ulp = TWO ** (exponent_of(g) - 23)
++            g = next((g + k * ulp for k in (1, -1, 2, -2) if rn32((g + k * ulp) * constant) == power), None)
++            assert g is not None
+         assert rn32(g * constant) == power  # this holds for both constants at every power that the model uses
+         fraction = int((g / TWO ** exponent_of(g) - 1) * 2 ** 23)
+         gains[256 * b:256 * b + 256] = [single(draws, exponent_of(g), fraction) for _ in range(256)]
+@@ -1009,7 +1045,7 @@ def synthetic_model(seed):
+     # first one.
+     needed = [("general.architecture", STRING, "llama4"), ("llama4.embedding_length", UINT32, WIDTH),
+               ("llama4.block_count", UINT32, LAYERS)]
+-    if seed % 2 == 0:  # where the key is absent, the head dimension is 128
++    if seed % 2 == 0 or HEAD_DIMENSION != 128:  # where the key is absent, the head dimension is 128 (Hallmark dense patch: or)
+         needed.append(("llama4.attention.key_length", UINT32, HEAD_DIMENSION))
+     alignments = [32, 32 << draws.between(1, 3)]  # the first shard has no key for its alignment, which is then 32
+     metadata = [needed + synthetic_metadata(draws, 0, total),
+diff --git a/weight_sums/weight_sums.cpp b/weight_sums/weight_sums.cpp
+index 1d3c176..ba5acbf 100644
+--- a/weight_sums/weight_sums.cpp
++++ b/weight_sums/weight_sums.cpp
+@@ -1,5 +1,7 @@
+ // Copyright 2026 Anthropic PBC
+ // SPDX-License-Identifier: Apache-2.0
++// Modified by the Hallmark project (dense patch): the rule's two constants also for width 2,048 and
++// head dimension 64. Each change is marked "Hallmark dense patch".
+ 
+ // decode_q8_0() and the case BF16 of decode() are adapted from gguf-py 0.19.0 (gguf/quants.py: dequantize_blocks of the
+ // classes Q8_0 and BF16); the case F16 follows its dequantize(). It is under the MIT License. That project's notice:
+@@ -687,14 +689,23 @@ inline void locate(Tensor &tensor, const Shard &shard) {
+ // w = RNE(2^e * p) is the element's integer. The page docs/model.md writes pi for p, c_0 for c and,
+ // in the block formats, h and h_min for d and dmin, mn for m, and c for the code q.
+ 
+-// The only model width (metadata key embedding_length) and head dimension (attention.key_length)
+-// that plan() accepts. The two constants below are right for these values only. kQueryConstant
+-// includes the attention scale, 1 / sqrt(128).
+-constexpr std::uint32_t kWidth = 5120;
++// The model widths (metadata key embedding_length) and head dimensions (attention.key_length) that
++// plan() accepts, each pair with its two constants as binary32 bit patterns: the norm constant
++// RN32(sqrt(width) / 2^t), t the largest integer with 4^t <= width, and the query constant
++// RN32(sqrt(width) / 2^t / sqrt(head dimension)), which includes the attention scale. Hallmark dense
++// patch: upstream accepts the first pair alone.
++struct ModelShape {
++  std::uint32_t width, head_dimension, norm_constant, query_constant;
++};
++constexpr ModelShape kShapes[] = {
++    {5120, 128, 0x3F8F1BBDu, 0x3DCA62C2u}, // RN32(sqrt(5120) / 64), RN32(sqrt(5120) / 64 / sqrt(128))
++    {2048, 64, 0x3FB504F3u, 0x3E3504F3u},  // RN32(sqrt(2048) / 32) = RN32(sqrt(2)), RN32(sqrt(2) / 8)
++};
++// By the rule, an absent attention.key_length means this (docs/model.md, "11.1 The container").
+ constexpr std::uint32_t kHeadDimension = 128;
+-
+-constexpr std::uint32_t kNormConstant = 0x3F8F1BBDu;  // RN32(sqrt(5120) / 64), as a binary32 bit pattern
+-constexpr std::uint32_t kQueryConstant = 0x3DCA62C2u; // RN32(sqrt(5120) / 64 / sqrt(128)), as a binary32 bit pattern
++// Which of the shape's two constants a matrix multiplies its norm's gains by (Hallmark dense patch:
++// the value is the shape's, no longer a fixed bit pattern).
++enum class Constant { none, norm, query };
+ 
+ // A tensor with the role matrix or embedding is committed. The output head has the role matrix.
+ enum class Role { ignored, norm, matrix, embedding };
+@@ -712,35 +723,35 @@ struct LayerKind {
+   const char *kind;
+   Role role;
+   const char *norm; // the kind of the norm that the matrix reads, or nullptr
+-  std::uint32_t constant;
++  Constant constant;
+ };
+ 
+ constexpr LayerKind kLayerKinds[] = {
+-    {"attn_norm", Role::norm, nullptr, 0},
+-    {"ffn_norm", Role::norm, nullptr, 0},
+-    {"attn_q", Role::matrix, "attn_norm", kQueryConstant},
+-    {"attn_k", Role::matrix, "attn_norm", kNormConstant},
+-    {"attn_v", Role::matrix, "attn_norm", kNormConstant},
+-    {"attn_output", Role::matrix, nullptr, 0},
+-    {"ffn_gate", Role::matrix, "ffn_norm", kNormConstant},
+-    {"ffn_up", Role::matrix, "ffn_norm", kNormConstant},
+-    {"ffn_down", Role::matrix, nullptr, 0},
+-    {"ffn_gate_inp", Role::matrix, "ffn_norm", kNormConstant},
+-    {"ffn_gate_shexp", Role::matrix, "ffn_norm", kNormConstant},
+-    {"ffn_up_shexp", Role::matrix, "ffn_norm", kNormConstant},
+-    {"ffn_down_shexp", Role::matrix, nullptr, 0},
+-    {"ffn_gate_exps", Role::matrix, "ffn_norm", kNormConstant},
+-    {"ffn_up_exps", Role::matrix, "ffn_norm", kNormConstant},
+-    {"ffn_down_exps", Role::matrix, nullptr, 0},
++    {"attn_norm", Role::norm, nullptr, Constant::none},
++    {"ffn_norm", Role::norm, nullptr, Constant::none},
++    {"attn_q", Role::matrix, "attn_norm", Constant::query},
++    {"attn_k", Role::matrix, "attn_norm", Constant::norm},
++    {"attn_v", Role::matrix, "attn_norm", Constant::norm},
++    {"attn_output", Role::matrix, nullptr, Constant::none},
++    {"ffn_gate", Role::matrix, "ffn_norm", Constant::norm},
++    {"ffn_up", Role::matrix, "ffn_norm", Constant::norm},
++    {"ffn_down", Role::matrix, nullptr, Constant::none},
++    {"ffn_gate_inp", Role::matrix, "ffn_norm", Constant::norm},
++    {"ffn_gate_shexp", Role::matrix, "ffn_norm", Constant::norm},
++    {"ffn_up_shexp", Role::matrix, "ffn_norm", Constant::norm},
++    {"ffn_down_shexp", Role::matrix, nullptr, Constant::none},
++    {"ffn_gate_exps", Role::matrix, "ffn_norm", Constant::norm},
++    {"ffn_up_exps", Role::matrix, "ffn_norm", Constant::norm},
++    {"ffn_down_exps", Role::matrix, nullptr, Constant::none},
+ };
+ 
+ // Returns how the rule uses the tensor `name` in a model with `layers` layers. A layer number has
+ // one to nine decimal digits (a limit of this program) and no leading zero, except in "0". A name
+ // of any other form, or of an unknown kind, is ignored. A name of a known kind whose layer number
+ // is `layers` or more is an error.
+-inline Use classify(const std::string &name, std::uint64_t layers) {
++inline Use classify(const std::string &name, std::uint64_t layers, const ModelShape &shape) {
+   if (name == "token_embd.weight") return {Role::embedding, "", 0};
+-  if (name == "output.weight") return {Role::matrix, "output_norm.weight", kNormConstant};
++  if (name == "output.weight") return {Role::matrix, "output_norm.weight", shape.norm_constant};
+   if (name == "output_norm.weight") return {Role::norm, "", 0};
+ 
+   const std::string prefix = "blk.";
+@@ -762,7 +773,9 @@ inline Use classify(const std::string &name, std::uint64_t layers) {
+     Use use;
+     use.role = known.role;
+     if (known.norm != nullptr) use.norm = prefix + digits + "." + known.norm + ".weight";
+-    use.constant = known.constant;
++    use.constant = known.constant == Constant::query  ? shape.query_constant
++                   : known.constant == Constant::norm ? shape.norm_constant
++                                                      : 0;
+     return use;
+   }
+   return {};
+@@ -1282,10 +1295,17 @@ inline std::vector<Job> plan(std::vector<Shard> &shards) {
+   const auto key_length = first.metadata.find(prefix + ".attention.key_length");
+   const bool has_head_dimension = key_length != first.metadata.end() && key_length->second.is_unsigned();
+   const std::uint64_t head_dimension = has_head_dimension ? key_length->second.number : kHeadDimension;
+-  if (width != kWidth) outside_the_rule(Status::bound, first.path + ": the embedding_length is not 5120.");
+-  if (head_dimension != kHeadDimension) {
+-    outside_the_rule(Status::bound, first.path + ": the attention.key_length is not 128.");
++  // Hallmark dense patch: the pair must be one of kShapes. Upstream's messages for its own width.
++  const ModelShape *shape = nullptr;
++  for (const ModelShape &known : kShapes)
++    if (width == known.width && head_dimension == known.head_dimension) shape = &known;
++  if (!shape && width != 5120 && width != 2048)
++    outside_the_rule(Status::bound, first.path + ": the embedding_length is not 5120 (or 2048).");
++  if (!shape) {
++    outside_the_rule(Status::bound, first.path + ": the attention.key_length is not " +
++                                        (width == 5120 ? "128." : "64 (at the embedding_length 2048)."));
+   }
++  const std::uint64_t kWidth = shape->width; // Hallmark dense patch: the model's, no longer a constant
+ 
+   std::map<std::string, const Tensor *> by_name;
+   std::vector<std::pair<const Tensor *, Use>> committed;
+@@ -1296,7 +1316,7 @@ inline std::vector<Job> plan(std::vector<Shard> &shards) {
+         fail(Status::container, shard.path + ": entry " + std::to_string(i + 1) + " of the tensor table has the same " +
+                                     "name as an earlier tensor of this command. Check that no file is named twice.");
+       }
+-      const Use use = classify(tensor.name, layers);
++      const Use use = classify(tensor.name, layers, *shape);
+       if (use.role == Role::ignored) continue;
+       // From here on a message may give the tensor's name, because the name has one of the
+       // forms that classify() knows. (The message in classify() gives only such a name.) In a
+@@ -1304,7 +1324,7 @@ inline std::vector<Job> plan(std::vector<Shard> &shards) {
+       if (use.role == Role::norm) {
+         if (tensor.type != kTypeF32) fail(Status::type, "The norm " + tensor.name + " must have the storage type F32.");
+         if (tensor.elements != kWidth) {
+-          fail(Status::container, "The norm " + tensor.name + " does not have 5120 elements.");
++          fail(Status::container, "The norm " + tensor.name + " does not have " + std::to_string(kWidth) + " elements.");
+         }
+       } else {
+         if (tensor.type != kTypeF32 && tensor.type != kTypeQ4K && tensor.type != kTypeQ5K && tensor.type != kTypeQ6K &&
+@@ -1325,7 +1345,8 @@ inline std::vector<Job> plan(std::vector<Shard> &shards) {
+     job.embedding = use.role == Role::embedding;
+     if (!use.norm.empty()) {
+       if (tensor->dims[0] != kWidth) {
+-        fail(Status::container, "The tensor " + tensor->name + " reads a norm, so its first dimension must be 5120.");
++        fail(Status::container, "The tensor " + tensor->name + " reads a norm, so its first dimension must be " +
++                                    std::to_string(kWidth) + ".");
+       }
+       const auto norm = by_name.find(use.norm);
+       if (norm == by_name.end()) {
+diff --git a/weight_sums/weight_sums.py b/weight_sums/weight_sums.py
+index cb44803..5e7bc47 100755
+--- a/weight_sums/weight_sums.py
++++ b/weight_sums/weight_sums.py
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env python3
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): the rule's two constants also for width 2,048 and head
++# dimension 64. Each change is marked "Hallmark dense patch".
+ 
+ """Write a model's sums file: one line per committed tensor, with the SHA-256 of its integers.
+ 
+@@ -149,6 +151,14 @@ WIDTH = 5120
+ HEAD_DIMENSION = 128
+ NORM_CONSTANT = np.uint32(0x3F8F1BBD).view(np.float32)  # sqrt(5120) / 64, rounded to binary32
+ QUERY_CONSTANT = np.uint32(0x3DCA62C2).view(np.float32)  # sqrt(5120) / 64 / sqrt(128), rounded to binary32
++# Hallmark dense patch: the (width, head dimension) pairs that the rule admits, each with its norm and query
++# constant as binary32 bit patterns: RN32(sqrt(width) / 2^t), t the largest integer with 4^t <= width, and
++# RN32(sqrt(width) / 2^t / sqrt(head dimension)). The first pair is upstream's: WIDTH, HEAD_DIMENSION and the two
++# constants above. A matrix multiplies its norm's gains by its model's constant (shaped()).
++SHAPES = {
++    (5120, 128): (0x3F8F1BBD, 0x3DCA62C2),
++    (2048, 64): (0x3FB504F3, 0x3E3504F3),  # RN32(sqrt(2048) / 32) = RN32(sqrt(2)), RN32(sqrt(2) / 8)
++}
+ 
+ # A layer's matrices are named blk.<layer>.<kind>.weight, with <layer> in decimal and no leading
+ # zero. Each kind maps to the norm of the same layer whose output it reads, and to the constant that
+@@ -288,14 +298,27 @@ def model_layers(reader):
+         raise Fault(
+             "metadata", f"the metadata key <architecture>.block_count of the first shard is not a number. {note}"
+         )
+-    for what, found, only in (("width", width, WIDTH), ("head dimension", head_dimension, HEAD_DIMENSION)):
+-        if found != only:
+-            raise Fault(
+-                "model shape",
+-                f"the first shard's metadata give another {what} than {only}. The constants of the conversion rule are "
+-                f"valid for the width {WIDTH} and the head dimension {HEAD_DIMENSION} only",
+-            )
+-    return layers
++    # Hallmark dense patch: one of the pairs of SHAPES; returns the shape with the layers.
++    numbers = isinstance(width, (int, float)) and isinstance(head_dimension, (int, float))
++    found = SHAPES.get((width, head_dimension)) if numbers else None  # a list would not hash
++    # Hallmark dense patch: with the added pair, width, head dimension and layer count count only as
++    # unsigned integers, as bin/weight_sums reads them (it rejects a width or a layer count of another
++    # type, with another status, and takes a head dimension of another type as absent, that is 128).
++    # Upstream's pair keeps this program's laxer reading.
++    if found is not None and (width, head_dimension) != (WIDTH, HEAD_DIMENSION):
++        kinds = (GGUFValueType.UINT8, GGUFValueType.UINT16, GGUFValueType.UINT32, GGUFValueType.UINT64)
++        names = (".embedding_length", ".attention.key_length", ".block_count")
++        fields = [reader.get_field(architecture + n) for n in names]
++        if not all(f is not None and len(f.types) == 1 and f.types[0] in kinds for f in fields):
++            found = None
++    if found is None:
++        raise Fault(
++            "model shape",
++            "the first shard's metadata give another width and head dimension than 5120 and 128, or 2048 and 64. The "
++            "constants of the conversion rule are valid for these only",
++        )
++    norm_constant, query_constant = (np.uint32(word).view(np.float32) for word in found)
++    return layers, (int(width), norm_constant, query_constant)
+ 
+ 
+ def read_shard(path, is_first):
+@@ -317,7 +340,7 @@ def read_shard(path, is_first):
+                 raise Malformed(f"the offset in entry {number} of the tensor table is too large")
+             place = (path, entry.data_offset, entry.n_bytes)
+             tensors.append(Tensor(entry.name, number, entry.tensor_type, dims, entry.n_elements, *place))
+-        return tensors, model_layers(reader) if is_first else None
++        return tensors, model_layers(reader) if is_first else None  # Hallmark dense patch: (layers, shape)
+     except (Fault, MemoryError):
+         raise
+     except OSError as error:
+@@ -334,7 +357,12 @@ def read_shard(path, is_first):
+ # Which tensors the rule uses.
+ 
+ 
+-def select(tensors, layers):
++def shaped(constant, shape):
++    """Hallmark dense patch: the model's constant in place of upstream's NORM_CONSTANT or QUERY_CONSTANT."""
++    return shape[2] if constant == QUERY_CONSTANT else shape[1]
++
++
++def select(tensors, layers, shape):
+     """Return the list of committed tensors and a dict of the norms by name.
+ 
+     A list entry is (tensor, name of the norm that it reads, constant). The last two are None for a
+@@ -355,12 +383,12 @@ def select(tensors, layers):
+         if tensor.name == HEAD_NORM or kind in LAYER_NORMS:
+             norms[tensor.name] = tensor
+         elif tensor.name == HEAD:
+-            committed.append((tensor, HEAD_NORM, NORM_CONSTANT))
++            committed.append((tensor, HEAD_NORM, shape[1]))
+         elif tensor.name == EMBEDDING or (kind in LAYER_MATRICES and LAYER_MATRICES[kind] is None):
+             committed.append((tensor, None, None))
+         elif kind in LAYER_MATRICES:
+             norm_kind, constant = LAYER_MATRICES[kind]
+-            committed.append((tensor, f"blk.{in_layer[1]}.{norm_kind}.weight", constant))
++            committed.append((tensor, f"blk.{in_layer[1]}.{norm_kind}.weight", shaped(constant, shape)))
+         else:
+             continue
+         # A number of more than 20 digits exceeds every integer that a GGUF file can store. The
+@@ -375,8 +403,8 @@ def select(tensors, layers):
+     for norm in norms.values():
+         if norm.storage != GGMLQuantizationType.F32:
+             raise Fault("norm type", f"the norm {norm.name} is not of type F32")
+-        if norm.elements != WIDTH:
+-            raise Fault("norm length", f"the norm {norm.name} does not have {WIDTH} elements")
++        if norm.elements != shape[0]:
++            raise Fault("norm length", f"the norm {norm.name} does not have {shape[0]} elements")
+     for tensor, norm, _ in committed:
+         if not tensor.dims:
+             raise Fault("container", f"{tensor.name} has no dimensions")
+@@ -384,8 +412,8 @@ def select(tensors, layers):
+             raise Fault("tensor type", f"{tensor.name} is not of type F32, F16, BF16, Q8_0, Q4_K, Q5_K or Q6_K")
+         if norm is not None and norm not in norms:
+             raise Fault("norm absent", f"{tensor.name} needs {norm}, which is in none of the shards")
+-        if norm is not None and tensor.dims[0] != WIDTH:
+-            raise Fault("matrix width", f"{tensor.name} reads a norm, but its first dimension is not {WIDTH}")
++        if norm is not None and tensor.dims[0] != shape[0]:
++            raise Fault("matrix width", f"{tensor.name} reads a norm, but its first dimension is not {shape[0]}")
+         if tensor.elements == 0:
+             raise Fault("all zero", f"{tensor.name} has no elements")
+     return committed, norms
+@@ -705,10 +733,10 @@ def main(words):
+         check_gguf_py(given.any_gguf_version)
+         check_output_path(given.out)
+ 
+-        tensors, layers = read_shard(given.shards[0], True)
++        tensors, (layers, shape) = read_shard(given.shards[0], True)  # Hallmark dense patch: and the shape
+         for path in given.shards[1:]:
+             tensors += read_shard(path, False)[0]
+-        committed, norms = select(tensors, layers)
++        committed, norms = select(tensors, layers, shape)
+         say(f"shards: {len(given.shards)}, tensors: {len(tensors)}, committed tensors: {len(committed)}")
+ 
+         lines = convert_all(committed, norms, given.eres, given.workers, given.decode_twice)
