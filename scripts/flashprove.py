@@ -54,12 +54,13 @@ def source_digest(tree):
     return hashlib.sha256(text.encode()).hexdigest()
 
 
-def build_verifier(tree, output):
+def build_verifier(tree, output, expected=PIN["verifier_source_digest"], name="bin"):
+    """Build cp_verify into output/<name>; the tree's source digest must be `expected`."""
     digest = source_digest(tree)
-    require(digest == PIN["verifier_source_digest"], "verifier source digest changed")
-    out = output / "bin"
+    require(digest == expected, "verifier source digest changed")
+    out = output / name
     out.mkdir(mode=0o700)
-    log = output / "verifier-build.log"
+    log = output / ("verifier-build.log" if name == "bin" else f"{name}-build.log")
     if platform.system() == "Linux":
         args = ["bash", tree / "verifier/build.sh", "-", out]
         cwd = tree
@@ -119,7 +120,7 @@ def result_fields(stdout):
     return dict(field.split("=", 1) for field in lines[-2][8:].split() if "=" in field)
 
 
-def accepted(code, stdout, commitment_id, checked):
+def accepted(code, stdout, commitment_id, checked, build=PIN["verifier_source_digest"]):
     fields = result_fields(stdout)
     return bool(
         code == 0
@@ -128,11 +129,20 @@ def accepted(code, stdout, commitment_id, checked):
         and fields.get("claim") == "exact-match"
         and fields.get("commitment_id") == commitment_id
         and fields.get("range") == checked
-        and fields.get("build") == PIN["verifier_source_digest"]
+        and fields.get("build") == build
     )
 
 
-def check_proof(tree, verifier, case, commitment_id, checked, next_token, log):
+def check_proof(
+    tree,
+    verifier,
+    case,
+    commitment_id,
+    checked,
+    next_token,
+    log,
+    build=PIN["verifier_source_digest"],
+):
     """Run upstream integrations/check_proof.py with every expected value held by the caller."""
     args = [
         sys.executable,
@@ -160,7 +170,7 @@ def check_proof(tree, verifier, case, commitment_id, checked, next_token, log):
     started = time.monotonic()
     done = subprocess.run([str(a) for a in args], capture_output=True, text=True, timeout=300)
     log.write_text(done.stdout + "\n--- stderr ---\n" + done.stderr)
-    ok = accepted(done.returncode, done.stdout, commitment_id, checked)
+    ok = accepted(done.returncode, done.stdout, commitment_id, checked, build)
     return ok, dict(
         exit_code=done.returncode,
         seconds=time.monotonic() - started,

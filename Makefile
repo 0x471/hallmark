@@ -1,4 +1,4 @@
-.PHONY: demo-web demo-tui check-demo e2e e2e-llm benchmark-llm-gpu e2e-composed verify-llm verify-flashprove e2e-flashprove compare-provers check check-train check-llm check-guard check-comparison check-conformance check-spec check-admission test package-check package-check-train package-check-guard package-check-comparison smoke docs docs-serve
+.PHONY: demo-web demo-tui check-demo e2e e2e-llm benchmark-llm-gpu e2e-composed verify-llm verify-flashprove verify-flashprove-tinyllama e2e-flashprove compare-provers check check-train check-llm check-guard check-comparison check-conformance check-spec check-admission test package-check package-check-train package-check-guard package-check-comparison smoke docs docs-serve
 
 check:
 	uv lock --check
@@ -38,6 +38,9 @@ verify-llm:
 
 verify-flashprove:
 	uv run --locked --python 3.12.12 python scripts/flashprove.py
+
+verify-flashprove-tinyllama:
+	uv run --locked --python 3.12.12 python scripts/flashprove_tinyllama.py
 
 e2e-flashprove:
 	uv run --locked --python 3.12.12 --extra llm python scripts/run_flashprove_gpu.py --credit-balance-usd "$(GPU_CREDIT_BALANCE_USD)" --max-cost-usd 3.50 $(if $(FLASHPROVE_BUILD_RUN),--build-run "$(FLASHPROVE_BUILD_RUN)")
