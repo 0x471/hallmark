@@ -65,8 +65,8 @@ builds both verifiers and requires:
 - **Constants.** The four implementations' constants agree with an exact derivation.
 - **`weight_sums`.** It matches upstream's exact oracle at both widths.
 - **nvcc.** Outside the target, upstream's `prover/build.sh` built `serving_cp_commit` and
-  `serving_cp_prove` from the patched source with nvcc 13.2.86 on Linux, without a GPU. Neither
-  program has run.
+  `serving_cp_prove`, and the test builds of both, from the patched source with nvcc 13.2.86 on
+  Linux, without a GPU. No program has run.
 - **TinyLlama's shape, planning only.** A dense parameter file at TinyLlama-1.1B's shape, with
   placeholder scales, passes the patched planner in the standard parameter form; the unpatched build
   refuses it for its three table digests.

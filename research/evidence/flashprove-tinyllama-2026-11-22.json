@@ -234,7 +234,7 @@
   "linux_other_checks": {
     "make_check": {
       "date": "2026-11-22",
-      "ruff_format_mypy_spec_conformance_admission": "pass",
+      "ruff_format_mypy_spec_conformance_admission": "pass (spec, conformance and admission run on their own, since make stops at the pytest failure)",
       "pytest": "2229 passed, 1 failed, 114 skipped",
       "failed": "tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]",
       "failed_note": "flaky on that host: fails 4 of 5 runs on upstream main e2cc6d6 too; it rewrites a file with bytes of the same length, and the host's file times do not always change. An earlier run on 2026-11-21 failed tests/test_manifests.py::test_file_changed_during_read[abd] instead, which fails 3 of 3 on upstream main there. The branch touches neither src/ nor these tests"
@@ -263,6 +263,14 @@
       "command": "make package-check",
       "uv": "0.9.18 (the version scripts/reproduce_package.py requires)",
       "result": "passed"
+    },
+    "check_guard": {
+      "date": "2026-11-22",
+      "result": "32 passed"
+    },
+    "check_comparison": {
+      "date": "2026-11-22",
+      "result": "31 passed"
     }
   },
   "earlier_revision_mac_runs": {
@@ -320,10 +328,22 @@
         "exit_code": 0,
         "seconds": 3558,
         "sha256": "92cba6284b0e4642cf025e2e3b62f86d38da340214c748042448db509c91de02"
+      },
+      {
+        "command": "prover/build.sh cp_commit (test build)",
+        "exit_code": 0,
+        "seconds": 1211,
+        "sha256": "7cd9ceb53bdd271feaf721dd4bb008cdbc5906379a6c6dcb8662a54e8e390f11"
+      },
+      {
+        "command": "prover/build.sh cp_prove (test build)",
+        "exit_code": 0,
+        "seconds": 2781,
+        "sha256": "4b0f51d4f91fcbb8223cd7da4de4ba16e7585f71ce356211fce5c9c8978d9f89"
       }
     ],
     "build_record_sources": "0fa9c1ff8cc618da62bcc75d75db6e4401193ca7d571ba09076d13ceb39b7892",
-    "warnings": "46 (serving_cp_commit) and 98 (serving_cp_prove), all in files that no patch changes: common/zeroing_heap.h, field/lazy_gl64.cuh, field/transform_groups_gl64.cuh, attn/front.cuh, hiding/forest_fused.cuh, prover/layer_prove.cuh, prover/layer_walk.cuh",
+    "warnings": "46 (serving_cp_commit and the cp_commit test build each) and 98 (serving_cp_prove and the cp_prove test build each), all in files that no patch changes: common/zeroing_heap.h, field/lazy_gl64.cuh, field/transform_groups_gl64.cuh, attn/front.cuh, hiding/forest_fused.cuh, prover/layer_prove.cuh, prover/layer_walk.cuh",
     "compiler_sample": "built, not run: status 77, no GPU (build.sh then checks the compiler by version only)",
     "least_available_memory_mib": 4647,
     "not_run": "neither program ran: they need an H100-class GPU (sm_90a)"

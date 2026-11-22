@@ -10,9 +10,9 @@ way the patched verifier/tests/served_form_test.py does for its dense case:
 - NE 0 and hr 0, the expert-only weight widths 0, no rcl or gcl lines, and the router's and the
   clamps' segments taken out of the call lines;
 - iota_0 .. iota_7 refitted with upstream's verifier/tests/forest_lines.py;
-- the three table digests a dense model forms (no tsig), from upstream's scales/policy_tables.py,
-  which refuses NE 0, so they are computed on a copy with NE 4: only the sigmoid table depends
-  on NE;
+- the three table digests a dense model forms (no tsig), from upstream's scales/policy_tables.py.
+  It refuses NE 0, but no table's entries depend on NE (NE only decides whether the sigmoid table
+  is formed), so they are computed on a copy with NE 4; the verifier compares them with its own;
 - KL.bin: the full kit's first 22 layer records, with rotary positions in every layer.
 
 Every other line is the full kit's, except the few that TinyLlama's shape forces, set in FORCED.

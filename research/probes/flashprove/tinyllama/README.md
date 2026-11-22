@@ -164,16 +164,19 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
   calls equal, 495 s.
 
 Also at this revision, on the same Linux host:
-- **nvcc 13.2.86** (no GPU): upstream's `verifier/build.sh`, then `prover/build.sh serving_cp_commit`
-  and `serving_cp_prove`, built both production programs from the patched source (exit 0, 26 and 59
-  minutes). Every compiler warning is in a file that no patch changes. Neither program has run;
+- **nvcc 13.2.86** (no GPU): upstream's `verifier/build.sh`, then `prover/build.sh serving_cp_commit`,
+  `serving_cp_prove`, `cp_commit` and `cp_prove`, built both production programs and both test
+  builds from the patched source (exit 0; 26, 59, 20 and 46 minutes). Every compiler warning is in a
+  file that no patch changes. No program has run;
 - the `integer_model` CPU suite (`pytest -m "not vllm and not prover"`, Python 3.13, torch
   2.13.0+cpu) on the patched tree: 947 passed, 0 failed, 16 skipped (4 need a GPU, 12
   `transformers`);
 - `weight_sums/tests/run_tests.sh`: 24 steps passed, among them both programs' refusal suites and
   every oracle step. The two `make_model` steps end with SIGILL, because that CPU has no SHA-NI;
-- Hallmark's `make check`: one failure, `tests/test_manifests.py::test_file_changed_during_read[abd]`,
-  which upstream `main` fails the same way on that host; the branch does not touch it.
+- Hallmark's `make check`: one failure, `tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]`,
+  which fails on upstream `main` on that host too (4 of 5 runs); the branch touches neither it nor
+  `src/`. Every other step passed, as did `make package-check` (uv 0.9.18), `check-guard` and
+  `check-comparison`. On macOS the whole pytest suite passes (2,242 passed, 0 failed).
 
 **Recorded runs, of an earlier revision.** Three runs on 2026-11-21 (macOS arm64, `apple-clang`, 328-396
 s) passed the target as it then was:

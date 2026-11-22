@@ -3283,4 +3283,5 @@ calls equal on each. The planner admits the TinyLlama-shaped file, its three tab
 digests, and the unpatched build answers `NO: policy-tables`. Its figures for that file (a proof of
 at most 14,061,196 bytes; 126.21 bits by the compiled bound) are of placeholder scales and lines, not
 a measurement. nvcc built `serving_cp_commit` (1,530 s) and `serving_cp_prove` (3,558 s) without a
-GPU; every warning is in a file no patch changes. Neither program has run. No kit, no proof, no spend.
+GPU, and the test builds `cp_commit` (1,211 s) and `cp_prove` (2,781 s); every warning is in a file
+no patch changes. No program has run. No kit, no proof, no spend.
