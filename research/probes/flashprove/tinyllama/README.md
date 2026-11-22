@@ -158,11 +158,11 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
 ([evidence](../../../evidence/flashprove-tinyllama-2026-11-22.json)):
 
 - Ubuntu 24.04, x86_64, upstream `verifier/build.sh` with g++ 13.3. 108 of 108 calls compared equal,
-  with exit codes 99 times 1, 7 times 0, and 2 times 4 (planning calls inside `check_proof.py`), 1,657 s.
-  Earlier runs, the day before without the TinyLlama row and earlier the same day with a looser one,
-  passed with the same two verifier binaries.
+  with exit codes 99 times 1, 7 times 0, and 2 times 4 (planning calls inside `check_proof.py`), 1,670 s.
+  Earlier runs, the day before without the TinyLlama row and earlier the same day with looser forms
+  of it, passed with the same two verifier binaries.
 - macOS arm64, Apple clang 17 (`apple-clang`, built as `make verify-flashprove` builds it): 108 of 108
-  calls equal, 508 s.
+  calls equal, 499 s.
 - Both hosts' planning calls name the same TinyLlama-shaped files (equal `h_par` and
   `configuration`).
 
@@ -175,14 +175,16 @@ Also at this revision, on the same Linux host:
   records name the sources' digest `0fa9c1ff…`, which upstream's `build.sh` computes from the
   sources and anyone can recompute from the pinned archive with the three patches applied;
 - the `integer_model` CPU suite (`pytest -m "not vllm and not prover"`, Python 3.13, torch
-  2.13.0+cpu) on the patched tree: 947 passed, 0 failed, 16 skipped (4 need a GPU, 12
-  `transformers`);
+  2.13.0+cpu) on the tree that the target patched from the pins: 947 passed, 0 failed, 16 skipped
+  (4 need a GPU, 12 `transformers`);
 - `weight_sums/tests/run_tests.sh`: 24 steps passed, among them both programs' refusal suites and
   every oracle step. The two `make_model` steps end with SIGILL, because that CPU has no SHA-NI;
-- Hallmark's `make check`: one failure, `tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]`,
-  which fails on Hallmark's `main` on that host too (4 of 5 runs); the branch touches neither it nor
-  `src/`. Every other step passed, as did `make package-check` (uv 0.9.18), `check-guard` and
-  `check-comparison`. On macOS the whole pytest suite passes (2,258 passed, 0 failed).
+- Hallmark's `make check` at the last code change: one failure,
+  `tests/test_manifests.py::test_file_changed_during_read[abd]`, which fails on Hallmark's `main` on
+  that host too (3 of 3 runs); in other runs it was
+  `tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]` (4 of 5 on `main`). The
+  branch touches neither test nor `src/`. Every other step passed, as did `make package-check` (uv 0.9.18), `check-guard` and
+  `check-comparison`. On macOS the whole pytest suite passes (2,266 passed, 0 failed).
 
 **Recorded runs, of an earlier revision.** Three runs on 2026-11-21 (macOS arm64, `apple-clang`, 328-396
 s) passed the target as it then was:

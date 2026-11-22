@@ -71,8 +71,8 @@
     "command": "make verify-flashprove-tinyllama",
     "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM",
     "passed": true,
-    "seconds": 1656.9,
-    "seconds_note": "6 vCPUs; not a timing",
+    "seconds": 1669.6,
+    "seconds_note": "6 vCPUs, beside the integer_model suite; not a timing",
     "builds": {
       "patched": {
         "recipe": "upstream verifier/build.sh",
@@ -205,16 +205,26 @@
       },
       "h_par": "252ffdf7478c1d69609b5412dd1a540d66aac0916fd29298da52a5cbcc6cb8b9",
       "configuration": "f7fd2f25691d8c4712549b600d541add91c0aa669892d26fcba552dab9b86ccc",
-      "same_files_on_both_hosts": "h_par and configuration equal on Linux and macOS: the generator wrote the same TinyLlama-shaped files"
+      "same_files_on_both_hosts": "h_par and configuration equal on Linux and macOS: the generator wrote the same TinyLlama-shaped files",
+      "unmet_without_digests": {
+        "patched": [
+          "table-digests"
+        ],
+        "unpatched": [
+          "routed-experts",
+          "both-clamps",
+          "table-digests"
+        ]
+      }
     },
-    "earlier_runs": "2026-11-21 and earlier on 2026-11-22, before the rename and before the planning check required the planner's whole ending: all passed with the same 108 calls and the same two verifier binaries (sha256); the first had no planning check"
+    "earlier_runs": "2026-11-21 and earlier on 2026-11-22, before the rename and before the planning check's present form: all passed with the same 108 calls and the same two verifier binaries (sha256); the first had no planning check"
   },
   "mac_target_run": {
     "command": "make verify-flashprove-tinyllama",
     "date": "2026-11-22",
     "host": "macOS 15 (Darwin 24.6.0), arm64",
     "passed": true,
-    "seconds": 507.9,
+    "seconds": 499.1,
     "builds": {
       "patched": {
         "recipe": "apple-clang",
@@ -234,36 +244,51 @@
     "tinyllama_plan": {
       "h_par": "252ffdf7478c1d69609b5412dd1a540d66aac0916fd29298da52a5cbcc6cb8b9",
       "configuration": "f7fd2f25691d8c4712549b600d541add91c0aa669892d26fcba552dab9b86ccc",
-      "unpatched": "policy-tables"
+      "unpatched": "policy-tables",
+      "unmet_without_digests": {
+        "patched": [
+          "table-digests"
+        ],
+        "unpatched": [
+          "routed-experts",
+          "both-clamps",
+          "table-digests"
+        ]
+      }
     },
-    "note": "with the tighter planning check (the planner's whole ending in both calls); the same two verifier binaries (sha256) as the runs before it"
+    "note": "at the last code change (d54153d): the planning check requires the planner's whole ending, the pinned shape and file IDs, and the no-digest control; the same two verifier binaries (sha256) as every earlier run"
   },
   "linux_other_checks": {
     "make_check": {
       "date": "2026-11-22",
+      "commit": "d54153d, the last code change",
       "ruff_format_mypy_spec_conformance_admission": "pass (spec, conformance and admission run on their own, since make stops at the pytest failure)",
-      "pytest": "2229 passed, 1 failed, 114 skipped",
-      "failed": "tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]",
-      "failed_note": "flaky on that host: fails 4 of 5 runs on Hallmark's main e2cc6d6 too; it rewrites a file with bytes of the same length, and the host's file times do not always change. An earlier run on 2026-11-21 failed tests/test_manifests.py::test_file_changed_during_read[abd] instead, which fails 3 of 3 on Hallmark's main there. The branch touches neither src/ nor these tests"
+      "pytest": "2355 passed, 1 failed, 12 skipped",
+      "skipped_note": "the environment also held the train and guard extras from check-guard and check-comparison, so fewer tests skipped than in a core environment",
+      "failed": "tests/test_manifests.py::test_file_changed_during_read[abd]",
+      "failed_note": "fails 3 of 3 runs on Hallmark's main e2cc6d6 on that host. Earlier runs of this branch there failed tests/test_worker.py::test_stream_copy_retains_rejected_output[modified] instead, which fails 4 of 5 runs on that main. The branch touches neither test nor src/"
     },
     "integer_model_cpu_suite": {
-      "date": "2026-11-21",
+      "date": "2026-11-22",
       "command": "pytest -m 'not vllm and not prover' (integrations/vllm/integer_model, patched tree)",
       "result": "947 passed, 0 failed, 16 skipped, 56 deselected",
       "skipped": "4 need an NVIDIA GPU; 12 need transformers",
       "python": "3.13",
       "torch": "2.13.0+cpu",
-      "seconds": 1470
+      "seconds": 1537,
+      "tree": "the pinned archive with the three pinned patches applied by the target (tools.patch sha256 1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040)",
+      "earlier": "2026-11-21: the same counts, on a tree whose tools.patch is not recorded"
     },
     "weight_sums_run_tests": {
-      "date": "2026-11-21",
+      "date": "2026-11-22",
       "command": "weight_sums/tests/run_tests.sh (patched tree)",
       "passed_steps": 24,
       "failed_steps": [
         "model.cpp",
         "model.py"
       ],
-      "failed_note": "make_model ends with SIGILL: the CPU has no SHA-NI, which make_model needs"
+      "failed_note": "make_model ends with an illegal instruction (SIGILL): the CPU has no SHA-NI (sha_ni absent from /proc/cpuinfo), which make_model needs",
+      "tree": "the same tree (tools.patch sha256 1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040)"
     },
     "package_check": {
       "date": "2026-11-22",
@@ -310,7 +335,7 @@
   },
   "mac_other_checks": {
     "date": "2026-11-22",
-    "pytest": "uv run --locked pytest: 2258 passed, 0 failed, 102 skipped",
+    "pytest": "uv run --locked pytest at d54153d: 2266 passed, 0 failed, 102 skipped",
     "docs": "make docs: passed, 176 pages"
   },
   "prover_compile": {
