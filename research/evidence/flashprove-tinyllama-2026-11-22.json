@@ -71,8 +71,8 @@
     "command": "make verify-flashprove-tinyllama",
     "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM",
     "passed": true,
-    "seconds": 1478.3,
-    "seconds_note": "ran beside the first nvcc compile of the prover patch on the same 6 vCPUs; not a timing",
+    "seconds": 1656.9,
+    "seconds_note": "6 vCPUs; not a timing",
     "builds": {
       "patched": {
         "recipe": "upstream verifier/build.sh",
@@ -202,16 +202,19 @@
         "proof_bytes_at_most": 14061196,
         "bits_compiled_bound": 126.21,
         "note": "of placeholder scales and lines; no measurement and not a fitted kit"
-      }
+      },
+      "h_par": "252ffdf7478c1d69609b5412dd1a540d66aac0916fd29298da52a5cbcc6cb8b9",
+      "configuration": "f7fd2f25691d8c4712549b600d541add91c0aa669892d26fcba552dab9b86ccc",
+      "same_files_on_both_hosts": "h_par and configuration equal on Linux and macOS: the generator wrote the same TinyLlama-shaped files"
     },
-    "earlier_runs": "2026-11-21 and earlier on 2026-11-22, before the rename of the target, its files and the patched build's name: both passed with the same 108 calls and the same two verifier binaries (sha256); the first had no check 6"
+    "earlier_runs": "2026-11-21 and earlier on 2026-11-22, before the rename and before the planning check required the planner's whole ending: all passed with the same 108 calls and the same two verifier binaries (sha256); the first had no planning check"
   },
   "mac_target_run": {
     "command": "make verify-flashprove-tinyllama",
     "date": "2026-11-22",
     "host": "macOS 15 (Darwin 24.6.0), arm64",
     "passed": true,
-    "seconds": 495.2,
+    "seconds": 507.9,
     "builds": {
       "patched": {
         "recipe": "apple-clang",
@@ -228,8 +231,12 @@
     },
     "calls_compared": 108,
     "calls_differing": 0,
-    "tinyllama_plan": "as on Linux: patched admitted in the standard parameter form, unpatched NO: policy-tables; the same planner figures",
-    "note": "the same two verifier binaries (sha256) as a run before the rename of the target, its files and the patched build's name"
+    "tinyllama_plan": {
+      "h_par": "252ffdf7478c1d69609b5412dd1a540d66aac0916fd29298da52a5cbcc6cb8b9",
+      "configuration": "f7fd2f25691d8c4712549b600d541add91c0aa669892d26fcba552dab9b86ccc",
+      "unpatched": "policy-tables"
+    },
+    "note": "with the tighter planning check (the planner's whole ending in both calls); the same two verifier binaries (sha256) as the runs before it"
   },
   "linux_other_checks": {
     "make_check": {
@@ -303,7 +310,7 @@
   },
   "mac_other_checks": {
     "date": "2026-11-22",
-    "pytest": "uv run --locked pytest: 2242 passed, 0 failed, 102 skipped",
+    "pytest": "uv run --locked pytest: 2258 passed, 0 failed, 102 skipped",
     "docs": "make docs: passed, 176 pages"
   },
   "prover_compile": {

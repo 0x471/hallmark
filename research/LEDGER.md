@@ -3278,9 +3278,10 @@ build refuses it, and the prover patch compiles with upstream's nvcc 13.2.86. Pa
 and upstream's `prover/build.sh serving_cp_commit` and `serving_cp_prove` exit 0 on the patched source.
 
 Result: passed ([evidence](evidence/flashprove-tinyllama-2026-11-22.json)). The target passed on
-Linux (g++ 13.3, 1478 s, beside the nvcc build) and macOS (Apple clang 17, 495 s), 108 of 108
+Linux (g++ 13.3, 1,657 s) and macOS (Apple clang 17, 508 s), 108 of 108
 calls equal on each. The planner admits the TinyLlama-shaped file, its three tables match their
-digests, and the unpatched build answers `NO: policy-tables`. Its figures for that file (a proof of
+digests, both planning calls print the planner's whole ending and name the same files on both hosts,
+and the unpatched build answers `NO: policy-tables`. Its figures for that file (a proof of
 at most 14,061,196 bytes; 126.21 bits by the compiled bound) are of placeholder scales and lines, not
 a measurement. nvcc built `serving_cp_commit` (1,530 s) and `serving_cp_prove` (3,558 s) without a
 GPU, and the test builds `cp_commit` (1,211 s) and `cp_prove` (2,781 s); every warning is in a file

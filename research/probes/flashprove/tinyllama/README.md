@@ -158,10 +158,13 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
 ([evidence](../../../evidence/flashprove-tinyllama-2026-11-22.json)):
 
 - Ubuntu 24.04, x86_64, upstream `verifier/build.sh` with g++ 13.3. 108 of 108 calls compared equal,
-  with exit codes 99 times 1, 7 times 0, and 2 times 4 (planning calls inside `check_proof.py`). A run
-  the day before, without the TinyLlama row, passed with the same two verifier binaries.
+  with exit codes 99 times 1, 7 times 0, and 2 times 4 (planning calls inside `check_proof.py`), 1,657 s.
+  Earlier runs, the day before without the TinyLlama row and earlier the same day with a looser one,
+  passed with the same two verifier binaries.
 - macOS arm64, Apple clang 17 (`apple-clang`, built as `make verify-flashprove` builds it): 108 of 108
-  calls equal, 495 s.
+  calls equal, 508 s.
+- Both hosts' planning calls name the same TinyLlama-shaped files (equal `h_par` and
+  `configuration`).
 
 Also at this revision, on the same Linux host:
 - **nvcc 13.2.86** (no GPU): upstream's `verifier/build.sh`, then `prover/build.sh serving_cp_commit`,
@@ -176,7 +179,7 @@ Also at this revision, on the same Linux host:
 - Hallmark's `make check`: one failure, `tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]`,
   which fails on upstream `main` on that host too (4 of 5 runs); the branch touches neither it nor
   `src/`. Every other step passed, as did `make package-check` (uv 0.9.18), `check-guard` and
-  `check-comparison`. On macOS the whole pytest suite passes (2,242 passed, 0 failed).
+  `check-comparison`. On macOS the whole pytest suite passes (2,258 passed, 0 failed).
 
 **Recorded runs, of an earlier revision.** Three runs on 2026-11-21 (macOS arm64, `apple-clang`, 328-396
 s) passed the target as it then was:
