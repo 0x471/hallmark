@@ -347,8 +347,25 @@ THREE_TABLES = (
     "(lines tsilu0 .. texp7, no tsig)"
 )
 NOT_STANDARD = re.compile(r"^plan: not the standard parameter form", re.M)
+NO_POLICY = re.compile(r"^plan: the policy's kind is ", re.M)
 PROOF_BYTES = re.compile(r"^length: proof: at most (\d+) bytes", re.M)
 BITS = re.compile(r"^accounting: as one number, by the compiled bound: ([0-9.]+) bits", re.M)
+# The last lines of a planning call that reached the planner's end (planEndH in upstream's
+# verifier/src/cp_verify.cpp): "plan: profile ..", the one-time files' two lines, then only
+# "plan: .." lines (among them the standard-form line when a condition is unmet), then these five.
+# Other planning paths print "PLAN ONLY" without them, so the standard-form line's absence counts
+# only after all of them.
+ONE_TIME = (
+    "accounting: one-time files: the plan of a key: ",
+    "accounting: one-time files: the plan of an entry: ",
+)
+ENDING = (
+    re.compile(r"statement: \d+ words, y at word \d+"),
+    re.compile(r"h_par=([0-9a-f]{64})"),
+    re.compile(r"configuration=([0-9a-f]{64})"),
+    re.compile(r"dw=8"),
+    re.compile(r"PLAN ONLY: no proof was checked"),
+)
 
 
 def stdout_of(args, log):
@@ -359,16 +376,43 @@ def stdout_of(args, log):
     return done.returncode, done.stdout
 
 
+def planner_ending(text, name):
+    """(h_par, configuration) from a planning call's last lines, after checking their order and
+    form, that the standard form is met, and that the three tables match their digests."""
+    lines = text.splitlines()
+    starts = [i for i, x in enumerate(lines) if x.startswith("plan: profile ")]
+    require(len(starts) == 1, f"{name}: not one line 'plan: profile'")
+    tail = lines[starts[0] + 1 :]
+    require(
+        len(tail) >= len(ONE_TIME) + len(ENDING), f"{name}: the planner's last lines are missing"
+    )
+    one_time, tail = tail[: len(ONE_TIME)], tail[len(ONE_TIME) :]
+    require(all(map(str.startswith, one_time, ONE_TIME)), f"{name}: no one-time files' lines")
+    middle, last = tail[: -len(ENDING)], tail[-len(ENDING) :]
+    require(all(x.startswith("plan: ") for x in middle), f"{name}: an unexpected planner line")
+    found = [pattern.fullmatch(x) for pattern, x in zip(ENDING, last, strict=True)]
+    require(all(found), f"{name}: the planner's last lines are not as expected")
+    require(not NOT_STANDARD.search(text), f"{name}: not in the standard parameter form")
+    require(not NO_POLICY.search(text), f"{name}: every call would end NO: policy")
+    require(THREE_TABLES in middle, f"{name}: the three tables do not match their digests")
+    return found[1].group(1), found[2].group(1)
+
+
 def planning_summary(accounting, request, control):
     """What the planning calls on the TinyLlama-shaped files must show, from their outputs."""
+    ids = planner_ending(accounting, "-plan accounting")
+    require(planner_ending(request, "-plan request") == ids, "the planning calls name other files")
     proof, bits = PROOF_BYTES.findall(accounting), BITS.findall(accounting)
-    require(THREE_TABLES in accounting.splitlines(), "the three tables do not match their digests")
     require(len(proof) == 1 and len(bits) == 1, "the accounting has no proof length or bits")
-    require(not NOT_STANDARD.search(request), "not in the standard parameter form")
-    require(request.splitlines()[-1:] == ["PLAN ONLY: no proof was checked"], "planning failed")
     refusals = re.findall(r"^NO: (\S+)$", control, re.M)
     require(refusals == ["policy-tables"], f"the unpatched build says {refusals}")
-    return dict(proof_bytes_at_most=int(proof[0]), bits_compiled_bound=float(bits[0]))
+    require(control.splitlines()[-1:] == ["NO: policy-tables"], "the unpatched build's last line")
+    return dict(
+        proof_bytes_at_most=int(proof[0]),
+        bits_compiled_bound=float(bits[0]),
+        h_par=ids[0],
+        configuration=ids[1],
+    )
 
 
 def check_tinyllama_plan(tree, output, verifiers):

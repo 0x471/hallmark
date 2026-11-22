@@ -283,7 +283,8 @@
     ],
     "recipe": "apple-clang",
     "host": "macOS arm64",
-    "note": "earlier patches and an earlier comparator; establishes that revision only"
+    "note": "earlier patches and an earlier comparator; establishes that revision only",
+    "checks": "108 equal calls; standard-form test on the patched build; the negative control's five misses (not its last line); the provers' reader; fold constants; weight_sums. Not: the timed-output check or the TinyLlama planning check, which did not exist then"
   },
   "not_run": [
     "any commitment or proof (no GPU run)",
@@ -346,6 +347,7 @@
     "warnings": "46 (serving_cp_commit and the cp_commit test build each) and 98 (serving_cp_prove and the cp_prove test build each), all in files that no patch changes: common/zeroing_heap.h, field/lazy_gl64.cuh, field/transform_groups_gl64.cuh, attn/front.cuh, hiding/forest_fused.cuh, prover/layer_prove.cuh, prover/layer_walk.cuh",
     "compiler_sample": "built, not run: status 77, no GPU (build.sh then checks the compiler by version only)",
     "least_available_memory_mib": 4647,
-    "not_run": "neither program ran: they need an H100-class GPU (sm_90a)"
+    "not_run": "neither program ran: they need an H100-class GPU (sm_90a)",
+    "logs": "kept outside the repository, since they hold the build host's paths; the exit codes, times and warning counts above are copied from them"
   }
 }

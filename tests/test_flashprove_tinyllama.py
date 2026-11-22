@@ -256,37 +256,97 @@ def test_served_form_cases_are_read_from_the_test_output():
     assert found == ["routed-experts.dense", "routed-experts.NE-0"]
 
 
-ACCOUNTING = (
-    "length: proof: at most 14061196 bytes, 13617133 on average over the drawn positions\n"
-    "accounting: as one number, by the compiled bound: 126.21 bits, proof of work counted"
-    " (without it: 96.23 bits)\n"
+# A planning call's output on the TinyLlama-shaped files, cut to the lines that matter here; the
+# planner's last lines are the patched build's, as -plan accounting and -plan request print them.
+H_PAR = "252ffdf7478c1d69609b5412dd1a540d66aac0916fd29298da52a5cbcc6cb8b9"
+CONFIGURATION = "f7fd2f25691d8c4712549b600d541add91c0aa669892d26fcba552dab9b86ccc"
+THREE = (
     "plan: this program's three public tables match the parameter file's digests"
-    " (lines tsilu0 .. texp7, no tsig)\n"
-    "PLAN ONLY: no proof was checked\n"
+    " (lines tsilu0 .. texp7, no tsig)"
 )
-REQUEST = "dw=8\nPLAN ONLY: no proof was checked\n"
+PLANNED = [
+    "accounting: as one number, by the compiled bound: 126.21 bits, proof of work counted"
+    " (without it: 96.23 bits)",
+    "length: proof: at most 14061196 bytes, 13617133 on average over the drawn positions",
+    "plan: profile 4: the profile rules out no result",
+    "accounting: one-time files: the plan of a key: 53 closeness rounds rest on the theorem",
+    "accounting: one-time files: the plan of an entry: 23 closeness rounds rest on the theorem",
+    "plan: lidb 28",
+    "plan: nminH 27",
+    "plan: a value of the residual stream has five limbs (line xl)",
+    THREE,
+    "statement: 177 words, y at word 171",
+    "h_par=" + H_PAR,
+    "configuration=" + CONFIGURATION,
+    "dw=8",
+    "PLAN ONLY: no proof was checked",
+]
 NOT_STANDARD = (
     "plan: not the standard parameter form (both-clamps): no run with these public inputs"
-    " can be a verification (at best status 14)\n"
+    " can be a verification (at best status 14)"
 )
+REFUSED = "NO: policy-tables\n"
+
+
+def text(lines):
+    return "".join(x + "\n" for x in lines)
 
 
 def test_tinyllama_planning_summary():
-    got = harness.planning_summary(ACCOUNTING, REQUEST, "NO: policy-tables\n")
-    assert got == dict(proof_bytes_at_most=14061196, bits_compiled_bound=126.21)
+    got = harness.planning_summary(text(PLANNED), text(PLANNED), REFUSED)
+    assert got == dict(
+        proof_bytes_at_most=14061196,
+        bits_compiled_bound=126.21,
+        h_par=H_PAR,
+        configuration=CONFIGURATION,
+    )
+
+
+def changed(at, new):
+    """PLANNED with the line that starts with `at` replaced by `new` (a list, maybe empty)."""
+    (i,) = [i for i, x in enumerate(PLANNED) if x.startswith(at)]
+    return PLANNED[:i] + new + PLANNED[i + 1 :]
 
 
 @pytest.mark.parametrize(
-    ("accounting", "planned", "control"),
+    ("accounting", "planned", "control", "why"),
     [
-        (ACCOUNTING.replace("three public", "four public"), REQUEST, "NO: policy-tables\n"),
-        (ACCOUNTING.replace("at most 14061196", "at most x"), REQUEST, "NO: policy-tables\n"),
-        (ACCOUNTING, NOT_STANDARD + REQUEST, "NO: policy-tables\n"),
-        (ACCOUNTING, REQUEST.replace("PLAN ONLY", "NO: plan-layout\nNO"), "NO: policy-tables\n"),
-        (ACCOUNTING, REQUEST, "NO: plan-layout\n"),
-        (ACCOUNTING, REQUEST, "PLAN ONLY: no proof was checked\n"),
+        # Output that ends like a planning call but lacks the planner's last lines.
+        (PLANNED, PLANNED[-2:], [], "plan: profile"),
+        (PLANNED, [], [], "plan: profile"),
+        (PLANNED[:-1], PLANNED, [], "missing|not as expected"),
+        (changed("configuration=", []), PLANNED, [], "not as expected"),
+        (changed("accounting: one-time files: the plan of a key", []), PLANNED, [], "one-time"),
+        (PLANNED, changed("plan: profile", []), [], "plan: profile"),
+        (PLANNED + ["PLAN ONLY: no proof was checked"], PLANNED, [], "unexpected|not as expected"),
+        (PLANNED, changed("plan: lidb", ["group: something else"]), [], "unexpected"),
+        (PLANNED, changed("plan: profile", PLANNED[2:3] * 2), [], "plan: profile"),
+        (changed("dw=", ["dw=4"]), PLANNED, [], "not as expected"),
+        # The standard form not met, or every call ending NO: policy, in either call.
+        (changed("plan: lidb", [NOT_STANDARD]), PLANNED, [], "standard parameter form"),
+        (PLANNED, changed("plan: lidb", [NOT_STANDARD]), [], "standard parameter form"),
+        (
+            PLANNED,
+            changed(
+                "plan: lidb", ["plan: the policy's kind is X: every whole call ends NO: policy"]
+            ),
+            [],
+            "NO: policy",
+        ),
+        # The tables, the two calls' files, and the accounting's figures.
+        (changed(THREE, [THREE.replace("three", "four")]), PLANNED, [], "three tables"),
+        (PLANNED, changed("configuration=", ["configuration=" + "0" * 64]), [], "other files"),
+        (PLANNED, changed("h_par=", ["h_par=" + "0" * 64]), [], "other files"),
+        (changed("length: proof", []), PLANNED, [], "proof length"),
+        (changed("accounting: as one number", []), PLANNED, [], "proof length or bits"),
+        # The unpatched build must refuse with policy-tables, as its last line.
+        (PLANNED, PLANNED, ["NO: plan-layout"], "unpatched"),
+        (PLANNED, PLANNED, PLANNED, "unpatched"),
+        (PLANNED, PLANNED, ["NO: policy-tables", "NO: policy-tables"], "unpatched"),
+        (PLANNED, PLANNED, ["NO: policy-tables", "something after it"], "last line"),
     ],
 )
-def test_tinyllama_planning_summary_refuses(accounting, planned, control):
-    with pytest.raises(ValueError):
-        harness.planning_summary(accounting, planned, control)
+def test_tinyllama_planning_summary_refuses(accounting, planned, control, why):
+    refused = text(control) if control else REFUSED
+    with pytest.raises(ValueError, match=why):
+        harness.planning_summary(text(accounting), text(planned), refused)

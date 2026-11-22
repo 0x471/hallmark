@@ -73,9 +73,10 @@ builds both verifiers and requires:
 
 The current revision passed it on 2026-11-22 on Linux (upstream `verifier/build.sh`, g++ 13.3) and
 on macOS (Apple clang 17, built as `make verify-flashprove` builds it;
-[evidence](../../research/evidence/flashprove-tinyllama-2026-11-22.json)). Upstream's `integer_model` CPU suite passes on the patched tree (947, 0 failed). These are planning,
-parsing and table checks; no proof is checked. At TinyLlama's 2,048/64 shape the planner runs on
-placeholder scales only, and nothing yet runs through `integer_model`'s GGUF reader. Further one-off
+[evidence](../../research/evidence/flashprove-tinyllama-2026-11-22.json)). Upstream's `integer_model` CPU suite passes on the patched tree (947, 0 failed). Apart from upstream's
+stored proofs and their altered copies, which both builds check, these are planning, parsing and
+table checks: no TinyLlama proof exists or is checked. At TinyLlama's 2,048/64 shape the planner runs
+on placeholder scales only, and nothing yet runs through `integer_model`'s GGUF reader. Further one-off
 checks and their limits:
 [README](../../research/probes/flashprove/tinyllama/README.md#checks).
 

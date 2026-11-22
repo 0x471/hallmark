@@ -151,7 +151,7 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
 | the provers' parameter-file reader, built from the patched source | admits the upstream kit, the dense kit and the dense kit with three digests; refuses four digests at NE 0, `tsig` for `trope`, and no `tsig` with experts (`policy-tables`) |
 | fold constants in the 4 patched implementations | equal to each other, to the pins and to an exact derivation |
 | `weight_sums` (patched) against upstream's exact oracle | the same sums at 5,120/128 (seed 1) and 2,048/64 (seeds 1 and 100) |
-| a dense parameter file and `KL.bin` at TinyLlama-1.1B's shape, from [`tinyllama_plan.py`](tinyllama_plan.py) (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22 layers, vocabulary 32,000, rotary base 10,000, T = 64) | the patched build's planner (`-plan arrays`, `request`, `accounting`) admits it in the standard parameter form, with its three tables matching their digests; the unpatched build refuses it with `policy-tables` alone |
+| a dense parameter file and `KL.bin` at TinyLlama-1.1B's shape, from [`tinyllama_plan.py`](tinyllama_plan.py) (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22 layers, vocabulary 32,000, rotary base 10,000, T = 64) | the patched build's planner (`-plan arrays`, `request`, `accounting`) admits it in the standard parameter form, with its three tables matching their digests. Both calls must print the planner's whole ending in upstream's order (the standard-form line can only be missing after it) and name the same files (`h_par`, `configuration`). The unpatched build refuses it with `policy-tables` alone, as its last line |
 
 **Current revision** (patched verifier digest `6f7ac148…`, the patch hashes in `patches.json`):
 **passed on Linux and on macOS** on 2026-11-22, every row above as required
@@ -187,8 +187,9 @@ s) passed the target as it then was:
   "seconds" or ending in "<n>.<nnn> s";
 - no check of the timed formats or of the negative control's last line.
 
-They recorded 108 equal calls and every row above. They establish that result for that revision
-only.
+They recorded 108 equal calls, the standard-form test on the patched build, its negative control's
+five misses (not its last line), the provers' reader, the fold constants and `weight_sums`. They had
+no timed-output row and no TinyLlama row. They establish those results for that revision only.
 
 Other checks, run once on 2026-11-21 outside the make target, each on an earlier revision (scratch
 copies). The verifier sources then differed from today's in comments only. The other files differed
