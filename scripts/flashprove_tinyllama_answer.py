@@ -194,6 +194,11 @@ def inputs(output):
     return model_dir, paths[parquet]
 
 
+def minimal_env(output):
+    """The environment of a child that reads no PYTHON* variable of the caller's."""
+    return {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": str(output)}
+
+
 def same(path, expected, what):
     require(Path(path).read_bytes() == expected, f"{what} differs from the committed kit")
 
@@ -248,7 +253,7 @@ def rebuild_kit(tree, output, pythons, model_dir, parquet, gguf_dir, expected, v
         tokenizer,
         cal,
     ]
-    code, text = run(args, output / "calibration-set.log")
+    code, text = run(args, output / "calibration-set.log", env=minimal_env(output))
     require(
         code == 0 and "the drawn rows are as expected" in text,
         "the calibration set is not the pinned one",
@@ -270,7 +275,7 @@ def rebuild_kit(tree, output, pythons, model_dir, parquet, gguf_dir, expected, v
     ]
     args += ["--tokens", cal, "--out", fit, "--eres", KIT["e_res"]]
     started = time.monotonic()
-    code, _ = run(args, output / "calibrate.log")
+    code, _ = run(args, output / "calibrate.log", env=minimal_env(output))
     require(code == 0, "calibrate.py failed")
     found["calibrate_seconds"] = time.monotonic() - started
     same(fit / "words.json", expected["words.json"], "words.json")
@@ -296,7 +301,7 @@ def rebuild_kit(tree, output, pythons, model_dir, parquet, gguf_dir, expected, v
         fit / "words.json",
     ]
     args += [gguf_dir / "wsums.txt", config / "policy.txt", config / "KL.bin"]
-    code, text = run(args, output / "words_to_policy.log")
+    code, text = run(args, output / "words_to_policy.log", env=minimal_env(output))
     require(code == 0 and text.rstrip().endswith("w2p end 0"), "words_to_policy.py failed")
     # 2e. The layout (step 5).
     code, arrays = ft.stdout_of(
@@ -417,14 +422,24 @@ def check_scale_tests(tree, output, scales):
         "test_gguf_weights.py",
     ):
         code, text = run(
-            [scales, "-B", tree / "scales/tests" / test], output / f"scales-{test}.log", cwd=tree
+            [scales, "-B", tree / "scales/tests" / test],
+            output / f"scales-{test}.log",
+            cwd=tree,
+            env=minimal_env(output),
         )
         last = text.rstrip().splitlines()[-1] if text.strip() else ""
-        # 0: all ran and passed. 77: upstream's status for "passed in part", when cases need what
-        # this host lacks (make_model needs SHA-NI; SMALL_MODEL is its output).
-        whole = code == 0 and (last == "OK" or last.startswith("OK: "))
-        partial = code == 77 and last.startswith("in part: ")
-        require((whole or partial) and "FAILED" not in text, f"scales/tests/{test}: {code} {last}")
+        # SUITE.md's rows: status 0 and these patterns (the patched row counts 23 tests). The other
+        # two tests have no row: 0, or 77 for "passed in part" (this target builds no make_model and
+        # sets no SMALL_MODEL, so those cases skip).
+        if test == "test_policy_tables.py":
+            passed = code == 0 and last == "OK" and re.search(r"^Ran 23 tests? in", text, re.M)
+        elif test == "table_ties.py":
+            passed = code == 0 and re.fullmatch(r"OK: 26 checks", last)
+        else:
+            passed = (code == 0 and last.startswith("OK")) or (
+                code == 77 and last.startswith("in part: ")
+            )
+        require(passed and "FAILED" not in text, f"scales/tests/{test}: {code} {last}")
         rows[test] = dict(status=code, last_line=last)
     return rows
 
@@ -450,7 +465,7 @@ def failures(answer):
     for row in answer["positions"]:
         if not low <= row["slope"] <= high:
             missed.append(f"the logits' scale at position {row['position']}: {row['slope']:.4f}")
-        if row["correlation"] < bounds["logit_correlation"]:
+        if not row["correlation"] >= bounds["logit_correlation"]:  # NaN fails too
             missed.append(
                 f"the logits' correlation at position {row['position']}: {row['correlation']:.5f}"
             )
@@ -458,14 +473,16 @@ def failures(answer):
 
 
 def mutated(policy, kl):
-    """The kit with one-bit changes: the logit exponent s, and one layer's value shift kv."""
+    """The kit with one-bit changes of the model itself: the final norm's MF (it doubles every
+    logit), and one layer's value shift kv. (The line s is only the logits' stated unit: the
+    forward pass does not read it, so a change of s would test this target's divisor alone.)"""
     lines = policy.decode("ascii").split("\n")
-    at = next(i for i, x in enumerate(lines) if x.startswith("s "))
-    s_plus = lines[:at] + [f"s {int(lines[at].split()[1]) + 1}"] + lines[at + 1 :]
+    at = next(i for i, x in enumerate(lines) if x.startswith("MF "))
+    mf_plus = lines[:at] + [f"MF {int(lines[at].split()[1]) + 1}"] + lines[at + 1 :]
     words = list(struct.unpack(f"<{len(kl) // 4}I", kl))
     words[10 * len(LAYER_WORDS) + LAYER_WORDS.index("kv")] += 1
     return {
-        "logit-exponent-s-plus-1": ("\n".join(s_plus).encode("ascii"), kl),
+        "final-norm-MF-plus-1": ("\n".join(mf_plus).encode("ascii"), kl),
         "layer-10-kv-plus-1": (policy, struct.pack(f"<{len(words)}I", *words)),
     }
 

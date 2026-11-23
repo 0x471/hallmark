@@ -105,7 +105,7 @@
     "logit_correlation": 0.998
   },
   "mutation_controls": [
-    "logit-exponent-s-plus-1",
+    "final-norm-MF-plus-1",
     "layer-10-kv-plus-1"
   ]
 }

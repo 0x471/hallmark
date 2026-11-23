@@ -173,7 +173,12 @@ def test_failures_passes_only_an_answer_that_meets_every_condition():
     }
     for what, change in cases.items():
         assert answer.failures(a_passing_answer() | change), what
-    for field, value in (("slope", 0.5), ("slope", 2.0), ("correlation", 0.995)):
+    for field, value in (
+        ("slope", 0.5),
+        ("slope", 2.0),
+        ("correlation", 0.995),
+        ("correlation", float("nan")),
+    ):
         bad = a_passing_answer()
         bad["positions"][3][field] = value
         assert answer.failures(bad), (field, value)
@@ -184,10 +189,10 @@ def test_the_mutation_controls_change_one_value_by_one():
     kl = (PROBE / "kit/KL.bin").read_bytes()
     controls = answer.mutated(policy, kl)
     assert sorted(controls) == sorted(KIT["mutation_controls"])
-    s_policy, s_kl = controls["logit-exponent-s-plus-1"]
-    before, after = policy.decode().split("\n"), s_policy.decode().split("\n")
+    mf_policy, mf_kl = controls["final-norm-MF-plus-1"]
+    before, after = policy.decode().split("\n"), mf_policy.decode().split("\n")
     changed = [(a, b) for a, b in zip(before, after, strict=True) if a != b]
-    assert s_kl == kl and len(changed) == 1 and changed[0][0].startswith("s ")
+    assert mf_kl == kl and len(changed) == 1 and changed[0][0].startswith("MF ")
     assert int(changed[0][1].split()[1]) == int(changed[0][0].split()[1]) + 1
     kv_policy, kv_kl = controls["layer-10-kv-plus-1"]
     old, new = (struct.unpack(f"<{len(kl) // 4}I", x) for x in (kl, kv_kl))
