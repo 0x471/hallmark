@@ -10,15 +10,26 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
 [PROVER-COMPARISON](../PROVER-COMPARISON.md): the same model under both provers. The aim is to see whether FlashProve can take over the TinyLlama case from SASH: that needs FlashProve's numbers on TinyLlama itself, not on Maverick, which is far heavier than this demo needs. No fair comparison of the two provers exists yet; this work is meant to make one.
 
 - **Option 1, a small public MoE model: rejected.** The unchanged prover reads real weights only at
-  width 5,120 and head width 128 (`prover/weights_blocks/gguf_source.cuh`), in Llama 4's MoE layout.
-  No small public model of that shape is known here, and a different model would not be like-for-like.
-- **Option 2, TinyLlama as a 1-expert MoE: rejected.** NE 1 is refused: NE is 0 or a power of two from
-  2 (`verifier/docs/parameter-file.md`).
-  - Padding TinyLlama to width 5,120 with four zero experts passes the unchanged verifier's planning
-    check (a local probe, not in the repository; no proof).
-  - But every #187 number would then be a 5,120-wide model's. The padded route needs new scale tools
-    anyway, since upstream's refuse rotary base 10,000. Lean covers neither route
-    (`lean/GAPS.md`: one model size).
+  width 5,120 and head width 128 (`prover/weights_blocks/gguf_source.cuh`), in Llama 4's MoE layout:
+  with experts, every odd layer is an MoE layer with one routed expert per token
+  (`verifier/docs/parameter-file.md`). The models known here in that layout are Meta's Llama 4, which
+  #186 rules out (gated weights). A different model would not be like-for-like either.
+- **Option 2, TinyLlama as an MoE on unchanged upstream: rejected, though possible in a padded form.**
+  As written it fails: NE 1 is refused, since NE is 0 or a power of two from 2
+  (`verifier/docs/parameter-file.md`). TinyLlama zero-padded to width 5,120 with four zero experts is
+  exact in float, and passes the unchanged verifier's planning check and the provers' parameter rules
+  (a local CPU probe, not in the repository; no proof). It is rejected because:
+  - every #187 number would describe the padded model: by its shapes about 11.4 billion committed
+    parameters, mostly zeros, against TinyLlama's 1.1 billion, and about seven times the
+    multiplications per token (computed from the shapes, not measured);
+  - unchanged `cp_commit` always runs the worst-case check on real weights, and whether TinyLlama's
+    scales pass it is not measured; if they fail, the scales must be roomier, at an accuracy cost
+    nobody has measured;
+  - it needs new scale tools anyway, since upstream's refuse rotary base 10,000, and a padding exporter
+    on top.
+
+  What it keeps is upstream's unchanged verifier, so its `YES` would be upstream's own. If the owner
+  prefers that, it is the fallback. Lean covers neither route (`lean/GAPS.md`: one model size).
 - **Option 3, a patched FlashProve: proposed**, as Hallmark's own small patches on the pinned source.
   They are applied with `git apply`, as the SASH patches are, and each is SHA-256-pinned. It is not a
   dependency on a fork.
@@ -42,6 +53,8 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
 
 Decision 0093 and `make verify-flashprove` stay as they are. The patched verifier is a second build
 with its own source digest, `6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52`.
+SASH stays Hallmark's LLM proof path, and its code is unchanged. A switch to FlashProve needs it to
+match SASH first and gets its own decision (#186).
 
 **What a patched `YES` means.** Upstream's proof checks passed on a dense model's statement under
 parameters that upstream itself does not admit to `YES`. NE 0 is among the forms its documents name
