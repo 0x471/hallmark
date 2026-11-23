@@ -1,3 +1,25 @@
+diff --git a/SUITE.md b/SUITE.md
+index 8785de3f..bb9ec754 100644
+--- a/SUITE.md
++++ b/SUITE.md
+@@ -1,5 +1,8 @@
+ # The test suite
+ 
++Modified by the Hallmark project (dense patch): the row scales.policy_tables counts the 23 tests of the patched
++scales/tests/test_policy_tables.py.
++
+ This page lists the tests of this repository that anyone can run. Each test is one row of a table: what it needs, about how long it takes, the command that runs it and what its output must show. The page is also the input to `run_suite.py`, which reads only the tables.
+ 
+ No test uses a real model's weights; the tests that need weights use synthetic ones. A test that passes shows that the programs or routines it names gave the expected answers on synthetic inputs, or that a file or program that should be refused was refused. It shows nothing more about soundness or hiding.
+@@ -152,7 +155,7 @@ These rows compare routines, or stored reference files, with expected answers: p
+ | prover.parameter_file_one_bits_test | cpu | - | any | 1 | 0.1 | `0,77 ^(?!(?!^parameter_file_one_bits_test: passes$)(?!^not run: [A-Za-z0-9_]+: this CPU cannot run the SHA instructions: the test died with SIGILL, and so did a one-instruction program that uses sha256rnds2; run it on a CPU that can$))` | `prover/tests/unit.sh --field 2 both tests/parameter_file_one_bits_test.cpp ${W:?} examples/target_small_f2/policy.txt` |
+ | prover.parameter_file_one_place_test | cpu | - | any | 1 | 0.1 | `0,77 ^(?!(?!^parameter_file_one_place_test: passes$)(?!^not run: [A-Za-z0-9_]+: this CPU cannot run the SHA instructions: the test died with SIGILL, and so did a one-instruction program that uses sha256rnds2; run it on a CPU that can$))` | `prover/tests/unit.sh --field 2 both tests/parameter_file_one_place_test.cpp ${W:?} examples/target_small_f2/policy.txt` |
+ | prover.public_weights_test | cpu | - | any | 1 | 0.2 | `0,77 ^(?!(?!.*?(?:: passes$))(?!^not run: [A-Za-z0-9_]+: this CPU cannot run the SHA instructions: the test died with SIGILL, and so did a one-instruction program that uses sha256rnds2; run it on a CPU that can$))` | `prover/tests/unit.sh --field 2 both tests/public_weights_test.cpp ${W:?} "${W:?}/written"` |
+-| scales.policy_tables | cpu | - | any | 1 | 1.2 | `0 ^OK ;; ^Ran 22 tests? in` | `python3 -B scales/tests/test_policy_tables.py` |
++| scales.policy_tables | cpu | - | any | 1 | 1.2 | `0 ^OK ;; ^Ran 23 tests? in` | `python3 -B scales/tests/test_policy_tables.py` |
+ | scales.table_ties | cpu | - | any | 1 | 0.8 | `0 ^OK: 26 checks$` | `python3 -B scales/tests/table_ties.py` |
+ | sources.format_vectors | cpu | - | any | 1 | 0.1 | `0 ^format-vectors.txt: [1-9]\d* lines, as format_rules.py prints them$` | `mkdir -p ${W:?} && python3 -B docs/format/format_rules.py > ${W:?}/print && cmp ${W:?}/print docs/format/format-vectors.txt && echo "format-vectors.txt: $(wc -l < ${W:?}/print) lines, as format_rules.py prints them"` |
+ | t-s8_model | cpu | - | any | 1 | 0.4 | `0 ^the model prints the stored file$` | `mkdir -p ${W:?} && cd tests && python3 -B s8_model.py -write ${W:?}/model.tsv && cmp ${W:?}/model.tsv s8_known_answers.tsv && echo "the model prints the stored file"` |
 diff --git a/scales/fit_scales.py b/scales/fit_scales.py
 index abdb8a9b..bf45dee9 100755
 --- a/scales/fit_scales.py
@@ -22,7 +44,7 @@ index abdb8a9b..bf45dee9 100755
      c = math.sqrt(d / 4**t)
  
 diff --git a/scales/gguf_weights.py b/scales/gguf_weights.py
-index c3e5949b..b3ebe768 100644
+index c3e5949b..f5cf213b 100644
 --- a/scales/gguf_weights.py
 +++ b/scales/gguf_weights.py
 @@ -1,5 +1,7 @@
@@ -52,7 +74,7 @@ index c3e5949b..b3ebe768 100644
  REQUIRED = object()  # marks a key of SHAPE_KEYS without which the model is rejected
  # The shape parameters that the metadata give. A row has the parameter's name in the result of shape_words, its type,
  # its key after the prefix, and its value if the first shard does not have the key. The last two defaults are those of
-@@ -479,21 +484,47 @@ def shape_words(model):
+@@ -479,21 +484,55 @@ def shape_words(model):
      both in ascending order. SHAPE_KEYS and SHAPE_TENSORS explain the other keys.
      """
      architecture = model.metadata("general.architecture")
@@ -66,8 +88,8 @@ index c3e5949b..b3ebe768 100644
      shape = {}
      for parameter, kind, key, if_absent in SHAPE_KEYS:
 -        value = model.metadata(f"{ARCHITECTURE}.{key}", if_absent)
-+        if dense and parameter in ("dh", "theta"):
-+            if_absent = REQUIRED  # Hallmark dense patch: a dense file states its head dimension and rotary base
++        if dense and parameter in ("dh", "theta", "eps"):
++            if_absent = REQUIRED  # Hallmark dense patch: a dense file states its head dimension, rotary base and epsilon
 +        value = model.metadata(f"{architecture}.{key}", if_absent)
          if value is REQUIRED:
 -            raise ModelError(f"the model's first shard has no metadata key {ARCHITECTURE}.{key}")
@@ -79,18 +101,26 @@ index c3e5949b..b3ebe768 100644
          shape[parameter] = value
 +    layers = range(shape["L"])
 +    if dense:
-+        # Hallmark dense patch: no layer has experts and every layer has the rotary encoding, without rescaling, and
-+        # no matrix has a bias. A llama file with experts (llama.cpp writes Mixtral so), with the factors of rotary
-+        # rescaling (rope_freqs.weight) or with biases is rejected: the forward pass would not read those tensors.
++        # Hallmark dense patch: no layer has experts and every layer has the rotary encoding on all dh coordinates,
++        # without rescaling, and no matrix has a bias and no query or key a norm. A llama file with experts (llama.cpp
++        # writes Mixtral so), with rotary rescaling (rope_freqs.weight, or a rope.scaling or rope.scale_linear key),
++        # with a rotary dimension other than dh, with biases or with query/key norms is rejected: the forward pass
++        # would compute another function than the file's model.
 +        names = model.names()
 +        if model.metadata(f"{architecture}.expert_count", 0) != 0 or any(
 +            part in name for name in names for part in ("_exps.", "_shexp.", "ffn_gate_inp.")
 +        ):
 +            raise ModelError("the llama model has experts; only a dense llama model is supported")
-+        if "rope_freqs.weight" in names or model.metadata(f"{architecture}.rope.scaling.type", "none") != "none":
++        scaling = [f"{architecture}.rope.scaling.{key}" for key in ("type", "factor", "original_context_length")]
++        scaling.append(f"{architecture}.rope.scale_linear")
++        if "rope_freqs.weight" in names or any(model.metadata(key, None) not in (None, "none") for key in scaling):
 +            raise ModelError("the llama model rescales its rotary frequencies, which the forward pass does not")
++        if model.metadata(f"{architecture}.rope.dimension_count", REQUIRED) != shape["dh"]:
++            raise ModelError("the llama model's rotary dimension is absent or not its head dimension")
 +        if any(name.endswith(".bias") for name in names):
 +            raise ModelError("the llama model has biases, which the forward pass does not read")
++        if any(name.endswith(("attn_q_norm.weight", "attn_k_norm.weight")) for name in names):
++            raise ModelError("the llama model normalizes queries or keys, which the forward pass does not")
 +        shape["moe"], shape["rope"] = [], list(layers)
 +        for parameter, name in SHAPE_TENSORS:
 +            if parameter not in ("fe", "NE"):
@@ -340,7 +370,7 @@ index d1ec7cfb..7684a572 100755
          return DIFFERS if findings else 0
      sys.stdout.buffer.write("".join(line + "\n" for line in new).encode("ascii"))  # as bytes: no line end is translated
 diff --git a/scales/tests/test_gguf_weights.py b/scales/tests/test_gguf_weights.py
-index 70950688..b75dcfc7 100755
+index 70950688..9a96d2b2 100755
 --- a/scales/tests/test_gguf_weights.py
 +++ b/scales/tests/test_gguf_weights.py
 @@ -1,6 +1,8 @@
@@ -352,7 +382,7 @@ index 70950688..b75dcfc7 100755
  
  """Test scales/gguf_weights.py: block decoders, models of several shards, shape_words(), rejections.
  
-@@ -485,10 +487,32 @@ def synthetic_cases(work, check):
+@@ -485,10 +487,41 @@ def synthetic_cases(work, check):
          )
      vector = {**both, "blk.0.attn_q.weight": float_tensor(rng, (8,))}
      check("rejects-a-vector-where-a-matrix-gives-a-size", rejected(shape_of, "vector", METADATA, vector))
@@ -366,10 +396,12 @@ index 70950688..b75dcfc7 100755
 +    # layer has the rotary encoding and none has experts.
 +    dense_meta = {key.replace("llama4.", "llama.", 1): value for key, value in METADATA.items()}
 +    dense_meta = without(dense_meta, "llama.expert_used_count", "llama.expert_count")
++    dense_meta["llama.rope.dimension_count"] = METADATA["llama4.attention.key_length"]
 +    dense_tensors = without(first, "blk.1.ffn_gate_inp.weight")
 +    dense_shape = {**SHAPE, "fe": 0, "NE": 0, "moe": [], "rope": [0, 1, 2, 3, 4]}
 +    check("dense-llama-shape", shape_of("dense", dense_meta, dense_tensors, "llama") == dense_shape)
-+    for key in ("llama.attention.key_length", "llama.rope.freq_base"):
++    for key in ("llama.attention.key_length", "llama.rope.freq_base", "llama.attention.layer_norm_rms_epsilon",
++                "llama.rope.dimension_count"):
 +        check("dense-llama-rejects-a-file-without-" + key,
 +              rejected(shape_of, "dense-no-" + key, without(dense_meta, key), dense_tensors, "llama"))  # fmt: skip
 +    extra = {
@@ -377,11 +409,18 @@ index 70950688..b75dcfc7 100755
 +        "a-router": {**dense_tensors, "blk.1.ffn_gate_inp.weight": first["blk.1.ffn_gate_inp.weight"]},
 +        "rotary-rescaling": {**dense_tensors, "rope_freqs.weight": float_tensor(rng, (4,))},
 +        "a-bias": {**dense_tensors, "blk.0.attn_q.bias": float_tensor(rng, (8,))},
++        "a-query-norm": {**dense_tensors, "blk.0.attn_q_norm.weight": float_tensor(rng, (4,))},
++        "a-key-norm": {**dense_tensors, "blk.0.attn_k_norm.weight": float_tensor(rng, (4,))},
 +    }
 +    for name, tensors in extra.items():
 +        check("dense-llama-rejects-" + name, rejected(shape_of, "dense-" + name, dense_meta, tensors, "llama"))
 +    counted = {**dense_meta, "llama.expert_count": 8}
 +    check("dense-llama-rejects-an-expert-count", rejected(shape_of, "dense-expert-count", counted, dense_tensors, "llama"))
++    keys = {"rope-scaling-type": ("llama.rope.scaling.type", "linear"), "rope-scaling-factor": ("llama.rope.scaling.factor", 4.0),
++            "rope-scale-linear": ("llama.rope.scale_linear", 4.0), "partial-rotary": ("llama.rope.dimension_count", 1)}
++    for name, (key, value) in keys.items():
++        check("dense-llama-rejects-" + name,
++              rejected(shape_of, "dense-" + name, {**dense_meta, key: value}, dense_tensors, "llama"))  # fmt: skip
 +
      # What the maker of a file chooses must not reach a message as it is. In a shard's bytes, a name
      # or a key is replaced by text of the same length, so that the rest of the header stays valid.

@@ -10,6 +10,8 @@ import struct
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import flashprove_tinyllama as harness
 import flashprove_tinyllama_answer as answer
@@ -49,7 +51,7 @@ def test_the_kit_files_and_patches_match_their_pins():
 def test_scales_patch_touches_only_the_scale_tools_and_marks_every_file():
     text = (PROBE / KIT["scales_patch"]["name"]).read_text()
     files = re.findall(r"^diff --git a/(\S+) b/\1$", text, re.M)
-    assert files and all(f.startswith("scales/") for f in files), files
+    assert files and all(f.startswith("scales/") or f == "SUITE.md" for f in files), files
     assert text.isascii()
     for path in files:  # Apache-2.0 section 4(b)
         hunk = text.split(f"diff --git a/{path} b/{path}\n", 1)[1].split("\ndiff --git ", 1)[0]
@@ -137,6 +139,90 @@ def test_the_environments_pin_upstreams_versions():
     assert (im["torch"], im["numpy"], im["gguf"]) == ("2.13.0", "2.4.6", "0.19.0")
 
 
-def test_bounds_separate_a_one_bit_scale_error():
-    low, high = KIT["bounds"]["logit_slope"]
-    assert 0.5 < low < 1 < high < 2  # a shift off by one bit gives a slope near 0.5 or 2
+def a_passing_answer():
+    rows = [
+        dict(
+            position=24 + i, token=tok, margin=1.0, float_margin=1.0, slope=1.0, correlation=0.9995
+        )
+        for i, tok in enumerate(CASE["answer_ids"])
+    ]
+    ids = CASE["prompt_ids"] + CASE["answer_ids"]
+    return dict(
+        T=64,
+        window=ids + [0] * (64 - len(ids)),
+        r=24,
+        e=32,
+        range_failure=None,
+        choices=CASE["answer_ids"],
+        matches=True,
+        gate_key_within_limit=True,
+        peaks=dict(key=7108),
+        positions=rows,
+    )
+
+
+def test_failures_passes_only_an_answer_that_meets_every_condition():
+    assert answer.failures(a_passing_answer()) == []
+    cases = {
+        "range": dict(range_failure=dict(position=40, condition=6)),
+        "choices": dict(matches=False, choices=[1] * 8),
+        "gate key": dict(gate_key_within_limit=False, peaks=dict(key=40000)),
+        "positions": dict(r=23),
+        "window": dict(window=[0] * 64),
+        "T": dict(T=128),
+    }
+    for what, change in cases.items():
+        assert answer.failures(a_passing_answer() | change), what
+    for field, value in (("slope", 0.5), ("slope", 2.0), ("correlation", 0.995)):
+        bad = a_passing_answer()
+        bad["positions"][3][field] = value
+        assert answer.failures(bad), (field, value)
+
+
+def test_the_mutation_controls_change_one_value_by_one():
+    policy = (PROBE / "kit/policy.txt").read_bytes()
+    kl = (PROBE / "kit/KL.bin").read_bytes()
+    controls = answer.mutated(policy, kl)
+    assert sorted(controls) == sorted(KIT["mutation_controls"])
+    s_policy, s_kl = controls["logit-exponent-s-plus-1"]
+    before, after = policy.decode().split("\n"), s_policy.decode().split("\n")
+    changed = [(a, b) for a, b in zip(before, after, strict=True) if a != b]
+    assert s_kl == kl and len(changed) == 1 and changed[0][0].startswith("s ")
+    assert int(changed[0][1].split()[1]) == int(changed[0][0].split()[1]) + 1
+    kv_policy, kv_kl = controls["layer-10-kv-plus-1"]
+    old, new = (struct.unpack(f"<{len(kl) // 4}I", x) for x in (kl, kv_kl))
+    diff = [i for i in range(len(old)) if old[i] != new[i]]
+    assert kv_policy == policy and diff == [10 * 13 + 2] and new[diff[0]] == old[diff[0]] + 1
+
+
+def test_same_refuses_a_changed_file(tmp_path):
+    path = tmp_path / "f"
+    path.write_bytes(b"abc")
+    answer.same(path, b"abc", "f")
+    with pytest.raises(ValueError):
+        answer.same(path, b"abd", "f")
+
+
+def test_the_lock_files_are_pinned_and_hold_the_pinned_versions():
+    folder = PROBE / "requirements"
+    named = set()
+    for env, spec in KIT["environments"].items():
+        for platform_key, lock in spec["locks"].items():
+            path = folder / lock["file"]
+            named.add(lock["file"])
+            assert sha(path) == lock["sha256"]
+            text = path.read_text()
+            pins = dict(
+                x.split(" ")[0].split("==") for x in text.splitlines() if re.match(r"[a-z]", x)
+            )
+            hashed = re.findall(r"^[a-z][^ ]*==[^ ]+ \\\n +--hash=sha256:[0-9a-f]{64}", text, re.M)
+            assert len(hashed) == len(pins), lock["file"]  # every pin is followed by its hashes
+            assert len(answer.locked(path)) == len(
+                pins
+            )  # what the target compares with uv pip freeze
+            for package, version in spec["packages"].items():
+                assert pins[package].split("+")[0] == version, (env, platform_key, package)
+            assert not any(p.startswith(("nvidia", "triton")) for p in pins), lock["file"]
+            if platform_key.startswith("linux"):
+                assert pins["torch"].endswith("+cpu")
+    assert {p.name for p in folder.glob("*.txt")} == named

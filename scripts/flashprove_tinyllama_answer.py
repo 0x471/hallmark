@@ -2,27 +2,33 @@
 
 `make verify-flashprove-tinyllama-answer` runs on a CPU, with no GPU and no spend. It downloads the
 pinned upstream archive, TinyLlama-1.1B-Chat-v1.0's files at the revision of Hallmark's SASH path
-(about 2.2 GB) and WikiText-2's training split, applies the three pinned patches and scales.patch,
-and then requires, in order:
+(about 2.2 GB) and WikiText-2's training split, makes two Python environments from the hash-locked
+requirement files of requirements/ (its own platform's; only macOS arm64 and Linux x86_64 have
+them), applies the three pinned patches and scales.patch, and then requires, in order:
 
 1. the export: export_gguf.py writes the GGUF file with the pinned SHA-256;
 2. the kit, rebuilt by upstream's own route (scales/README.md, "A real model", steps 1 to 5) with
    the patched tools: weight_sums, make_calibration_set.py --tinyllama, calibrate.py and
-   words_to_policy.py from check 6's dense base file, -plan arrays and pack_layout.py. Every file
-   must equal the committed kit (tinyllama/kit/) byte for byte; maxima.json is compared and
-   recorded;
+   words_to_policy.py from check 6's dense base file, -plan arrays and pack_layout.py. Every kit
+   file but maxima.json must equal the committed kit (tinyllama/kit/) byte for byte; maxima.json,
+   whose last digits depend on the device and libraries, is compared and recorded only;
 3. the patched verifier's planner admits the kit in the standard parameter form, for the whole kit
    and for SASH's request, with the pinned h_par and configuration; the unpatched one refuses it
    (policy-tables); the provers' parameter-file reader admits it;
-4. upstream's scale-tool tests pass on the patched tree;
+4. upstream's scale-tool tests pass on the patched tree, run as SUITE.md runs its two scales rows
+   (the other two tests have no row); status 77 means passed in part: this target builds no
+   make_model and sets no SMALL_MODEL, so those cases skip;
 5. the float reference: upstream's float pass on the GGUF agrees with Hugging Face transformers on
    the safetensors, and float greedy decoding gives SASH's answer;
 6. the decisive check: upstream's integer model (patched), on the GGUF and the committed kit, with
    every file pinned and the weights checked against wsums.txt, gives SASH's eight answer tokens
-   after SASH's 25 prompt tokens, in one window of 64 tokens with no failed range condition.
+   after SASH's 25 prompt tokens, in one window of 64 tokens with no failed range condition, and
+   its logits follow the float logits (slope and correlation bounds in kit.json); two mutation
+   controls (s + 1, and one layer's kv + 1) must each fail at least one of these conditions.
 
-No commitment, proof or GPU run is made. Equal tokens show that the integer model is TinyLlama on
-this request; they do not show that FlashProve's and SASH's integer functions are equal.
+No commitment, proof or GPU run is made. Equal tokens show that the integer model agrees with
+SASH's answer on this request; they do not show that FlashProve's and SASH's integer functions are
+equal.
 Set FLASHPROVE_TINYLLAMA_INPUTS to a folder holding the pinned model files and parquet file to skip
 the downloads; each file is checked against its pin before it is read.
 """
@@ -32,6 +38,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import shutil
 import struct
 import subprocess
@@ -51,6 +58,7 @@ KIT = json.loads((PROBE / "kit.json").read_text())
 CASE_PATH = ROOT / KIT["model"]["case"]
 CASE = json.loads(CASE_PATH.read_text())
 KIT_FILES = ("policy.txt", "KL.bin", "layout.txt")  # the configuration directory
+LAYER_WORDS = ("kq", "kk", "kv", "ko", "kg", "ku", "kd", "M1", "K1", "M2", "K2", "sh", "rp")
 SETUP_FILES = ("wsums.txt", "fold.txt")  # beside the weights
 FIT_FILES = ("words.json", "maxima.json")
 CPU_TORCH = "https://download.pytorch.org/whl/cpu"
@@ -89,27 +97,33 @@ def committed_kit():
     return {name: (KIT_DIR / name).read_bytes() for name in KIT["files"]}
 
 
+def platform_key():
+    """The lock files' platform name for this host; other hosts are refused."""
+    key = {("Darwin", "arm64"): "macos-arm64", ("Linux", "x86_64"): "linux-x86_64"}.get(
+        (platform.system(), platform.machine())
+    )
+    require(key is not None, f"no lock file for {platform.system()} {platform.machine()}")
+    return key
+
+
 def environment(output, name):
-    """A new virtual environment with the pinned packages, made by uv."""
+    """A new virtual environment, made by uv from the pinned, hash-locked requirement file of
+    this platform (requirements/<name>-<platform>.txt, its SHA-256 in kit.json), installed with
+    --require-hashes. Returns its interpreter and what it holds (uv pip freeze)."""
     spec = KIT["environments"][name]
+    lock = spec["locks"][platform_key()]
+    path = PROBE / "requirements" / lock["file"]
+    require(sha(path) == lock["sha256"], f"{lock['file']} does not match kit.json")
     venv = output / f"venv-{name}"
     code, _ = run(["uv", "venv", "-q", "-p", spec["python"], venv], output / f"venv-{name}.log")
     require(code == 0, f"uv cannot make the {name} environment")
     python = venv / "bin/python"
-    packages = [f"{k}=={v}" for k, v in spec["packages"].items()]
-    linux = platform.system() == "Linux"
-    if linux:  # the CPU build of torch; PyPI's Linux wheels pull CUDA libraries
-        torch = [p for p in packages if p.startswith("torch==")]
-        packages = [p for p in packages if not p.startswith("torch==")]
-        code, _ = run(
-            ["uv", "pip", "install", "-q", "-p", python, "--index-url", CPU_TORCH, *torch],
-            output / f"venv-{name}-torch.log",
-        )
-        require(code == 0, f"cannot install torch into the {name} environment")
-    code, _ = run(
-        ["uv", "pip", "install", "-q", "-p", python, *packages], output / f"venv-{name}-install.log"
-    )
-    require(code == 0, f"cannot install the {name} packages")
+    args = ["uv", "pip", "install", "-q", "-p", python, "--require-hashes", "--no-deps", "-r", path]
+    if platform.system() == "Linux":  # torch's CPU build; PyPI's Linux wheels pull CUDA libraries
+        args += ["--index-url", CPU_TORCH, "--extra-index-url", "https://pypi.org/simple"]
+        args += ["--index-strategy", "unsafe-best-match"]
+    code, _ = run(args, output / f"venv-{name}-install.log")
+    require(code == 0, f"cannot install the {name} lock file")
     code, text = run(
         [python, "-I", "-c", VERSIONS, *spec["packages"]], output / f"venv-{name}-versions.log"
     )
@@ -119,7 +133,26 @@ def environment(output, name):
         require(
             versions[package].split("+")[0] == wanted, f"{name}: {package} is {versions[package]}"
         )
+    code, frozen = run(["uv", "pip", "freeze", "-p", python], output / f"venv-{name}-freeze.log")
+    require(code == 0, f"uv pip freeze failed ({name})")
+    installed = sorted(
+        re.sub(r"[-_.]+", "-", x.split("==")[0]).lower() + "==" + x.split("==")[1]
+        for x in (y.strip() for y in frozen.splitlines())
+        if "==" in x
+    )
+    require(installed == locked(path), f"the {name} environment is not exactly its lock file")
+    versions["lock_file"] = lock["file"]
+    versions["installed"] = installed
     return python, versions
+
+
+def locked(path):
+    """The name==version lines of a lock file, normalised as uv pip freeze prints them."""
+    lines = Path(path).read_text().splitlines()
+    pins = [x.split(" ")[0] for x in lines if re.match(r"[A-Za-z]", x)]
+    return sorted(
+        re.sub(r"[-_.]+", "-", x.split("==")[0]).lower() + "==" + x.split("==")[1] for x in pins
+    )
 
 
 VERSIONS = (
@@ -375,7 +408,7 @@ def check_planning(tree, output, verifiers):
 
 
 def check_scale_tests(tree, output, scales):
-    """Step 4: upstream's scale-tool tests on the patched tree, as SUITE.md runs them."""
+    """Step 4: upstream's scale-tool tests on the patched tree (see the module's docstring)."""
     rows = {}
     for test in (
         "test_policy_tables.py",
@@ -394,6 +427,47 @@ def check_scale_tests(tree, output, scales):
         require((whole or partial) and "FAILED" not in text, f"scales/tests/{test}: {code} {last}")
         rows[test] = dict(status=code, last_line=last)
     return rows
+
+
+def failures(answer):
+    """The conditions of the decisive check that an answer_check.py result misses (none: pass)."""
+    bounds = KIT["bounds"]
+    if answer["range_failure"] is not None:
+        return [f"a range condition fails: {answer['range_failure']}"]
+    missed = []
+    if not answer["matches"]:
+        missed.append(f"the choices are {answer['choices']}, not SASH's {CASE['answer_ids']}")
+    if not answer["gate_key_within_limit"]:
+        missed.append(f"the gate key reaches {answer['peaks']['key']}")
+    req, ids = KIT["request"], CASE["prompt_ids"] + CASE["answer_ids"]
+    if (answer["T"], answer["r"], answer["e"]) != (req["T"], req["r"], req["e"]):
+        missed.append("the window or its range is not kit.json's request")
+    if answer["window"] != ids + [req["filler"]] * (req["T"] - len(ids)):
+        missed.append("the window is not SASH's ids with kit.json's filler")
+    if [r["position"] for r in answer["positions"]] != list(range(answer["r"], answer["e"])):
+        missed.append("the checked positions are not r .. e - 1")
+    low, high = bounds["logit_slope"]
+    for row in answer["positions"]:
+        if not low <= row["slope"] <= high:
+            missed.append(f"the logits' scale at position {row['position']}: {row['slope']:.4f}")
+        if row["correlation"] < bounds["logit_correlation"]:
+            missed.append(
+                f"the logits' correlation at position {row['position']}: {row['correlation']:.5f}"
+            )
+    return missed
+
+
+def mutated(policy, kl):
+    """The kit with one-bit changes: the logit exponent s, and one layer's value shift kv."""
+    lines = policy.decode("ascii").split("\n")
+    at = next(i for i, x in enumerate(lines) if x.startswith("s "))
+    s_plus = lines[:at] + [f"s {int(lines[at].split()[1]) + 1}"] + lines[at + 1 :]
+    words = list(struct.unpack(f"<{len(kl) // 4}I", kl))
+    words[10 * len(LAYER_WORDS) + LAYER_WORDS.index("kv")] += 1
+    return {
+        "logit-exponent-s-plus-1": ("\n".join(s_plus).encode("ascii"), kl),
+        "layer-10-kv-plus-1": (policy, struct.pack(f"<{len(words)}I", *words)),
+    }
 
 
 def check_answer(tree, output, pythons, model_dir, gguf):
@@ -434,48 +508,53 @@ def check_answer(tree, output, pythons, model_dir, gguf):
         floats["float_greedy_is_the_answer"],
         f"float greedy decoding gives {floats['float_greedy']}",
     )
-    model = output / "integer-model"
-    model.mkdir()
-    for name in ("policy.txt", "KL.bin"):
-        shutil.copyfile(KIT_DIR / name, model / name)
-    settings = dict(
-        blocks="gguf", setup_folder=str(gguf.parent), shards=[str(gguf)], verify_sums=True
-    )
-    (model / "integer_model.json").write_text(
-        json.dumps(dict(weights="blocks", weight_settings=settings))
-    )
-    digests = {name: sha(model / name) for name in ("integer_model.json", "policy.txt", "KL.bin")}
-    digests |= {name: KIT["files"][name] for name in SETUP_FILES}
-    pinned = (
-        output / "integer-model-digests.json"
-    )  # outside the model directory, as load_from_folder asks
-    pinned.write_text(json.dumps(digests))
     env = {
         "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
         "HOME": str(output),
         "PYTHONPATH": str(tree / "integrations/vllm/integer_model"),
     }
-    answer_json = output / "answer.json"
-    args = [im, "-s", PROBE / "answer_check.py", model, pinned, case, logits, answer_json]
-    code, _ = run(args, output / "answer-check.log", env=env)
-    require(code == 0, "answer_check.py failed")
-    answer = json.loads(answer_json.read_text())
-    require(answer["range_failure"] is None, f"a range condition fails: {answer['range_failure']}")
+
+    def integer_run(name, policy, kl):
+        """answer_check.py on the GGUF file with this policy.txt and KL.bin, every file pinned."""
+        model = output / f"integer-model-{name}"
+        model.mkdir()
+        (model / "policy.txt").write_bytes(policy)
+        (model / "KL.bin").write_bytes(kl)
+        settings = dict(
+            blocks="gguf", setup_folder=str(gguf.parent), shards=[str(gguf)], verify_sums=True
+        )
+        (model / "integer_model.json").write_text(
+            json.dumps(dict(weights="blocks", weight_settings=settings))
+        )
+        digests = {"integer_model.json": sha(model / "integer_model.json")}
+        digests |= {"policy.txt": hashlib.sha256(policy).hexdigest()}
+        digests |= {"KL.bin": hashlib.sha256(kl).hexdigest()}
+        digests |= {n: KIT["files"][n] for n in SETUP_FILES}
+        pinned = output / f"integer-model-{name}-digests.json"  # outside the model directory
+        pinned.write_text(json.dumps(digests))
+        found = output / f"answer-{name}.json"
+        args = [im, "-s", PROBE / "answer_check.py", model, pinned, case, logits, found]
+        code, _ = run(args, output / f"answer-check-{name}.log", env=env)
+        require(code == 0, f"answer_check.py failed ({name})")
+        return json.loads(found.read_text())
+
+    kit = committed_kit()
     require(
-        answer["matches"],
-        f"the integer model gives {answer['choices']}, not SASH's {CASE['answer_ids']}",
+        hashlib.sha256(kit["policy.txt"]).hexdigest() == KIT["files"]["policy.txt"]
+        and hashlib.sha256(kit["KL.bin"]).hexdigest() == KIT["files"]["KL.bin"],
+        "the kit's policy.txt or KL.bin is not the pinned one",
     )
-    require(answer["gate_key_within_limit"], f"the gate key reaches {answer['peaks']['key']}")
-    low, high = bounds["logit_slope"]
-    for row in answer["positions"]:
-        require(
-            low <= row["slope"] <= high,
-            f"the logits' scale at position {row['position']}: {row['slope']}",
-        )
-        require(
-            row["correlation"] >= bounds["logit_correlation"],
-            f"the logits at position {row['position']}",
-        )
+    answer = integer_run("kit", kit["policy.txt"], kit["KL.bin"])
+    missed = failures(answer)
+    require(not missed, "the decisive check fails: " + "; ".join(missed))
+    # Controls: one-bit changes of the kit must fail at least one condition, or the bounds have
+    # no power. The answer check's own figures are recorded for each.
+    controls = {}
+    for name, (policy, kl) in mutated(kit["policy.txt"], kit["KL.bin"]).items():
+        found = integer_run(name, policy, kl)
+        controls[name] = dict(failed=failures(found), choices=found.get("choices"))
+        require(controls[name]["failed"], f"the control {name} passes every condition")
+    answer["controls"] = controls
     return floats, answer
 
 

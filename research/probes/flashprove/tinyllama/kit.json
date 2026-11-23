@@ -4,8 +4,8 @@
   "patches_json_sha256": "c3ef0c5f274e41d46cf688b5704e9acb70d7c842f9e770156b5565dd17beb72e",
   "scales_patch": {
     "name": "scales.patch",
-    "sha256": "5eff281641dd27b35c617f01de3f1a2c8a223520a1c19a47acd0b95d215d6907",
-    "bytes": 28858
+    "sha256": "85f6a2ca63c94350a61c44c4b3366831cd2cbad0fccae0328eacb270a1478578",
+    "bytes": 33646
   },
   "model": {
     "case": "research/probes/sash/response-case.json",
@@ -34,7 +34,18 @@
         "tokenizers": "0.22.2",
         "safetensors": "0.8.0",
         "transformers": "5.15.1"
-      }
+      },
+      "locks": {
+        "macos-arm64": {
+          "file": "scales-macos-arm64.txt",
+          "sha256": "a90ecc08252b4d47abd4f5287f5c37fff10faaeadab68a9860b8d1ef1988f40d"
+        },
+        "linux-x86_64": {
+          "file": "scales-linux-x86_64.txt",
+          "sha256": "141cc59c3a21f196a6753bda102d725f2d0865de4e0f0c5655fd9b10c5077c8b"
+        }
+      },
+      "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13"
     },
     "integer_model": {
       "python": "3.13",
@@ -42,7 +53,18 @@
         "torch": "2.13.0",
         "numpy": "2.4.6",
         "gguf": "0.19.0"
-      }
+      },
+      "locks": {
+        "macos-arm64": {
+          "file": "integer_model-macos-arm64.txt",
+          "sha256": "b9d89b9e3571659760261c5c14441c99c331da76b6526f17b15edd94215df78c"
+        },
+        "linux-x86_64": {
+          "file": "integer_model-linux-x86_64.txt",
+          "sha256": "bba3b40f517585fa71af22286ddc71a6ef892143ea416c91625fe8dbd5a249a2"
+        }
+      },
+      "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13"
     }
   },
   "e_res": 11,
@@ -80,6 +102,10 @@
       0.75,
       1.33
     ],
-    "logit_correlation": 0.99
-  }
+    "logit_correlation": 0.998
+  },
+  "mutation_controls": [
+    "logit-exponent-s-plus-1",
+    "layer-10-kv-plus-1"
+  ]
 }
