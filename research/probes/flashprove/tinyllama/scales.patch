@@ -44,7 +44,7 @@ index abdb8a9b..bf45dee9 100755
      c = math.sqrt(d / 4**t)
  
 diff --git a/scales/gguf_weights.py b/scales/gguf_weights.py
-index c3e5949b..f5cf213b 100644
+index c3e5949b..e8f6acf4 100644
 --- a/scales/gguf_weights.py
 +++ b/scales/gguf_weights.py
 @@ -1,5 +1,7 @@
@@ -74,7 +74,7 @@ index c3e5949b..f5cf213b 100644
  REQUIRED = object()  # marks a key of SHAPE_KEYS without which the model is rejected
  # The shape parameters that the metadata give. A row has the parameter's name in the result of shape_words, its type,
  # its key after the prefix, and its value if the first shard does not have the key. The last two defaults are those of
-@@ -479,21 +484,55 @@ def shape_words(model):
+@@ -479,21 +484,60 @@ def shape_words(model):
      both in ascending order. SHAPE_KEYS and SHAPE_TENSORS explain the other keys.
      """
      architecture = model.metadata("general.architecture")
@@ -111,7 +111,8 @@ index c3e5949b..f5cf213b 100644
 +            part in name for name in names for part in ("_exps.", "_shexp.", "ffn_gate_inp.")
 +        ):
 +            raise ModelError("the llama model has experts; only a dense llama model is supported")
-+        scaling = [f"{architecture}.rope.scaling.{key}" for key in ("type", "factor", "original_context_length")]
++        scaling = [f"{architecture}.rope.scaling.{key}"
++                   for key in ("type", "factor", "original_context_length", "attn_factor", "finetuned")]
 +        scaling.append(f"{architecture}.rope.scale_linear")
 +        if "rope_freqs.weight" in names or any(model.metadata(key, None) not in (None, "none") for key in scaling):
 +            raise ModelError("the llama model rescales its rotary frequencies, which the forward pass does not")
@@ -121,11 +122,15 @@ index c3e5949b..f5cf213b 100644
 +            raise ModelError("the llama model has biases, which the forward pass does not read")
 +        if any(name.endswith(("attn_q_norm.weight", "attn_k_norm.weight")) for name in names):
 +            raise ModelError("the llama model normalizes queries or keys, which the forward pass does not")
++        if model.metadata(f"{architecture}.attention.causal", True) is not True:
++            raise ModelError("the llama model's attention is not causal, and the forward pass's is")
 +        shape["moe"], shape["rope"] = [], list(layers)
 +        for parameter, name in SHAPE_TENSORS:
 +            if parameter not in ("fe", "NE"):
 +                shape[parameter] = _outputs(model, name)
 +        shape["fe"], shape["NE"] = 0, 0
++        if shape["H"] % shape["dh"] or shape["G"] % shape["dh"]:
++            raise ModelError("the llama model's query or key rows are not a whole number of heads")
 +        shape["H"] //= shape["dh"]
 +        shape["G"] //= shape["dh"]
 +        return shape
@@ -370,7 +375,7 @@ index d1ec7cfb..7684a572 100755
          return DIFFERS if findings else 0
      sys.stdout.buffer.write("".join(line + "\n" for line in new).encode("ascii"))  # as bytes: no line end is translated
 diff --git a/scales/tests/test_gguf_weights.py b/scales/tests/test_gguf_weights.py
-index 70950688..9a96d2b2 100755
+index 70950688..3fddd65f 100755
 --- a/scales/tests/test_gguf_weights.py
 +++ b/scales/tests/test_gguf_weights.py
 @@ -1,6 +1,8 @@
@@ -382,7 +387,7 @@ index 70950688..9a96d2b2 100755
  
  """Test scales/gguf_weights.py: block decoders, models of several shards, shape_words(), rejections.
  
-@@ -485,10 +487,41 @@ def synthetic_cases(work, check):
+@@ -485,10 +487,44 @@ def synthetic_cases(work, check):
          )
      vector = {**both, "blk.0.attn_q.weight": float_tensor(rng, (8,))}
      check("rejects-a-vector-where-a-matrix-gives-a-size", rejected(shape_of, "vector", METADATA, vector))
@@ -411,13 +416,16 @@ index 70950688..9a96d2b2 100755
 +        "a-bias": {**dense_tensors, "blk.0.attn_q.bias": float_tensor(rng, (8,))},
 +        "a-query-norm": {**dense_tensors, "blk.0.attn_q_norm.weight": float_tensor(rng, (4,))},
 +        "a-key-norm": {**dense_tensors, "blk.0.attn_k_norm.weight": float_tensor(rng, (4,))},
++        "a-partial-head": {**dense_tensors, "blk.0.attn_q.weight": block_tensor(rng, Q4_K, (9, 1024))},
 +    }
 +    for name, tensors in extra.items():
 +        check("dense-llama-rejects-" + name, rejected(shape_of, "dense-" + name, dense_meta, tensors, "llama"))
 +    counted = {**dense_meta, "llama.expert_count": 8}
 +    check("dense-llama-rejects-an-expert-count", rejected(shape_of, "dense-expert-count", counted, dense_tensors, "llama"))
 +    keys = {"rope-scaling-type": ("llama.rope.scaling.type", "linear"), "rope-scaling-factor": ("llama.rope.scaling.factor", 4.0),
-+            "rope-scale-linear": ("llama.rope.scale_linear", 4.0), "partial-rotary": ("llama.rope.dimension_count", 1)}
++            "rope-scale-linear": ("llama.rope.scale_linear", 4.0), "partial-rotary": ("llama.rope.dimension_count", 1),
++            "rope-attn-factor": ("llama.rope.scaling.attn_factor", 1.5), "rope-finetuned": ("llama.rope.scaling.finetuned", True),
++            "non-causal": ("llama.attention.causal", False)}
 +    for name, (key, value) in keys.items():
 +        check("dense-llama-rejects-" + name,
 +              rejected(shape_of, "dense-" + name, {**dense_meta, key: value}, dense_tensors, "llama"))  # fmt: skip
