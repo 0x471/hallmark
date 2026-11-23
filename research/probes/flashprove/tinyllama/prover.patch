@@ -1,25 +1,3 @@
-diff --git a/prover/common/cp_files.h b/prover/common/cp_files.h
-index 5db04f2..5220201 100644
---- a/prover/common/cp_files.h
-+++ b/prover/common/cp_files.h
-@@ -1,5 +1,7 @@
- // Copyright 2026 Anthropic PBC
- // SPDX-License-Identifier: Apache-2.0
-+// Modified by the Hallmark project (dense patch): the comment on isk.txt's line ranges. The change is
-+// marked "Hallmark dense patch".
- 
- // Terms: docs/glossary.md.
- 
-@@ -609,7 +611,8 @@ static inline bool read_key(const std::string &path, Key &key) {
- // configuration files that have this digest, no prompt can drive a value of the forward pass out of
- // its range (prover/weights_commitment/worst_case.cuh). cp_prove starts only if the line has h_par
- // of its own configuration files (Prover::the_ranges_are_guarded() in prover/prover/isk.cuh); a
--// test build's cp_prove also starts if the line "seed test" is present.
-+// test build's cp_prove also starts if the line "seed test" is present. Hallmark dense patch: any
-+// build's cp_prove also starts without the line under "seed public".
- // seed test: cp_commit read the seed from a file given with the test option -test-seed, so nothing
- // is hidden. A production build has no -test-seed, and its cp_prove rejects a commitment that has
- // the line [cp-isk-seed-test]. Its cp_commit has the same check in the code for a call that adds
 diff --git a/prover/common/parameter_file.h b/prover/common/parameter_file.h
 index 36921cb..f3540f6 100644
 --- a/prover/common/parameter_file.h
@@ -67,38 +45,6 @@ index 36921cb..f3540f6 100644
        {wide("theta0") != 0, "shape-theta0", "theta0_lo", "theta0 (theta0_lo + 2^32 theta0_hi) must not be 0"},
        {v("KF") + 14 >= v("MF"), "policy-norm-F", "KF", "KF must be at least MF - 14"},
        {wide("epsF") >= 1 && wide("epsF") >> 59 == 0, "policy-norm-F", "epsF_lo",
-diff --git a/prover/hash_commitment/hf_commit.cu b/prover/hash_commitment/hf_commit.cu
-index c533af9..663e6f6 100644
---- a/prover/hash_commitment/hf_commit.cu
-+++ b/prover/hash_commitment/hf_commit.cu
-@@ -1,5 +1,7 @@
- // Copyright 2026 Anthropic PBC
- // SPDX-License-Identifier: Apache-2.0
-+// Modified by the Hallmark project (dense patch): under -public-weights the worst-case check, a
-+// hiding safeguard, is left out unless asked for. Each change is marked "Hallmark dense patch".
- 
- // Terms: docs/glossary.md.
- 
-@@ -126,6 +128,8 @@
- // (what that shows and does not: prover/weights_commitment/worst_case.cuh), isk.txt gets the line
- // "ranges <h_par>", which cp_prove requires. Only a call with -test-seed, which no production build
- // has, can omit both: nothing is hidden, and isk.txt says "seed test": only test builds accept it.
-+// Hallmark dense patch: so can a call with -public-weights, without -worst-case: nothing is hidden,
-+// isk.txt says "seed public", and cp_prove then takes the commitment without the line ranges.
- #include "hash_commitment/hf_commit_derivation_check.cuh" // first: it defines the macro through which the shared headers call it
- #include "common/setting.h"
- #include "weights_commitment/lent_memory.h" // before every header that allocates GPU memory
-@@ -994,6 +998,10 @@ static int cp_commit_main(int argc, char **argv) {
- #ifndef SERVING_BUILD
-   if (O.from_weights && !O.worst_case) printf("cp_commit: a test's run: the worst-case check is left out, and isk.txt gets no line ranges\n");
- #endif
-+  // Hallmark dense patch: -public-weights exists in the serving build alone.
-+  if (O.from_weights && !O.worst_case && O.public_seed)
-+    printf("cp_commit: -public-weights (Hallmark dense patch): the worst-case check is left out, and isk.txt gets no line ranges; "
-+           "nothing is hidden, and a request may end \"failed\" where a value leaves its range\n");
-   static PinnedWeights &weights = *new PinnedWeights;
-   weights.joined_cut_bytes = O.piece_bytes;
-   auto begin = now();
 diff --git a/prover/hash_commitment/hf_commit_weights.cuh b/prover/hash_commitment/hf_commit_weights.cuh
 index 18a3174..20c0569 100644
 --- a/prover/hash_commitment/hf_commit_weights.cuh
@@ -142,33 +88,6 @@ index 18a3174..20c0569 100644
      if (!rd.norm[0]) return;
      const ::gguf::Tensor &norm = source.file.at(blk + rd.norm + ".weight");
      if (norm.type != ::gguf::F32 || norm.cells() != g.dims[0]) {
-diff --git a/prover/prover/isk.cuh b/prover/prover/isk.cuh
-index fd6fc47..def0874 100644
---- a/prover/prover/isk.cuh
-+++ b/prover/prover/isk.cuh
-@@ -1,5 +1,7 @@
- // Copyright 2026 Anthropic PBC
- // SPDX-License-Identifier: Apache-2.0
-+// Modified by the Hallmark project (dense patch): under -public-weights the worst-case check, a
-+// hiding safeguard, is left out unless asked for. Each change is marked "Hallmark dense patch".
- 
- // Terms: docs/glossary.md.
- 
-@@ -344,6 +346,14 @@ inline int Prover::the_ranges_are_guarded() {
-     return 0;
-   }
- #endif
-+  // Hallmark dense patch: under "seed public" (read_isk() has checked that -public-weights is given
-+  // then, and only then) cp_commit leaves the check out unless it was asked for. Nothing is hidden, so
-+  // a "failed" that depends on the weights tells nothing that the public weights do not. A line ranges
-+  // that is there must still have these files' h_par.
-+  if (isk_ranges.empty() && !args.public_weights.empty()) {
-+    printf("# isk.txt has no line ranges, and isk.txt says \"seed public\": in this run \"failed\" may depend on the weights, which are public\n");
-+    return 0;
-+  }
-   if (!isk_ranges.empty() && isk_ranges == cp::digest_hex(parameters_hash_words.data(), parameters_hash_words.size())) return 0;
-   printf("refused (ranges-not-guarded): isk.txt has no line ranges for these configuration files. cp_commit's first form writes the "
-          "line when its worst-case check has passed; its second form never adds it: make the commitment again\n");
 diff --git a/prover/weights_blocks/gguf_source.cuh b/prover/weights_blocks/gguf_source.cuh
 index 7397920..d0d79e4 100644
 --- a/prover/weights_blocks/gguf_source.cuh
@@ -227,49 +146,6 @@ index 7397920..d0d79e4 100644
    std::map<std::string, int> exponent_;
    int embedding_exponent_ = 0;
    uint8_t *stage_[2] = {nullptr, nullptr}, *room_ = nullptr;
-diff --git a/prover/weights_commitment/arguments.h b/prover/weights_commitment/arguments.h
-index 042ba07..330564e 100644
---- a/prover/weights_commitment/arguments.h
-+++ b/prover/weights_commitment/arguments.h
-@@ -1,5 +1,7 @@
- // Copyright 2026 Anthropic PBC
- // SPDX-License-Identifier: Apache-2.0
-+// Modified by the Hallmark project (dense patch): under -public-weights the worst-case check, a
-+// hiding safeguard, is left out unless asked for. Each change is marked "Hallmark dense patch".
- 
- // Terms: docs/glossary.md.
- 
-@@ -113,7 +115,10 @@ struct Opt {
-   // the forward pass that the check bounds, can any prompt drive a value out of its range? If the
-   // check fails, cp_commit exits with status 7, before the seed is drawn. Every run of the first
-   // form runs it, except a test run with -test-seed (under which nothing is hidden) and neither
--  // -worst-case nor -worst-case-table.
-+  // -worst-case nor -worst-case-table. Hallmark dense patch: nor a run with -public-weights, under
-+  // which nothing is hidden either, unless -worst-case or -worst-case-table is given; there a request
-+  // may then end "failed" if a value leaves its range (scales/worst-case-bounds.md: soundness does
-+  // not rest on the check).
-   bool worst_case = false;
-   // -worst-case-table (first form only): a new file for the check's full table, readable by its
-   // owner only, because its numbers are computed from the weights. Empty: not given.
-@@ -191,7 +196,8 @@ struct Opt {
-         "pass that the check bounds a prompt can drive the value out of its range. When the check has passed, isk.txt gets the line ranges, without which "
-         "cp_prove does not start. -worst-case-table: the check's table, a line for each site and layer, goes into a new file for "
-         "its owner only; its numbers are computed from the weights, so keep it as secret as isk. -worst-case: "
--        SERVING_OR("it changes nothing", "makes the check under -test-seed too; elsewhere it changes nothing") ".\n"
-+        SERVING_OR("makes the check under -public-weights too, where it is otherwise left out (Hallmark dense patch); elsewhere it changes nothing",
-+                   "makes the check under -test-seed too; elsewhere it changes nothing") ".\n"
-         "-keep-for-the-audit (not with -leaves): the 32 fresh bytes of the key file's making and of each entry's are kept in <isk>/audit, for the audit with the key, which destroys them before it says yes. Together with the seed they "
-         "open every mask in key.bin and the entries: until that yes nothing of the commitment leaves, and no cp_prove is started on isk (docs/operators-duties.md, \"The audit with the key\").\n"
-         SERVING_OR("-public-weights <file of 32 bytes>: for public weights only: with this option the weights are NOT hidden: whoever has the 32-byte file can work out every mask. "
-@@ -341,7 +347,7 @@ struct Opt {
-     if (from_weights ? config.empty() || leaves_M < 1 || first_given || sweep
-                    : !config.empty() || !(leaves_given || M_given || first_given) || keep_level >= 0 || worst_case || !worst_case_table.empty() || keep_for_the_audit || public_seed)
-       return false;
--    worst_case = from_weights && (!test_seed || worst_case || !worst_case_table.empty());
-+    worst_case = from_weights && ((!test_seed && !public_seed) || worst_case || !worst_case_table.empty()); // Hallmark dense patch: && !public_seed
-     M = M_given ? (uint32_t)leaves_M : 0, first = first_given ? (uint32_t)first_leaf : 0;
-     if (leaves && strcmp(leaves, "none")) {
-       const char *const dots = strstr(leaves, "..");
 diff --git a/prover/weights_commitment/fold_source.cuh b/prover/weights_commitment/fold_source.cuh
 index e609e91..ae0af09 100644
 --- a/prover/weights_commitment/fold_source.cuh
