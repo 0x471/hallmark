@@ -307,6 +307,10 @@ folder, 249 s).
 - **The prover patch has never run.** It compiles with nvcc (above), but no `cp_commit` or `cp_prove`
   has run at NE 0 here, and the pinned repository holds no NE 0 kit. More gaps of this kind can
   surface only in the GPU commit and proving jobs.
+- **The patched tree's own documents still state upstream's rules.** No patch touches
+  `verifier/docs/parameter-file.md`, `docs/format/FORMAT.md` 13.7 or `docs/model.md` 11.3, so in a
+  patched tree they still say that NE 0 never ends in acceptance and that c_0 = RN32(sqrt(d) / 64).
+  This README and decision 0094 are the record of what the patches change.
 - **Tests that need x86-64 SHA instructions or Linux did not run on the Mac.**
   - Upstream's `weight_sums/tests/run_tests.sh`;
   - `integer_model`'s `tests/test_gguf_files.py` (it builds `make_model`);
