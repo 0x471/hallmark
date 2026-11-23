@@ -7,8 +7,8 @@ Propose dense TinyLlama on pinned FlashProve
 under `research/probes/flashprove/tinyllama/` and `make verify-flashprove-tinyllama`, a CPU check that runs
 upstream's stored proofs and altered copies through the unpatched and the patched verifier and
 requires equal results. It also checks that a TinyLlama-shaped parameter file passes the patched
-verifier's planner. The prover patch compiles with nvcc 13.2.86 but has not run, and no TinyLlama
-proof exists. `make verify-flashprove` (decision 0093) is unchanged.
+verifier's planner. The prover patch keeps upstream's mandatory worst-case check; it compiles with
+nvcc 13.2.86 but has not run, and no TinyLlama proof exists. `make verify-flashprove` (decision 0093) is unchanged.
 
 Fit a TinyLlama-1.1B kit for the proposed patches: `scales.patch` lets upstream's scale tools read a
 dense `llama` model, `export_gguf.py` writes the pinned model as GGUF (BF16 bits unchanged), and

@@ -153,37 +153,43 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
 | a dense parameter file and `KL.bin` at TinyLlama-1.1B's shape, from [`tinyllama_plan.py`](tinyllama_plan.py) (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22 layers, vocabulary 32,000, rotary base 10,000, T = 64) | the patched build's planner (`-plan arrays`, `request`, `accounting`) admits it in the standard parameter form, with its three tables matching their digests. Both calls must print the planner's whole ending in upstream's order (the standard-form line can only be missing after it) and name the same files (`h_par`, `configuration`). The unpatched build refuses it with `policy-tables` alone, as its last line. Without its digest lines, the unpatched build finds exactly `routed-experts`, `both-clamps` and `table-digests` unmet, and the patched build only `table-digests`. The shape, `h_par` and `configuration` must equal the pins in `patches.json` |
 
 **Current revision** (patched verifier digest `6f7ac148…`, the patch hashes in `patches.json`):
-**passed on Linux and on macOS** on 2026-11-22, every row above as required
-([evidence](../../../evidence/flashprove-tinyllama-2026-11-22.json)):
+**passed on Linux and on macOS** on 2026-11-23, every row above as required
+([evidence](../../../evidence/flashprove-tinyllama-2026-11-23.json)):
 
 - Ubuntu 24.04, x86_64, upstream `verifier/build.sh` with g++ 13.3. 108 of 108 calls compared equal,
-  with exit codes 99 times 1, 7 times 0, and 2 times 4 (planning calls inside `check_proof.py`), 1,670 s.
-  Earlier runs, the day before without the TinyLlama row and earlier the same day with looser forms
-  of it, passed with the same two verifier binaries.
+  with exit codes 99 times 1, 7 times 0, and 2 times 4 (planning calls inside `check_proof.py`), 1,638 s.
+  The revision of 2026-11-22, whose `prover.patch` also left the worst-case check out, passed the
+  same rows with the same two verifier binaries
+  ([evidence](../../../evidence/flashprove-tinyllama-2026-11-22.json)); earlier runs, without the
+  TinyLlama row or with looser forms of it, passed too.
 - macOS arm64, Apple clang 17 (`apple-clang`, built as `make verify-flashprove` builds it): 108 of 108
-  calls equal, 499 s.
+  calls equal, with the same exit codes, 351 s.
 - Both hosts' planning calls name the same TinyLlama-shaped files (equal `h_par` and
   `configuration`).
 
 Also at this revision, on the same Linux host:
 - **nvcc 13.2.86** (no GPU): upstream's `verifier/build.sh`, then `prover/build.sh serving_cp_commit`,
   `serving_cp_prove`, `cp_commit` and `cp_prove`, built both production programs and both test
-  builds from the patched source (exit 0; 26, 59, 20 and 46 minutes). Every compiler warning is in a
+  builds from the patched source (exit 0; 25, 65, 23 and 53 minutes). Every compiler warning is in a
   file that no patch changes. No program has run. Without a GPU, `build.sh` built its compiler
   sample but could not run it (status 77), so it checked the compiler by its version only. The build
-  records name the sources' digest `0fa9c1ff…`, which upstream's `build.sh` computes from the
+  records name the sources' digest `61295b3d…`, which upstream's `build.sh` computes from the
   sources and anyone can recompute from the pinned archive with the three patches applied;
 - the `integer_model` CPU suite (`pytest -m "not vllm and not prover"`, Python 3.13, torch
   2.13.0+cpu) on the tree that the target patched from the pins: 947 passed, 0 failed, 16 skipped
   (4 need a GPU, 12 `transformers`);
 - `weight_sums/tests/run_tests.sh`: 24 steps passed, among them both programs' refusal suites and
   every oracle step. The two `make_model` steps end with SIGILL, because that CPU has no SHA-NI;
-- Hallmark's `make check` at the last code change: one failure,
-  `tests/test_manifests.py::test_file_changed_during_read[abd]`, which fails on Hallmark's `main` on
-  that host too (3 of 3 runs); in other runs it was
+- Hallmark's `make check` at the last code change (`1208545`): 2,367 passed, 2 failed.
+  `tests/test_manifests.py::test_file_changed_during_read[abd]` fails on Hallmark's `main` on that
+  host too (5 of 6 runs): there two back-to-back writes leave a file's `st_mtime_ns` unchanged, so a
+  same-size rewrite during a read is not seen.
+  `tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker` fails on `main` there
+  too; its cause is not established. On 2026-11-22 the failure was the first alone, or
   `tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]` (4 of 5 on `main`). The
-  branch touches neither test nor `src/`. Every other step passed, as did `make package-check` (uv 0.9.18), `check-guard` and
-  `check-comparison`. On macOS the whole pytest suite passes (2,266 passed, 0 failed).
+  branch touches none of these tests and not `src/`. Every other step passed (`check-spec`,
+  `check-conformance` and `check-admission` run on their own, since `make` stops at pytest). On
+  macOS `make check` passes (pytest 2,279 passed, 0 failed), and so does `make docs`.
 
 **Recorded runs, of an earlier revision.** Three runs on 2026-11-21 (macOS arm64, `apple-clang`, 328-396
 s) passed the target as it then was:
@@ -283,22 +289,25 @@ change):
 **Current kit** (`scales.patch`, the lock files and `kit/` as pinned in `kit.json`): **passed on
 Linux and on macOS** on 2026-11-23, every row as required
 ([evidence](../../../evidence/flashprove-tinyllama-answer-2026-11-23.json)): Ubuntu 24.04 x86_64
-(fresh clone, every input downloaded, 1,877 s) and macOS arm64 (inputs from a checked local
-folder, 249 s).
+(a clone at the code's last commit, every input downloaded, 1,833 s) and macOS arm64 (inputs from
+a checked local folder, 258 s).
 
 - both environments hold exactly their lock files (43 and 19 distributions);
 - every required kit file, the GGUF file and the calibration set rebuilt byte for byte on both
   hosts; `maxima.json` (recorded only) equals the committed one on macOS and differs in its last
   digits on Linux, as upstream's `scales/README.md` expects across devices, while `words.json` (the
   scales) is the same; the calibration set's drawn rows have upstream's `DRAWS_SHA256`;
-- float reference: relative L2 3.9e-6 at the final norm; transformers' greedy reply is SASH's;
+- float reference: relative L2 3.9e-6 (macOS) and 1.3e-6 (Linux) at the final norm; transformers'
+  greedy reply is SASH's;
 - the integer model: SASH's eight tokens, no failed range condition over the 64 positions, the
-  gate's key at most 7,108, with every recorded peak and margin identical on the two hosts; logit
-  slopes 0.988 to 1.004 and correlations of at least 0.9991; the smallest top-1 margin 0.86 logits
-  (float: 1.06), at the full stop;
-- the mutation controls: with `s` + 1 the slope is 0.49 to 0.50 at every checked position; with
-  layer 10's `kv` + 1 the tokens and slopes stay, and the correlation falls to 0.994 to 0.997, below
-  the floor;
+  gate's key at most 7,108, with every recorded peak, margin and clamped cell identical on the two
+  hosts (the slopes and correlations, against each host's own float pass, differ by at most 1.1e-6);
+  logit slopes 0.988 to 1.004 and correlations of at least 0.9991; the smallest top-1 margin 0.86
+  logits (float: 1.06), at the full stop; one value entry beyond its clamp, `vw` in layer 2 at
+  position 32 (the final EOS), 2,233 against 2,047;
+- the mutation controls, identical on the two hosts: with `MF` + 1 the tokens stay and the slope is
+  1.98 to 2.01 at every checked position; with layer 10's `kv` + 1 the tokens and slopes stay, and
+  the correlation falls to 0.994 to 0.997, below the floor;
 - the planner's bounds for the kit: a proof of at most 14,061,196 bytes, 126.21 bits, the same as
   check 6, whose proof-system lines the kit keeps.
 

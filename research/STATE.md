@@ -11,7 +11,8 @@ such as TinyLlama-1.1B reach the verifier's standard form, give the provers and 
 constants for width 2,048, and keep upstream's mandatory worst-case check.
 `make verify-flashprove-tinyllama` checks them on the CPU and passed on Linux and macOS, including
 a TinyLlama-shaped planning check with placeholder scales; the prover patch compiles with nvcc
-([evidence](evidence/flashprove-tinyllama-2026-11-22.json)). No proof, no GPU run.
+([evidence](evidence/flashprove-tinyllama-2026-11-23.json); the 2026-11-22 revision, which skipped
+that check, [here](evidence/flashprove-tinyllama-2026-11-22.json)). No proof, no GPU run.
 
 2026-11-23. A fourth patch, `scales.patch`, lets upstream's scale tools fit a dense `llama` model, and
 `kit/` holds a TinyLlama-1.1B kit fitted by upstream's route from a GGUF export of the pinned model.

@@ -101,12 +101,12 @@ every file pinned, gives SASH's eight answer tokens after SASH's 25 prompt token
 64-token window with no failed range condition and the gate's key at most 32,639, with its logits
 following the float logits; two one-bit mutations of the kit must each fail that check.
 It passed on 2026-11-23 on Linux (x86_64, every input downloaded) and on macOS (arm64); both rebuilt
-every required file byte for byte, and the integer model's results are identical on the two
+every required file byte for byte, and the integer model's choices, peaks, margins and clamped cells are identical on the two
 ([evidence](../../research/evidence/flashprove-tinyllama-answer-2026-11-23.json)).
 
-The current revision of the patches passed `make verify-flashprove-tinyllama` on 2026-11-22 on Linux (upstream `verifier/build.sh`, g++ 13.3) and
+The current revision of the patches passed `make verify-flashprove-tinyllama` on 2026-11-23 on Linux (upstream `verifier/build.sh`, g++ 13.3) and
 on macOS (Apple clang 17, built as `make verify-flashprove` builds it;
-[evidence](../../research/evidence/flashprove-tinyllama-2026-11-22.json)). Upstream's `integer_model` CPU suite passes on the patched tree (947, 0 failed). Apart from upstream's
+[evidence](../../research/evidence/flashprove-tinyllama-2026-11-23.json)). Upstream's `integer_model` CPU suite passes on the patched tree (947, 0 failed). Apart from upstream's
 stored proofs and their altered copies, which both builds check, these are planning, parsing and
 table checks: no TinyLlama proof exists or is checked. The answer check runs the integer model, not a
 prover, on one request. Further one-off checks and their limits:

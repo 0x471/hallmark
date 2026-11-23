@@ -3321,3 +3321,30 @@ controls; a reviewer's mutations showed that one layer's shift off by one bit pa
 The planner bounds the kit's proof at 14,061,196 bytes and 126.21 bits, as for check 6, whose
 placeholder proof-system lines the kit keeps. No commitment, proof or GPU run; equal tokens are a
 smoke test, not equality of the two integer functions.
+
+## 2026-11-23: the review's fixes, the kept worst-case check, and reruns (proposed)
+
+Hypothesis: after an adversarial review, the patches and the answer check still pass with
+`prover.patch` keeping upstream's mandatory worst-case check, a dense reader that refuses more
+non-Llama-2 files, a mutation control that changes the logits themselves (`MF` + 1 in place of `s` +
+1, which changed only the check's own divisor), a NaN-safe correlation bound, minimal child
+environments and SUITE.md's own rows for its two scale tests. Pass criterion: both targets pass on
+Linux x86_64 and macOS arm64 at the last code change, and the prover patch compiles with nvcc.
+
+Result: passed at `1208545`
+([patches](evidence/flashprove-tinyllama-2026-11-23.json),
+[kit and answer](evidence/flashprove-tinyllama-answer-2026-11-23.json)). `prover.patch` is now
+13,205 bytes and changes five files; the four that only skipped the check are upstream's again.
+`make verify-flashprove-tinyllama`: 108 of 108 calls equal on both hosts (1,638 s and 351 s). nvcc
+13.2.86 built all four prover programs from the patched source (exit 0; warnings only in files no
+patch changes); no program ran. `make verify-flashprove-tinyllama-answer`: SASH's eight tokens on
+both hosts (1,833 s with every input downloaded, 258 s), with the same choices, peaks, margins and
+clamped cells (one: `vw` in layer 2 at the final EOS, 2,233 against 2,047); `MF` + 1 doubles the
+slope with the tokens unchanged, and layer 10's `kv` + 1 falls below the correlation floor. The
+floor, 0.998, set by hand before it, held in a one-off sweep: every layer's `kv`, `ko` and `kd` + 1,
+66 kits, all caught (5 by their tokens, 61 by the floor alone, the closest at 0.9962); 30 of them
+would have passed the earlier floor of 0.99. The margin is thin. Linux `make check`: 2 failures,
+both on `main` on that host too. The calibration text's licence is left to the owner; the kit
+stands or falls with it, the patches do not. Not shown: any proof through the verifier's NE 0
+branches (the 108 calls are all on MoE proofs), the worst-case check on the kit, any commitment or
+proof. No GPU, no spend.
