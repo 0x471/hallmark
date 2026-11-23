@@ -13,7 +13,8 @@ proof exists. `make verify-flashprove` (decision 0093) is unchanged.
 Fit a TinyLlama-1.1B kit for the proposed patches: `scales.patch` lets upstream's scale tools read a
 dense `llama` model, `export_gguf.py` writes the pinned model as GGUF (BF16 bits unchanged), and
 `research/probes/flashprove/tinyllama/kit/` holds the kit made by upstream's route. `make
-verify-flashprove-tinyllama-answer` rebuilds the file and the kit byte for byte on a CPU and requires
+verify-flashprove-tinyllama-answer` rebuilds the file and the kit on a CPU (every file byte for byte but the
+recorded `maxima.json`), in environments from hash-locked requirement files, and requires
 that upstream's integer model gives SASH's eight answer tokens on SASH's prompt, with no failed range
 condition; it passed on Linux and macOS. No commitment or proof is made.
 

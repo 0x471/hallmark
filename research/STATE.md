@@ -15,7 +15,7 @@ a TinyLlama-shaped planning check with placeholder scales; the prover patch comp
 
 2026-11-23. A fourth patch, `scales.patch`, lets upstream's scale tools fit a dense `llama` model, and
 `kit/` holds a TinyLlama-1.1B kit fitted by upstream's route from a GGUF export of the pinned model.
-`make verify-flashprove-tinyllama-answer` rebuilds the export and the kit byte for byte, and
+`make verify-flashprove-tinyllama-answer` rebuilds the export and the kit (every required file byte for byte), and
 upstream's integer model with the kit gives SASH's eight answer tokens on SASH's prompt, over a whole
 64-token window with no failed range condition, on Linux and on macOS
 ([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). The integer model is not a prover:

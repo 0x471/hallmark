@@ -51,15 +51,15 @@
     "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
     "version": "0.16.0"
   },
-  "commit": "28ae047, the code and kit of these runs",
+  "commit": "7f2c684, the code and kit of these runs",
   "kit_pins": {
     "schema_id": "hallmark.flashprove-tinyllama-kit/1",
     "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
     "patches_json_sha256": "c3ef0c5f274e41d46cf688b5704e9acb70d7c842f9e770156b5565dd17beb72e",
     "scales_patch": {
       "name": "scales.patch",
-      "sha256": "5eff281641dd27b35c617f01de3f1a2c8a223520a1c19a47acd0b95d215d6907",
-      "bytes": 28858
+      "sha256": "85f6a2ca63c94350a61c44c4b3366831cd2cbad0fccae0328eacb270a1478578",
+      "bytes": 33646
     },
     "model": {
       "case": "research/probes/sash/response-case.json",
@@ -88,7 +88,18 @@
           "tokenizers": "0.22.2",
           "safetensors": "0.8.0",
           "transformers": "5.15.1"
-        }
+        },
+        "locks": {
+          "macos-arm64": {
+            "file": "scales-macos-arm64.txt",
+            "sha256": "8c70674e284ddff5566bca9a20ff962dce933c5048905b0a9aa452de647337c7"
+          },
+          "linux-x86_64": {
+            "file": "scales-linux-x86_64.txt",
+            "sha256": "5e74b017f8c00ab192b17e12fa419ffff5ab348b893c76b8f5dd961e58ca5065"
+          }
+        },
+        "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13"
       },
       "integer_model": {
         "python": "3.13",
@@ -96,7 +107,18 @@
           "torch": "2.13.0",
           "numpy": "2.4.6",
           "gguf": "0.19.0"
-        }
+        },
+        "locks": {
+          "macos-arm64": {
+            "file": "integer_model-macos-arm64.txt",
+            "sha256": "43809fb499f1ef3e83661c572706d577863941da33cd7641cc9012180f1ec778"
+          },
+          "linux-x86_64": {
+            "file": "integer_model-linux-x86_64.txt",
+            "sha256": "8c45e5ca0398111b3795dccc2d88e53821f36563445d1aa40cbc1b5a5c0b2705"
+          }
+        },
+        "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13"
       }
     },
     "e_res": 11,
@@ -134,8 +156,12 @@
         0.75,
         1.33
       ],
-      "logit_correlation": 0.99
-    }
+      "logit_correlation": 0.998
+    },
+    "mutation_controls": [
+      "logit-exponent-s-plus-1",
+      "layer-10-kv-plus-1"
+    ]
   },
   "statement_compared": {
     "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
@@ -186,19 +212,19 @@
     "how": "FLASHPROVE_TINYLLAMA_INPUTS set to a folder of the pinned files (hard links; each checked against its pin), so no model download",
     "host": "macOS 15.7.1 (Darwin 24.6.0), Apple M4 Pro, arm64",
     "passed": true,
-    "seconds": 343.5,
+    "seconds": 339.9,
     "builds": {
       "patched": {
         "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
         "recipe": "apple-clang",
-        "seconds": 31.547634457994718,
+        "seconds": 32.220395500015,
         "sha256": "d1ad3a47ef22445c95770b12c6e5ef99b15e863ca1a4b91f3bef2b223b707ef4",
         "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52"
       },
       "upstream": {
         "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
         "recipe": "apple-clang",
-        "seconds": 32.17065374998492,
+        "seconds": 31.593762708012946,
         "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
         "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
       }
@@ -206,12 +232,80 @@
     "environments": {
       "integer_model": {
         "gguf": "0.19.0",
+        "installed": [
+          "certifi==2026.11.20",
+          "charset-normalizer==3.5.3",
+          "filelock==4.3.0",
+          "fsspec==2026.9.0",
+          "gguf==0.19.0",
+          "idna==3.20",
+          "jinja2==3.1.6",
+          "markupsafe==3.0.4",
+          "mpmath==1.3.0",
+          "networkx==3.7",
+          "numpy==2.4.6",
+          "pyyaml==6.0.4",
+          "requests==2.34.2",
+          "setuptools==84.2.1",
+          "sympy==1.14.0",
+          "torch==2.13.0",
+          "tqdm==4.70.1",
+          "typing-extensions==4.16.0",
+          "urllib3==2.8.0"
+        ],
+        "lock_file": "integer_model-macos-arm64.txt",
         "numpy": "2.4.6",
         "python": "3.13.2",
         "torch": "2.13.0"
       },
       "scales": {
         "gguf": "0.19.0",
+        "installed": [
+          "annotated-doc==0.0.7",
+          "annotated-types==0.8.0",
+          "anyio==4.16.0",
+          "certifi==2026.11.20",
+          "charset-normalizer==3.5.3",
+          "click==8.5.1",
+          "filelock==4.3.0",
+          "fsspec==2026.9.0",
+          "gguf==0.19.0",
+          "h11==0.16.0",
+          "hf-xet==1.8.0",
+          "httpcore==1.0.9",
+          "httpx==0.28.1",
+          "huggingface-hub==1.33.0",
+          "idna==3.20",
+          "jinja2==3.1.6",
+          "markdown-it-py==4.3.0",
+          "markupsafe==3.0.4",
+          "mdurl==0.1.2",
+          "mpmath==1.3.0",
+          "networkx==3.7",
+          "numpy==2.3.5",
+          "packaging==26.3",
+          "pyarrow==23.0.1",
+          "pydantic-core==2.50.5",
+          "pydantic==2.14.4",
+          "pygments==2.21.0",
+          "pyyaml==6.0.4",
+          "regex==2026.11.19",
+          "requests==2.34.2",
+          "rich==15.0.0",
+          "safetensors==0.8.0",
+          "setuptools==84.2.1",
+          "shellingham==1.5.4",
+          "sympy==1.14.0",
+          "tokenizers==0.22.2",
+          "torch==2.9.1",
+          "tqdm==4.70.1",
+          "transformers==5.15.1",
+          "typer==0.29.2",
+          "typing-extensions==4.16.0",
+          "typing-inspection==0.4.5",
+          "urllib3==2.8.0"
+        ],
+        "lock_file": "scales-macos-arm64.txt",
         "numpy": "2.3.5",
         "pyarrow": "23.0.1",
         "python": "3.13.2",
@@ -222,18 +316,19 @@
       }
     },
     "kit": {
-      "reproduced_byte_for_byte": true,
-      "files": [
+      "required_files_reproduced_byte_for_byte": true,
+      "required_files": [
         "KL.bin",
         "fold.txt",
         "layout.txt",
-        "maxima.json",
         "policy.txt",
         "words.json",
         "wsums.txt"
       ],
-      "maxima_equal_to_committed": true,
-      "calibrate_seconds": 89.3,
+      "maxima_json_recorded_only": {
+        "equal_to_committed": true
+      },
+      "calibrate_seconds": 79.2,
       "gguf": {
         "bytes": 2200293664,
         "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
@@ -266,7 +361,7 @@
         "status": 77
       },
       "test_gguf_weights.py": {
-        "last_line": "in part: 88 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
+        "last_line": "in part: 96 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
         "status": 77
       },
       "test_policy_tables.py": {
@@ -288,6 +383,52 @@
         2
       ],
       "float_greedy_is_the_answer": true
+    },
+    "mutation_controls": {
+      "layer-10-kv-plus-1": {
+        "choices": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "failed": [
+          "the logits' correlation at position 24: 0.99684",
+          "the logits' correlation at position 25: 0.99721",
+          "the logits' correlation at position 26: 0.99627",
+          "the logits' correlation at position 27: 0.99713",
+          "the logits' correlation at position 28: 0.99423",
+          "the logits' correlation at position 29: 0.99614",
+          "the logits' correlation at position 30: 0.99578",
+          "the logits' correlation at position 31: 0.99483"
+        ]
+      },
+      "logit-exponent-s-plus-1": {
+        "choices": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "failed": [
+          "the logits' scale at position 24: 0.4999",
+          "the logits' scale at position 25: 0.5022",
+          "the logits' scale at position 26: 0.4999",
+          "the logits' scale at position 27: 0.5018",
+          "the logits' scale at position 28: 0.4997",
+          "the logits' scale at position 29: 0.4995",
+          "the logits' scale at position 30: 0.4940",
+          "the logits' scale at position 31: 0.4958"
+        ]
+      }
     },
     "answer": {
       "T": 64,
@@ -404,27 +545,27 @@
           "token": 2
         }
       ],
-      "seconds": 5.4
+      "seconds": 4.7
     }
   },
   "linux_run": {
     "command": "make verify-flashprove-tinyllama-answer",
-    "how": "fresh clone at 28ae047; every input downloaded and checked",
+    "how": "fresh clone at 7f2c684; every input downloaded and checked",
     "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM",
     "passed": true,
-    "seconds": 1541.5,
+    "seconds": 1794.8,
     "builds": {
       "patched": {
         "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
         "recipe": "upstream verifier/build.sh",
-        "seconds": 191.11501673189923,
+        "seconds": 210.4374380679801,
         "sha256": "9bd671a98b0daecc4453ccd085f91b76475d2b07899ac822d0cb02023c9d6b26",
         "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52"
       },
       "upstream": {
         "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
         "recipe": "upstream verifier/build.sh",
-        "seconds": 192.937474722974,
+        "seconds": 205.5808870359324,
         "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
         "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
       }
@@ -432,12 +573,80 @@
     "environments": {
       "integer_model": {
         "gguf": "0.19.0",
+        "installed": [
+          "certifi==2026.11.20",
+          "charset-normalizer==3.5.3",
+          "filelock==4.3.0",
+          "fsspec==2026.9.0",
+          "gguf==0.19.0",
+          "idna==3.20",
+          "jinja2==3.1.6",
+          "markupsafe==3.0.4",
+          "mpmath==1.3.0",
+          "networkx==3.7",
+          "numpy==2.4.6",
+          "pyyaml==6.0.4",
+          "requests==2.34.2",
+          "setuptools==84.2.1",
+          "sympy==1.14.0",
+          "torch==2.13.0+cpu",
+          "tqdm==4.70.1",
+          "typing-extensions==4.16.0",
+          "urllib3==2.8.0"
+        ],
+        "lock_file": "integer_model-linux-x86_64.txt",
         "numpy": "2.4.6",
         "python": "3.13.15",
         "torch": "2.13.0+cpu"
       },
       "scales": {
         "gguf": "0.19.0",
+        "installed": [
+          "annotated-doc==0.0.7",
+          "annotated-types==0.8.0",
+          "anyio==4.16.0",
+          "certifi==2026.11.20",
+          "charset-normalizer==3.5.3",
+          "click==8.5.1",
+          "filelock==4.3.0",
+          "fsspec==2026.9.0",
+          "gguf==0.19.0",
+          "h11==0.16.0",
+          "hf-xet==1.8.0",
+          "httpcore==1.0.9",
+          "httpx==0.28.1",
+          "huggingface-hub==1.33.0",
+          "idna==3.20",
+          "jinja2==3.1.6",
+          "markdown-it-py==4.3.0",
+          "markupsafe==3.0.4",
+          "mdurl==0.1.2",
+          "mpmath==1.3.0",
+          "networkx==3.7",
+          "numpy==2.3.5",
+          "packaging==26.3",
+          "pyarrow==23.0.1",
+          "pydantic-core==2.50.5",
+          "pydantic==2.14.4",
+          "pygments==2.21.0",
+          "pyyaml==6.0.4",
+          "regex==2026.11.19",
+          "requests==2.34.2",
+          "rich==15.0.0",
+          "safetensors==0.8.0",
+          "setuptools==84.2.1",
+          "shellingham==1.5.4",
+          "sympy==1.14.0",
+          "tokenizers==0.22.2",
+          "torch==2.9.1+cpu",
+          "tqdm==4.70.1",
+          "transformers==5.15.1",
+          "typer==0.29.2",
+          "typing-extensions==4.16.0",
+          "typing-inspection==0.4.5",
+          "urllib3==2.8.0"
+        ],
+        "lock_file": "scales-linux-x86_64.txt",
         "numpy": "2.3.5",
         "pyarrow": "23.0.1",
         "python": "3.13.15",
@@ -448,18 +657,19 @@
       }
     },
     "kit": {
-      "reproduced_byte_for_byte": true,
-      "files": [
+      "required_files_reproduced_byte_for_byte": true,
+      "required_files": [
         "KL.bin",
         "fold.txt",
         "layout.txt",
-        "maxima.json",
         "policy.txt",
         "words.json",
         "wsums.txt"
       ],
-      "maxima_equal_to_committed": false,
-      "calibrate_seconds": 594.2,
+      "maxima_json_recorded_only": {
+        "equal_to_committed": false
+      },
+      "calibrate_seconds": 667.0,
       "gguf": {
         "bytes": 2200293664,
         "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
@@ -492,7 +702,7 @@
         "status": 77
       },
       "test_gguf_weights.py": {
-        "last_line": "in part: 88 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
+        "last_line": "in part: 96 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
         "status": 77
       },
       "test_policy_tables.py": {
@@ -514,6 +724,52 @@
         2
       ],
       "float_greedy_is_the_answer": true
+    },
+    "mutation_controls": {
+      "layer-10-kv-plus-1": {
+        "choices": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "failed": [
+          "the logits' correlation at position 24: 0.99684",
+          "the logits' correlation at position 25: 0.99721",
+          "the logits' correlation at position 26: 0.99627",
+          "the logits' correlation at position 27: 0.99713",
+          "the logits' correlation at position 28: 0.99423",
+          "the logits' correlation at position 29: 0.99614",
+          "the logits' correlation at position 30: 0.99578",
+          "the logits' correlation at position 31: 0.99483"
+        ]
+      },
+      "logit-exponent-s-plus-1": {
+        "choices": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "failed": [
+          "the logits' scale at position 24: 0.4999",
+          "the logits' scale at position 25: 0.5022",
+          "the logits' scale at position 26: 0.4999",
+          "the logits' scale at position 27: 0.5018",
+          "the logits' scale at position 28: 0.4997",
+          "the logits' scale at position 29: 0.4995",
+          "the logits' scale at position 30: 0.4940",
+          "the logits' scale at position 31: 0.4958"
+        ]
+      }
     },
     "answer": {
       "T": 64,
@@ -630,33 +886,33 @@
           "token": 2
         }
       ],
-      "seconds": 32.7
+      "seconds": 41.0
     }
   },
-  "first_made": "The kit files were first made in a scratch run on the Mac (the same tools, before the target existed) and committed; both target runs rebuilt every one of them byte for byte.",
+  "first_made": "The kit files were first made in a scratch run on the Mac (the same tools, before the target existed) and committed; both target runs rebuilt every required one byte for byte (maxima.json is recorded only).",
   "not_run": [
     "any commitment or proof; no GPU was used",
     "cp_commit's worst-case check (GPU only; prover.patch leaves it out under -public-weights)",
     "cp_prove's rules beyond its parameter-file reader",
     "any prompt other than SASH's, and any T other than 64",
-    "the make_model cases of upstream's scale tests (they need SHA-NI); status 77, passed in part"
+    "the make_model cases of upstream's scale tests: the target builds no make_model and sets no SMALL_MODEL, so they skip on every host (status 77, passed in part)"
   ],
   "tinyllama_proof": false,
   "gpu_used": false,
   "hiding_claim": false,
-  "equal_tokens_mean": "a smoke test that the integer model is TinyLlama on this request, not that FlashProve's and SASH's integer functions are equal",
+  "equal_tokens_mean": "a smoke test that the integer model agrees with SASH's answer on this request, not that FlashProve's and SASH's integer functions are equal",
   "cross_host": {
-    "kit_files_gguf_and_calibration_set": "identical on both hosts (each run requires byte equality with the pins)",
-    "maxima_json": "equal to the committed file on macOS; differs in last digits on Linux, which upstream's scales/README.md expects across devices and libraries; words.json (the scales) is identical",
-    "integer_model": "choices, every recorded peak and every top-1 margin identical on both hosts",
-    "python": "3.13.2 (macOS) and 3.13.15 (Linux): the same calibration set"
+    "required_files_gguf_and_calibration_set": "identical on both hosts (each run requires byte equality with the pins)",
+    "maxima_json": "recorded only: equal to the committed file on macOS, last digits differ on Linux, which upstream's scales/README.md expects across devices and libraries; words.json (the scales) is identical",
+    "integer_model": "choices, every recorded peak, every top-1 margin and both controls' figures identical on both hosts",
+    "environments": "each host's environments hold exactly its platform's lock file; Python 3.13.2 (macOS) and 3.13.15 (Linux)"
   },
-  "gates_at_8153a39": {
-    "linux_make_check": "2363 passed, 2 failed, 12 skipped (Ubuntu host above). tests/test_manifests.py::test_file_changed_during_read[abd] also fails on main on that host (earlier record); tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker passed 3 of 3 runs alone at 8153a39 and 3 of 3 on main e2cc6d6. The branch changes no file under src/ and neither test.",
-    "linux_package_check": "passed (uv 0.9.18)",
-    "mac_pytest": "2275 passed, 0 failed, 102 skipped",
-    "docs": "make docs passed, 176 pages",
-    "live_spec_audit": "scripts/check_spec.py --live: passed, live matched (macOS)",
-    "lint": "ruff check and ruff format --check: clean"
+  "review_history": "An earlier run of this target at 28ae047 (before two reviews) passed with a correlation floor of 0.99, no mutation controls and environments pinned only at the top level; a reviewer's one-bit mutations of the kit showed that one layer's shift off by one bit passed those bounds. These runs are at 7f2c684, with the floor at 0.998, the two controls and hash-locked environments.",
+  "make_verify_flashprove": {
+    "command": "make verify-flashprove (decision 0093)",
+    "host": "macOS arm64",
+    "commit": "192788e",
+    "result": "passed, 99 rejections, 225.6 s, with 0093's pinned unpatched source digest",
+    "note": "scripts/flashprove.py is unchanged since 192788e"
   }
 }

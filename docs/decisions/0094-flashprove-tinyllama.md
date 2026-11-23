@@ -42,8 +42,9 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
   - it does not ask `routed-experts` or `both-clamps` at NE 0;
   - no check of a proof's bytes changes; only admission does.
 - **`prover.patch`**:
-  - adds the fold constants for width 2,048 and head width 64 (`0x3FB504F3`, `0x3E3504F3`, by
-    upstream's own rule), and makes `cp_commit` check the model file's width, head width and expert
+  - adds the fold constants for width 2,048 and head width 64 (`0x3FB504F3`, `0x3E3504F3`). Their
+    rule, RN32(sqrt(d) / 2^t), is Hallmark's generalisation of upstream's RN32(sqrt(d) / 64): the
+    same from width 4,096 to 16,383, twice it at 2,048, so that the fit needs no change. It also makes `cp_commit` check the model file's width, head width and expert
     layers against the parameter file, as `cp_prove` already does;
   - adds the same three-digest form to the provers' parameter-file reader;
   - leaves out the worst-case check under `-public-weights` unless asked for. The check is a hiding
@@ -94,16 +95,18 @@ builds both verifiers and requires:
   `table-digests`: at this shape the patch changes admission and nothing else that the planner sees.
 
 `make verify-flashprove-tinyllama-answer` (CPU, downloads the pinned model) rebuilds the GGUF file
-and the kit byte for byte from pinned inputs, checks the kit with both planners and the provers'
+and the kit from pinned inputs (every file byte for byte but `maxima.json`, which is device-dependent
+and recorded only), in environments from hash-locked requirement files, checks the kit with both planners and the provers'
 reader, runs upstream's scale-tool tests on the patched tree and a float reference against
 transformers, and then requires **the decisive check**: upstream's integer model, with the kit and
 every file pinned, gives SASH's eight answer tokens after SASH's 25 prompt tokens, over a whole
-64-token window with no failed range condition and the gate's key at most 32,639.
+64-token window with no failed range condition and the gate's key at most 32,639, with its logits
+following the float logits; two one-bit mutations of the kit must each fail that check.
 It passed on 2026-11-23 on Linux (x86_64, every input downloaded) and on macOS (arm64); both rebuilt
-the kit byte for byte, and the integer model's results are identical on the two
+every required file byte for byte, and the integer model's results are identical on the two
 ([evidence](../../research/evidence/flashprove-tinyllama-answer-2026-11-23.json)).
 
-The current revision passed it on 2026-11-22 on Linux (upstream `verifier/build.sh`, g++ 13.3) and
+The current revision of the patches passed `make verify-flashprove-tinyllama` on 2026-11-22 on Linux (upstream `verifier/build.sh`, g++ 13.3) and
 on macOS (Apple clang 17, built as `make verify-flashprove` builds it;
 [evidence](../../research/evidence/flashprove-tinyllama-2026-11-22.json)). Upstream's `integer_model` CPU suite passes on the patched tree (947, 0 failed). Apart from upstream's
 stored proofs and their altered copies, which both builds check, these are planning, parsing and
@@ -119,14 +122,16 @@ decisive free check above. Equal tokens are a smoke test, not a proof that the t
 are equal; #187's like-for-like section must name each backend's model, conversion, request, window,
 range and statement.
 
-1. **The calibration text's licence**: WikiText-2 (CC BY-SA 3.0, GFDL), as in upstream's rule; only
-   token ids derived from it are used, and none is committed. The owner decides.
+1. **The calibration text's licence**: WikiText-2 (CC BY-SA; its dataset card's tags name 3.0 and
+   GFDL, its text 4.0), as in upstream's rule. No text or token id from it is committed, but the
+   kit's scales are computed from it. The owner decides; a no means refitting on another text.
 2. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks).
    The prover patch already compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s
    worst-case check, which `prover.patch` leaves out under `-public-weights`, and `cp_prove`'s rules
    beyond its parameter-file reader run only there.
-3. **#187's proof-system lines.** The kit keeps check 6's lines, set from the verifier's rules, not
-   sized for speed; a kit for each number of checked tokens in #187's sweep.
+3. **#187's proof-system lines.** The kit keeps check 6's lines: placeholders set from the verifier's
+   rules, not sized for speed, which `cp_prove` has judged only by its parameter-file reader; a kit
+   for each number of checked tokens in #187's sweep.
 
 **Not claimed.** No dense proof exists. There is no claim of soundness of the patched C++ or CUDA code,
 no Lean coverage, no hiding, and no like-for-like numbers yet.

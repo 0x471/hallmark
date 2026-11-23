@@ -3295,22 +3295,29 @@ Hypothesis: with a fourth patch for upstream's scale tools, upstream's own route
 TinyLlama-1.1B-Chat (T = 64, e_res 11) from a GGUF export of the pinned model, the patched verifier
 admits that kit in the standard parameter form, and upstream's integer model with it gives SASH's
 eight answer tokens on SASH's 25 prompt tokens. Pass criterion: `make
-verify-flashprove-tinyllama-answer` passes: the export and every kit file are rebuilt byte for byte
-from pinned inputs, both planners and the provers' reader judge the kit as expected, upstream's
-scale-tool tests pass on the patched tree, the float pass agrees with transformers, and the integer
-model gives `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]` over a whole 64-token window with no failed
-range condition.
+verify-flashprove-tinyllama-answer` passes: environments made from hash-locked requirement files
+hold exactly those files; the export and every kit file but the device-dependent `maxima.json` are
+rebuilt byte for byte from pinned inputs; both planners and the provers' reader judge the kit as
+expected; upstream's scale-tool tests pass on the patched tree; the float pass agrees with
+transformers; the integer model gives `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]` over a whole
+64-token window with no failed range condition and logits within the slope and correlation bounds;
+and two one-bit mutations of the kit each fail.
 
-Result: passed on Linux x86_64 (fresh clone, every input downloaded, 1,541 s) and on macOS arm64
-(343 s, model files from a checked local folder)
-([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). Both hosts rebuilt every kit file
-byte for byte; `maxima.json` differs in its last digits on Linux, as upstream expects, with the same
-scales. The integer model's choices, peaks and margins are identical on the two hosts. The drawn calibration rows have
-upstream's own `DRAWS_SHA256`, which upstream's tests do not reproduce. The float pass on the export
-agrees with transformers to a relative L2 of 3.9e-6. The integer model gives SASH's eight tokens, no
-range condition fails at any of the 64 positions, and the gate's key peaks at 7,108 (limit 32,639).
-Its logits over 2^17 follow the float logits with a slope of 0.988 to 1.004 and a correlation of at
-least 0.9991 at each checked position; the smallest top-1 margin is 0.86 (float: 1.06), at the full
-stop. The planner bounds the kit's proof at 14,061,196 bytes and 126.21 bits, as for check 6, whose
-proof-system lines the kit keeps. No commitment, proof or GPU run; equal tokens are a smoke test,
-not equality of the two integer functions.
+Result: passed on Linux x86_64 (fresh clone, every input downloaded, 1,795 s) and on macOS
+arm64 (340 s, model files from a checked local folder)
+([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). Both hosts rebuilt every
+required file byte for byte; `maxima.json`, recorded only, differs in its last digits on Linux, as
+upstream expects, with the same scales. The integer model's choices, peaks and margins are identical
+on the two hosts. The drawn calibration rows have upstream's own `DRAWS_SHA256`, which upstream's
+tests do not reproduce. The float pass on the export agrees with transformers to a relative L2 of
+3.9e-6. The integer model gives SASH's eight tokens, no range condition fails at any of the 64
+positions (one value cell clamps, at the final EOS), and the gate's key peaks at 7,108 (limit
+32,639). Its logits over 2^17 follow the float logits with a slope of 0.988 to 1.004 and a
+correlation of at least 0.9991; the smallest top-1 margin is 0.86 (float: 1.06), at the full stop.
+The controls fail as required: `s` + 1 halves the slope, and layer 10's `kv` + 1, which leaves the
+tokens and slopes as they are, lowers the correlation to 0.994 to 0.997, below the floor of 0.998.
+An earlier run of this target, before both reviews, passed with a correlation floor of 0.99 and no
+controls; a reviewer's mutations showed that one layer's shift off by one bit passed those bounds.
+The planner bounds the kit's proof at 14,061,196 bytes and 126.21 bits, as for check 6, whose
+placeholder proof-system lines the kit keeps. No commitment, proof or GPU run; equal tokens are a
+smoke test, not equality of the two integer functions.

@@ -69,8 +69,12 @@ What a patched `YES` means that upstream's does not:
 ### `prover.patch` (cp_commit, cp_prove; 9 files)
 
 - **Fold constants (P1).** The conversion multiplies each norm's gains into the next matrix by c_0 =
-  RN32(sqrt(d) / 2^t), where t is the largest integer with 4^t <= d, and by c_0 / sqrt(dh) for `attn_q`
-  (`scales/README.md`, "The exponent of each cell", step 2). Upstream hard-codes them for 5,120/128.
+  RN32(sqrt(d) / 2^t), where t is the largest integer with 4^t <= d, and by c_0 / sqrt(dh) for `attn_q`.
+  This rule is Hallmark's generalisation, not upstream's: upstream defines c_0 = RN32(sqrt(d) / 64)
+  (`docs/model.md`, 11.3), which is the same from width 4,096 to 16,383 but at 2,048 would be half
+  of this one (`0x3F3504F3`). Hallmark's form makes c_0 cancel the factor c of sqrt(d) = c 2^t
+  (`scales/README.md`, "The exponent of each cell", step 2), so the fit's shifts need no change.
+  Upstream hard-codes its constants for 5,120/128.
   The patch adds a table of admitted shapes: (5,120, 128) with upstream's `0x3F8F1BBD`, `0x3DCA62C2`,
   and (2,048, 64) with `0x3FB504F3`, `0x3E3504F3` (sqrt 2 and sqrt 2 / 8). These are exact bit
   patterns, not computed at run time.
@@ -231,12 +235,14 @@ as noted.
 
 [`scales.patch`](scales.patch), a fourth patch pinned in [`kit.json`](kit.json) (not `patches.json`, so
 the three patches above and their records stay as they are), lets upstream's scale tools fit a dense
-`llama` model. Its 7 files are all under `scales/`, each marked "Hallmark dense patch":
+`llama` model. Its 8 files are under `scales/`, and `SUITE.md`, each marked "Hallmark dense patch":
 
 - `gguf_weights.py`: `shape_words()` also reads the architecture `llama`, dense only: no experts,
-  the rotary encoding in every layer, and the head dimension and rotary base required from the file.
-  A `llama` file with experts, a router, rotary rescaling (`rope_freqs.weight`) or biases is
-  refused, since the float pass would not read those tensors;
+  the rotary encoding on all coordinates of every layer, and the head dimension, rotary base,
+  rotary dimension and norm epsilon required from the file. A `llama` file with experts, a router,
+  rotary rescaling (`rope_freqs.weight`, or a `rope.scaling` or `rope.scale_linear` key), a rotary
+  dimension other than the head dimension, biases or query/key norms is refused, since the float
+  pass would compute another function;
 - `policy_tables.py`: at NE 0 it computes the three tables a dense model forms (24 lines, no
   `tsig`), the form `verifier.patch` admits;
 - `words_to_policy.py`: the rotary base may be 10,000 as well as 500,000 (the verifier's
@@ -247,8 +253,9 @@ the three patches above and their records stay as they are), lets upstream's sca
 - `fit_scales.py`: a comment only. Its shifts are right at width 2,048 as written, because the
   patched conversion multiplies by RN32(sqrt(d) / 2^t), not sqrt(d) / 64, so no factor 2^(t - 6) is
   left;
+- `SUITE.md`: its `scales.policy_tables` row counts 23 tests, one more than upstream's;
 - upstream's tests: the NE 0 rejection case of `test_policy_tables.py` becomes a test of the three
-  tables, `test_gguf_weights.py` gets 9 dense cases, and its "another architecture" case now uses a
+  tables, `test_gguf_weights.py` gets 16 dense cases, and its "another architecture" case now uses a
   name that stays unsupported.
 
 [`export_gguf.py`](export_gguf.py) writes TinyLlama-1.1B-Chat-v1.0 (the revision and file pins of
@@ -269,29 +276,36 @@ change):
 | step | requirement |
 |---|---|
 | export | the GGUF file's SHA-256 is the pin in `kit.json` |
+| environments | two virtual environments made by uv from this platform's hash-locked file in `requirements/` (macOS arm64 or Linux x86_64; pinned in `kit.json`), installed with `--require-hashes`; the top-level versions must be upstream's, and the full installed set is recorded |
 | setup files | `weight_sums` (patched) and `fold.txt` equal `kit/` byte for byte |
 | calibration set | `--tinyllama` gives the pinned set, and its drawn rows have upstream's own `DRAWS_SHA256` (steps 1 to 3 of upstream's rule run on byte-identical inputs) |
 | fit | `calibrate.py` gives `kit/words.json` byte for byte; `maxima.json` is compared and recorded |
 | configuration | `words_to_policy.py` ends `w2p end 0`; it and `pack_layout.py` give `kit/policy.txt`, `KL.bin` and `layout.txt` byte for byte |
 | planning | on the kit and on SASH's request (66 words: 25 prompt ids, 8 answer ids, 31 filler 0, r = 24, e = 32), the patched planner prints its whole ending in the standard parameter form with three tables and the pinned `h_par` and `configuration`; the unpatched build ends `NO: policy-tables`; the provers' parameter-file reader admits the kit |
-| upstream's scale tests | `test_policy_tables.py`, `table_ties.py`, `test_calibrate.py` and `test_gguf_weights.py` pass on the patched tree, as `SUITE.md` runs them (`make_model` cases skip without SHA-NI) |
+| upstream's scale tests | `test_policy_tables.py`, `table_ties.py`, `test_calibrate.py` and `test_gguf_weights.py` pass on the patched tree, the first two with `SUITE.md`'s commands (the other two have no row). Status 77, passed in part, is accepted with an "in part" last line: the target builds no `make_model` and sets no `SMALL_MODEL`, so those cases skip on every host |
 | float reference | upstream's float pass on the GGUF agrees with Hugging Face transformers on the safetensors at the final norm (relative L2 at most 1e-4), and transformers' greedy decoding gives SASH's answer |
-| **the answer** | upstream's integer model (patched, torch 2.13.0), with every file pinned and the weights' integers checked against `wsums.txt`, run over the whole 64-token window: no range condition fails at any position; the greedy choices at positions 24 to 31 are SASH's `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]`; the gate's key stays at most 32,639; and at each checked position the integer logits over 2^s have a slope of 0.75 to 1.33 and a correlation of at least 0.99 against the float logits (a shift off by one bit would give a slope near 0.5 or 2) |
+| **the answer** | upstream's integer model (patched, torch 2.13.0), with every file pinned and the weights' integers checked against `wsums.txt`, run over the whole 64-token window: no range condition fails at any position; the greedy choices at positions 24 to 31 are SASH's `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]`; the gate's key stays at most 32,639 (the integer model's condition for a key without the clamp `gcl`; it is meant to match the provers' refusal, but upstream has not compared its range tests with the released `cp_prove`); and at each checked position the integer logits over 2^s have a slope of 0.75 to 1.33 and a correlation of at least 0.998 against the float logits. The slope bound catches an error in the logits' overall scale (`s` or `MF` off by one bit gives a slope near 0.5 or 2); the correlation floor is set from the runs' 0.9991 so that one layer's shift off by one bit, which can leave the tokens and the slope as they are, falls below it |
+| mutation controls | the same check on two one-bit changes of the kit must fail at least one condition: `s` + 1 in `policy.txt`, and layer 10's `kv` + 1 in `KL.bin` |
 
-**Current kit** (`scales.patch` and `kit/` as pinned in `kit.json`): **passed on Linux and on
-macOS** on 2026-11-23, every row as required
+**Current kit** (`scales.patch`, the lock files and `kit/` as pinned in `kit.json`): **passed on
+Linux and on macOS** on 2026-11-23, every row as required
 ([evidence](../../../evidence/flashprove-tinyllama-answer-2026-11-23.json)): Ubuntu 24.04 x86_64
-(fresh clone, every input downloaded, 1,541 s) and macOS arm64 (inputs from a checked local
-folder, 343 s).
+(fresh clone, every input downloaded, 1,795 s) and macOS arm64 (inputs from a checked local
+folder, 340 s).
 
-- every kit file, the GGUF file and the calibration set rebuilt byte for byte on both hosts;
-  `maxima.json` equals the committed one on macOS and differs in its last digits on Linux, as
-  upstream's `scales/README.md` expects across devices, while `words.json` (the scales) is the same;
-  the calibration set's drawn rows have upstream's `DRAWS_SHA256`;
+- both environments hold exactly their lock files (43 and 19 distributions);
+- every required kit file, the GGUF file and the calibration set rebuilt byte for byte on both
+  hosts; `maxima.json` (recorded only) equals the committed one on macOS and differs in its last
+  digits on Linux, as upstream's `scales/README.md` expects across devices, while `words.json` (the
+  scales) is the same; the calibration set's drawn rows have upstream's `DRAWS_SHA256`;
 - float reference: relative L2 3.9e-6 at the final norm; transformers' greedy reply is SASH's;
 - the integer model: SASH's eight tokens, no failed range condition over the 64 positions, the
-  gate's key at most 7,108, with every recorded peak and margin identical on the two hosts; logit slopes 0.988 to 1.004 and correlations of at least 0.9991; the
-  smallest top-1 margin 0.86 logits (float: 1.06), at the full stop;
+  gate's key at most 7,108, with every recorded peak and margin identical on the two hosts; logit
+  slopes 0.988 to 1.004 and correlations of at least 0.9991; the smallest top-1 margin 0.86 logits
+  (float: 1.06), at the full stop;
+- the mutation controls: with `s` + 1 the slope is 0.49 to 0.50 at every checked position; with
+  layer 10's `kv` + 1 the tokens and slopes stay, and the correlation falls to 0.994 to 0.997, below
+  the floor;
 - the planner's bounds for the kit: a proof of at most 14,061,196 bytes, 126.21 bits, the same as
   check 6, whose proof-system lines the kit keeps.
 
@@ -312,17 +326,26 @@ folder, 343 s).
 - **The kit's proof-system lines are check 6's**, not sized for speed: the full kit's values, with
   the lines that TinyLlama's shape forces (`ll`, which 22 layers force from 2 to 1; `la`, `lB`,
   `lmS`, `kFD`, `iotaA_0`, `iotaH_0` to `iotaH_2`, `ranges-part`) set from the verifier's own rules
-  and refusals. The fit changes only the scales and the six lines that depend on them. The
-  planner's sizes and bits for the kit are bounds of these lines, not measurements, and #187 may
-  want smaller ones.
-- **One request.** The answer check covers SASH's one prompt in one window of T = 64. Another prompt
-  can clamp a cell or fail a range condition. #187's sweep over the number of checked tokens needs a
+  and refusals. The fit changes only the scales and the six lines that depend on them. They are
+  placeholders that `cp_prove` has not judged beyond its parameter-file reader; it has further
+  checks at run time (for example `forest-depth-A` in `prover/attn/front.cuh`). The planner's sizes
+  and bits for the kit are bounds of these lines, not measurements, and #187 may want smaller ones.
+- **One request.** The answer check covers SASH's one prompt in one window of T = 64. On it one value
+  cell clamps (`v` in layer 2, 2,233 to 2,047, at position 32, the final EOS, after the checked
+  positions); another prompt
+  can clamp other cells or fail a range condition. #187's sweep over the number of checked tokens needs a
   kit for each T.
-- **Equal tokens are a smoke test.** They show that this integer model is TinyLlama on this request,
-  not that FlashProve's and SASH's integer functions are equal.
-- **The calibration text is WikiText-2** (CC BY-SA 3.0 and GFDL, by its dataset card), as in
-  upstream's rule. Only token ids derived from it are used, and none is committed. Whether it suits
-  Hallmark's source rules is the owner's call.
+- **Equal tokens are a smoke test.** They show that this integer model agrees with SASH's answer on
+  this request, not that FlashProve's and SASH's integer functions are equal. The mutation controls
+  show that the bounds catch two kinds of one-bit error; other single errors may still pass.
+- **The calibration text is WikiText-2**, as in upstream's rule: CC BY-SA (its dataset card's tags
+  name CC BY-SA 3.0 and GFDL, its text CC BY-SA 4.0). No text and no token id from it is committed,
+  but numbers computed from it are: `kit/maxima.json`, `words.json`, `KL.bin`, six lines of
+  `policy.txt`, and the calibration set's SHA-256 in `kit.json`. Whether that suits Hallmark's source
+  rules is the owner's call; if not, the kit must be refitted on another text.
+- **The environments pin every distribution by hash, but not Python's patch version** (uv's choice
+  of 3.13; the runs had 3.13.2 and 3.13.15), and only for macOS arm64 and Linux x86_64. They are
+  installed from PyPI and, for torch on Linux, from PyTorch's CPU index.
 - **The float reference is Hugging Face transformers 5.15.1**, run as a check of the export. It is
   not part of any statement.
 
