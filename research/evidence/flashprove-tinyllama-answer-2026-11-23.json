@@ -914,5 +914,14 @@
     "commit": "192788e",
     "result": "passed, 99 rejections, 225.6 s, with 0093's pinned unpatched source digest",
     "note": "scripts/flashprove.py is unchanged since 192788e"
+  },
+  "gates": {
+    "commit": "7f2c684 (code) and f6015d1 (these records); the records commit changes no code",
+    "macos_make_check": "passed at 7f2c684: uv lock --check, ruff check, ruff format --check, mypy (42 files), pytest 2278 passed 0 failed 102 skipped, check-spec, check-conformance, check-admission",
+    "linux_make_check": "at f6015d1: ruff and formatting pass; pytest 2367 passed, 1 failed (tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker), 12 skipped, so make stops there; check-spec, check-conformance and check-admission then passed when run on their own",
+    "linux_control_on_main": "the full pytest suite on main (e2cc6d6) on the same host, the same day: 2292 passed, 3 failed, among them the same e2e test (with tests/test_manifests.py::test_file_changed_during_read[abd] and tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]); the e2e test passed 3 of 3 runs alone at f6015d1. Its cause is not established; it fails on main too",
+    "linux_package_check": "passed (uv 0.9.18)",
+    "docs": "make docs passed, 176 pages",
+    "live_spec_audit": "scripts/check_spec.py --live: passed, live matched (macOS)"
   }
 }
