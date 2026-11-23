@@ -122,8 +122,9 @@ range and statement.
 
 1. **The calibration text's licence**: WikiText-2 (CC BY-SA; its dataset card's tags name 3.0 and
    GFDL, its text 4.0), as in upstream's rule. No text or token id from it is committed, but the
-   kit's scales are computed from it. Reviewed under `research/AUTHORITY.json`'s source selection
-   (recorded in `kit.json`); the owner may overrule, which means refitting on another text.
+   kit's scales are computed from it. The card's tags and its text name different versions, and
+   `research/AUTHORITY.json` excludes ambiguous licences, so the owner decides; a no means refitting
+   on another text. The patches do not depend on it.
 2. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks).
    The prover patch compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s mandatory
    worst-case check (whether the kit passes it is not known; if not, its scales are made coarser)
