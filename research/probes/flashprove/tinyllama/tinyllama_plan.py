@@ -2,7 +2,8 @@
 
 usage: python3 -I -B tinyllama_plan.py TREE OUT
 
-TREE is the pinned upstream source with the three patches applied; OUT must not exist. It starts
+TREE is the pinned upstream source with the three program patches applied (scales.patch too, in
+the answer target: it changes nothing this file reads); OUT must not exist. It starts
 from upstream's prover/examples/target_full_f2 (Llama 4 Maverick's shape) and makes it dense the
 way the patched verifier/tests/served_form_test.py does for its dense case:
 

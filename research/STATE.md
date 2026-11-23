@@ -8,7 +8,7 @@ Updated: 2026-11-23. Phase: MIT-licensed research software in a public repositor
 three pinned patches on FlashProve `9e2bdd8`
 ([`research/probes/flashprove/tinyllama/`](probes/flashprove/tinyllama/README.md)). They let a dense model
 such as TinyLlama-1.1B reach the verifier's standard form, give the provers and CPU tools the
-constants for width 2,048, and leave the worst-case check out under `-public-weights`.
+constants for width 2,048, and keep upstream's mandatory worst-case check.
 `make verify-flashprove-tinyllama` checks them on the CPU and passed on Linux and macOS, including
 a TinyLlama-shaped planning check with placeholder scales; the prover patch compiles with nvcc
 ([evidence](evidence/flashprove-tinyllama-2026-11-22.json)). No proof, no GPU run.

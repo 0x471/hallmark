@@ -66,7 +66,7 @@ What a patched `YES` means that upstream's does not:
 - **Lean covers neither form.** Its statement is for one model size (`lean/GAPS.md`), so it covers
   neither this nor a padded TinyLlama.
 
-### `prover.patch` (cp_commit, cp_prove; 9 files)
+### `prover.patch` (cp_commit, cp_prove; 5 files)
 
 - **Fold constants (P1).** The conversion multiplies each norm's gains into the next matrix by c_0 =
   RN32(sqrt(d) / 2^t), where t is the largest integer with 4^t <= d, and by c_0 / sqrt(dh) for `attn_q`.
@@ -85,21 +85,14 @@ What a patched `YES` means that upstream's does not:
     Tensor sizes alone cannot tell dh 64 with H 32, G 4 from dh 128 with H 16, G 2.
 - **Three digests (P3).** The provers' parameter-file reader (`common/parameter_file.h`) takes the
   same two digest forms as the verifier, with the same rule.
-- **Worst-case check (P4).** Under `-public-weights` (the published seed in `isk.txt`'s line
-  `seed public`), `cp_commit` leaves out the worst-case check unless `-worst-case` or
-  `-worst-case-table` is given, as it already does under the test option `-test-seed`. `cp_prove` then
-  starts without `isk.txt`'s line `ranges`, but only under `seed public` and `-public-weights`.
-  - The check is a hiding safeguard. "Soundness does not rest on it"
-    (`scales/worst-case-bounds.md`), and with public weights nothing is hidden. The cost: a request
-    whose values leave a range ends `failed`.
-  - Files: `weights_commitment/arguments.h`, `hash_commitment/hf_commit.cu`, `prover/isk.cuh`,
-    `common/cp_files.h` (a comment).
-  - What `cp_prove` checks at that point is only a label. `isk.txt` has no authentication, as upstream
-    notes, and `read_isk()` requires `-public-weights` with a readable file whenever it says
-    `seed public`. A secret commitment whose `isk.txt` was altered to say `seed public` and lacks
-    `ranges` therefore takes this branch when run with a wrong public seed file. `cp_prove` then goes
-    on starting, and may clear stale spool output, until `read_the_seed()` compares that file with
-    `seed.bin` and refuses, before any request is served.
+- **No change to the worst-case check.** `cp_commit` runs upstream's mandatory worst-case check, and
+  `cp_prove` requires `isk.txt`'s line `ranges`, as upstream does. An earlier revision of this patch
+  left the check out under `-public-weights`; a review found that this changed the default for
+  every `-public-weights` commitment, upstream's own Maverick route included, on the speculation
+  that the kit might fail the check. It was dropped (four files: `arguments.h`, `hf_commit.cu`,
+  `isk.cuh` and a comment in `cp_files.h` are upstream's again). If the kit fails the check on a
+  GPU, its scales are made coarser (`scales/worst_case.py`), or a narrower, explicit option is
+  proposed with that evidence.
 - **Not changed: `moe_at_layer`** (`prover/prover/layout.h`). It reads the prover's own profile,
   which is `mo ? 3 : 2` with `mo = NE > 0` (`prover/inputs.cuh`, `prover/layer_setup.cuh`). So at
   NE 0 no layer takes the MoE path, though the function itself does not test NE.
@@ -284,8 +277,8 @@ change):
 | planning | on the kit and on SASH's request (66 words: 25 prompt ids, 8 answer ids, 31 filler 0, r = 24, e = 32), the patched planner prints its whole ending in the standard parameter form with three tables and the pinned `h_par` and `configuration`; the unpatched build ends `NO: policy-tables`; the provers' parameter-file reader admits the kit |
 | upstream's scale tests | `test_policy_tables.py`, `table_ties.py`, `test_calibrate.py` and `test_gguf_weights.py` pass on the patched tree, the first two with `SUITE.md`'s commands (the other two have no row). Status 77, passed in part, is accepted with an "in part" last line: the target builds no `make_model` and sets no `SMALL_MODEL`, so those cases skip on every host |
 | float reference | upstream's float pass on the GGUF agrees with Hugging Face transformers on the safetensors at the final norm (relative L2 at most 1e-4), and transformers' greedy decoding gives SASH's answer |
-| **the answer** | upstream's integer model (patched, torch 2.13.0), with every file pinned and the weights' integers checked against `wsums.txt`, run over the whole 64-token window: no range condition fails at any position; the greedy choices at positions 24 to 31 are SASH's `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]`; the gate's key stays at most 32,639 (the integer model's condition for a key without the clamp `gcl`; it is meant to match the provers' refusal, but upstream has not compared its range tests with the released `cp_prove`); and at each checked position the integer logits over 2^s have a slope of 0.75 to 1.33 and a correlation of at least 0.998 against the float logits. The slope bound catches an error in the logits' overall scale (`s` or `MF` off by one bit gives a slope near 0.5 or 2); the correlation floor is set from the runs' 0.9991 so that one layer's shift off by one bit, which can leave the tokens and the slope as they are, falls below it |
-| mutation controls | the same check on two one-bit changes of the kit must fail at least one condition: `s` + 1 in `policy.txt`, and layer 10's `kv` + 1 in `KL.bin` |
+| **the answer** | upstream's integer model (patched, torch 2.13.0), with every file pinned and the weights' integers checked against `wsums.txt`, run over the whole 64-token window: no range condition fails at any position; the greedy choices at positions 24 to 31 are SASH's `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]`; the gate's key stays at most 32,639 (the integer model's condition for a key without the clamp `gcl`; it is meant to match the provers' refusal, but upstream has not compared its range tests with the released `cp_prove`); and at each checked position the integer logits over 2^s have a slope of 0.75 to 1.33 and a correlation of at least 0.998 against the float logits. The slope bound catches an error in the logits' overall scale (`MF` off by one bit doubles every logit). The correlation floor was set from measured runs, between the real kit's 0.9991 and the erroneous kits below: a one-off sweep that changed every layer's `kv`, `ko` and `kd` by one bit, 66 kits, caught all 66 (5 changed the tokens; the other 61 kept SASH's tokens and slopes within the bound, and fell below the floor, the closest at 0.9962). With the earlier floor of 0.99, 30 of the 66 would have passed. The margin is thin, and other errors may still pass |
+| mutation controls | the same check on two one-bit changes of the kit must fail at least one condition: `MF` + 1 in `policy.txt`, and layer 10's `kv` + 1 in `KL.bin` (the line `s` is not used: the forward pass does not read it, so changing it would test this target's own divisor) |
 
 **Current kit** (`scales.patch`, the lock files and `kit/` as pinned in `kit.json`): **passed on
 Linux and on macOS** on 2026-11-23, every row as required
@@ -320,8 +313,9 @@ folder, 249 s).
   - the prover rows `parameter_file_one_bits_test` and `parameter_file_one_place_test`.
 - **No TinyLlama commitment or proof.** The kit is fitted and the integer model gives SASH's answer
   on a CPU, but `cp_commit` and `cp_prove` have not run on it.
-  - `cp_commit`'s worst-case check has not run (it needs a GPU), and `prover.patch` leaves it out
-    under `-public-weights`. Whether TinyLlama's scales would pass it is not known.
+  - `cp_commit`'s worst-case check, mandatory as upstream's, has not run (it needs a GPU). Whether
+    TinyLlama's scales pass it is not known; if they do not, `cp_commit` makes no commitment
+    (status 7) and the scales must be made coarser, at an accuracy cost nobody has measured.
   - Of the provers' rules, only their parameter-file reader has judged the kit (it admits it).
 - **The kit's proof-system lines are check 6's**, not sized for speed: the full kit's values, with
   the lines that TinyLlama's shape forces (`ll`, which 22 layers force from 2 to 1; `la`, `lB`,
@@ -338,14 +332,22 @@ folder, 249 s).
 - **Equal tokens are a smoke test.** They show that this integer model agrees with SASH's answer on
   this request, not that FlashProve's and SASH's integer functions are equal. The mutation controls
   show that the bounds catch two kinds of one-bit error; other single errors may still pass.
-- **The calibration text is WikiText-2**, as in upstream's rule: CC BY-SA (its dataset card's tags
-  name CC BY-SA 3.0 and GFDL, its text CC BY-SA 4.0). No text and no token id from it is committed,
-  but numbers computed from it are: `kit/maxima.json`, `words.json`, `KL.bin`, six lines of
-  `policy.txt`, and the calibration set's SHA-256 in `kit.json`. Whether that suits Hallmark's source
-  rules is the owner's call; if not, the kit must be refitted on another text.
+- **The calibration text is WikiText-2** (S. Merity et al., "Pointer Sentinel Mixture Models",
+  arXiv:1609.07843), as in upstream's rule, at the revision upstream pins. Licence: CC BY-SA (its
+  dataset card's tags name CC BY-SA 3.0 and GFDL, its text CC BY-SA 4.0). No text and no token id
+  from it is committed, but numbers computed from it are: `kit/maxima.json`, `words.json`, `KL.bin`,
+  six lines of `policy.txt`, and the calibration set's SHA-256 in `kit.json`. The licence review is
+  recorded in `kit.json` under `research/AUTHORITY.json`'s source selection; the owner may overrule
+  it, and the kit would then be refitted on another text.
 - **The environments pin every distribution by hash, but not Python's patch version** (uv's choice
-  of 3.13; the runs had 3.13.2 and 3.13.15), and only for macOS arm64 and Linux x86_64. They are
-  installed from PyPI and, for torch on Linux, from PyTorch's CPU index.
+  of 3.13, which uv may download if the host has none; the runs had 3.13.2 and 3.13.15) nor uv's own
+  version, and only for macOS arm64 and Linux x86_64. They are installed from PyPI and, for torch on
+  Linux, from PyTorch's CPU index.
+- **No dense proof has been checked.** The 108 equal calls of `make verify-flashprove-tinyllama` are
+  all on upstream's MoE proofs: they show that the patch changes nothing there. Every check at NE 0
+  is a planning, parsing or table check, and the pinned repository has no NE 0 proof, so the
+  verifier's NE 0 branches have checked no proof here. Before a dense `YES` is relied on, an
+  altered-copies table must be run against a dense proof.
 - **The float reference is Hugging Face transformers 5.15.1**, run as a check of the export. It is
   not part of any statement.
 

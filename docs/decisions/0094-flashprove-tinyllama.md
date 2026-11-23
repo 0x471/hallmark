@@ -22,13 +22,11 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
   - every #187 number would describe the padded model: by its shapes about 11.4 billion committed
     parameters, mostly zeros, against TinyLlama's 1.1 billion, and about seven times the
     multiplications per token (computed from the shapes, not measured);
-  - unchanged `cp_commit` always runs the worst-case check on real weights, and whether TinyLlama's
-    scales pass it is not measured; if they fail, the scales must be roomier, at an accuracy cost
-    nobody has measured;
-  - it needs new scale tools anyway, since upstream's refuse rotary base 10,000, and a padding exporter
-    on top.
+  - it needs the same new scale tools as option 3 (upstream's refuse rotary base 10,000), and a
+    padding exporter on top.
 
-  What it keeps is upstream's unchanged verifier, so its `YES` would be upstream's own. If the owner
+  Both routes meet `cp_commit`'s mandatory worst-case check, which has not run for either. What
+  option 2 keeps is upstream's unchanged verifier, so its `YES` would be upstream's own. If the owner
   prefers that, it is the fallback. Lean covers neither route (`lean/GAPS.md`: one model size).
 - **Option 3, a patched FlashProve: proposed**, as Hallmark's own small patches on the pinned source.
   They are applied with `git apply`, as the SASH patches are, and each is SHA-256-pinned. It is not a
@@ -47,8 +45,9 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
     same from width 4,096 to 16,383, twice it at 2,048, so that the fit needs no change. It also makes `cp_commit` check the model file's width, head width and expert
     layers against the parameter file, as `cp_prove` already does;
   - adds the same three-digest form to the provers' parameter-file reader;
-  - leaves out the worst-case check under `-public-weights` unless asked for. The check is a hiding
-    safeguard on which soundness does not rest, and nothing is hidden under a public seed.
+  - leaves `cp_commit`'s worst-case check as upstream's: mandatory. (An earlier revision left it out
+    under `-public-weights`, which changed upstream's default for every such commitment; it was
+    dropped.)
 - **`tools.patch`** gives `weight_sums` and upstream's CPU integer model the same constants and dense
   form.
 - **`scales.patch`** (pinned in `kit.json`) lets upstream's scale tools fit a dense `llama` model:
@@ -68,8 +67,7 @@ match SASH first and gets its own decision (#186).
 parameters that upstream itself does not admit to `YES`. NE 0 is among the forms its documents name
 as never accepted, and the pinned repository ships no NE 0 FlashProve kit or proof. Without the gate's clamp (`gcl`, refused at
 NE 0), the gate's key is range-checked rather than clamped; the shipped provers make no proof for a
-key above 32,639. With a public seed nothing is hidden, and
-without the worst-case check a request may end `failed` where a value leaves its range. The dense form
+key above 32,639. With a public seed nothing is hidden. The dense form
 is chosen by NE alone: as upstream's, a `YES` is about the enrolled integer commitment and the caller's
 request and range, not about which checkpoint was converted, the tokenizer, or SASH's integer function.
 
@@ -124,12 +122,16 @@ range and statement.
 
 1. **The calibration text's licence**: WikiText-2 (CC BY-SA; its dataset card's tags name 3.0 and
    GFDL, its text 4.0), as in upstream's rule. No text or token id from it is committed, but the
-   kit's scales are computed from it. The owner decides; a no means refitting on another text.
+   kit's scales are computed from it. Reviewed under `research/AUTHORITY.json`'s source selection
+   (recorded in `kit.json`); the owner may overrule, which means refitting on another text.
 2. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks).
-   The prover patch already compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s
-   worst-case check, which `prover.patch` leaves out under `-public-weights`, and `cp_prove`'s rules
-   beyond its parameter-file reader run only there.
-3. **#187's proof-system lines.** The kit keeps check 6's lines: placeholders set from the verifier's
+   The prover patch compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s mandatory
+   worst-case check (whether the kit passes it is not known; if not, its scales are made coarser)
+   and `cp_prove`'s rules beyond its parameter-file reader run only there.
+3. **A dense proof's altered copies.** The 108 equal calls are all on MoE proofs, and no proof has
+   gone through the verifier's NE 0 branches. Before a dense `YES` is relied on, run an
+   altered-copies table (as upstream's `examples/rejected-proofs`) against the first dense proof.
+4. **#187's proof-system lines.** The kit keeps check 6's lines: placeholders set from the verifier's
    rules, not sized for speed, which `cp_prove` has judged only by its parameter-file reader; a kit
    for each number of checked tokens in #187's sweep.
 
