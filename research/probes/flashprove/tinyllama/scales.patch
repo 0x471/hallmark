@@ -375,7 +375,7 @@ index d1ec7cfb..7684a572 100755
          return DIFFERS if findings else 0
      sys.stdout.buffer.write("".join(line + "\n" for line in new).encode("ascii"))  # as bytes: no line end is translated
 diff --git a/scales/tests/test_gguf_weights.py b/scales/tests/test_gguf_weights.py
-index 70950688..3fddd65f 100755
+index 70950688..e3f154a9 100755
 --- a/scales/tests/test_gguf_weights.py
 +++ b/scales/tests/test_gguf_weights.py
 @@ -1,6 +1,8 @@
@@ -387,7 +387,7 @@ index 70950688..3fddd65f 100755
  
  """Test scales/gguf_weights.py: block decoders, models of several shards, shape_words(), rejections.
  
-@@ -485,10 +487,44 @@ def synthetic_cases(work, check):
+@@ -485,10 +487,48 @@ def synthetic_cases(work, check):
          )
      vector = {**both, "blk.0.attn_q.weight": float_tensor(rng, (8,))}
      check("rejects-a-vector-where-a-matrix-gives-a-size", rejected(shape_of, "vector", METADATA, vector))
@@ -417,6 +417,7 @@ index 70950688..3fddd65f 100755
 +        "a-query-norm": {**dense_tensors, "blk.0.attn_q_norm.weight": float_tensor(rng, (4,))},
 +        "a-key-norm": {**dense_tensors, "blk.0.attn_k_norm.weight": float_tensor(rng, (4,))},
 +        "a-partial-head": {**dense_tensors, "blk.0.attn_q.weight": block_tensor(rng, Q4_K, (9, 1024))},
++        "a-partial-key-head": {**dense_tensors, "blk.0.attn_k.weight": block_tensor(rng, Q5_K, (5, 1024))},
 +    }
 +    for name, tensors in extra.items():
 +        check("dense-llama-rejects-" + name, rejected(shape_of, "dense-" + name, dense_meta, tensors, "llama"))
@@ -429,6 +430,9 @@ index 70950688..3fddd65f 100755
 +    for name, (key, value) in keys.items():
 +        check("dense-llama-rejects-" + name,
 +              rejected(shape_of, "dense-" + name, {**dense_meta, key: value}, dense_tensors, "llama"))  # fmt: skip
++    causal = {**dense_meta, "llama.attention.causal": True}
++    check("dense-llama-reads-a-file-that-states-causal",
++          shape_of("dense-causal", causal, dense_tensors, "llama") == dense_shape)  # fmt: skip
 +
      # What the maker of a file chooses must not reach a message as it is. In a shard's bytes, a name
      # or a key is replaced by text of the same length, so that the rest of the header stays valid.
