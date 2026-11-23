@@ -650,5 +650,13 @@
     "maxima_json": "equal to the committed file on macOS; differs in last digits on Linux, which upstream's scales/README.md expects across devices and libraries; words.json (the scales) is identical",
     "integer_model": "choices, every recorded peak and every top-1 margin identical on both hosts",
     "python": "3.13.2 (macOS) and 3.13.15 (Linux): the same calibration set"
+  },
+  "gates_at_8153a39": {
+    "linux_make_check": "2363 passed, 2 failed, 12 skipped (Ubuntu host above). tests/test_manifests.py::test_file_changed_during_read[abd] also fails on main on that host (earlier record); tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker passed 3 of 3 runs alone at 8153a39 and 3 of 3 on main e2cc6d6. The branch changes no file under src/ and neither test.",
+    "linux_package_check": "passed (uv 0.9.18)",
+    "mac_pytest": "2275 passed, 0 failed, 102 skipped",
+    "docs": "make docs passed, 176 pages",
+    "live_spec_audit": "scripts/check_spec.py --live: passed, live matched (macOS)",
+    "lint": "ruff check and ruff format --check: clean"
   }
 }
