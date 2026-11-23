@@ -412,6 +412,22 @@ def check_planning(tree, output, verifiers):
     return found
 
 
+# SUITE.md's rows for two of the tests: status 0, a pattern the last line must match, and patterns
+# that some line must match.
+SUITE_ROWS = {
+    "test_policy_tables.py": (r"^OK", [r"^Ran 23 tests? in"]),
+    "table_ties.py": (r"^OK: 26 checks$", []),
+}
+
+
+def suite_passes(test, code, text):
+    """Whether a test's status and output pass its SUITE.md row."""
+    lines = text.rstrip("\n").splitlines() or [""]
+    last, others = SUITE_ROWS[test]
+    found = all(any(re.search(x, line) for line in lines) for x in others)
+    return code == 0 and re.search(last, lines[-1]) is not None and found
+
+
 def check_scale_tests(tree, output, scales):
     """Step 4: upstream's scale-tool tests on the patched tree (see the module's docstring)."""
     rows = {}
@@ -428,13 +444,11 @@ def check_scale_tests(tree, output, scales):
             env=minimal_env(output),
         )
         last = text.rstrip().splitlines()[-1] if text.strip() else ""
-        # SUITE.md's rows: status 0 and these patterns (the patched row counts 23 tests). The other
-        # two tests have no row: 0, or 77 for "passed in part" (this target builds no make_model and
-        # sets no SMALL_MODEL, so those cases skip).
-        if test == "test_policy_tables.py":
-            passed = code == 0 and last == "OK" and re.search(r"^Ran 23 tests? in", text, re.M)
-        elif test == "table_ties.py":
-            passed = code == 0 and re.fullmatch(r"OK: 26 checks", last)
+        # Two tests have SUITE.md rows (the patched row counts 23 tests). The other two have none:
+        # 0, or 77 for "passed in part" (this target builds no make_model and sets no SMALL_MODEL,
+        # so those cases skip).
+        if test in SUITE_ROWS:
+            passed = suite_passes(test, code, text)
         else:
             passed = (code == 0 and last.startswith("OK")) or (
                 code == 77 and last.startswith("in part: ")
@@ -474,8 +488,8 @@ def failures(answer):
 
 def mutated(policy, kl):
     """The kit with one-bit changes of the model itself: the final norm's MF (it doubles every
-    logit), and one layer's value shift kv. (The line s is only the logits' stated unit: the
-    forward pass does not read it, so a change of s would test this target's divisor alone.)"""
+    logit), and one layer's value shift kv. (Not the line s: without a seed the forward pass does
+    not read it, so a change of s would test only this target's divisor.)"""
     lines = policy.decode("ascii").split("\n")
     at = next(i for i, x in enumerate(lines) if x.startswith("MF "))
     mf_plus = lines[:at] + [f"MF {int(lines[at].split()[1]) + 1}"] + lines[at + 1 :]

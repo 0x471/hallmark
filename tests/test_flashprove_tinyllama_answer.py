@@ -231,3 +231,14 @@ def test_the_lock_files_are_pinned_and_hold_the_pinned_versions():
             if platform_key.startswith("linux"):
                 assert pins["torch"].endswith("+cpu")
     assert {p.name for p in folder.glob("*.txt")} == named
+
+
+def test_suite_rows_are_applied_as_suite_md_defines_them():
+    ok = "....\n----\nRan 23 tests in 1.2s\n\nOK (skipped=1)\n"
+    assert answer.suite_passes("test_policy_tables.py", 0, ok)
+    assert not answer.suite_passes("test_policy_tables.py", 1, ok)
+    assert not answer.suite_passes("test_policy_tables.py", 0, ok.replace("23", "22"))
+    assert not answer.suite_passes("test_policy_tables.py", 0, ok + "late line\n")
+    assert answer.suite_passes("table_ties.py", 0, "x\nOK: 26 checks\n")
+    assert not answer.suite_passes("table_ties.py", 0, "OK: 26 checks, 1 odd\n")
+    assert not answer.suite_passes("table_ties.py", 0, "")
