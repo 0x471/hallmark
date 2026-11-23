@@ -14,7 +14,8 @@ It records:
 - that no range condition fails at any of the T positions (the integer model raises
   RangeConditionFailed otherwise, and the prover would make no proof);
 - the largest absolute value of each named integer, the gate's lookup key among them (without the
-  clamp gcl the provers refuse a key above 32,639);
+  clamp gcl the provers refuse a key above 32,639), and every entry of a clamped value (a norm's
+  output, a query, key or value entry) that lies beyond the clamp, with its layer and positions;
 - at the checked positions, the margin of the top logit over the second, and the slope and
   correlation of the integer logits (divided by 2^s) against the float reference's logits.
 
@@ -31,11 +32,14 @@ import numpy as np
 import torch
 
 LARGEST_GATE_KEY = 32639  # the provers make no proof for a larger key without the clamp gcl
+# The values before their clamp to CLAMPED_MAX (integer_model/model.py): the norms' outputs and the
+# query, key and value entries.
+BEFORE_CLAMP = ("a_w", "m_w", "aF_w", "qw", "kw", "vw")
 
 
 def main(model_dir, digests_path, case_path, float_logits, out_json):
     import integer_model  # noqa: PLC0415 - from the patched upstream tree, on PYTHONPATH
-    from integer_model.model import RangeConditionFailed  # noqa: PLC0415
+    from integer_model.model import CLAMPED_MAX, RangeConditionFailed  # noqa: PLC0415
 
     started = time.monotonic()
     case = json.loads(open(case_path).read())
@@ -46,11 +50,26 @@ def main(model_dir, digests_path, case_path, float_logits, out_json):
     window = prompt + answer + [0] * (p.T - len(prompt) - len(answer))
     r, e = len(prompt) - 1, len(prompt) + len(answer) - 1
     peaks = collections.defaultdict(int)
+    clamped = []
     logits = {}
 
     def record(name, layer, tensor):
         if not tensor.dtype.is_floating_point:
             peaks[name] = max(peaks[name], int(tensor.abs().max()))
+        if name in BEFORE_CLAMP:
+            beyond = tensor.abs() > CLAMPED_MAX
+            if bool(beyond.any()):
+                at = beyond.flatten(1).any(1).nonzero().flatten().tolist()
+                count = int(beyond.sum())
+                clamped.append(
+                    dict(
+                        name=name,
+                        layer=layer,
+                        positions=at,
+                        entries=count,
+                        largest=int(tensor.abs().max()),
+                    )
+                )
         if name == "lam":
             logits["lam"] = tensor[r:e].to(torch.float64) / 2.0**p.s
 
@@ -84,7 +103,9 @@ def main(model_dir, digests_path, case_path, float_logits, out_json):
             matches=got == answer,
             positions=rows,
             peaks=dict(sorted(peaks.items())),
-            gate_key_within_limit=peaks["key"] <= LARGEST_GATE_KEY,
+            clamped=clamped,
+            clamp_limit=CLAMPED_MAX,
+            gate_key_within_limit="key" in peaks and peaks["key"] <= LARGEST_GATE_KEY,
         )
     result["seconds"] = time.monotonic() - started
     with open(out_json, "x") as f:
