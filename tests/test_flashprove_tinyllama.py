@@ -32,8 +32,12 @@ def changed_files(patch):
 
 
 def test_pins_match_the_patch_files():
+    # The fourth patch, scales.patch, is the kit's, pinned by kit.json
+    # (tests/test_flashprove_tinyllama_answer.py).
+    kit = json.loads((harness.PROBE / "kit.json").read_text())
     on_disk = sorted(p.name for p in harness.PROBE.glob("*.patch"))
-    assert sorted(harness.PINS["apply_order"]) == on_disk == sorted(harness.PINS["patches"])
+    assert sorted([*harness.PINS["apply_order"], kit["scales_patch"]["name"]]) == on_disk
+    assert sorted(harness.PINS["apply_order"]) == sorted(harness.PINS["patches"])
     for name, pin in harness.PINS["patches"].items():
         data = (harness.PROBE / name).read_bytes()
         assert len(data) == pin["bytes"]

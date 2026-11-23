@@ -1,0 +1,85 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-kit/1",
+  "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+  "patches_json_sha256": "c3ef0c5f274e41d46cf688b5704e9acb70d7c842f9e770156b5565dd17beb72e",
+  "scales_patch": {
+    "name": "scales.patch",
+    "sha256": "5eff281641dd27b35c617f01de3f1a2c8a223520a1c19a47acd0b95d215d6907",
+    "bytes": 28858
+  },
+  "model": {
+    "case": "research/probes/sash/response-case.json",
+    "files": [
+      "config.json",
+      "model.safetensors",
+      "tokenizer.json"
+    ],
+    "note": "id, revision, licence, sizes and SHA-256 come from the case file, the pins of Hallmark's SASH path"
+  },
+  "calibration_text": {
+    "what": "WikiText-2 (raw), training split, as upstream's make_calibration_set.py pins it",
+    "url": "https://huggingface.co/datasets/Salesforce/wikitext/resolve/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-2-raw-v1/train-00000-of-00001.parquet",
+    "bytes": 6357543,
+    "sha256": "e83889baabc497075506f91975be5fac0d45c5290b6b20582c8cd1e853d0c9f7",
+    "licence": "CC BY-SA 3.0 and GFDL (the dataset card); only token ids derived from it are used, and none is committed"
+  },
+  "environments": {
+    "scales": {
+      "python": "3.13",
+      "packages": {
+        "torch": "2.9.1",
+        "numpy": "2.3.5",
+        "gguf": "0.19.0",
+        "pyarrow": "23.0.1",
+        "tokenizers": "0.22.2",
+        "safetensors": "0.8.0",
+        "transformers": "5.15.1"
+      }
+    },
+    "integer_model": {
+      "python": "3.13",
+      "packages": {
+        "torch": "2.13.0",
+        "numpy": "2.4.6",
+        "gguf": "0.19.0"
+      }
+    }
+  },
+  "e_res": 11,
+  "gguf": {
+    "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+    "bytes": 2200293664,
+    "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+  },
+  "calibration_set": {
+    "bytes": 131200,
+    "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31",
+    "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c"
+  },
+  "base_policy_sha256": "84f867cd0e5d6217b14158b43862fd924f40d189a107750e0b8b604bfc2dd5b2",
+  "files": {
+    "policy.txt": "2af02e144eaa03ba3e23587f305d9bebdf8f56bad4f5b97a512f055e5c5ed602",
+    "KL.bin": "1658bb72676fd6b774c83ff163b3c24211a603a281f5df0644a9c966684d7282",
+    "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+    "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c",
+    "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+    "words.json": "3465d8977ab6c3d0dcc40a2ce27b35e6b4962c8e14bef2f8bc9bd9e94119bf81",
+    "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31"
+  },
+  "h_par": "df7a40e52e295044e1452e46e7f58bfed53b8abd4e0816dd7ae0ff16b60ddd09",
+  "configuration": "e5407adf4450292e462e45e1fe8bf5e7bd8a3bd5dd16084e16ffe07a09dd0db6",
+  "request": {
+    "T": 64,
+    "filler": 0,
+    "r": 24,
+    "e": 32
+  },
+  "bounds": {
+    "final_norm_relative_l2": 0.0001,
+    "logit_slope": [
+      0.75,
+      1.33
+    ],
+    "logit_correlation": 0.99
+  }
+}

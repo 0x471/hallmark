@@ -1,0 +1,485 @@
+diff --git a/scales/fit_scales.py b/scales/fit_scales.py
+index abdb8a9b..bf45dee9 100755
+--- a/scales/fit_scales.py
++++ b/scales/fit_scales.py
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env python3
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): a comment on the width 2,048 (no code changes). Marked
++# "Hallmark dense patch".
+ 
+ # Terms: docs/glossary.md.
+ 
+@@ -238,6 +240,9 @@ def fit(shape, maxima, exponents, e_res=11, eg=SILU_KEY_EXPONENT):
+     # factor is 1 for d from 4,096 to 16,383 (the programs in weight_sums/ accept only 5,120). At
+     # another d the shifts after these products, and E_logit, are off by t - 6 bits. fit() does not
+     # check for this.
++    # Hallmark dense patch: the patched conversion (weight_sums, the integer model, cp_commit) multiplies by
++    # RN32(sqrt(d) / 2^t) in place of sqrt(d) / 64, so c cancels and no factor 2^(t - 6) is left: at d = 2,048
++    # (t = 5) the shifts and E_logit below are right as written.
+     t = (d.bit_length() - 1) // 2
+     c = math.sqrt(d / 4**t)
+ 
+diff --git a/scales/gguf_weights.py b/scales/gguf_weights.py
+index c3e5949b..b3ebe768 100644
+--- a/scales/gguf_weights.py
++++ b/scales/gguf_weights.py
+@@ -1,5 +1,7 @@
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): shape_words() also reads a dense model of the architecture llama
++# (no experts, the rotary encoding in every layer). Each change is marked "Hallmark dense patch".
+ 
+ # Parts of this file are adapted from gguf-py, which is under the MIT License. That project's notice, which applies to
+ # those parts:
+@@ -62,7 +64,7 @@ computes a model's quantization scales, reads the model through this module. Typ
+ 
+ Model.tensor() reads only the tensor types F32 (plain float32), Q4_K, Q5_K and Q6_K (ggml's
+ quantized block formats with codes of 4, 5 and 6 bits) and the wider types Q8_0, F16 and BF16, and
+-shape_words() accepts only the architecture llama4. ModelError reports unusable input, but a malformed file may instead hang
++shape_words() accepts only the architecture llama4 (and, by the Hallmark dense patch, a dense llama). ModelError reports unusable input, but a malformed file may instead hang
+ gguf's reader or exhaust memory: see Model.__init__(). The module prints nothing.
+ 
+ The public package gguf (the folder gguf-py of github.com/ggml-org/llama.cpp) parses the container,
+@@ -100,6 +102,9 @@ import torch
+ 
+ GGUF_PY_VERSION = "0.19.0"  # open_model requires this version of the package gguf; the decoders are compared with it
+ ARCHITECTURE = "llama4"  # the value of the key general.architecture, and the prefix of the other metadata keys
++# Hallmark dense patch: the second architecture that shape_words() reads, dense only. Its files must state the head
++# dimension and the rotary base (no default is assumed), and may have no experts.
++DENSE_ARCHITECTURE = "llama"
+ REQUIRED = object()  # marks a key of SHAPE_KEYS without which the model is rejected
+ # The shape parameters that the metadata give. A row has the parameter's name in the result of shape_words, its type,
+ # its key after the prefix, and its value if the first shard does not have the key. The last two defaults are those of
+@@ -479,21 +484,47 @@ def shape_words(model):
+     both in ascending order. SHAPE_KEYS and SHAPE_TENSORS explain the other keys.
+     """
+     architecture = model.metadata("general.architecture")
+-    if architecture != ARCHITECTURE:
+-        raise ModelError(f"the model's general.architecture is not {ARCHITECTURE!r}, the only one that is supported")
++    dense = architecture == DENSE_ARCHITECTURE  # Hallmark dense patch
++    if architecture != ARCHITECTURE and not dense:
++        raise ModelError(
++            f"the model's general.architecture is not {ARCHITECTURE!r} or {DENSE_ARCHITECTURE!r}, the ones that are supported"
++        )
+     shape = {}
+     for parameter, kind, key, if_absent in SHAPE_KEYS:
+-        value = model.metadata(f"{ARCHITECTURE}.{key}", if_absent)
++        if dense and parameter in ("dh", "theta"):
++            if_absent = REQUIRED  # Hallmark dense patch: a dense file states its head dimension and rotary base
++        value = model.metadata(f"{architecture}.{key}", if_absent)
+         if value is REQUIRED:
+-            raise ModelError(f"the model's first shard has no metadata key {ARCHITECTURE}.{key}")
++            raise ModelError(f"the model's first shard has no metadata key {architecture}.{key}")
+         if type(value) is not kind or (kind is int and value < 1):
+             wanted = "a positive integer" if kind is int else "a floating-point number"
+-            raise ModelError(f"the metadata key {ARCHITECTURE}.{key} of the model's first shard must be {wanted}")
++            raise ModelError(f"the metadata key {architecture}.{key} of the model's first shard must be {wanted}")
+         shape[parameter] = value
++    layers = range(shape["L"])
++    if dense:
++        # Hallmark dense patch: no layer has experts and every layer has the rotary encoding, without rescaling, and
++        # no matrix has a bias. A llama file with experts (llama.cpp writes Mixtral so), with the factors of rotary
++        # rescaling (rope_freqs.weight) or with biases is rejected: the forward pass would not read those tensors.
++        names = model.names()
++        if model.metadata(f"{architecture}.expert_count", 0) != 0 or any(
++            part in name for name in names for part in ("_exps.", "_shexp.", "ffn_gate_inp.")
++        ):
++            raise ModelError("the llama model has experts; only a dense llama model is supported")
++        if "rope_freqs.weight" in names or model.metadata(f"{architecture}.rope.scaling.type", "none") != "none":
++            raise ModelError("the llama model rescales its rotary frequencies, which the forward pass does not")
++        if any(name.endswith(".bias") for name in names):
++            raise ModelError("the llama model has biases, which the forward pass does not read")
++        shape["moe"], shape["rope"] = [], list(layers)
++        for parameter, name in SHAPE_TENSORS:
++            if parameter not in ("fe", "NE"):
++                shape[parameter] = _outputs(model, name)
++        shape["fe"], shape["NE"] = 0, 0
++        shape["H"] //= shape["dh"]
++        shape["G"] //= shape["dh"]
++        return shape
+     key, wanted = EXPERTS_PER_TOKEN
+     if model.metadata(f"{ARCHITECTURE}.{key}", wanted) != wanted:
+         raise ModelError(f"the key {ARCHITECTURE}.{key} is not {wanted}; only {wanted} expert per token is supported")
+-    layers = range(shape["L"])
+     shape["moe"] = [layer for layer in layers if (layer + 1) % MOE_INTERVAL == 0]
+     shape["rope"] = [layer for layer in layers if (layer + 1) % NO_ROPE_INTERVAL != 0]
+     for parameter, name in SHAPE_TENSORS:
+diff --git a/scales/make_calibration_set.py b/scales/make_calibration_set.py
+index 4721d530..ebbab76a 100755
+--- a/scales/make_calibration_set.py
++++ b/scales/make_calibration_set.py
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env python3
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): the option --tinyllama makes the same rule's set for TinyLlama-1.1B.
++# Each change is marked "Hallmark dense patch".
+ 
+ """Make the calibration set for Llama 4 Maverick's quantization scales from three published files.
+ 
+@@ -42,6 +44,13 @@ calibration text, except that imatrix overwrites each window's first id. The sou
+ (github.com/ggml-org/llama.cpp), commit 794fe23f29fb40104975c91fe19f23798f7c726e: examples/imatrix/imatrix.cpp,
+ compute_imatrix, lines 470 and 511 to 513.
+ 
++Hallmark dense patch: with --tinyllama in place of --any-files, the call is
++make_calibration_set.py --tinyllama <train.parquet> <tinyllama tokenizer.json> <out .npy>
++and makes the set for TinyLlama-1.1B-Chat-v1.0 by the same rule. TinyLlama's tokenizer.json is byte for byte the
++Llama 2 tokenizer of INPUTS (the same SHA-256), and it serves in steps 2 and 4 and as the second tokenizer of step 5;
++step 6 puts TinyLlama's start token, id 1, in place of 200,000. Steps 1 to 3 then have the inputs of INPUTS, so the
++drawn rows must have DRAWS_SHA256, and the set must have TINYLLAMA_SET_SHA256.
++
+ Exit status:
+ 0  the file is written and, without --any-files, both sums are as expected
+ 1  the file is written, but a sum is not as expected
+@@ -116,6 +125,20 @@ INPUTS = (
+ # reproduces either sum.
+ DRAWS_SHA256 = "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c"
+ SET_SHA256 = "a2ce04bd55b1b6fa2b9148744e087f5a2a484c1b3d525ea9fb2fc1ab8c6c2c02"
++
++# Hallmark dense patch: the tokenizer file of --tinyllama, and the sum of its set.
++TINYLLAMA_TOKENIZER = {
++    "role": "TinyLlama tokenizer file",
++    "what": "the TinyLlama-1.1B-Chat-v1.0 tokenizer, byte for byte the Llama 2 tokenizer of INPUTS",
++    "repository": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
++    "revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
++    "path": "tokenizer.json",
++    "bytes": 1842767,
++    "sha256": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
++}
++TINYLLAMA_START_ID = 1
++# Checked with Python 3.13.2, numpy 2.3.5, pyarrow 23.0.1 and tokenizers 0.22.2 (macOS arm64).
++TINYLLAMA_SET_SHA256 = "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+ CHECKED_WITH = "Python 3.13.15, numpy 2.3.5, pyarrow 23.0.1, tokenizers 0.22.2"
+ 
+ # The constants of the rule (steps 3, 4 and 6 at apply_rule()).
+@@ -220,7 +243,7 @@ def npy_file(rows):
+     return buffer.getvalue()
+ 
+ 
+-def apply_rule(rows, llama2, llama4):
++def apply_rule(rows, llama2, llama4, start_id=START_ID):  # Hallmark dense patch: start_id
+     """Apply steps 1 to 6 of the rule to the text rows.
+ 
+     Return the drawn rows, the windows and a dict of five counts, which run() prints. The counts in
+@@ -274,7 +297,7 @@ def apply_rule(rows, llama2, llama4):
+             f"too little text: the second tokenizer (<llama4 tokenizer.json>) gives {len(second_ids)} ids "
+             f"for the prose, and the rule needs at least {WINDOWS * step}"
+         )
+-    windows = [[START_ID] + second_ids[step * w : step * (w + 1)] for w in range(WINDOWS)]
++    windows = [[start_id] + second_ids[step * w : step * (w + 1)] for w in range(WINDOWS)]
+ 
+     used = sorted(starts[:DRAWS_USED])
+     overlapping = sum(b - a < DRAW_LENGTH for at, a in enumerate(used) for b in used[at + 1 :])
+@@ -326,10 +349,11 @@ def remove_created(path, made):
+         pass
+ 
+ 
+-def run(paths, any_files):
++def run(paths, any_files, tinyllama=False):
+     """Make the set from the four paths of the command line.
+ 
+-    Return the exit status, or raise a Rejection.
++    Return the exit status, or raise a Rejection. Hallmark dense patch: with tinyllama, paths has the TinyLlama
++    tokenizer file twice, as the first and the second tokenizer.
+     """
+     out = paths[3]
+     if os.path.lexists(out):
+@@ -340,9 +364,11 @@ def run(paths, any_files):
+     if not os.path.isdir(folder):
+         raise Rejection(f"cannot create {out}: {folder} is not an existing folder")
+     # All three files are read and checked before the first is parsed.
+-    data = [read_input(path, named, any_files) for path, named in zip(paths, INPUTS)]
++    inputs = (INPUTS[0], TINYLLAMA_TOKENIZER, TINYLLAMA_TOKENIZER) if tinyllama else INPUTS  # Hallmark dense patch
++    data = [read_input(path, named, any_files) for path, named in zip(paths, inputs)]
+     draws, windows, counts = apply_rule(
+-        text_rows(paths[0], data[0]), load_tokenizer(paths[1], data[1]), load_tokenizer(paths[2], data[2])
++        text_rows(paths[0], data[0]), load_tokenizer(paths[1], data[1]), load_tokenizer(paths[2], data[2]),
++        start_id=TINYLLAMA_START_ID if tinyllama else START_ID,
+     )
+     draws_file, set_file = npy_file(draws), npy_file(windows)
+     write_new_file(out, set_file)
+@@ -359,13 +385,14 @@ def run(paths, any_files):
+     )
+     if any_files:
+         return WRITTEN
+-    draws_differ, set_differs = sha256(draws_file) != DRAWS_SHA256, sha256(set_file) != SET_SHA256
++    expected_set = TINYLLAMA_SET_SHA256 if tinyllama else SET_SHA256  # Hallmark dense patch
++    draws_differ, set_differs = sha256(draws_file) != DRAWS_SHA256, sha256(set_file) != expected_set
+     if draws_differ:
+         say(f"the drawn rows are not as expected: their SHA-256 should be {DRAWS_SHA256}")
+     else:
+         say("the drawn rows are as expected")
+     if set_differs:
+-        say(f"the set is not as expected: its SHA-256 should be {SET_SHA256}. The file is written all the same.")
++        say(f"the set is not as expected: its SHA-256 should be {expected_set}. The file is written all the same.")
+     else:
+         say("the set is as expected")
+     if draws_differ or set_differs:
+@@ -379,6 +406,19 @@ def run(paths, any_files):
+ 
+ 
+ def main(argv):
++    if "--tinyllama" in argv:  # Hallmark dense patch: <train.parquet> <tinyllama tokenizer.json> <out .npy>
++        paths = [argument for argument in argv if argument != "--tinyllama"]
++        if len(paths) != 3 or len(argv) != 4 or "--any-files" in paths:
++            print("usage: make_calibration_set.py --tinyllama <train.parquet> <tinyllama tokenizer.json> <out .npy>",
++                  file=sys.stderr)  # fmt: skip
++            return REJECTED
++        try:
++            return run([paths[0], paths[1], paths[1], paths[2]], any_files=False, tinyllama=True)
++        except Rejection as rejection:
++            say(str(rejection), sys.stderr)
++        except Exception:
++            traceback.print_exc()
++        return REJECTED
+     paths = [argument for argument in argv if argument != "--any-files"]
+     if len(paths) != 4:
+         print(USAGE, file=sys.stderr)
+diff --git a/scales/policy_tables.py b/scales/policy_tables.py
+index d1ec7cfb..7684a572 100755
+--- a/scales/policy_tables.py
++++ b/scales/policy_tables.py
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env python3
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): at NE 0 the program computes the three tables that a dense model
++# forms (no sigmoid table, so no lines tsig0 to tsig7). Each change is marked "Hallmark dense patch".
+ 
+ # Terms: docs/glossary.md.
+ 
+@@ -22,7 +24,8 @@ what it finds. It does not test where the lines are; the verifier does.
+ With --strip, the program prints the file without its digest lines and interprets no other line.
+ 
+ To compute the lines, the program needs a file with "prof 20" and NE above 0, because only such a
+-model has all four tables. It rejects cs above 12 and S above 31, where an entry would not fit a
++model has all four tables. (Hallmark dense patch: with "prof 20" and NE 0 it computes the three tables
++of a dense model, 24 lines, tsilu0 to texp7 without tsig0 to tsig7.) It rejects cs above 12 and S above 31, where an entry would not fit a
+ 32-bit word. It does not test whether the verifier accepts the file's values. Time and memory grow
+ with the rotary tables (2^lt * dh entries) and the softmax table (in proportion to 2^rx).
+ 
+@@ -365,8 +368,8 @@ def _parameters(lines):
+         if name not in found:
+             raise ValueError('there is no line of the exact form "%s <number>": the name, one space and decimal digits, and '
+                              "nothing after them, not even a carriage return" % name)  # fmt: skip
+-    if found["prof"] != 20 or found["NE"] == 0:
+-        raise ValueError('the file does not have "prof 20" and NE above 0, so its model lacks one of the four tables')
++    if found["prof"] != 20:  # Hallmark dense patch: NE 0 is allowed, with three tables
++        raise ValueError('the file does not have "prof 20", so its model lacks one of the tables')
+     for name, largest in _LARGEST.items():
+         if found[name] > largest:
+             raise ValueError("the line %s is above %d, the largest value that this program handles" % (name, largest))
+@@ -376,9 +379,17 @@ def _parameters(lines):
+     return found
+ 
+ 
++def names_of(d):
++    """Hallmark dense patch: the names of the groups of digest lines for a result of digests(): TABLES, or without tsig."""
++    return TABLES if len(d) == len(TABLES) else tuple(name for name in TABLES if name != "tsig")
++
++
+ def digests(lines):
+     """The digests of the four tables, in the order of TABLES, each a list of DW words.
+ 
++    Hallmark dense patch: at NE 0 there is no sigmoid table, and the result has the three others, in the order of
++    TABLES without tsig.
++
+     lines are the lines of a parameter file without their line feeds. Digest lines among them are ignored. The words
+     that are hashed are those of docs/model.md, "4 Public tables", "Digests". If the lines do not
+     determine the four tables, the function raises a ValueError whose text says why.
+@@ -395,12 +406,14 @@ def digests(lines):
+         [entry + _OFFSET for table in rotary_tables(2 ** p["lt"], p["dh"], p["cs"], p["theta0"]) for entry in table],
+         softmax_table(p["S"], p["rx"]),
+     )
++    if p["NE"] == 0:  # Hallmark dense patch: a dense model has no router, so no sigmoid table
++        hashed = hashed[:1] + hashed[2:]
+     return [hash_words(_TABLE_NUMBER, words) for words in hashed]
+ 
+ 
+ def table_lines(d):
+     """The digest lines, without line feeds, for the result d of digests."""
+-    return ["%s%d %d" % (table, i, word) for table, digest in zip(TABLES, d) for i, word in enumerate(digest)]
++    return ["%s%d %d" % (table, i, word) for table, digest in zip(names_of(d), d) for i, word in enumerate(digest)]
+ 
+ 
+ def _table_of(line):
+@@ -453,17 +466,20 @@ def _with_tables(lines):
+ 
+ def _check(lines):
+     """Compares the digest lines, in the order of the file, with the computed ones. Returns what differs, as messages."""
+-    computed = table_lines(digests(lines))
++    d = digests(lines)
++    computed, names = table_lines(d), names_of(d)  # Hallmark dense patch: three groups at NE 0
+     stated = [line for line in lines if is_table_line(line)]
+     if not stated:
+         return ["the file has no digest lines; " + _AGAIN]
+     findings = [
+         "the lines %s0 to %s%d do not match the table that the file's other lines define; %s" % (table, table, DW - 1, _AGAIN)
+-        for k, table in enumerate(TABLES)
++        for k, table in enumerate(names)
+         if [line for line in stated if _table_of(line) == table] != computed[DW * k : DW * (k + 1)]
+     ]
++    if len(names) < len(TABLES) and any(_table_of(line) == "tsig" for line in stated):
++        findings.append("the file has lines tsig0 to tsig7, but at NE 0 there is no sigmoid table; " + _AGAIN)
+     if not findings and stated != computed:
+-        findings = ["the digest lines are right but not in the order %s; %s" % (", ".join(TABLES), _AGAIN)]
++        findings = ["the digest lines are right but not in the order %s; %s" % (", ".join(names), _AGAIN)]
+     return findings
+ 
+ 
+@@ -486,7 +502,8 @@ def main(arguments):
+         print("%s: %s" % (paths[0], str(e) or "the tables for the file's values do not fit in memory"), file=sys.stderr)
+         return REJECTED
+     if mode == "--check":
+-        for finding in findings or ["the %d digest lines match the tables" % TBLW]:
++        # Hallmark dense patch: 24 lines at NE 0, TBLW (32) otherwise.
++        for finding in findings or ["the %d digest lines match the tables" % sum(map(is_table_line, lines))]:
+             print(finding)
+         return DIFFERS if findings else 0
+     sys.stdout.buffer.write("".join(line + "\n" for line in new).encode("ascii"))  # as bytes: no line end is translated
+diff --git a/scales/tests/test_gguf_weights.py b/scales/tests/test_gguf_weights.py
+index 70950688..b75dcfc7 100755
+--- a/scales/tests/test_gguf_weights.py
++++ b/scales/tests/test_gguf_weights.py
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env python3
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): cases for a dense llama model. Each change is marked
++# "Hallmark dense patch".
+ 
+ """Test scales/gguf_weights.py: block decoders, models of several shards, shape_words(), rejections.
+ 
+@@ -485,10 +487,32 @@ def synthetic_cases(work, check):
+         )
+     vector = {**both, "blk.0.attn_q.weight": float_tensor(rng, (8,))}
+     check("rejects-a-vector-where-a-matrix-gives-a-size", rejected(shape_of, "vector", METADATA, vector))
+-    check("rejects-another-architecture", rejected(shape_of, "llama", METADATA, both, "llama"))
++    # Hallmark dense patch: "llama" is now read when dense (below), so another name stands for another architecture.
++    check("rejects-another-architecture", rejected(shape_of, "mistral", METADATA, both, "mistral"))
+     two_experts = {**METADATA, "llama4.expert_used_count": 2}
+     check("rejects-two-experts-per-token", rejected(shape_of, "two-experts", two_experts, both))
+ 
++    # Hallmark dense patch: a dense llama model. Its file must state the head dimension and the rotary base; every
++    # layer has the rotary encoding and none has experts.
++    dense_meta = {key.replace("llama4.", "llama.", 1): value for key, value in METADATA.items()}
++    dense_meta = without(dense_meta, "llama.expert_used_count", "llama.expert_count")
++    dense_tensors = without(first, "blk.1.ffn_gate_inp.weight")
++    dense_shape = {**SHAPE, "fe": 0, "NE": 0, "moe": [], "rope": [0, 1, 2, 3, 4]}
++    check("dense-llama-shape", shape_of("dense", dense_meta, dense_tensors, "llama") == dense_shape)
++    for key in ("llama.attention.key_length", "llama.rope.freq_base"):
++        check("dense-llama-rejects-a-file-without-" + key,
++              rejected(shape_of, "dense-no-" + key, without(dense_meta, key), dense_tensors, "llama"))  # fmt: skip
++    extra = {
++        "routed-experts": {**dense_tensors, **second},
++        "a-router": {**dense_tensors, "blk.1.ffn_gate_inp.weight": first["blk.1.ffn_gate_inp.weight"]},
++        "rotary-rescaling": {**dense_tensors, "rope_freqs.weight": float_tensor(rng, (4,))},
++        "a-bias": {**dense_tensors, "blk.0.attn_q.bias": float_tensor(rng, (8,))},
++    }
++    for name, tensors in extra.items():
++        check("dense-llama-rejects-" + name, rejected(shape_of, "dense-" + name, dense_meta, tensors, "llama"))
++    counted = {**dense_meta, "llama.expert_count": 8}
++    check("dense-llama-rejects-an-expert-count", rejected(shape_of, "dense-expert-count", counted, dense_tensors, "llama"))
++
+     # What the maker of a file chooses must not reach a message as it is. In a shard's bytes, a name
+     # or a key is replaced by text of the same length, so that the rest of the header stays valid.
+     def hostile(old):
+diff --git a/scales/tests/test_policy_tables.py b/scales/tests/test_policy_tables.py
+index 4afa4a99..223f5d81 100755
+--- a/scales/tests/test_policy_tables.py
++++ b/scales/tests/test_policy_tables.py
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env python3
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): NE 0 is no longer a rejection; test_a_dense_model_has_three_tables.
++# Each change is marked "Hallmark dense patch".
+ 
+ """Tests scales/policy_tables.py: the hash, the four tables, the three modes of the command line and the widths.
+ 
+@@ -399,6 +401,21 @@ class Program(unittest.TestCase):
+                 for group, line in zip(groups or [], printed_lines):
+                     self.assertIn(group, line)
+ 
++    def test_a_dense_model_has_three_tables(self):
++        """Hallmark dense patch: at NE 0 the default mode writes 24 lines, the groups tsilu, trope and texp of the
++        four-table file unchanged and no tsig, and --check accepts them and only them."""
++        dense_plain = self.replaced("NE", "NE 0", base=self.plain)
++        dense_tables = [line for line in self.tables if not line.startswith("tsig")]
++        self.assertEqual(len(dense_tables), 3 * DW)
++        dense = self.replaced("NE", "NE 0", base=self.with_tables(dense_tables))
++        self.assert_prints(self.run_tool(dense_plain), dense)
++        self.assert_prints(self.run_tool(self.replaced("NE", "NE 0")), dense)  # the tsig lines are taken out
++        self.assert_prints(self.run_tool("--check", dense), ["the %d digest lines match the tables" % (3 * DW)])
++        run = self.run_tool("--check", self.replaced("NE", "NE 0"))
++        self.assertEqual(run.returncode, 1)
++        self.assertIn(b"at NE 0 there is no sigmoid table", run.stdout)
++        self.assertEqual(policy_tables.names_of(policy_tables.digests(dense)), ("tsilu", "trope", "texp"))
++
+     def test_rejections(self):
+         text = ("\n".join(self.good) + "\n").encode("ascii")
+         every, computing = ((), ("--check",), ("--strip",)), ((), ("--check",))
+@@ -408,8 +425,7 @@ class Program(unittest.TestCase):
+             ("an empty file", b"", every),
+             ("prof 19", self.replaced("prof", "prof 19"), computing),
+             ("prof 21", self.replaced("prof", "prof 21"), computing),
+-            ("NE 0", self.replaced("NE", "NE 0"), computing),
+-            ("NE 0, no digest lines", self.replaced("NE", "NE 0", base=self.plain), computing),
++            # Hallmark dense patch: NE 0 is no rejection (test_a_dense_model_has_three_tables).
+             ("theta0 is 0", self.replaced("theta0_lo", "theta0_lo 0"), computing),
+             ("CR LF line ends", [line + "\r" for line in self.good], computing),
+             ("cs above the limit", self.replaced("cs", "cs 13"), computing),
+diff --git a/scales/words_to_policy.py b/scales/words_to_policy.py
+index 2daeddf8..fa906973 100755
+--- a/scales/words_to_policy.py
++++ b/scales/words_to_policy.py
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env python3
+ # Copyright 2026 Anthropic PBC
+ # SPDX-License-Identifier: Apache-2.0
++# Modified by the Hallmark project (dense patch): the rotary base 10000, which the verifier's rotary-table also admits.
++# Each change is marked "Hallmark dense patch".
+ 
+ """Write a model's fitted quantization scales into two public files of its configuration.
+ 
+@@ -82,7 +84,8 @@ output projection (o) and of the query and key projections (qk).
+           arith-eps            eps1, eps2 or epsF is not d * 1e-5 * 4^e_res, rounded to the
+                                nearest integer. Counts the three names.
+                                If the rounded number is 0, all three count.
+-          arith-const          S, rx, cs, theta are not 12, 8, 12, 500000. Counts the four names.
++          arith-const          S, rx, cs are not 12, 8, 12, or theta is neither 500000 nor 10000
++                               (Hallmark dense patch). Counts the four names.
+   3       law-U-<site>,        A no-overflow condition (see check_no_overflow()) does not hold at
+           law-W-<site>         the site up, down, o or qk. Counts shifts.
+           law-kq-kk            kq and kk differ in a layer in which one of them is below 16.
+@@ -305,7 +308,8 @@ def norm_is_admitted(m, k):
+ 
+ # The verifier also applies the limits of `form`, `norm`, `final-norm`, `rp` and `logit-exponent`,
+ # and it requires cs = 12. Otherwise `arith-eps` and `arith-const` are stricter than the verifier:
+-# this program accepts only a model with the norm epsilon 1e-5 and the rotary base 500000, and only
++# this program accepts only a model with the norm epsilon 1e-5 and the rotary base 500000 (Hallmark
++# dense patch: or 10000), and only
+ # S = 12 and rx = 8 (defined in scales/README.md, "The fixed exponents"). The verifier rejects fewer
+ # values of S and rx, but it answers `YES` only with these two values (its condition
+ # softmax-table) and with a rotary base of 10000 or 500000 (rotary-table).
+@@ -320,7 +324,8 @@ def check_ranges(layers, model, shape):
+     # product in binary64. At d = 5,120 a model file's epsilon gives the exact integer up to
+     # e_res = 14. From 15 on it gives a different one, and this program rejects the file.
+     eps = (2 * shape["d"] * 4 ** model["e_res"] + 100000) // 200000
+-    constants = (("S", 12), ("rx", 8), ("cs", 12), ("theta", 500000))
++    constants = (("S", 12), ("rx", 8), ("cs", 12))
++    # Hallmark dense patch: theta may also be 10000, the other base that the verifier answers YES with.
+     reject_if_any({
+         "form": sum(not 1 <= k <= 16 + 8 * form for k, form in shifts),
+         "norm": sum(not norm_is_admitted(m, k) for m, k in norms),
+@@ -328,7 +333,7 @@ def check_ranges(layers, model, shape):
+         "final-norm": not norm_is_admitted(model["MF"], model["KF"]),
+         "logit-exponent": model["E_logit"] > 63,
+         "arith-eps": sum(model[name] != eps or eps == 0 for name in ("eps1", "eps2", "epsF")),
+-        "arith-const": sum(model[name] != value for name, value in constants),
++        "arith-const": sum(model[name] != value for name, value in constants) + (model["theta"] not in (500000, 10000)),
+     })  # fmt: skip
+ 
+ 
