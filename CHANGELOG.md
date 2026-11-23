@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+Decide how TinyLlama goes on FlashProve ([decision 0094](docs/decisions/0094-flashprove-tinyllama.md),
+proposed, for #186): padded into FlashProve's MoE format, with FlashProve unchanged as decision 0093
+drives it. The other route, Hallmark's own patches for dense layers, was tested on a CPU and is not
+taken: `cp_commit`'s mandatory worst-case check, computed with a port of upstream's code, refuses
+its TinyLlama kit at one gate row. Its results are in the ledger and `research/evidence/`; its code
+stays outside the repository. No commitment, proof or spend.
+
 Add FlashProve as a pinned external proof backend for Mixture-of-Experts models:
 `make verify-flashprove` checks the stored upstream proofs on a Mac, and
 `make e2e-flashprove` proves upstream's synthetic small kit on one HF H200

@@ -1,6 +1,19 @@
 # Research state
 
-Updated: 2026-11-04. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
+Updated: 2026-11-23. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
+
+## TinyLlama on FlashProve — decision proposed, not built
+
+2026-11-23. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed, #186)
+proves TinyLlama-1.1B padded into FlashProve's MoE format (width 5,120, four zero experts), with
+FlashProve unchanged. The other route, Hallmark's own patches for dense layers, was tested and not
+taken: on a CPU, upstream's integer model with a kit fitted through them gave SASH's eight answer
+tokens on Linux and macOS, but `cp_commit`'s mandatory worst-case check, computed with a port of
+upstream's code and checked from the float weights, refuses that kit at one gate row of layer 21
+(a key of 47,481 against 32,639), and no rescaling fixes it
+([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). The padded route keeps the
+check, whose standard form clamps that key. Next: the padding exporter, a padded kit and its CPU
+checks, then GPU jobs with an approved cap. SASH stays the LLM proof path.
 
 ## SASH and FlashProve comparison — recorded
 

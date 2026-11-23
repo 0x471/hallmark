@@ -12,7 +12,9 @@ Hallmark drives FlashProve as a pinned external backend: upstream commit
 ([decision 0093](decisions/0093-flashprove-backend.md)). FlashProve proves MoE
 models only, so Hallmark's dense TinyLlama response stays on
 [SASH](LLM-PROOF.md). [SASH and FlashProve compared](PROVER-COMPARISON.md) sets
-the two side by side.
+the two side by side. Proposed, not built:
+[decision 0094](decisions/0094-flashprove-tinyllama.md) would prove TinyLlama
+padded into FlashProve's MoE format, with FlashProve unchanged.
 
 | Command | What it does | Needs |
 |---|---|---|
