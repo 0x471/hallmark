@@ -3247,3 +3247,129 @@ small stored proof 0.62 s, fresh H200 proof 0.63 s, full-size proof 7.88 s
 `check_proof.py` timings (1.45 s, 7.99 s) and this re-timing. The FlashProve
 decision is renumbered 0092 → 0093 because #181 merged its Slurm decision as
 0092 first. No spend.
+
+## 2026-11-21: dense TinyLlama patches for pinned FlashProve (proposed), CPU checks
+
+Hypothesis: three small pinned patches on FlashProve `9e2bdd8` let a dense model (NE 0) reach
+the verifier's standard parameter form without changing any check of a proof's bytes, and give the
+provers and the CPU tools the constants for width 2,048 and head width 64 (#186, option 3; decision
+0094, proposed). Pass criterion: `make verify-flashprove-tinyllama` passes; on upstream's two stored
+proofs and 99 altered copies, every `cp_verify` call of the patched build equals the unpatched
+build's apart from the build digest and timed fields; upstream's standard-form test with the dense
+cases passes, and fails on the unpatched build exactly in the five dense cases.
+
+Result: passed on Linux, upstream `verifier/build.sh` with g++ 13.3, x86_64
+([decision 0094](../docs/decisions/0094-flashprove-tinyllama.md),
+[evidence](evidence/flashprove-tinyllama-2026-11-22.json)). 108 of 108 calls equal; 99 of 99 altered
+sets rejected; patched verifier source digest `6f7ac148...`. Other runs:
+- the `integer_model` CPU suite on the patched tree: 947 passed, 0 failed;
+- `weight_sums/tests/run_tests.sh`: 24 steps passed; the two `make_model` steps end with SIGILL
+  (no SHA-NI on that CPU).
+Three earlier-revision runs on macOS also passed. No GPU, no proof, no spend; the prover patch is
+not compiled. Synthetic inputs only.
+
+## 2026-11-22: TinyLlama-shaped planning and the first nvcc build of the patches (proposed)
+
+Hypothesis: with the patches of decision 0094 (proposed), the verifier's planner admits a dense
+parameter file at TinyLlama-1.1B's shape (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22
+layers, vocabulary 32,000, rotary base 10,000, T = 64) in the standard parameter form, the unpatched
+build refuses it, and the prover patch compiles with upstream's nvcc 13.2.86. Pass criterion: check
+6 of `make verify-flashprove-tinyllama` passes on Linux and macOS together with every earlier check,
+and upstream's `prover/build.sh serving_cp_commit` and `serving_cp_prove` exit 0 on the patched source.
+
+Result: passed ([evidence](evidence/flashprove-tinyllama-2026-11-22.json)). The target passed on
+Linux (g++ 13.3, 1,670 s) and macOS (Apple clang 17, 499 s), 108 of 108
+calls equal on each. The planner admits the TinyLlama-shaped file, its three tables match their
+digests, both planning calls print the planner's whole ending and name the same pinned files on both
+hosts, and the unpatched build answers `NO: policy-tables`. Without the digest lines the unpatched
+build misses exactly `routed-experts`, `both-clamps` and `table-digests`, the patched build only
+`table-digests`. Its figures for that file (a proof of
+at most 14,061,196 bytes; 126.21 bits by the compiled bound) are of placeholder scales and lines, not
+a measurement. nvcc built `serving_cp_commit` (1,530 s) and `serving_cp_prove` (3,558 s) without a
+GPU, and the test builds `cp_commit` (1,211 s) and `cp_prove` (2,781 s); every warning is in a file
+no patch changes. No program has run. No kit, no proof, no spend.
+
+## 2026-11-23: a fitted TinyLlama kit and the decisive CPU answer check (proposed)
+
+Hypothesis: with a fourth patch for upstream's scale tools, upstream's own route fits a kit for
+TinyLlama-1.1B-Chat (T = 64, e_res 11) from a GGUF export of the pinned model, the patched verifier
+admits that kit in the standard parameter form, and upstream's integer model with it gives SASH's
+eight answer tokens on SASH's 25 prompt tokens. Pass criterion: `make
+verify-flashprove-tinyllama-answer` passes: environments made from hash-locked requirement files
+hold exactly those files; the export and every kit file but the device-dependent `maxima.json` are
+rebuilt byte for byte from pinned inputs; both planners and the provers' reader judge the kit as
+expected; upstream's scale-tool tests pass on the patched tree; the float pass agrees with
+transformers; the integer model gives `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]` over a whole
+64-token window with no failed range condition and logits within the slope and correlation bounds;
+and two one-bit mutations of the kit each fail.
+
+Result: passed on Linux x86_64 (fresh clone, every input downloaded, 1,877 s) and on macOS
+arm64 (249 s, model files from a checked local folder)
+([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). Both hosts rebuilt every
+required file byte for byte; `maxima.json`, recorded only, differs in its last digits on Linux, as
+upstream expects, with the same scales. The integer model's choices, peaks and margins are identical
+on the two hosts. The drawn calibration rows have upstream's own `DRAWS_SHA256`, which upstream's
+tests do not reproduce. The float pass on the export agrees with transformers to a relative L2 of
+3.9e-6. The integer model gives SASH's eight tokens, no range condition fails at any of the 64
+positions (one value cell clamps, at the final EOS), and the gate's key peaks at 7,108 (limit
+32,639). Its logits over 2^17 follow the float logits with a slope of 0.988 to 1.004 and a
+correlation of at least 0.9991; the smallest top-1 margin is 0.86 (float: 1.06), at the full stop.
+The controls fail as required: `s` + 1 halves the slope, and layer 10's `kv` + 1, which leaves the
+tokens and slopes as they are, lowers the correlation to 0.994 to 0.997, below the floor of 0.998.
+An earlier run of this target, before both reviews, passed with a correlation floor of 0.99 and no
+controls; a reviewer's mutations showed that one layer's shift off by one bit passed those bounds.
+The planner bounds the kit's proof at 14,061,196 bytes and 126.21 bits, as for check 6, whose
+placeholder proof-system lines the kit keeps. No commitment, proof or GPU run; equal tokens are a
+smoke test, not equality of the two integer functions.
+
+## 2026-11-23: the review's fixes, the kept worst-case check, and reruns (proposed)
+
+Hypothesis: after an adversarial review, the patches and the answer check still pass with
+`prover.patch` keeping upstream's mandatory worst-case check, a dense reader that refuses more
+non-Llama-2 files, a mutation control that changes the logits themselves (`MF` + 1 in place of `s` +
+1, which changed only the check's own divisor), a NaN-safe correlation bound, minimal child
+environments and SUITE.md's own rows for its two scale tests. Pass criterion: both targets pass on
+Linux x86_64 and macOS arm64 at the last code change, and the prover patch compiles with nvcc.
+
+Result: passed at `1208545`
+([patches](evidence/flashprove-tinyllama-2026-11-23.json),
+[kit and answer](evidence/flashprove-tinyllama-answer-2026-11-23.json)). `prover.patch` is now
+13,205 bytes and changes five files; the four that only skipped the check are upstream's again.
+`make verify-flashprove-tinyllama`: 108 of 108 calls equal on both hosts (1,638 s and 351 s). nvcc
+13.2.86 built all four prover programs from the patched source (exit 0; warnings only in files no
+patch changes); no program ran. `make verify-flashprove-tinyllama-answer`: SASH's eight tokens on
+both hosts (1,833 s with every input downloaded, 258 s), with the same choices, peaks, margins and
+clamped cells (one: `vw` in layer 2 at the final EOS, 2,233 against 2,047); `MF` + 1 doubles the
+slope with the tokens unchanged, and layer 10's `kv` + 1 falls below the correlation floor. The
+floor, 0.998, set by hand before it, held in a one-off sweep: every layer's `kv`, `ko` and `kd` + 1,
+66 kits, all caught (5 by their tokens, 61 by the floor alone, the closest at 0.9962); 30 of them
+would have passed the earlier floor of 0.99. The margin is thin. Linux `make check`: 2 failures,
+both on `main` on that host too. The calibration text's licence is left to the owner; the kit
+stands or falls with it, the patches do not. Not shown: any proof through the verifier's NE 0
+branches (the 108 calls are all on MoE proofs), the worst-case check on the kit, any commitment or
+proof. No GPU, no spend.
+
+## 2026-11-23: cp_commit's worst-case check on a CPU (proposed)
+
+Hypothesis: the TinyLlama kit passes `cp_commit`'s mandatory worst-case check, which upstream
+computes only on a GPU, and if it does not, coarser scales fix it. Pass criterion: a CPU port of
+upstream's `worst_case.cuh` (the decisive row bounds with the GPU's rounding emulated exactly) finds
+every site within its limit, and a bound from the float weights alone agrees.
+
+Result: failed, at one site
+([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json), step 7 of both runs at
+`7004750`, identical on Linux and macOS). Every site fits but the gate of layer 21: one row of 5,632
+can take a key of 47,481 against the limit of 32,639 (0.54 bits over); no other layer's gate key
+exceeds 14,631, q, k, v and up keep at least 1.2 bits, and the stream, bounded by Frobenius norms,
+3.7 bits. The float bound agrees: that row can reach a gate input of 177.4, and in every layer the
+integer bound is the float one times the norm's ball radius over 2,048, within 2e-4. The second half
+of the hypothesis is false: in real units the bound is the row's own, so no rescaling helps, and
+upstream's remedy, `gcl 1`, needs the sigmoid table and is refused at NE 0. With these patches
+`cp_commit` would not commit this kit. The ways past it, an opt-in to leave the check out under
+`-public-weights` or `gcl` at NE 0, both leave decision 0093's "unchanged upstream" rule, so decision
+0094 now proposes padded option 2, on unchanged FlashProve, whose standard form carries `gcl`. On SASH's prompt the gate's key reaches 7,108. The answer target, which now records
+this step, passed on both hosts (1,786 s and 367 s) with the same tokens and figures as before; the
+66-kit shift sweep, rerun with its committed script, gave the same 66 catches. Not shown: the GPU's
+own verdict, and the GPU's guards on its matrix products. No GPU, no spend. The probe's code, a failed
+experiment, stays outside the repository (decision 0094: branch `flashprove-tinyllama` of
+`0x471/hallmark` at `e24af18`).

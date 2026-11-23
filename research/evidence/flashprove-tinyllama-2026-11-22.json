@@ -1,0 +1,395 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-evidence/1",
+  "recorded_at": "2026-11-22",
+  "decision": "docs/decisions/0094-flashprove-tinyllama.md",
+  "decision_status": "proposed",
+  "code": "the code of these runs is not in this repository: decision 0094 keeps option 3, a failed experiment, outside it. It is on branch flashprove-tinyllama of github.com/0x471/hallmark, whose history holds every commit named here, up to e24af18891af088bd99854ee23a6f8844b2df723",
+  "source": {
+    "upstream": "https://github.com/anthropics/FlashProve",
+    "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+    "version": "0.16.0",
+    "licence": "Apache-2.0",
+    "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+    "bytes": 157799758,
+    "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+  },
+  "patches": {
+    "apply_order": [
+      "verifier.patch",
+      "prover.patch",
+      "tools.patch"
+    ],
+    "fold_constants": {
+      "2048,64": [
+        "0x3FB504F3",
+        "0x3E3504F3"
+      ],
+      "5120,128": [
+        "0x3F8F1BBD",
+        "0x3DCA62C2"
+      ]
+    },
+    "patches": {
+      "prover.patch": {
+        "bytes": 21735,
+        "sha256": "b84de422c0ffbdf0854c397d4d951f8934503dac6d918e87fbaeffc07ce38dff"
+      },
+      "tools.patch": {
+        "bytes": 37858,
+        "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+      },
+      "verifier.patch": {
+        "bytes": 14123,
+        "sha256": "b78c47e5d552a22c6174d2449e0bb165badc7d9c552db744bf424fbf7e524f8d"
+      }
+    },
+    "schema_id": "hallmark.flashprove-tinyllama-patches/1",
+    "served_form_cases_only_the_patch_meets": [
+      "routed-experts.dense",
+      "routed-experts.dense-three-digests",
+      "routed-experts.dense-three-silu-altered",
+      "routed-experts.dense-three-rope-altered",
+      "routed-experts.dense-three-exp-altered"
+    ],
+    "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+    "verifier_source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52",
+    "weight_sums_oracle_cases": [
+      [
+        "5120,128",
+        1
+      ],
+      [
+        "2048,64",
+        1
+      ],
+      [
+        "2048,64",
+        100
+      ]
+    ]
+  },
+  "linux_target_run": {
+    "command": "make verify-flashprove-tinyllama",
+    "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM",
+    "passed": true,
+    "seconds": 1669.6,
+    "seconds_note": "6 vCPUs, beside the integer_model suite; not a timing",
+    "builds": {
+      "patched": {
+        "recipe": "upstream verifier/build.sh",
+        "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+        "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52",
+        "sha256": "9bd671a98b0daecc4453ccd085f91b76475d2b07899ac822d0cb02023c9d6b26"
+      },
+      "upstream": {
+        "recipe": "upstream verifier/build.sh",
+        "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+        "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+        "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394"
+      }
+    },
+    "timed_formats": 9,
+    "calls_compared": 108,
+    "calls_differing": 0,
+    "exit_codes_of_compared_calls": {
+      "1 (refused)": 99,
+      "0 (accepted)": 7,
+      "4 (planning call inside check_proof.py)": 2
+    },
+    "stored_proofs": {
+      "accepted-proof": {
+        "exit_code": 0,
+        "last_lines": [
+          "result: outcome=verified commitment_id=79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183 range=60:64 checked_tokens=3 end_token=not_checked claim=exact-match policy=exact next_token=199 C=256 theta=256 cap=0 s=16 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=49 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52",
+          "check_proof: verified: exact match: every checked token (tokens 61 to 63 of the request) is the model's greedy choice; the next token, 199, is the model's greedy choice; the end of the reply was not checked; commitment: 49 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 38 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+        ]
+      },
+      "full-size": {
+        "exit_code": 0,
+        "last_lines": [
+          "result: outcome=verified commitment_id=7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe range=23:1024 checked_tokens=1000 end_token=not_checked claim=exact-match policy=exact next_token=52599 C=256 theta=256 cap=0 s=15 limits=exact request_tokens=1024 leaf=0 commitment_assumed_rounds=86 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52",
+          "check_proof: verified: exact match: every checked token (tokens 24 to 1023 of the request) is the model's greedy choice; the next token, 52599, is the model's greedy choice; the end of the reply was not checked; commitment: 86 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 71 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+        ]
+      }
+    },
+    "rejection_tables": [
+      {
+        "table": "altered_copies.tsv",
+        "example": "accepted-proof",
+        "last_line": "10 altered sets: all rejected"
+      },
+      {
+        "table": "every_kind_of_item.tsv",
+        "example": "accepted-proof",
+        "last_line": "79 altered sets: all rejected"
+      },
+      {
+        "table": "altered_copies_clipped_gap.tsv",
+        "example": "accepted-proof-clipped-gap",
+        "last_line": "10 altered sets: all rejected"
+      }
+    ],
+    "standard_form": {
+      "patched": "served_form_test.py: all as expected",
+      "unpatched_misses": [
+        "routed-experts.dense",
+        "routed-experts.dense-three-digests",
+        "routed-experts.dense-three-exp-altered",
+        "routed-experts.dense-three-rope-altered",
+        "routed-experts.dense-three-silu-altered"
+      ]
+    },
+    "provers_parameter_file_reader": {
+      "prover/tests/configurations/pinned/policy.txt": "admitted",
+      "served-form-patched/routed-experts.dense-sig-for-rope/policy.txt": "policy-tables",
+      "served-form-patched/routed-experts.dense-three-digests/policy.txt": "admitted",
+      "served-form-patched/routed-experts.dense-with-digests/policy.txt": "policy-tables",
+      "served-form-patched/routed-experts.dense/policy.txt": "admitted",
+      "served-form-patched/table-digests.no-tsig/policy.txt": "policy-tables"
+    },
+    "fold_constants": {
+      "integer_model": [
+        "2048,64",
+        "5120,128"
+      ],
+      "prover": [
+        "2048,64",
+        "5120,128"
+      ],
+      "weight_sums.cpp": [
+        "2048,64",
+        "5120,128"
+      ],
+      "weight_sums.py": [
+        "2048,64",
+        "5120,128"
+      ]
+    },
+    "weight_sums_against_oracle": [
+      {
+        "same": true,
+        "seed": 1,
+        "shape": "5120,128"
+      },
+      {
+        "same": true,
+        "seed": 1,
+        "shape": "2048,64"
+      },
+      {
+        "same": true,
+        "seed": 100,
+        "shape": "2048,64"
+      }
+    ],
+    "date": "2026-11-22",
+    "tinyllama_plan": {
+      "generator": "research/probes/flashprove/tinyllama/tinyllama_plan.py",
+      "shape": {
+        "G": 4,
+        "H": 32,
+        "L": 22,
+        "NE": 0,
+        "V": 32000,
+        "d": 2048,
+        "dh": 64,
+        "f": 5632,
+        "lt": 6,
+        "theta0_lo": 10000
+      },
+      "patched": "-plan arrays, request and accounting: status 4 (PLAN ONLY); standard parameter form met; three tables match their digests",
+      "unpatched": "NO: policy-tables",
+      "planner_figures": {
+        "proof_bytes_at_most": 14061196,
+        "bits_compiled_bound": 126.21,
+        "note": "of placeholder scales and lines; no measurement and not a fitted kit"
+      },
+      "h_par": "252ffdf7478c1d69609b5412dd1a540d66aac0916fd29298da52a5cbcc6cb8b9",
+      "configuration": "f7fd2f25691d8c4712549b600d541add91c0aa669892d26fcba552dab9b86ccc",
+      "same_files_on_both_hosts": "h_par and configuration equal on Linux and macOS: the generator wrote the same TinyLlama-shaped files",
+      "unmet_without_digests": {
+        "patched": [
+          "table-digests"
+        ],
+        "unpatched": [
+          "routed-experts",
+          "both-clamps",
+          "table-digests"
+        ]
+      }
+    },
+    "earlier_runs": "2026-11-21 and earlier on 2026-11-22, before the rename and before the planning check's present form: all passed with the same 108 calls and the same two verifier binaries (sha256); the first had no planning check"
+  },
+  "mac_target_run": {
+    "command": "make verify-flashprove-tinyllama",
+    "date": "2026-11-22",
+    "host": "macOS 15 (Darwin 24.6.0), arm64",
+    "passed": true,
+    "seconds": 499.1,
+    "builds": {
+      "patched": {
+        "recipe": "apple-clang",
+        "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+        "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52",
+        "sha256": "d1ad3a47ef22445c95770b12c6e5ef99b15e863ca1a4b91f3bef2b223b707ef4"
+      },
+      "upstream": {
+        "recipe": "apple-clang",
+        "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+        "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+        "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034"
+      }
+    },
+    "calls_compared": 108,
+    "calls_differing": 0,
+    "tinyllama_plan": {
+      "h_par": "252ffdf7478c1d69609b5412dd1a540d66aac0916fd29298da52a5cbcc6cb8b9",
+      "configuration": "f7fd2f25691d8c4712549b600d541add91c0aa669892d26fcba552dab9b86ccc",
+      "unpatched": "policy-tables",
+      "unmet_without_digests": {
+        "patched": [
+          "table-digests"
+        ],
+        "unpatched": [
+          "routed-experts",
+          "both-clamps",
+          "table-digests"
+        ]
+      }
+    },
+    "note": "at the last code change (d54153d): the planning check requires the planner's whole ending, the pinned shape and file IDs, and the no-digest control; the same two verifier binaries (sha256) as every earlier run"
+  },
+  "linux_other_checks": {
+    "make_check": {
+      "date": "2026-11-22",
+      "commit": "d54153d, the last code change",
+      "ruff_format_mypy_spec_conformance_admission": "pass (spec, conformance and admission run on their own, since make stops at the pytest failure)",
+      "pytest": "2355 passed, 1 failed, 12 skipped",
+      "skipped_note": "the environment also held the train and guard extras from check-guard and check-comparison, so fewer tests skipped than in a core environment",
+      "failed": "tests/test_manifests.py::test_file_changed_during_read[abd]",
+      "failed_note": "fails 3 of 3 runs on Hallmark's main e2cc6d6 on that host. Earlier runs of this branch there failed tests/test_worker.py::test_stream_copy_retains_rejected_output[modified] instead, which fails 4 of 5 runs on that main. The branch touches neither test nor src/"
+    },
+    "integer_model_cpu_suite": {
+      "date": "2026-11-22",
+      "command": "pytest -m 'not vllm and not prover' (integrations/vllm/integer_model, patched tree)",
+      "result": "947 passed, 0 failed, 16 skipped, 56 deselected",
+      "skipped": "4 need an NVIDIA GPU; 12 need transformers",
+      "python": "3.13",
+      "torch": "2.13.0+cpu",
+      "seconds": 1537,
+      "tree": "the pinned archive with the three pinned patches applied by the target (tools.patch sha256 1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040)",
+      "earlier": "2026-11-21: the same counts, on a tree whose tools.patch is not recorded"
+    },
+    "weight_sums_run_tests": {
+      "date": "2026-11-22",
+      "command": "weight_sums/tests/run_tests.sh (patched tree)",
+      "passed_steps": 24,
+      "failed_steps": [
+        "model.cpp",
+        "model.py"
+      ],
+      "failed_note": "make_model ends with an illegal instruction (SIGILL): the CPU has no SHA-NI (sha_ni absent from /proc/cpuinfo), which make_model needs",
+      "tree": "the same tree (tools.patch sha256 1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040)"
+    },
+    "package_check": {
+      "date": "2026-11-22",
+      "command": "make package-check",
+      "uv": "0.9.18 (the version scripts/reproduce_package.py requires)",
+      "result": "passed"
+    },
+    "check_guard": {
+      "date": "2026-11-22",
+      "result": "32 passed"
+    },
+    "check_comparison": {
+      "date": "2026-11-22",
+      "result": "31 passed"
+    }
+  },
+  "earlier_revision_mac_runs": {
+    "verifier_source_digest": "f363b8e09c753b05d9b8be1dda6e4ffbd31a023de1daf1ec66abcbc8d7e64e29",
+    "runs": 3,
+    "seconds": [
+      328,
+      360,
+      396
+    ],
+    "recipe": "apple-clang",
+    "host": "macOS arm64",
+    "note": "earlier patches and an earlier comparator; establishes that revision only",
+    "checks": "108 equal calls; standard-form test on the patched build; the negative control's five misses (not its last line); the provers' reader; fold constants; weight_sums. Not: the timed-output check or the TinyLlama planning check, which did not exist then"
+  },
+  "not_run": [
+    "any commitment or proof (no GPU run)",
+    "a fitted TinyLlama kit: dense scale conversion, calibration, GGUF export; check 6 uses placeholder scales",
+    "x86 SHA-NI tests (make_model, prover unit rows)"
+  ],
+  "synthetic_inputs_only": true,
+  "prover_patch_compiled": true,
+  "tinyllama_proof": false,
+  "hiding_claim": false,
+  "live_spec_audit": {
+    "date": "2026-11-22",
+    "command": "scripts/check_spec.py --live",
+    "result": "passed, live matched",
+    "host": "macOS arm64"
+  },
+  "mac_other_checks": {
+    "date": "2026-11-22",
+    "pytest": "uv run --locked pytest at d54153d: 2266 passed, 0 failed, 102 skipped",
+    "docs": "make docs: passed, 176 pages"
+  },
+  "prover_compile": {
+    "date": "2026-11-22",
+    "host": "the Linux host above; no GPU",
+    "source": "the pinned archive with the three pinned patches applied; byte-identical (diff -r, build outputs aside) to the tree that make verify-flashprove-tinyllama patched",
+    "toolchain": "nvcc V13.2.86 (CUDA 13.2 Update 2), as upstream requires: pip cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2, the pin in research/probes/flashprove/source.json; libcuda.so link stub from NVIDIA's cuda_cudart-linux-x86_64-13.2.86-archive.tar.xz (sha256 d6be2b3546fa93e5dec9e3d118d31f9540d0b7af5319ee3c6726f202dfc5b5d4); g++ 13.3",
+    "steps": [
+      {
+        "command": "verifier/build.sh",
+        "exit_code": 0,
+        "seconds": 203
+      },
+      {
+        "command": "prover/build.sh serving_cp_commit",
+        "exit_code": 0,
+        "seconds": 1530,
+        "sha256": "90c9364c5f3faa92845282befdd6224ec566de67df1f822327f160f4b51c1da1",
+        "verifier_beside_sha256": "9bd671a98b0daecc4453ccd085f91b76475d2b07899ac822d0cb02023c9d6b26"
+      },
+      {
+        "command": "prover/build.sh serving_cp_prove",
+        "exit_code": 0,
+        "seconds": 3558,
+        "sha256": "92cba6284b0e4642cf025e2e3b62f86d38da340214c748042448db509c91de02"
+      },
+      {
+        "command": "prover/build.sh cp_commit (test build)",
+        "exit_code": 0,
+        "seconds": 1211,
+        "sha256": "7cd9ceb53bdd271feaf721dd4bb008cdbc5906379a6c6dcb8662a54e8e390f11"
+      },
+      {
+        "command": "prover/build.sh cp_prove (test build)",
+        "exit_code": 0,
+        "seconds": 2781,
+        "sha256": "4b0f51d4f91fcbb8223cd7da4de4ba16e7585f71ce356211fce5c9c8978d9f89"
+      }
+    ],
+    "build_record_sources": "0fa9c1ff8cc618da62bcc75d75db6e4401193ca7d571ba09076d13ceb39b7892",
+    "warnings": "46 (serving_cp_commit and the cp_commit test build each) and 98 (serving_cp_prove and the cp_prove test build each), all in files that no patch changes: common/zeroing_heap.h, field/lazy_gl64.cuh, field/transform_groups_gl64.cuh, attn/front.cuh, hiding/forest_fused.cuh, prover/layer_prove.cuh, prover/layer_walk.cuh",
+    "compiler_sample": "built, not run: status 77, no GPU (build.sh then checks the compiler by version only)",
+    "least_available_memory_mib": 4647,
+    "not_run": "neither program ran: they need an H100-class GPU (sm_90a)",
+    "logs": "kept outside the repository, since they hold the build host's paths; the exit codes, times and warning counts above are copied from them",
+    "log_sha256": {
+      "verifier.log": "954a70c190b0eb6ef3012393285b89e570d45839e4de960aabd76539a43eb873",
+      "serving_cp_commit.log": "e7847158348aaf62669fc948d66ef0196edce0c1fd8b0df4f2f7487ba01d386b",
+      "serving_cp_prove.log": "ebeacc078abdf90459dc7b914bb057b449501b893df09cb814272c7a2dd19970",
+      "cp_commit.log": "8ba858575fafcf3200ed6b9c332821d01a652533306b27323fbe9f4a8093ae06",
+      "cp_prove.log": "23d639f99be2f06d39ae7452516c64ebea35d81e483493036b4936e032b64d1d"
+    },
+    "build_record_sources_note": "upstream prover/build.sh's source digest over the pinned archive with the three patches applied; recomputable without nvcc",
+    "warnings_baseline": "not measured: no unpatched nvcc build was made here, so the counts are not compared with upstream's"
+  }
+}

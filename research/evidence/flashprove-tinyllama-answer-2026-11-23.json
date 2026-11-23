@@ -1,0 +1,3674 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-answer-evidence/2",
+  "recorded_at": "2026-11-23",
+  "decision": "docs/decisions/0094-flashprove-tinyllama.md",
+  "decision_status": "proposed",
+  "code": "the code of these runs is not in this repository: decision 0094 keeps option 3, a failed experiment, outside it. It is on branch flashprove-tinyllama of github.com/0x471/hallmark, whose history holds every commit named here, up to e24af18891af088bd99854ee23a6f8844b2df723",
+  "source": {
+    "bytes": 157799758,
+    "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+    "examples": {
+      "accepted-proof": {
+        "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+        "next_token": 199,
+        "range": "60:64"
+      },
+      "full-size": {
+        "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+        "next_token": 52599,
+        "range": "23:1024"
+      }
+    },
+    "gpu_kit": {
+      "name": "target_small_f2_roomy",
+      "range": "15:64"
+    },
+    "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+    "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+    "licence": "Apache-2.0",
+    "nvcc_release": "V13.2.86",
+    "rejection_tables": [
+      [
+        "accepted-proof",
+        "altered_copies.tsv",
+        10
+      ],
+      [
+        "accepted-proof",
+        "every_kind_of_item.tsv",
+        79
+      ],
+      [
+        "accepted-proof-clipped-gap",
+        "altered_copies_clipped_gap.tsv",
+        10
+      ]
+    ],
+    "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+    "schema_id": "hallmark.flashprove-source/1",
+    "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+    "upstream": "https://github.com/anthropics/FlashProve",
+    "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+    "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+    "version": "0.16.0"
+  },
+  "commit": "7004750, the last code change",
+  "supersedes": "this file's content at 49dce1b, a transcription of the runs at 1208545; each run's result.json is now embedded verbatim",
+  "kit_pins": {
+    "schema_id": "hallmark.flashprove-tinyllama-kit/1",
+    "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+    "patches_json_sha256": "38df89f40050b6fea68314edb6ea0959aa3182a166ef2c9dba5d27a8ac8aa523",
+    "scales_patch": {
+      "name": "scales.patch",
+      "sha256": "73c42a3c16a6b7440f378b4703d312eb5d7f82a697f2bd6a051cbca4b3501c2c",
+      "bytes": 34669
+    },
+    "model": {
+      "case": "research/probes/sash/response-case.json",
+      "files": [
+        "config.json",
+        "model.safetensors",
+        "tokenizer.json"
+      ],
+      "note": "id, revision, licence, sizes and SHA-256 come from the case file, the pins of Hallmark's SASH path"
+    },
+    "calibration_text": {
+      "what": "WikiText-2 (raw), training split, as upstream's make_calibration_set.py pins it",
+      "url": "https://huggingface.co/datasets/Salesforce/wikitext/resolve/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-2-raw-v1/train-00000-of-00001.parquet",
+      "bytes": 6357543,
+      "sha256": "e83889baabc497075506f91975be5fac0d45c5290b6b20582c8cd1e853d0c9f7",
+      "licence": "CC BY-SA: the dataset card's tags name CC BY-SA 3.0 and GFDL, its text CC BY-SA 4.0 (WikiText, S. Merity et al., 'Pointer Sentinel Mixture Models', arXiv:1609.07843, 2016). No text and no token id from it is committed; scale statistics computed from it are (kit/maxima.json, words.json, KL.bin, six lines of policy.txt) and the calibration set's SHA-256",
+      "licence_review": "not cleared by the owner. Reviewed only by this proposal's contributor: the dataset card's tags (CC BY-SA 3.0, GFDL) and its text (CC BY-SA 4.0) name different versions, and research/AUTHORITY.json excludes ambiguous licences. The owner decides (decision 0094, not done 1); a no means refitting the kit on another text. The patches do not depend on it"
+    },
+    "environments": {
+      "scales": {
+        "python": "3.13",
+        "packages": {
+          "torch": "2.9.1",
+          "numpy": "2.3.5",
+          "gguf": "0.19.0",
+          "pyarrow": "23.0.1",
+          "tokenizers": "0.22.2",
+          "safetensors": "0.8.0",
+          "transformers": "5.15.1"
+        },
+        "locks": {
+          "macos-arm64": {
+            "file": "scales-macos-arm64.txt",
+            "sha256": "a90ecc08252b4d47abd4f5287f5c37fff10faaeadab68a9860b8d1ef1988f40d"
+          },
+          "linux-x86_64": {
+            "file": "scales-linux-x86_64.txt",
+            "sha256": "141cc59c3a21f196a6753bda102d725f2d0865de4e0f0c5655fd9b10c5077c8b"
+          }
+        },
+        "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13"
+      },
+      "integer_model": {
+        "python": "3.13",
+        "packages": {
+          "torch": "2.13.0",
+          "numpy": "2.4.6",
+          "gguf": "0.19.0"
+        },
+        "locks": {
+          "macos-arm64": {
+            "file": "integer_model-macos-arm64.txt",
+            "sha256": "b9d89b9e3571659760261c5c14441c99c331da76b6526f17b15edd94215df78c"
+          },
+          "linux-x86_64": {
+            "file": "integer_model-linux-x86_64.txt",
+            "sha256": "bba3b40f517585fa71af22286ddc71a6ef892143ea416c91625fe8dbd5a249a2"
+          }
+        },
+        "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13"
+      }
+    },
+    "e_res": 11,
+    "gguf": {
+      "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+      "bytes": 2200293664,
+      "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+    },
+    "calibration_set": {
+      "bytes": 131200,
+      "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31",
+      "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c"
+    },
+    "base_policy_sha256": "84f867cd0e5d6217b14158b43862fd924f40d189a107750e0b8b604bfc2dd5b2",
+    "files": {
+      "policy.txt": "2af02e144eaa03ba3e23587f305d9bebdf8f56bad4f5b97a512f055e5c5ed602",
+      "KL.bin": "1658bb72676fd6b774c83ff163b3c24211a603a281f5df0644a9c966684d7282",
+      "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+      "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c",
+      "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+      "words.json": "3465d8977ab6c3d0dcc40a2ce27b35e6b4962c8e14bef2f8bc9bd9e94119bf81",
+      "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31"
+    },
+    "h_par": "df7a40e52e295044e1452e46e7f58bfed53b8abd4e0816dd7ae0ff16b60ddd09",
+    "configuration": "e5407adf4450292e462e45e1fe8bf5e7bd8a3bd5dd16084e16ffe07a09dd0db6",
+    "request": {
+      "T": 64,
+      "filler": 0,
+      "r": 24,
+      "e": 32
+    },
+    "bounds": {
+      "final_norm_relative_l2": 0.0001,
+      "logit_slope": [
+        0.75,
+        1.33
+      ],
+      "logit_correlation": 0.998
+    },
+    "mutation_controls": [
+      "final-norm-MF-plus-1",
+      "layer-10-kv-plus-1"
+    ],
+    "worst_case": {
+      "short": [
+        [
+          "gate",
+          21
+        ]
+      ],
+      "ratio_tolerance": 0.001,
+      "note": "cp_commit's worst-case check computed on a CPU by worst_case_cpu.py (Hallmark's port of upstream's worst_case.cuh): the gate of layer 21 does not fit (one row; without the line gcl, which the verifier refuses at NE 0, its key's limit is 32,639). Recorded, not a condition of passing the target"
+    }
+  },
+  "statement_compared": {
+    "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+    "prompt": "Name the capital of France in one short sentence.",
+    "prompt_ids": [
+      529,
+      29989,
+      1792,
+      29989,
+      29958,
+      13,
+      1170,
+      278,
+      7483,
+      310,
+      3444,
+      297,
+      697,
+      3273,
+      10541,
+      29889,
+      2,
+      13,
+      29966,
+      29989,
+      465,
+      22137,
+      29989,
+      29958,
+      13
+    ],
+    "sash_answer_ids": [
+      1576,
+      7483,
+      310,
+      3444,
+      338,
+      3681,
+      29889,
+      2
+    ],
+    "sash_response": "The capital of France is Paris.",
+    "note": "SASH's answer is from Hallmark's SASH path (research/probes/sash/response-case.json)"
+  },
+  "mac_run": {
+    "command": "make verify-flashprove-tinyllama-answer",
+    "host": "macOS 15.7.1 (Darwin 24.6.0), Apple M4 Pro, arm64",
+    "how": "FLASHPROVE_TINYLLAMA_INPUTS set to a folder of the pinned files (each checked against its pin), so no model download",
+    "result_json_sha256": "b155d15579d9e751c0cbf6cb475d89af8da7a097bbcf949c8d7fdbda9a316af4",
+    "result": {
+      "answer": {
+        "T": 64,
+        "answer": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "choices": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "clamp_limit": 2047,
+        "clamped": [
+          {
+            "entries": 1,
+            "largest": 2233,
+            "layer": 2,
+            "name": "vw",
+            "positions": [
+              32
+            ]
+          }
+        ],
+        "controls": {
+          "final-norm-MF-plus-1": {
+            "choices": [
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2
+            ],
+            "failed": [
+              "the logits' scale at position 24: 2.0006",
+              "the logits' scale at position 25: 2.0113",
+              "the logits' scale at position 26: 1.9981",
+              "the logits' scale at position 27: 2.0096",
+              "the logits' scale at position 28: 1.9965",
+              "the logits' scale at position 29: 1.9975",
+              "the logits' scale at position 30: 1.9768",
+              "the logits' scale at position 31: 1.9861"
+            ],
+            "least_correlation": 0.9991355114998671,
+            "slope_range": [
+              1.9767846666614868,
+              2.0113177293285966
+            ]
+          },
+          "layer-10-kv-plus-1": {
+            "choices": [
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2
+            ],
+            "failed": [
+              "the logits' correlation at position 24: 0.99684",
+              "the logits' correlation at position 25: 0.99721",
+              "the logits' correlation at position 26: 0.99627",
+              "the logits' correlation at position 27: 0.99713",
+              "the logits' correlation at position 28: 0.99423",
+              "the logits' correlation at position 29: 0.99614",
+              "the logits' correlation at position 30: 0.99578",
+              "the logits' correlation at position 31: 0.99483"
+            ],
+            "least_correlation": 0.9942268775410992,
+            "slope_range": [
+              0.9791184986617665,
+              1.0084240646258618
+            ]
+          }
+        },
+        "e": 32,
+        "gate_key_within_limit": true,
+        "matches": true,
+        "peaks": {
+          "a": 1678,
+          "aF": 1075,
+          "aF_Rc": 581060445,
+          "aF_sigma": 85557,
+          "aF_w": 1075,
+          "a_Rc": 60041590595,
+          "a_sigma": 421505,
+          "a_w": 1678,
+          "first_choice": 29989,
+          "gw": 7108,
+          "k": 1890,
+          "key": 7108,
+          "kw": 1890,
+          "lam": 3635195,
+          "m": 1678,
+          "m_Rc": 21718748203,
+          "m_sigma": 421364,
+          "m_w": 1678,
+          "o": 1117,
+          "q": 771,
+          "qw": 771,
+          "s": 1533,
+          "u": 1756,
+          "v": 2047,
+          "vw": 2233,
+          "x": 344950,
+          "x_last": 36249,
+          "x_mid": 344840
+        },
+        "positions": [
+          {
+            "correlation": 0.9991186338132362,
+            "float_margin": 1.3528270721435547,
+            "margin": 1.5227432250976562,
+            "position": 24,
+            "slope": 0.9997971138460586,
+            "token": 1576
+          },
+          {
+            "correlation": 0.999612704610576,
+            "float_margin": 4.829959869384766,
+            "margin": 4.786834716796875,
+            "position": 25,
+            "slope": 1.0044461213228744,
+            "token": 7483
+          },
+          {
+            "correlation": 0.999450710650195,
+            "float_margin": 3.1156539916992188,
+            "margin": 3.4290695190429688,
+            "position": 26,
+            "slope": 0.9998750485648852,
+            "token": 310
+          },
+          {
+            "correlation": 0.999481433240616,
+            "float_margin": 7.930538177490234,
+            "margin": 8.119987487792969,
+            "position": 27,
+            "slope": 1.0036059695395236,
+            "token": 3444
+          },
+          {
+            "correlation": 0.9992708090700619,
+            "float_margin": 3.7941207885742188,
+            "margin": 4.483634948730469,
+            "position": 28,
+            "slope": 0.9994075876078811,
+            "token": 338
+          },
+          {
+            "correlation": 0.9994768610566422,
+            "float_margin": 4.224757194519043,
+            "margin": 4.026390075683594,
+            "position": 29,
+            "slope": 0.9990878515664201,
+            "token": 3681
+          },
+          {
+            "correlation": 0.9994199305464538,
+            "float_margin": 1.0627670288085938,
+            "margin": 0.8570022583007812,
+            "position": 30,
+            "slope": 0.9880849424877806,
+            "token": 29889
+          },
+          {
+            "correlation": 0.9992304351629346,
+            "float_margin": 3.1625595092773438,
+            "margin": 3.5458755493164062,
+            "position": 31,
+            "slope": 0.9916396950149834,
+            "token": 2
+          }
+        ],
+        "r": 24,
+        "range_failure": null,
+        "s": 17,
+        "seconds": 5.767110249958932,
+        "window": [
+          529,
+          29989,
+          1792,
+          29989,
+          29958,
+          13,
+          1170,
+          278,
+          7483,
+          310,
+          3444,
+          297,
+          697,
+          3273,
+          10541,
+          29889,
+          2,
+          13,
+          29966,
+          29989,
+          465,
+          22137,
+          29989,
+          29958,
+          13,
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "builds": {
+        "patched": {
+          "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+          "recipe": "apple-clang",
+          "seconds": 33.42541170900222,
+          "sha256": "d1ad3a47ef22445c95770b12c6e5ef99b15e863ca1a4b91f3bef2b223b707ef4",
+          "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52"
+        },
+        "upstream": {
+          "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+          "recipe": "apple-clang",
+          "seconds": 33.158246083010454,
+          "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
+          "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+        }
+      },
+      "environments": {
+        "integer_model": {
+          "gguf": "0.19.0",
+          "installed": [
+            "certifi==2026.11.20",
+            "charset-normalizer==3.5.3",
+            "filelock==4.3.0",
+            "fsspec==2026.9.0",
+            "gguf==0.19.0",
+            "idna==3.20",
+            "jinja2==3.1.6",
+            "markupsafe==3.0.4",
+            "mpmath==1.3.0",
+            "networkx==3.7",
+            "numpy==2.4.6",
+            "pyyaml==6.0.4",
+            "requests==2.34.2",
+            "setuptools==84.2.1",
+            "sympy==1.14.0",
+            "torch==2.13.0",
+            "tqdm==4.70.1",
+            "typing-extensions==4.16.0",
+            "urllib3==2.8.0"
+          ],
+          "lock_file": "integer_model-macos-arm64.txt",
+          "numpy": "2.4.6",
+          "python": "3.13.2",
+          "torch": "2.13.0"
+        },
+        "scales": {
+          "gguf": "0.19.0",
+          "installed": [
+            "annotated-doc==0.0.7",
+            "annotated-types==0.8.0",
+            "anyio==4.16.0",
+            "certifi==2026.11.20",
+            "charset-normalizer==3.5.3",
+            "click==8.5.1",
+            "filelock==4.3.0",
+            "fsspec==2026.9.0",
+            "gguf==0.19.0",
+            "h11==0.16.0",
+            "hf-xet==1.8.0",
+            "httpcore==1.0.9",
+            "httpx==0.28.1",
+            "huggingface-hub==1.33.0",
+            "idna==3.20",
+            "jinja2==3.1.6",
+            "markdown-it-py==4.3.0",
+            "markupsafe==3.0.4",
+            "mdurl==0.1.2",
+            "mpmath==1.3.0",
+            "networkx==3.7",
+            "numpy==2.3.5",
+            "packaging==26.3",
+            "pyarrow==23.0.1",
+            "pydantic-core==2.50.5",
+            "pydantic==2.14.4",
+            "pygments==2.21.0",
+            "pyyaml==6.0.4",
+            "regex==2026.11.19",
+            "requests==2.34.2",
+            "rich==15.0.0",
+            "safetensors==0.8.0",
+            "setuptools==84.2.1",
+            "shellingham==1.5.4",
+            "sympy==1.14.0",
+            "tokenizers==0.22.2",
+            "torch==2.9.1",
+            "tqdm==4.70.1",
+            "transformers==5.15.1",
+            "typer==0.29.2",
+            "typing-extensions==4.16.0",
+            "typing-inspection==0.4.5",
+            "urllib3==2.8.0"
+          ],
+          "lock_file": "scales-macos-arm64.txt",
+          "numpy": "2.3.5",
+          "pyarrow": "23.0.1",
+          "python": "3.13.2",
+          "safetensors": "0.8.0",
+          "tokenizers": "0.22.2",
+          "torch": "2.9.1",
+          "transformers": "5.15.1"
+        }
+      },
+      "float_reference": {
+        "checked_logits": {
+          "positions": [
+            24,
+            31
+          ],
+          "shape": [
+            8,
+            32000
+          ]
+        },
+        "final_norm_max_abs": 0.00011444091796875,
+        "final_norm_relative_l2": 3.946445303881774e-06,
+        "float_greedy": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "float_greedy_is_the_answer": true,
+        "moe_layers": [],
+        "rope_layers": 22,
+        "seconds": 10.671090541989543,
+        "shape": {
+          "G": 4,
+          "H": 32,
+          "L": 22,
+          "NE": 0,
+          "V": 32000,
+          "d": 2048,
+          "dh": 64,
+          "eps": 9.999999747378752e-06,
+          "f": 5632,
+          "fe": 0,
+          "theta": 10000.0
+        }
+      },
+      "gpu_used": false,
+      "hiding_claim": false,
+      "host": {
+        "machine": "arm64",
+        "system": "Darwin"
+      },
+      "kit": {
+        "calibrate_seconds": 92.91790820797905,
+        "calibration_set": {
+          "bytes": 131200,
+          "drawn_rows_match_upstream": true,
+          "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c",
+          "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+        },
+        "gguf": {
+          "bytes": 2200293664,
+          "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+          "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+        },
+        "kit_reproduced": true,
+        "maxima_equal_to_committed": true
+      },
+      "kit_pins": {
+        "base_policy_sha256": "84f867cd0e5d6217b14158b43862fd924f40d189a107750e0b8b604bfc2dd5b2",
+        "bounds": {
+          "final_norm_relative_l2": 0.0001,
+          "logit_correlation": 0.998,
+          "logit_slope": [
+            0.75,
+            1.33
+          ]
+        },
+        "calibration_set": {
+          "bytes": 131200,
+          "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c",
+          "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+        },
+        "calibration_text": {
+          "bytes": 6357543,
+          "licence": "CC BY-SA: the dataset card's tags name CC BY-SA 3.0 and GFDL, its text CC BY-SA 4.0 (WikiText, S. Merity et al., 'Pointer Sentinel Mixture Models', arXiv:1609.07843, 2016). No text and no token id from it is committed; scale statistics computed from it are (kit/maxima.json, words.json, KL.bin, six lines of policy.txt) and the calibration set's SHA-256",
+          "licence_review": "not cleared by the owner. Reviewed only by this proposal's contributor: the dataset card's tags (CC BY-SA 3.0, GFDL) and its text (CC BY-SA 4.0) name different versions, and research/AUTHORITY.json excludes ambiguous licences. The owner decides (decision 0094, not done 1); a no means refitting the kit on another text. The patches do not depend on it",
+          "sha256": "e83889baabc497075506f91975be5fac0d45c5290b6b20582c8cd1e853d0c9f7",
+          "url": "https://huggingface.co/datasets/Salesforce/wikitext/resolve/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-2-raw-v1/train-00000-of-00001.parquet",
+          "what": "WikiText-2 (raw), training split, as upstream's make_calibration_set.py pins it"
+        },
+        "configuration": "e5407adf4450292e462e45e1fe8bf5e7bd8a3bd5dd16084e16ffe07a09dd0db6",
+        "e_res": 11,
+        "environments": {
+          "integer_model": {
+            "locks": {
+              "linux-x86_64": {
+                "file": "integer_model-linux-x86_64.txt",
+                "sha256": "bba3b40f517585fa71af22286ddc71a6ef892143ea416c91625fe8dbd5a249a2"
+              },
+              "macos-arm64": {
+                "file": "integer_model-macos-arm64.txt",
+                "sha256": "b9d89b9e3571659760261c5c14441c99c331da76b6526f17b15edd94215df78c"
+              }
+            },
+            "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13",
+            "packages": {
+              "gguf": "0.19.0",
+              "numpy": "2.4.6",
+              "torch": "2.13.0"
+            },
+            "python": "3.13"
+          },
+          "scales": {
+            "locks": {
+              "linux-x86_64": {
+                "file": "scales-linux-x86_64.txt",
+                "sha256": "141cc59c3a21f196a6753bda102d725f2d0865de4e0f0c5655fd9b10c5077c8b"
+              },
+              "macos-arm64": {
+                "file": "scales-macos-arm64.txt",
+                "sha256": "a90ecc08252b4d47abd4f5287f5c37fff10faaeadab68a9860b8d1ef1988f40d"
+              }
+            },
+            "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13",
+            "packages": {
+              "gguf": "0.19.0",
+              "numpy": "2.3.5",
+              "pyarrow": "23.0.1",
+              "safetensors": "0.8.0",
+              "tokenizers": "0.22.2",
+              "torch": "2.9.1",
+              "transformers": "5.15.1"
+            },
+            "python": "3.13"
+          }
+        },
+        "files": {
+          "KL.bin": "1658bb72676fd6b774c83ff163b3c24211a603a281f5df0644a9c966684d7282",
+          "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+          "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+          "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+          "policy.txt": "2af02e144eaa03ba3e23587f305d9bebdf8f56bad4f5b97a512f055e5c5ed602",
+          "words.json": "3465d8977ab6c3d0dcc40a2ce27b35e6b4962c8e14bef2f8bc9bd9e94119bf81",
+          "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+        },
+        "gguf": {
+          "bytes": 2200293664,
+          "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+          "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+        },
+        "h_par": "df7a40e52e295044e1452e46e7f58bfed53b8abd4e0816dd7ae0ff16b60ddd09",
+        "model": {
+          "case": "research/probes/sash/response-case.json",
+          "files": [
+            "config.json",
+            "model.safetensors",
+            "tokenizer.json"
+          ],
+          "note": "id, revision, licence, sizes and SHA-256 come from the case file, the pins of Hallmark's SASH path"
+        },
+        "mutation_controls": [
+          "final-norm-MF-plus-1",
+          "layer-10-kv-plus-1"
+        ],
+        "patches_json_sha256": "38df89f40050b6fea68314edb6ea0959aa3182a166ef2c9dba5d27a8ac8aa523",
+        "request": {
+          "T": 64,
+          "e": 32,
+          "filler": 0,
+          "r": 24
+        },
+        "scales_patch": {
+          "bytes": 34669,
+          "name": "scales.patch",
+          "sha256": "73c42a3c16a6b7440f378b4703d312eb5d7f82a697f2bd6a051cbca4b3501c2c"
+        },
+        "schema_id": "hallmark.flashprove-tinyllama-kit/1",
+        "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "worst_case": {
+          "note": "cp_commit's worst-case check computed on a CPU by worst_case_cpu.py (Hallmark's port of upstream's worst_case.cuh): the gate of layer 21 does not fit (one row; without the line gcl, which the verifier refuses at NE 0, its key's limit is 32,639). Recorded, not a condition of passing the target",
+          "ratio_tolerance": 0.001,
+          "short": [
+            [
+              "gate",
+              21
+            ]
+          ]
+        }
+      },
+      "passed": true,
+      "planning": {
+        "bits_compiled_bound": 126.21,
+        "configuration": "e5407adf4450292e462e45e1fe8bf5e7bd8a3bd5dd16084e16ffe07a09dd0db6",
+        "h_par": "df7a40e52e295044e1452e46e7f58bfed53b8abd4e0816dd7ae0ff16b60ddd09",
+        "patched": "standard parameter form, three tables, PLAN ONLY (accounting and request)",
+        "proof_bytes_at_most": 14061196,
+        "provers_parameter_file_reader": "admitted",
+        "unpatched_accounting": "NO: policy-tables",
+        "unpatched_request": "NO: policy-tables"
+      },
+      "proof_made": false,
+      "scale_tool_tests": {
+        "table_ties.py": {
+          "last_line": "OK: 26 checks",
+          "status": 0
+        },
+        "test_calibrate.py": {
+          "last_line": "in part: 19 cases passed; SMALL_MODEL is not set, so program_on_the_small_model was not run",
+          "status": 77
+        },
+        "test_gguf_weights.py": {
+          "last_line": "in part: 102 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
+          "status": 77
+        },
+        "test_policy_tables.py": {
+          "last_line": "OK",
+          "status": 0
+        }
+      },
+      "schema_id": "hallmark.flashprove-tinyllama-answer/1",
+      "seconds": 366.93783195799915,
+      "source": {
+        "bytes": 157799758,
+        "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+        "examples": {
+          "accepted-proof": {
+            "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+            "next_token": 199,
+            "range": "60:64"
+          },
+          "full-size": {
+            "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+            "next_token": 52599,
+            "range": "23:1024"
+          }
+        },
+        "gpu_kit": {
+          "name": "target_small_f2_roomy",
+          "range": "15:64"
+        },
+        "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+        "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+        "licence": "Apache-2.0",
+        "nvcc_release": "V13.2.86",
+        "rejection_tables": [
+          [
+            "accepted-proof",
+            "altered_copies.tsv",
+            10
+          ],
+          [
+            "accepted-proof",
+            "every_kind_of_item.tsv",
+            79
+          ],
+          [
+            "accepted-proof-clipped-gap",
+            "altered_copies_clipped_gap.tsv",
+            10
+          ]
+        ],
+        "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "schema_id": "hallmark.flashprove-source/1",
+        "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+        "upstream": "https://github.com/anthropics/FlashProve",
+        "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+        "version": "0.16.0"
+      },
+      "worst_case": {
+        "float_gate_keys": [
+          4185.8,
+          3961.4,
+          13991.6,
+          4220.3,
+          6198.5,
+          5197.1,
+          5294.7,
+          10261.1,
+          6226.2,
+          7441.8,
+          6766.3,
+          7413.0,
+          11399.0,
+          10637.7,
+          10791.9,
+          10272.7,
+          11568.0,
+          13119.9,
+          13574.0,
+          13643.9,
+          12579.2,
+          45405.7
+        ],
+        "float_rows_beyond_the_limit": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "float_sha256": "6407dfb78c6fe37b04cf0c747453c4b35d14e10323ef50b49481b578190fc2ae",
+        "gate_key_bounds": [
+          4377,
+          4142,
+          14631,
+          4413,
+          6482,
+          5435,
+          5537,
+          10730,
+          6511,
+          7782,
+          7076,
+          7752,
+          11920,
+          11124,
+          11285,
+          10742,
+          12097,
+          13720,
+          14195,
+          14267,
+          13155,
+          47481
+        ],
+        "gate_rows_beyond_the_limit": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "port_sha256": "6427b48162bdc73ccc226a6dd8023b579a279fd78dbfdc1169cf048c3332caca",
+        "public_sites_fit": true,
+        "row_sites_fit": false,
+        "rows_recomputed_exactly": {
+          "Wg 0": 1,
+          "Wg 1": 1,
+          "Wg 10": 1,
+          "Wg 11": 1,
+          "Wg 12": 1,
+          "Wg 13": 1,
+          "Wg 14": 1,
+          "Wg 15": 1,
+          "Wg 16": 1,
+          "Wg 17": 1,
+          "Wg 18": 1,
+          "Wg 19": 1,
+          "Wg 2": 1,
+          "Wg 20": 1,
+          "Wg 21": 1,
+          "Wg 3": 1,
+          "Wg 4": 1,
+          "Wg 5": 1,
+          "Wg 6": 1,
+          "Wg 7": 1,
+          "Wg 8": 1,
+          "Wg 9": 1,
+          "Wk 0": 2,
+          "Wk 1": 2,
+          "Wk 10": 2,
+          "Wk 11": 2,
+          "Wk 12": 2,
+          "Wk 13": 2,
+          "Wk 14": 2,
+          "Wk 15": 2,
+          "Wk 16": 2,
+          "Wk 17": 2,
+          "Wk 18": 2,
+          "Wk 19": 2,
+          "Wk 2": 3,
+          "Wk 20": 2,
+          "Wk 21": 2,
+          "Wk 3": 2,
+          "Wk 4": 2,
+          "Wk 5": 2,
+          "Wk 6": 2,
+          "Wk 7": 2,
+          "Wk 8": 3,
+          "Wk 9": 2,
+          "Wq 0": 2,
+          "Wq 1": 3,
+          "Wq 10": 2,
+          "Wq 11": 2,
+          "Wq 12": 2,
+          "Wq 13": 2,
+          "Wq 14": 2,
+          "Wq 15": 2,
+          "Wq 16": 3,
+          "Wq 17": 3,
+          "Wq 18": 2,
+          "Wq 19": 2,
+          "Wq 2": 3,
+          "Wq 20": 2,
+          "Wq 21": 2,
+          "Wq 3": 2,
+          "Wq 4": 2,
+          "Wq 5": 2,
+          "Wq 6": 2,
+          "Wq 7": 2,
+          "Wq 8": 2,
+          "Wq 9": 2,
+          "Wu 0": 1,
+          "Wu 1": 1,
+          "Wu 10": 1,
+          "Wu 11": 1,
+          "Wu 12": 1,
+          "Wu 13": 1,
+          "Wu 14": 1,
+          "Wu 15": 1,
+          "Wu 16": 1,
+          "Wu 17": 1,
+          "Wu 18": 1,
+          "Wu 19": 1,
+          "Wu 2": 1,
+          "Wu 20": 1,
+          "Wu 21": 1,
+          "Wu 3": 1,
+          "Wu 4": 1,
+          "Wu 5": 1,
+          "Wu 6": 1,
+          "Wu 7": 1,
+          "Wu 8": 1,
+          "Wu 9": 1,
+          "Wv 0": 1,
+          "Wv 1": 1,
+          "Wv 10": 1,
+          "Wv 11": 1,
+          "Wv 12": 1,
+          "Wv 13": 1,
+          "Wv 14": 1,
+          "Wv 15": 1,
+          "Wv 16": 1,
+          "Wv 17": 1,
+          "Wv 18": 1,
+          "Wv 19": 1,
+          "Wv 2": 1,
+          "Wv 20": 1,
+          "Wv 21": 1,
+          "Wv 3": 1,
+          "Wv 4": 1,
+          "Wv 5": 1,
+          "Wv 6": 1,
+          "Wv 7": 1,
+          "Wv 8": 1,
+          "Wv 9": 1
+        },
+        "short": [
+          [
+            "gate",
+            21
+          ]
+        ],
+        "stream_sites_fit_by_frobenius": true,
+        "worst_by_site": {
+          "gate": {
+            "bound": 48620674.00000001,
+            "headroom_bits": -0.5407352635385507,
+            "layer": 21,
+            "limit": 33422847.0,
+            "shortfall": 1,
+            "site": "gate",
+            "value": 10,
+            "word": "kg"
+          },
+          "head margin": {
+            "bound": 176068497409.0,
+            "headroom_bits": 0.6426761679869486,
+            "layer": 22,
+            "limit": 274882101247.0,
+            "shortfall": 0,
+            "site": "head margin",
+            "value": 0,
+            "word": "-"
+          },
+          "k": {
+            "bound": 47560735091.00001,
+            "headroom_bits": 1.5252793743813555,
+            "layer": 0,
+            "limit": 136899985407.0,
+            "shortfall": 0,
+            "site": "k",
+            "value": 22,
+            "word": "kk"
+          },
+          "last norm quotient": {
+            "bound": 2119.4897611264946,
+            "headroom_bits": 3.9448079542941574,
+            "layer": 22,
+            "limit": 32639,
+            "shortfall": 0,
+            "site": "last norm quotient",
+            "value": 32,
+            "word": "KF"
+          },
+          "last stream, a cell": {
+            "bound": 40734453968.09972,
+            "headroom_bits": 3.7488007315686858,
+            "layer": 22,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "last stream, a cell",
+            "value": 0,
+            "word": "e_res"
+          },
+          "norm 1 quotient": {
+            "bound": 4174.479522218647,
+            "headroom_bits": 2.9669286189922293,
+            "layer": 0,
+            "limit": 32639,
+            "shortfall": 0,
+            "site": "norm 1 quotient",
+            "value": 32,
+            "word": "K1"
+          },
+          "norm 2 quotient": {
+            "bound": 2119.4897611264946,
+            "headroom_bits": 3.9448079542941574,
+            "layer": 0,
+            "limit": 32639,
+            "shortfall": 0,
+            "site": "norm 2 quotient",
+            "value": 32,
+            "word": "K2"
+          },
+          "q": {
+            "bound": 69856035559.00002,
+            "headroom_bits": 2.9706656178851247,
+            "layer": 20,
+            "limit": 547599941631.0,
+            "shortfall": 0,
+            "site": "q",
+            "value": 24,
+            "word": "kq"
+          },
+          "stream at norm 1": {
+            "bound": 34446019086.25057,
+            "headroom_bits": 3.9907130402099398,
+            "layer": 21,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "stream at norm 1",
+            "value": 0,
+            "word": "e_res"
+          },
+          "stream at norm 2": {
+            "bound": 34474998768.4718,
+            "headroom_bits": 3.9894998008355813,
+            "layer": 21,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "stream at norm 2",
+            "value": 0,
+            "word": "e_res"
+          },
+          "stream at the last norm": {
+            "bound": 40734453968.09972,
+            "headroom_bits": 3.7488007315686858,
+            "layer": 22,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "stream at the last norm",
+            "value": 0,
+            "word": "e_res"
+          },
+          "up": {
+            "bound": 55019209.00000001,
+            "headroom_bits": 1.2808992631095037,
+            "layer": 21,
+            "limit": 133691391.0,
+            "shortfall": 0,
+            "site": "up",
+            "value": 12,
+            "word": "ku"
+          },
+          "v": {
+            "bound": 58183074.00000001,
+            "headroom_bits": 1.2002351408815422,
+            "layer": 3,
+            "limit": 133691391.0,
+            "shortfall": 0,
+            "site": "v",
+            "value": 12,
+            "word": "kv"
+          }
+        }
+      }
+    }
+  },
+  "linux_run": {
+    "command": "make verify-flashprove-tinyllama-answer",
+    "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM; no GPU",
+    "how": "a clone at 7004750,; every input downloaded and checked",
+    "result_json_sha256": "7e32ce5c0ff95560b085ee0670ab962c78a535b3c7a50072f870e02b6c779269",
+    "result": {
+      "answer": {
+        "T": 64,
+        "answer": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "choices": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "clamp_limit": 2047,
+        "clamped": [
+          {
+            "entries": 1,
+            "largest": 2233,
+            "layer": 2,
+            "name": "vw",
+            "positions": [
+              32
+            ]
+          }
+        ],
+        "controls": {
+          "final-norm-MF-plus-1": {
+            "choices": [
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2
+            ],
+            "failed": [
+              "the logits' scale at position 24: 2.0006",
+              "the logits' scale at position 25: 2.0113",
+              "the logits' scale at position 26: 1.9981",
+              "the logits' scale at position 27: 2.0096",
+              "the logits' scale at position 28: 1.9965",
+              "the logits' scale at position 29: 1.9975",
+              "the logits' scale at position 30: 1.9768",
+              "the logits' scale at position 31: 1.9861"
+            ],
+            "least_correlation": 0.9991355053978365,
+            "slope_range": [
+              1.9767838864467653,
+              2.0113177215890885
+            ]
+          },
+          "layer-10-kv-plus-1": {
+            "choices": [
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2
+            ],
+            "failed": [
+              "the logits' correlation at position 24: 0.99684",
+              "the logits' correlation at position 25: 0.99721",
+              "the logits' correlation at position 26: 0.99627",
+              "the logits' correlation at position 27: 0.99713",
+              "the logits' correlation at position 28: 0.99423",
+              "the logits' correlation at position 29: 0.99614",
+              "the logits' correlation at position 30: 0.99578",
+              "the logits' correlation at position 31: 0.99483"
+            ],
+            "least_correlation": 0.994226845322407,
+            "slope_range": [
+              0.9791188093841726,
+              1.0084249735440363
+            ]
+          }
+        },
+        "e": 32,
+        "gate_key_within_limit": true,
+        "matches": true,
+        "peaks": {
+          "a": 1678,
+          "aF": 1075,
+          "aF_Rc": 581060445,
+          "aF_sigma": 85557,
+          "aF_w": 1075,
+          "a_Rc": 60041590595,
+          "a_sigma": 421505,
+          "a_w": 1678,
+          "first_choice": 29989,
+          "gw": 7108,
+          "k": 1890,
+          "key": 7108,
+          "kw": 1890,
+          "lam": 3635195,
+          "m": 1678,
+          "m_Rc": 21718748203,
+          "m_sigma": 421364,
+          "m_w": 1678,
+          "o": 1117,
+          "q": 771,
+          "qw": 771,
+          "s": 1533,
+          "u": 1756,
+          "v": 2047,
+          "vw": 2233,
+          "x": 344950,
+          "x_last": 36249,
+          "x_mid": 344840
+        },
+        "positions": [
+          {
+            "correlation": 0.9991186274182229,
+            "float_margin": 1.3528366088867188,
+            "margin": 1.5227432250976562,
+            "position": 24,
+            "slope": 0.9997968572199412,
+            "token": 1576
+          },
+          {
+            "correlation": 0.9996127032635622,
+            "float_margin": 4.829927444458008,
+            "margin": 4.786834716796875,
+            "position": 25,
+            "slope": 1.0044461175029231,
+            "token": 7483
+          },
+          {
+            "correlation": 0.9994507033352188,
+            "float_margin": 3.115610122680664,
+            "margin": 3.4290695190429688,
+            "position": 26,
+            "slope": 0.9998743746269318,
+            "token": 310
+          },
+          {
+            "correlation": 0.9994814226631178,
+            "float_margin": 7.930485725402832,
+            "margin": 8.119987487792969,
+            "position": 27,
+            "slope": 1.0036063322755262,
+            "token": 3444
+          },
+          {
+            "correlation": 0.9992708073105966,
+            "float_margin": 3.7941036224365234,
+            "margin": 4.483634948730469,
+            "position": 28,
+            "slope": 0.999406555608502,
+            "token": 338
+          },
+          {
+            "correlation": 0.9994768507288255,
+            "float_margin": 4.224757194519043,
+            "margin": 4.026390075683594,
+            "position": 29,
+            "slope": 0.9990881722950117,
+            "token": 3681
+          },
+          {
+            "correlation": 0.9994199369924908,
+            "float_margin": 1.0627365112304688,
+            "margin": 0.8570022583007812,
+            "position": 30,
+            "slope": 0.9880845523242405,
+            "token": 29889
+          },
+          {
+            "correlation": 0.999230449084513,
+            "float_margin": 3.162534713745117,
+            "margin": 3.5458755493164062,
+            "position": 31,
+            "slope": 0.9916406011563942,
+            "token": 2
+          }
+        ],
+        "r": 24,
+        "range_failure": null,
+        "s": 17,
+        "seconds": 34.16313194390386,
+        "window": [
+          529,
+          29989,
+          1792,
+          29989,
+          29958,
+          13,
+          1170,
+          278,
+          7483,
+          310,
+          3444,
+          297,
+          697,
+          3273,
+          10541,
+          29889,
+          2,
+          13,
+          29966,
+          29989,
+          465,
+          22137,
+          29989,
+          29958,
+          13,
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "builds": {
+        "patched": {
+          "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+          "recipe": "upstream verifier/build.sh",
+          "seconds": 198.90876689506695,
+          "sha256": "9bd671a98b0daecc4453ccd085f91b76475d2b07899ac822d0cb02023c9d6b26",
+          "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52"
+        },
+        "upstream": {
+          "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+          "recipe": "upstream verifier/build.sh",
+          "seconds": 205.95027014100924,
+          "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+          "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+        }
+      },
+      "environments": {
+        "integer_model": {
+          "gguf": "0.19.0",
+          "installed": [
+            "certifi==2026.11.20",
+            "charset-normalizer==3.5.3",
+            "filelock==4.3.0",
+            "fsspec==2026.9.0",
+            "gguf==0.19.0",
+            "idna==3.20",
+            "jinja2==3.1.6",
+            "markupsafe==3.0.4",
+            "mpmath==1.3.0",
+            "networkx==3.7",
+            "numpy==2.4.6",
+            "pyyaml==6.0.4",
+            "requests==2.34.2",
+            "setuptools==84.2.1",
+            "sympy==1.14.0",
+            "torch==2.13.0+cpu",
+            "tqdm==4.70.1",
+            "typing-extensions==4.16.0",
+            "urllib3==2.8.0"
+          ],
+          "lock_file": "integer_model-linux-x86_64.txt",
+          "numpy": "2.4.6",
+          "python": "3.13.15",
+          "torch": "2.13.0+cpu"
+        },
+        "scales": {
+          "gguf": "0.19.0",
+          "installed": [
+            "annotated-doc==0.0.7",
+            "annotated-types==0.8.0",
+            "anyio==4.16.0",
+            "certifi==2026.11.20",
+            "charset-normalizer==3.5.3",
+            "click==8.5.1",
+            "filelock==4.3.0",
+            "fsspec==2026.9.0",
+            "gguf==0.19.0",
+            "h11==0.16.0",
+            "hf-xet==1.8.0",
+            "httpcore==1.0.9",
+            "httpx==0.28.1",
+            "huggingface-hub==1.33.0",
+            "idna==3.20",
+            "jinja2==3.1.6",
+            "markdown-it-py==4.3.0",
+            "markupsafe==3.0.4",
+            "mdurl==0.1.2",
+            "mpmath==1.3.0",
+            "networkx==3.7",
+            "numpy==2.3.5",
+            "packaging==26.3",
+            "pyarrow==23.0.1",
+            "pydantic-core==2.50.5",
+            "pydantic==2.14.4",
+            "pygments==2.21.0",
+            "pyyaml==6.0.4",
+            "regex==2026.11.19",
+            "requests==2.34.2",
+            "rich==15.0.0",
+            "safetensors==0.8.0",
+            "setuptools==84.2.1",
+            "shellingham==1.5.4",
+            "sympy==1.14.0",
+            "tokenizers==0.22.2",
+            "torch==2.9.1+cpu",
+            "tqdm==4.70.1",
+            "transformers==5.15.1",
+            "typer==0.29.2",
+            "typing-extensions==4.16.0",
+            "typing-inspection==0.4.5",
+            "urllib3==2.8.0"
+          ],
+          "lock_file": "scales-linux-x86_64.txt",
+          "numpy": "2.3.5",
+          "pyarrow": "23.0.1",
+          "python": "3.13.15",
+          "safetensors": "0.8.0",
+          "tokenizers": "0.22.2",
+          "torch": "2.9.1+cpu",
+          "transformers": "5.15.1"
+        }
+      },
+      "float_reference": {
+        "checked_logits": {
+          "positions": [
+            24,
+            31
+          ],
+          "shape": [
+            8,
+            32000
+          ]
+        },
+        "final_norm_max_abs": 0.000110626220703125,
+        "final_norm_relative_l2": 1.2930851198689197e-06,
+        "float_greedy": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "float_greedy_is_the_answer": true,
+        "moe_layers": [],
+        "rope_layers": 22,
+        "seconds": 22.726958620827645,
+        "shape": {
+          "G": 4,
+          "H": 32,
+          "L": 22,
+          "NE": 0,
+          "V": 32000,
+          "d": 2048,
+          "dh": 64,
+          "eps": 9.999999747378752e-06,
+          "f": 5632,
+          "fe": 0,
+          "theta": 10000.0
+        }
+      },
+      "gpu_used": false,
+      "hiding_claim": false,
+      "host": {
+        "machine": "x86_64",
+        "system": "Linux"
+      },
+      "kit": {
+        "calibrate_seconds": 612.896216779016,
+        "calibration_set": {
+          "bytes": 131200,
+          "drawn_rows_match_upstream": true,
+          "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c",
+          "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+        },
+        "gguf": {
+          "bytes": 2200293664,
+          "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+          "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+        },
+        "kit_reproduced": true,
+        "maxima_equal_to_committed": false
+      },
+      "kit_pins": {
+        "base_policy_sha256": "84f867cd0e5d6217b14158b43862fd924f40d189a107750e0b8b604bfc2dd5b2",
+        "bounds": {
+          "final_norm_relative_l2": 0.0001,
+          "logit_correlation": 0.998,
+          "logit_slope": [
+            0.75,
+            1.33
+          ]
+        },
+        "calibration_set": {
+          "bytes": 131200,
+          "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c",
+          "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+        },
+        "calibration_text": {
+          "bytes": 6357543,
+          "licence": "CC BY-SA: the dataset card's tags name CC BY-SA 3.0 and GFDL, its text CC BY-SA 4.0 (WikiText, S. Merity et al., 'Pointer Sentinel Mixture Models', arXiv:1609.07843, 2016). No text and no token id from it is committed; scale statistics computed from it are (kit/maxima.json, words.json, KL.bin, six lines of policy.txt) and the calibration set's SHA-256",
+          "licence_review": "not cleared by the owner. Reviewed only by this proposal's contributor: the dataset card's tags (CC BY-SA 3.0, GFDL) and its text (CC BY-SA 4.0) name different versions, and research/AUTHORITY.json excludes ambiguous licences. The owner decides (decision 0094, not done 1); a no means refitting the kit on another text. The patches do not depend on it",
+          "sha256": "e83889baabc497075506f91975be5fac0d45c5290b6b20582c8cd1e853d0c9f7",
+          "url": "https://huggingface.co/datasets/Salesforce/wikitext/resolve/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-2-raw-v1/train-00000-of-00001.parquet",
+          "what": "WikiText-2 (raw), training split, as upstream's make_calibration_set.py pins it"
+        },
+        "configuration": "e5407adf4450292e462e45e1fe8bf5e7bd8a3bd5dd16084e16ffe07a09dd0db6",
+        "e_res": 11,
+        "environments": {
+          "integer_model": {
+            "locks": {
+              "linux-x86_64": {
+                "file": "integer_model-linux-x86_64.txt",
+                "sha256": "bba3b40f517585fa71af22286ddc71a6ef892143ea416c91625fe8dbd5a249a2"
+              },
+              "macos-arm64": {
+                "file": "integer_model-macos-arm64.txt",
+                "sha256": "b9d89b9e3571659760261c5c14441c99c331da76b6526f17b15edd94215df78c"
+              }
+            },
+            "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13",
+            "packages": {
+              "gguf": "0.19.0",
+              "numpy": "2.4.6",
+              "torch": "2.13.0"
+            },
+            "python": "3.13"
+          },
+          "scales": {
+            "locks": {
+              "linux-x86_64": {
+                "file": "scales-linux-x86_64.txt",
+                "sha256": "141cc59c3a21f196a6753bda102d725f2d0865de4e0f0c5655fd9b10c5077c8b"
+              },
+              "macos-arm64": {
+                "file": "scales-macos-arm64.txt",
+                "sha256": "a90ecc08252b4d47abd4f5287f5c37fff10faaeadab68a9860b8d1ef1988f40d"
+              }
+            },
+            "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13",
+            "packages": {
+              "gguf": "0.19.0",
+              "numpy": "2.3.5",
+              "pyarrow": "23.0.1",
+              "safetensors": "0.8.0",
+              "tokenizers": "0.22.2",
+              "torch": "2.9.1",
+              "transformers": "5.15.1"
+            },
+            "python": "3.13"
+          }
+        },
+        "files": {
+          "KL.bin": "1658bb72676fd6b774c83ff163b3c24211a603a281f5df0644a9c966684d7282",
+          "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+          "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+          "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+          "policy.txt": "2af02e144eaa03ba3e23587f305d9bebdf8f56bad4f5b97a512f055e5c5ed602",
+          "words.json": "3465d8977ab6c3d0dcc40a2ce27b35e6b4962c8e14bef2f8bc9bd9e94119bf81",
+          "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+        },
+        "gguf": {
+          "bytes": 2200293664,
+          "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+          "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+        },
+        "h_par": "df7a40e52e295044e1452e46e7f58bfed53b8abd4e0816dd7ae0ff16b60ddd09",
+        "model": {
+          "case": "research/probes/sash/response-case.json",
+          "files": [
+            "config.json",
+            "model.safetensors",
+            "tokenizer.json"
+          ],
+          "note": "id, revision, licence, sizes and SHA-256 come from the case file, the pins of Hallmark's SASH path"
+        },
+        "mutation_controls": [
+          "final-norm-MF-plus-1",
+          "layer-10-kv-plus-1"
+        ],
+        "patches_json_sha256": "38df89f40050b6fea68314edb6ea0959aa3182a166ef2c9dba5d27a8ac8aa523",
+        "request": {
+          "T": 64,
+          "e": 32,
+          "filler": 0,
+          "r": 24
+        },
+        "scales_patch": {
+          "bytes": 34669,
+          "name": "scales.patch",
+          "sha256": "73c42a3c16a6b7440f378b4703d312eb5d7f82a697f2bd6a051cbca4b3501c2c"
+        },
+        "schema_id": "hallmark.flashprove-tinyllama-kit/1",
+        "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "worst_case": {
+          "note": "cp_commit's worst-case check computed on a CPU by worst_case_cpu.py (Hallmark's port of upstream's worst_case.cuh): the gate of layer 21 does not fit (one row; without the line gcl, which the verifier refuses at NE 0, its key's limit is 32,639). Recorded, not a condition of passing the target",
+          "ratio_tolerance": 0.001,
+          "short": [
+            [
+              "gate",
+              21
+            ]
+          ]
+        }
+      },
+      "passed": true,
+      "planning": {
+        "bits_compiled_bound": 126.21,
+        "configuration": "e5407adf4450292e462e45e1fe8bf5e7bd8a3bd5dd16084e16ffe07a09dd0db6",
+        "h_par": "df7a40e52e295044e1452e46e7f58bfed53b8abd4e0816dd7ae0ff16b60ddd09",
+        "patched": "standard parameter form, three tables, PLAN ONLY (accounting and request)",
+        "proof_bytes_at_most": 14061196,
+        "provers_parameter_file_reader": "admitted",
+        "unpatched_accounting": "NO: policy-tables",
+        "unpatched_request": "NO: policy-tables"
+      },
+      "proof_made": false,
+      "scale_tool_tests": {
+        "table_ties.py": {
+          "last_line": "OK: 26 checks",
+          "status": 0
+        },
+        "test_calibrate.py": {
+          "last_line": "in part: 19 cases passed; SMALL_MODEL is not set, so program_on_the_small_model was not run",
+          "status": 77
+        },
+        "test_gguf_weights.py": {
+          "last_line": "in part: 102 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
+          "status": 77
+        },
+        "test_policy_tables.py": {
+          "last_line": "OK",
+          "status": 0
+        }
+      },
+      "schema_id": "hallmark.flashprove-tinyllama-answer/1",
+      "seconds": 1785.8957591247745,
+      "source": {
+        "bytes": 157799758,
+        "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+        "examples": {
+          "accepted-proof": {
+            "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+            "next_token": 199,
+            "range": "60:64"
+          },
+          "full-size": {
+            "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+            "next_token": 52599,
+            "range": "23:1024"
+          }
+        },
+        "gpu_kit": {
+          "name": "target_small_f2_roomy",
+          "range": "15:64"
+        },
+        "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+        "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+        "licence": "Apache-2.0",
+        "nvcc_release": "V13.2.86",
+        "rejection_tables": [
+          [
+            "accepted-proof",
+            "altered_copies.tsv",
+            10
+          ],
+          [
+            "accepted-proof",
+            "every_kind_of_item.tsv",
+            79
+          ],
+          [
+            "accepted-proof-clipped-gap",
+            "altered_copies_clipped_gap.tsv",
+            10
+          ]
+        ],
+        "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "schema_id": "hallmark.flashprove-source/1",
+        "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+        "upstream": "https://github.com/anthropics/FlashProve",
+        "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+        "version": "0.16.0"
+      },
+      "worst_case": {
+        "float_gate_keys": [
+          4185.8,
+          3961.4,
+          13991.6,
+          4220.3,
+          6198.5,
+          5197.1,
+          5294.7,
+          10261.1,
+          6226.2,
+          7441.8,
+          6766.3,
+          7413.0,
+          11399.0,
+          10637.7,
+          10791.9,
+          10272.7,
+          11568.0,
+          13119.9,
+          13574.0,
+          13643.9,
+          12579.2,
+          45405.7
+        ],
+        "float_rows_beyond_the_limit": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "float_sha256": "b4b6707b6d5367dd876ff82a2fe572dbc39d3415ef74cd994100f51ab187f2e9",
+        "gate_key_bounds": [
+          4377,
+          4142,
+          14631,
+          4413,
+          6482,
+          5435,
+          5537,
+          10730,
+          6511,
+          7782,
+          7076,
+          7752,
+          11920,
+          11124,
+          11285,
+          10742,
+          12097,
+          13720,
+          14195,
+          14267,
+          13155,
+          47481
+        ],
+        "gate_rows_beyond_the_limit": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "port_sha256": "5db2d5169c523b28550fe5c4f29848714dcad98d0ca6a9ebee828f0028d1dcfd",
+        "public_sites_fit": true,
+        "row_sites_fit": false,
+        "rows_recomputed_exactly": {
+          "Wg 0": 1,
+          "Wg 1": 1,
+          "Wg 10": 1,
+          "Wg 11": 1,
+          "Wg 12": 1,
+          "Wg 13": 1,
+          "Wg 14": 1,
+          "Wg 15": 1,
+          "Wg 16": 1,
+          "Wg 17": 1,
+          "Wg 18": 1,
+          "Wg 19": 1,
+          "Wg 2": 1,
+          "Wg 20": 1,
+          "Wg 21": 1,
+          "Wg 3": 1,
+          "Wg 4": 1,
+          "Wg 5": 1,
+          "Wg 6": 1,
+          "Wg 7": 1,
+          "Wg 8": 1,
+          "Wg 9": 1,
+          "Wk 0": 2,
+          "Wk 1": 2,
+          "Wk 10": 2,
+          "Wk 11": 2,
+          "Wk 12": 2,
+          "Wk 13": 2,
+          "Wk 14": 2,
+          "Wk 15": 2,
+          "Wk 16": 2,
+          "Wk 17": 2,
+          "Wk 18": 2,
+          "Wk 19": 2,
+          "Wk 2": 3,
+          "Wk 20": 2,
+          "Wk 21": 2,
+          "Wk 3": 2,
+          "Wk 4": 2,
+          "Wk 5": 2,
+          "Wk 6": 2,
+          "Wk 7": 2,
+          "Wk 8": 3,
+          "Wk 9": 2,
+          "Wq 0": 2,
+          "Wq 1": 3,
+          "Wq 10": 2,
+          "Wq 11": 2,
+          "Wq 12": 2,
+          "Wq 13": 2,
+          "Wq 14": 2,
+          "Wq 15": 2,
+          "Wq 16": 3,
+          "Wq 17": 3,
+          "Wq 18": 2,
+          "Wq 19": 2,
+          "Wq 2": 3,
+          "Wq 20": 2,
+          "Wq 21": 2,
+          "Wq 3": 2,
+          "Wq 4": 2,
+          "Wq 5": 2,
+          "Wq 6": 2,
+          "Wq 7": 2,
+          "Wq 8": 2,
+          "Wq 9": 2,
+          "Wu 0": 1,
+          "Wu 1": 1,
+          "Wu 10": 1,
+          "Wu 11": 1,
+          "Wu 12": 1,
+          "Wu 13": 1,
+          "Wu 14": 1,
+          "Wu 15": 1,
+          "Wu 16": 1,
+          "Wu 17": 1,
+          "Wu 18": 1,
+          "Wu 19": 1,
+          "Wu 2": 1,
+          "Wu 20": 1,
+          "Wu 21": 1,
+          "Wu 3": 1,
+          "Wu 4": 1,
+          "Wu 5": 1,
+          "Wu 6": 1,
+          "Wu 7": 1,
+          "Wu 8": 1,
+          "Wu 9": 1,
+          "Wv 0": 1,
+          "Wv 1": 1,
+          "Wv 10": 1,
+          "Wv 11": 1,
+          "Wv 12": 1,
+          "Wv 13": 1,
+          "Wv 14": 1,
+          "Wv 15": 1,
+          "Wv 16": 1,
+          "Wv 17": 1,
+          "Wv 18": 1,
+          "Wv 19": 1,
+          "Wv 2": 1,
+          "Wv 20": 1,
+          "Wv 21": 1,
+          "Wv 3": 1,
+          "Wv 4": 1,
+          "Wv 5": 1,
+          "Wv 6": 1,
+          "Wv 7": 1,
+          "Wv 8": 1,
+          "Wv 9": 1
+        },
+        "short": [
+          [
+            "gate",
+            21
+          ]
+        ],
+        "stream_sites_fit_by_frobenius": true,
+        "worst_by_site": {
+          "gate": {
+            "bound": 48620674.00000001,
+            "headroom_bits": -0.5407352635385507,
+            "layer": 21,
+            "limit": 33422847.0,
+            "shortfall": 1,
+            "site": "gate",
+            "value": 10,
+            "word": "kg"
+          },
+          "head margin": {
+            "bound": 176068497409.0,
+            "headroom_bits": 0.6426761679869486,
+            "layer": 22,
+            "limit": 274882101247.0,
+            "shortfall": 0,
+            "site": "head margin",
+            "value": 0,
+            "word": "-"
+          },
+          "k": {
+            "bound": 47560735091.00001,
+            "headroom_bits": 1.5252793743813555,
+            "layer": 0,
+            "limit": 136899985407.0,
+            "shortfall": 0,
+            "site": "k",
+            "value": 22,
+            "word": "kk"
+          },
+          "last norm quotient": {
+            "bound": 2119.4897611264946,
+            "headroom_bits": 3.9448079542941574,
+            "layer": 22,
+            "limit": 32639,
+            "shortfall": 0,
+            "site": "last norm quotient",
+            "value": 32,
+            "word": "KF"
+          },
+          "last stream, a cell": {
+            "bound": 40734453968.09972,
+            "headroom_bits": 3.7488007315686858,
+            "layer": 22,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "last stream, a cell",
+            "value": 0,
+            "word": "e_res"
+          },
+          "norm 1 quotient": {
+            "bound": 4174.479522218647,
+            "headroom_bits": 2.9669286189922293,
+            "layer": 0,
+            "limit": 32639,
+            "shortfall": 0,
+            "site": "norm 1 quotient",
+            "value": 32,
+            "word": "K1"
+          },
+          "norm 2 quotient": {
+            "bound": 2119.4897611264946,
+            "headroom_bits": 3.9448079542941574,
+            "layer": 0,
+            "limit": 32639,
+            "shortfall": 0,
+            "site": "norm 2 quotient",
+            "value": 32,
+            "word": "K2"
+          },
+          "q": {
+            "bound": 69856035559.00002,
+            "headroom_bits": 2.9706656178851247,
+            "layer": 20,
+            "limit": 547599941631.0,
+            "shortfall": 0,
+            "site": "q",
+            "value": 24,
+            "word": "kq"
+          },
+          "stream at norm 1": {
+            "bound": 34446019086.25057,
+            "headroom_bits": 3.9907130402099398,
+            "layer": 21,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "stream at norm 1",
+            "value": 0,
+            "word": "e_res"
+          },
+          "stream at norm 2": {
+            "bound": 34474998768.4718,
+            "headroom_bits": 3.9894998008355813,
+            "layer": 21,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "stream at norm 2",
+            "value": 0,
+            "word": "e_res"
+          },
+          "stream at the last norm": {
+            "bound": 40734453968.09972,
+            "headroom_bits": 3.7488007315686858,
+            "layer": 22,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "stream at the last norm",
+            "value": 0,
+            "word": "e_res"
+          },
+          "up": {
+            "bound": 55019209.00000001,
+            "headroom_bits": 1.2808992631095037,
+            "layer": 21,
+            "limit": 133691391.0,
+            "shortfall": 0,
+            "site": "up",
+            "value": 12,
+            "word": "ku"
+          },
+          "v": {
+            "bound": 58183074.00000001,
+            "headroom_bits": 1.2002351408815422,
+            "layer": 3,
+            "limit": 133691391.0,
+            "shortfall": 0,
+            "site": "v",
+            "value": 12,
+            "word": "kv"
+          }
+        }
+      }
+    }
+  },
+  "across_hosts": {
+    "note": "computed from the two result.json files above",
+    "integer_model_choices_peaks_clamped_cells_window_identical": true,
+    "top1_margins_identical": true,
+    "largest_slope_or_correlation_difference": 1.0319993790641746e-06,
+    "controls_choices_and_verdicts_identical": true,
+    "worst_case_cpu_identical": true,
+    "float_gate_keys_largest_difference": 0.0
+  },
+  "shift_sweep": {
+    "how": "one-off, on the Mac, not a make target: research/probes/flashprove/tinyllama/shift_sweep.py on the Mac run's output folder; for each layer and each of kv, ko and kd, the kit with that KL.bin word + 1, through answer_check.py (every file pinned, verify_sums on) and the target's failures()",
+    "script_sha256": "08f3eff32c032acc731386c4e854b5fa426a843e770485e5f4a50f872e222a0c",
+    "output_sha256": "a79a009c082eaf5ca7411028287c36f143cac328b51b0f4136ee25aa1ef939eb",
+    "output": {
+      "program": "research/probes/flashprove/tinyllama/shift_sweep.py",
+      "run_result_sha256": "b155d15579d9e751c0cbf6cb475d89af8da7a097bbcf949c8d7fdbda9a316af4",
+      "kits": 66,
+      "caught": 66,
+      "tokens_changed": 5,
+      "highest_min_correlation_with_tokens_kept": 0.9962221672366639,
+      "would_pass_a_floor_of_0_99": 30,
+      "rows": [
+        {
+          "mutation": "L0-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99266",
+            "the logits' correlation at position 25: 0.99545",
+            "the logits' correlation at position 26: 0.99627",
+            "the logits' correlation at position 27: 0.99724",
+            "the logits' correlation at position 28: 0.99322",
+            "the logits' correlation at position 29: 0.99539",
+            "the logits' correlation at position 30: 0.99468",
+            "the logits' correlation at position 31: 0.99268"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9926640731475612,
+          "slope_range": [
+            0.9754449644585104,
+            1.0198847454291045
+          ]
+        },
+        {
+          "mutation": "L0-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99250",
+            "the logits' correlation at position 25: 0.99454",
+            "the logits' correlation at position 26: 0.99591",
+            "the logits' correlation at position 27: 0.99668",
+            "the logits' correlation at position 28: 0.99208",
+            "the logits' correlation at position 29: 0.99344",
+            "the logits' correlation at position 30: 0.99408",
+            "the logits' correlation at position 31: 0.99193"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9919254873018731,
+          "slope_range": [
+            0.9768460028535987,
+            1.02965384431615
+          ]
+        },
+        {
+          "mutation": "L0-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99214",
+            "the logits' correlation at position 25: 0.99697",
+            "the logits' correlation at position 26: 0.99683",
+            "the logits' correlation at position 28: 0.99641",
+            "the logits' correlation at position 29: 0.99726",
+            "the logits' correlation at position 30: 0.99581",
+            "the logits' correlation at position 31: 0.99517"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9921399001970981,
+          "slope_range": [
+            0.9843501669706893,
+            1.0299264670569908
+          ]
+        },
+        {
+          "mutation": "L1-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99522",
+            "the logits' correlation at position 25: 0.99699",
+            "the logits' correlation at position 26: 0.99766",
+            "the logits' correlation at position 28: 0.99683",
+            "the logits' correlation at position 29: 0.99722",
+            "the logits' correlation at position 30: 0.99665",
+            "the logits' correlation at position 31: 0.99585"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.995218389797586,
+          "slope_range": [
+            0.9877229877862473,
+            1.014317528873946
+          ]
+        },
+        {
+          "mutation": "L1-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99487",
+            "the logits' correlation at position 25: 0.99720",
+            "the logits' correlation at position 26: 0.99712",
+            "the logits' correlation at position 27: 0.99756",
+            "the logits' correlation at position 28: 0.99696",
+            "the logits' correlation at position 29: 0.99702",
+            "the logits' correlation at position 30: 0.99709",
+            "the logits' correlation at position 31: 0.99440"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9944044576156228,
+          "slope_range": [
+            0.9943365434478122,
+            1.0208626938542882
+          ]
+        },
+        {
+          "mutation": "L1-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99667",
+            "the logits' correlation at position 25: 0.99734",
+            "the logits' correlation at position 26: 0.99645",
+            "the logits' correlation at position 27: 0.99762",
+            "the logits' correlation at position 28: 0.99630",
+            "the logits' correlation at position 29: 0.99605",
+            "the logits' correlation at position 30: 0.99644",
+            "the logits' correlation at position 31: 0.99362"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9936209886735974,
+          "slope_range": [
+            0.9497599315313777,
+            1.0043717362041915
+          ]
+        },
+        {
+          "mutation": "L2-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99444",
+            "the logits' correlation at position 25: 0.99663",
+            "the logits' correlation at position 26: 0.99666",
+            "the logits' correlation at position 27: 0.99770",
+            "the logits' correlation at position 28: 0.99579",
+            "the logits' correlation at position 30: 0.99641",
+            "the logits' correlation at position 31: 0.99637"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9944414430363957,
+          "slope_range": [
+            0.9762815766390602,
+            1.0194254721577432
+          ]
+        },
+        {
+          "mutation": "L2-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99605",
+            "the logits' correlation at position 25: 0.99744",
+            "the logits' correlation at position 26: 0.99774",
+            "the logits' correlation at position 28: 0.99674",
+            "the logits' correlation at position 30: 0.99677",
+            "the logits' correlation at position 31: 0.99679"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9960542221421658,
+          "slope_range": [
+            0.9875300442473609,
+            1.0124863263037038
+          ]
+        },
+        {
+          "mutation": "L2-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99342",
+            "the logits' correlation at position 25: 0.99681",
+            "the logits' correlation at position 26: 0.99731",
+            "the logits' correlation at position 27: 0.99713",
+            "the logits' correlation at position 28: 0.99459",
+            "the logits' correlation at position 29: 0.99664",
+            "the logits' correlation at position 30: 0.99549",
+            "the logits' correlation at position 31: 0.98950"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.98949851085724,
+          "slope_range": [
+            0.9719030559938028,
+            1.0254636063484097
+          ]
+        },
+        {
+          "mutation": "L3-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99245",
+            "the logits' correlation at position 25: 0.99734",
+            "the logits' correlation at position 26: 0.99674",
+            "the logits' correlation at position 27: 0.99740",
+            "the logits' correlation at position 28: 0.99529",
+            "the logits' correlation at position 29: 0.99526",
+            "the logits' correlation at position 30: 0.99596",
+            "the logits' correlation at position 31: 0.99454"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9924521910383257,
+          "slope_range": [
+            0.9850442974321781,
+            1.0169646379097248
+          ]
+        },
+        {
+          "mutation": "L3-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99381",
+            "the logits' correlation at position 25: 0.99710",
+            "the logits' correlation at position 26: 0.99692",
+            "the logits' correlation at position 27: 0.99719",
+            "the logits' correlation at position 28: 0.99576",
+            "the logits' correlation at position 29: 0.99537",
+            "the logits' correlation at position 30: 0.99639",
+            "the logits' correlation at position 31: 0.99396"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.99380669400139,
+          "slope_range": [
+            0.9857793184983505,
+            1.012005664619593
+          ]
+        },
+        {
+          "mutation": "L3-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99498",
+            "the logits' correlation at position 25: 0.99713",
+            "the logits' correlation at position 26: 0.99601",
+            "the logits' correlation at position 27: 0.99770",
+            "the logits' correlation at position 28: 0.99573",
+            "the logits' correlation at position 29: 0.99625",
+            "the logits' correlation at position 30: 0.99632",
+            "the logits' correlation at position 31: 0.99475"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9947527292454097,
+          "slope_range": [
+            0.9719729755670242,
+            1.0117051222546418
+          ]
+        },
+        {
+          "mutation": "L4-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99565",
+            "the logits' correlation at position 25: 0.99784",
+            "the logits' correlation at position 26: 0.99792",
+            "the logits' correlation at position 28: 0.99728",
+            "the logits' correlation at position 29: 0.99789",
+            "the logits' correlation at position 30: 0.99741",
+            "the logits' correlation at position 31: 0.99495"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9949502226091732,
+          "slope_range": [
+            0.9801351058929714,
+            1.0013392553021927
+          ]
+        },
+        {
+          "mutation": "L4-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99499",
+            "the logits' correlation at position 26: 0.99773",
+            "the logits' correlation at position 28: 0.99725",
+            "the logits' correlation at position 29: 0.99750",
+            "the logits' correlation at position 30: 0.99731",
+            "the logits' correlation at position 31: 0.99464"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9946369005807688,
+          "slope_range": [
+            0.9765072098445392,
+            1.0027553855147178
+          ]
+        },
+        {
+          "mutation": "L4-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99379",
+            "the logits' correlation at position 25: 0.99599",
+            "the logits' correlation at position 26: 0.99606",
+            "the logits' correlation at position 27: 0.99699",
+            "the logits' correlation at position 28: 0.99575",
+            "the logits' correlation at position 29: 0.99693",
+            "the logits' correlation at position 30: 0.99592",
+            "the logits' correlation at position 31: 0.99548"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9937937476957719,
+          "slope_range": [
+            0.9823186385021832,
+            1.0103406262775299
+          ]
+        },
+        {
+          "mutation": "L5-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99706",
+            "the logits' correlation at position 25: 0.99758",
+            "the logits' correlation at position 26: 0.99762",
+            "the logits' correlation at position 28: 0.99653",
+            "the logits' correlation at position 29: 0.99742",
+            "the logits' correlation at position 30: 0.99734",
+            "the logits' correlation at position 31: 0.99519"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9951919967865108,
+          "slope_range": [
+            0.9866312327214216,
+            1.015964350252699
+          ]
+        },
+        {
+          "mutation": "L5-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99499",
+            "the logits' correlation at position 25: 0.99706",
+            "the logits' correlation at position 26: 0.99634",
+            "the logits' correlation at position 27: 0.99776",
+            "the logits' correlation at position 28: 0.99582",
+            "the logits' correlation at position 29: 0.99689",
+            "the logits' correlation at position 30: 0.99651",
+            "the logits' correlation at position 31: 0.99354"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9935373797940796,
+          "slope_range": [
+            0.9844488638917119,
+            1.0179866032156388
+          ]
+        },
+        {
+          "mutation": "L5-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99463",
+            "the logits' correlation at position 25: 0.99600",
+            "the logits' correlation at position 26: 0.99584",
+            "the logits' correlation at position 27: 0.99758",
+            "the logits' correlation at position 28: 0.99337",
+            "the logits' correlation at position 29: 0.99511",
+            "the logits' correlation at position 30: 0.99530",
+            "the logits' correlation at position 31: 0.98875"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9887478414768497,
+          "slope_range": [
+            0.9888871069762032,
+            1.0349645889917143
+          ]
+        },
+        {
+          "mutation": "L6-kv+1",
+          "caught": true,
+          "missed": [
+            "the choices are [1576, 7483, 310, 3444, 338, 3681, 29991, 2], not SASH's [1576, 7483, 310, 3444, 338, 3681, 29889, 2]",
+            "the logits' correlation at position 24: 0.98994",
+            "the logits' correlation at position 25: 0.99476",
+            "the logits' correlation at position 26: 0.99721",
+            "the logits' correlation at position 27: 0.99724",
+            "the logits' correlation at position 28: 0.99400",
+            "the logits' correlation at position 29: 0.99452",
+            "the logits' correlation at position 30: 0.99370",
+            "the logits' correlation at position 31: 0.98774"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": false,
+          "range_failure": null,
+          "min_correlation": 0.9877352025255998,
+          "slope_range": [
+            0.9829764536727151,
+            1.041117176465537
+          ]
+        },
+        {
+          "mutation": "L6-ko+1",
+          "caught": true,
+          "missed": [
+            "the choices are [1576, 7483, 310, 3444, 338, 3681, 29991, 2], not SASH's [1576, 7483, 310, 3444, 338, 3681, 29889, 2]",
+            "the logits' correlation at position 24: 0.99185",
+            "the logits' correlation at position 25: 0.99506",
+            "the logits' correlation at position 26: 0.99715",
+            "the logits' correlation at position 27: 0.99687",
+            "the logits' correlation at position 28: 0.99457",
+            "the logits' correlation at position 29: 0.99366",
+            "the logits' correlation at position 30: 0.99406",
+            "the logits' correlation at position 31: 0.98891"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": false,
+          "range_failure": null,
+          "min_correlation": 0.9889079384259151,
+          "slope_range": [
+            0.988843145343814,
+            1.0346342719039143
+          ]
+        },
+        {
+          "mutation": "L6-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.96487",
+            "the logits' correlation at position 25: 0.96711",
+            "the logits' correlation at position 26: 0.97596",
+            "the logits' correlation at position 27: 0.97693",
+            "the logits' correlation at position 28: 0.96947",
+            "the logits' correlation at position 29: 0.98304",
+            "the logits' correlation at position 30: 0.98685",
+            "the logits' correlation at position 31: 0.98824"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9648702398695913,
+          "slope_range": [
+            0.9221513797471492,
+            1.0591311936525913
+          ]
+        },
+        {
+          "mutation": "L7-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99331",
+            "the logits' correlation at position 25: 0.99222",
+            "the logits' correlation at position 26: 0.99352",
+            "the logits' correlation at position 27: 0.99553",
+            "the logits' correlation at position 28: 0.99079",
+            "the logits' correlation at position 29: 0.99389",
+            "the logits' correlation at position 30: 0.99476",
+            "the logits' correlation at position 31: 0.99470"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.990789033701193,
+          "slope_range": [
+            0.9724736649960822,
+            1.013097806857758
+          ]
+        },
+        {
+          "mutation": "L7-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99331",
+            "the logits' correlation at position 25: 0.99158",
+            "the logits' correlation at position 26: 0.99439",
+            "the logits' correlation at position 27: 0.99590",
+            "the logits' correlation at position 28: 0.99065",
+            "the logits' correlation at position 29: 0.99433",
+            "the logits' correlation at position 30: 0.99530",
+            "the logits' correlation at position 31: 0.99473"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9906465445762133,
+          "slope_range": [
+            0.965198424293901,
+            1.009505219320792
+          ]
+        },
+        {
+          "mutation": "L7-kd+1",
+          "caught": true,
+          "missed": [
+            "the choices are [1576, 7483, 310, 3444, 338, 3681, 29991, 2], not SASH's [1576, 7483, 310, 3444, 338, 3681, 29889, 2]",
+            "the logits' correlation at position 24: 0.97321",
+            "the logits' correlation at position 25: 0.99082",
+            "the logits' correlation at position 26: 0.99200",
+            "the logits' correlation at position 27: 0.99226",
+            "the logits' correlation at position 28: 0.98480",
+            "the logits' correlation at position 29: 0.98845",
+            "the logits' correlation at position 30: 0.99131",
+            "the logits' correlation at position 31: 0.98400"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": false,
+          "range_failure": null,
+          "min_correlation": 0.9732084199127945,
+          "slope_range": [
+            0.9725112908424689,
+            1.0254944564334736
+          ]
+        },
+        {
+          "mutation": "L8-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99657",
+            "the logits' correlation at position 28: 0.99706",
+            "the logits' correlation at position 29: 0.99717",
+            "the logits' correlation at position 30: 0.99747",
+            "the logits' correlation at position 31: 0.99622"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9962221672366639,
+          "slope_range": [
+            0.9799901803528822,
+            1.010308997258307
+          ]
+        },
+        {
+          "mutation": "L8-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99581",
+            "the logits' correlation at position 28: 0.99703",
+            "the logits' correlation at position 29: 0.99677",
+            "the logits' correlation at position 30: 0.99735",
+            "the logits' correlation at position 31: 0.99618"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9958085619758256,
+          "slope_range": [
+            0.982668212768459,
+            1.0043293378505018
+          ]
+        },
+        {
+          "mutation": "L8-kd+1",
+          "caught": true,
+          "missed": [
+            "the choices are [2177, 7483, 310, 3444, 338, 3681, 29889, 2], not SASH's [1576, 7483, 310, 3444, 338, 3681, 29889, 2]",
+            "the logits' correlation at position 24: 0.98610",
+            "the logits' correlation at position 25: 0.99219",
+            "the logits' correlation at position 26: 0.98561",
+            "the logits' correlation at position 27: 0.99301",
+            "the logits' correlation at position 28: 0.98477",
+            "the logits' correlation at position 29: 0.99236",
+            "the logits' correlation at position 30: 0.99118",
+            "the logits' correlation at position 31: 0.98619"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": false,
+          "range_failure": null,
+          "min_correlation": 0.98477312608875,
+          "slope_range": [
+            0.9663311781245939,
+            1.0231075434112475
+          ]
+        },
+        {
+          "mutation": "L9-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98242",
+            "the logits' correlation at position 25: 0.98868",
+            "the logits' correlation at position 26: 0.99054",
+            "the logits' correlation at position 27: 0.99105",
+            "the logits' correlation at position 28: 0.98898",
+            "the logits' correlation at position 29: 0.99250",
+            "the logits' correlation at position 30: 0.99416",
+            "the logits' correlation at position 31: 0.99316"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9824153331969974,
+          "slope_range": [
+            0.9745121136498114,
+            1.0353890680374311
+          ]
+        },
+        {
+          "mutation": "L9-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98099",
+            "the logits' correlation at position 25: 0.98909",
+            "the logits' correlation at position 26: 0.99102",
+            "the logits' correlation at position 27: 0.99148",
+            "the logits' correlation at position 28: 0.98899",
+            "the logits' correlation at position 29: 0.99245",
+            "the logits' correlation at position 30: 0.99413",
+            "the logits' correlation at position 31: 0.99263"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.980991011614351,
+          "slope_range": [
+            0.9720687689126648,
+            1.0287745938071877
+          ]
+        },
+        {
+          "mutation": "L9-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.97333",
+            "the logits' correlation at position 25: 0.98312",
+            "the logits' correlation at position 26: 0.99033",
+            "the logits' correlation at position 27: 0.98904",
+            "the logits' correlation at position 28: 0.98126",
+            "the logits' correlation at position 29: 0.98881",
+            "the logits' correlation at position 30: 0.98926",
+            "the logits' correlation at position 31: 0.98705"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9733255546381245,
+          "slope_range": [
+            0.9672984667455132,
+            1.0202053458582192
+          ]
+        },
+        {
+          "mutation": "L10-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99684",
+            "the logits' correlation at position 25: 0.99721",
+            "the logits' correlation at position 26: 0.99627",
+            "the logits' correlation at position 27: 0.99713",
+            "the logits' correlation at position 28: 0.99423",
+            "the logits' correlation at position 29: 0.99614",
+            "the logits' correlation at position 30: 0.99578",
+            "the logits' correlation at position 31: 0.99483"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9942268775410992,
+          "slope_range": [
+            0.9791184986617665,
+            1.0084240646258618
+          ]
+        },
+        {
+          "mutation": "L10-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99659",
+            "the logits' correlation at position 25: 0.99679",
+            "the logits' correlation at position 26: 0.99647",
+            "the logits' correlation at position 27: 0.99740",
+            "the logits' correlation at position 28: 0.99395",
+            "the logits' correlation at position 29: 0.99642",
+            "the logits' correlation at position 30: 0.99561",
+            "the logits' correlation at position 31: 0.99513"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9939485722145693,
+          "slope_range": [
+            0.9802022560240756,
+            1.0037880355475999
+          ]
+        },
+        {
+          "mutation": "L10-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98755",
+            "the logits' correlation at position 25: 0.99391",
+            "the logits' correlation at position 26: 0.99373",
+            "the logits' correlation at position 27: 0.99367",
+            "the logits' correlation at position 28: 0.99147",
+            "the logits' correlation at position 29: 0.99407",
+            "the logits' correlation at position 30: 0.99199",
+            "the logits' correlation at position 31: 0.98677"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9867729033151234,
+          "slope_range": [
+            0.9640981298861899,
+            1.004778701495225
+          ]
+        },
+        {
+          "mutation": "L11-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.97303",
+            "the logits' correlation at position 25: 0.99441",
+            "the logits' correlation at position 26: 0.99537",
+            "the logits' correlation at position 27: 0.99461",
+            "the logits' correlation at position 28: 0.99052",
+            "the logits' correlation at position 29: 0.99580",
+            "the logits' correlation at position 30: 0.99386",
+            "the logits' correlation at position 31: 0.99313"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9730284570990599,
+          "slope_range": [
+            0.9469690586718987,
+            1.0082029433784339
+          ]
+        },
+        {
+          "mutation": "L11-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.97122",
+            "the logits' correlation at position 25: 0.99364",
+            "the logits' correlation at position 26: 0.99527",
+            "the logits' correlation at position 27: 0.99474",
+            "the logits' correlation at position 28: 0.98977",
+            "the logits' correlation at position 29: 0.99543",
+            "the logits' correlation at position 30: 0.99340",
+            "the logits' correlation at position 31: 0.99271"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9712232559704741,
+          "slope_range": [
+            0.9435913226440139,
+            1.0102447912544117
+          ]
+        },
+        {
+          "mutation": "L11-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.96721",
+            "the logits' correlation at position 25: 0.98783",
+            "the logits' correlation at position 26: 0.98997",
+            "the logits' correlation at position 27: 0.99281",
+            "the logits' correlation at position 28: 0.97714",
+            "the logits' correlation at position 29: 0.98880",
+            "the logits' correlation at position 30: 0.98497",
+            "the logits' correlation at position 31: 0.98085"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9672145802286861,
+          "slope_range": [
+            0.9475708869009717,
+            0.998252169816762
+          ]
+        },
+        {
+          "mutation": "L12-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98950",
+            "the logits' correlation at position 25: 0.99090",
+            "the logits' correlation at position 26: 0.99387",
+            "the logits' correlation at position 27: 0.99371",
+            "the logits' correlation at position 28: 0.98798",
+            "the logits' correlation at position 29: 0.99005",
+            "the logits' correlation at position 30: 0.99218",
+            "the logits' correlation at position 31: 0.99123"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9879788836310648,
+          "slope_range": [
+            0.9715362784607529,
+            1.0223204310535707
+          ]
+        },
+        {
+          "mutation": "L12-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98959",
+            "the logits' correlation at position 25: 0.99081",
+            "the logits' correlation at position 26: 0.99393",
+            "the logits' correlation at position 27: 0.99383",
+            "the logits' correlation at position 28: 0.98791",
+            "the logits' correlation at position 29: 0.99033",
+            "the logits' correlation at position 30: 0.99249",
+            "the logits' correlation at position 31: 0.99135"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9879105419084385,
+          "slope_range": [
+            0.9751103898905356,
+            1.0186129452684052
+          ]
+        },
+        {
+          "mutation": "L12-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98017",
+            "the logits' correlation at position 25: 0.98838",
+            "the logits' correlation at position 26: 0.99041",
+            "the logits' correlation at position 27: 0.99370",
+            "the logits' correlation at position 28: 0.98724",
+            "the logits' correlation at position 29: 0.98726",
+            "the logits' correlation at position 30: 0.98994",
+            "the logits' correlation at position 31: 0.98401"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9801712646547325,
+          "slope_range": [
+            0.9730596304740493,
+            1.0151332031590177
+          ]
+        },
+        {
+          "mutation": "L13-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99345",
+            "the logits' correlation at position 25: 0.99522",
+            "the logits' correlation at position 26: 0.99574",
+            "the logits' correlation at position 27: 0.99628",
+            "the logits' correlation at position 28: 0.99362",
+            "the logits' correlation at position 29: 0.99379",
+            "the logits' correlation at position 30: 0.99458",
+            "the logits' correlation at position 31: 0.98491"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9849144218715288,
+          "slope_range": [
+            0.9833666919342609,
+            1.020358020416165
+          ]
+        },
+        {
+          "mutation": "L13-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99362",
+            "the logits' correlation at position 25: 0.99544",
+            "the logits' correlation at position 26: 0.99559",
+            "the logits' correlation at position 27: 0.99637",
+            "the logits' correlation at position 28: 0.99378",
+            "the logits' correlation at position 29: 0.99386",
+            "the logits' correlation at position 30: 0.99465",
+            "the logits' correlation at position 31: 0.98417"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9841687387421686,
+          "slope_range": [
+            0.9882003405479421,
+            1.0194868913679733
+          ]
+        },
+        {
+          "mutation": "L13-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98224",
+            "the logits' correlation at position 25: 0.98940",
+            "the logits' correlation at position 26: 0.99042",
+            "the logits' correlation at position 27: 0.99013",
+            "the logits' correlation at position 28: 0.98646",
+            "the logits' correlation at position 29: 0.98660",
+            "the logits' correlation at position 30: 0.98699",
+            "the logits' correlation at position 31: 0.97023"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9702294309802375,
+          "slope_range": [
+            0.912472388509114,
+            0.9986151364742706
+          ]
+        },
+        {
+          "mutation": "L14-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99387",
+            "the logits' correlation at position 25: 0.99732",
+            "the logits' correlation at position 26: 0.99556",
+            "the logits' correlation at position 27: 0.99620",
+            "the logits' correlation at position 28: 0.99477",
+            "the logits' correlation at position 29: 0.99226",
+            "the logits' correlation at position 30: 0.99555",
+            "the logits' correlation at position 31: 0.98772"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9877190691927081,
+          "slope_range": [
+            0.9708950481412116,
+            1.0109639020205554
+          ]
+        },
+        {
+          "mutation": "L14-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99343",
+            "the logits' correlation at position 25: 0.99727",
+            "the logits' correlation at position 26: 0.99549",
+            "the logits' correlation at position 27: 0.99642",
+            "the logits' correlation at position 28: 0.99439",
+            "the logits' correlation at position 29: 0.99221",
+            "the logits' correlation at position 30: 0.99543",
+            "the logits' correlation at position 31: 0.98746"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9874641524090965,
+          "slope_range": [
+            0.9693561356585614,
+            1.0146725270255412
+          ]
+        },
+        {
+          "mutation": "L14-kd+1",
+          "caught": true,
+          "missed": [
+            "the choices are [1576, 7483, 310, 3444, 338, 3681, 29991, 2], not SASH's [1576, 7483, 310, 3444, 338, 3681, 29889, 2]",
+            "the logits' correlation at position 24: 0.98399",
+            "the logits' correlation at position 25: 0.98349",
+            "the logits' correlation at position 26: 0.98726",
+            "the logits' correlation at position 27: 0.98636",
+            "the logits' correlation at position 28: 0.99002",
+            "the logits' correlation at position 29: 0.99181",
+            "the logits' correlation at position 30: 0.98757",
+            "the logits' correlation at position 31: 0.98448"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": false,
+          "range_failure": null,
+          "min_correlation": 0.9834893181175942,
+          "slope_range": [
+            0.9616613014917462,
+            1.006209735744037
+          ]
+        },
+        {
+          "mutation": "L15-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99319",
+            "the logits' correlation at position 25: 0.99385",
+            "the logits' correlation at position 26: 0.99223",
+            "the logits' correlation at position 27: 0.98959",
+            "the logits' correlation at position 28: 0.98952",
+            "the logits' correlation at position 29: 0.98919",
+            "the logits' correlation at position 30: 0.99271",
+            "the logits' correlation at position 31: 0.99103"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9891932223229556,
+          "slope_range": [
+            0.9964527750255012,
+            1.0439710933042732
+          ]
+        },
+        {
+          "mutation": "L15-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99307",
+            "the logits' correlation at position 25: 0.99401",
+            "the logits' correlation at position 26: 0.99247",
+            "the logits' correlation at position 27: 0.98957",
+            "the logits' correlation at position 28: 0.98961",
+            "the logits' correlation at position 29: 0.98881",
+            "the logits' correlation at position 30: 0.99272",
+            "the logits' correlation at position 31: 0.99089"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9888141065458588,
+          "slope_range": [
+            1.0018213090068377,
+            1.0420513630559602
+          ]
+        },
+        {
+          "mutation": "L15-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98758",
+            "the logits' correlation at position 25: 0.99536",
+            "the logits' correlation at position 26: 0.99128",
+            "the logits' correlation at position 27: 0.99648",
+            "the logits' correlation at position 28: 0.99092",
+            "the logits' correlation at position 29: 0.99195",
+            "the logits' correlation at position 30: 0.99325",
+            "the logits' correlation at position 31: 0.99080"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.987576032657586,
+          "slope_range": [
+            0.9781847427542744,
+            1.015714691896437
+          ]
+        },
+        {
+          "mutation": "L16-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99216",
+            "the logits' correlation at position 25: 0.99528",
+            "the logits' correlation at position 26: 0.99453",
+            "the logits' correlation at position 27: 0.99518",
+            "the logits' correlation at position 28: 0.99243",
+            "the logits' correlation at position 29: 0.99095",
+            "the logits' correlation at position 30: 0.99537",
+            "the logits' correlation at position 31: 0.99553"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9909461499830529,
+          "slope_range": [
+            0.9848454587078657,
+            1.0113572593930542
+          ]
+        },
+        {
+          "mutation": "L16-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99235",
+            "the logits' correlation at position 25: 0.99531",
+            "the logits' correlation at position 26: 0.99447",
+            "the logits' correlation at position 27: 0.99509",
+            "the logits' correlation at position 28: 0.99245",
+            "the logits' correlation at position 29: 0.99095",
+            "the logits' correlation at position 30: 0.99539",
+            "the logits' correlation at position 31: 0.99559"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9909516769387932,
+          "slope_range": [
+            0.9850565346519755,
+            1.0108653023931848
+          ]
+        },
+        {
+          "mutation": "L16-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98634",
+            "the logits' correlation at position 25: 0.99077",
+            "the logits' correlation at position 26: 0.99089",
+            "the logits' correlation at position 27: 0.99175",
+            "the logits' correlation at position 28: 0.98886",
+            "the logits' correlation at position 29: 0.98584",
+            "the logits' correlation at position 30: 0.98847",
+            "the logits' correlation at position 31: 0.98459"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9845890293163754,
+          "slope_range": [
+            0.9735177811933987,
+            1.0134760743406819
+          ]
+        },
+        {
+          "mutation": "L17-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99047",
+            "the logits' correlation at position 25: 0.99544",
+            "the logits' correlation at position 26: 0.99739",
+            "the logits' correlation at position 27: 0.99467",
+            "the logits' correlation at position 28: 0.99663",
+            "the logits' correlation at position 29: 0.99315",
+            "the logits' correlation at position 30: 0.99585",
+            "the logits' correlation at position 31: 0.99596"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9904749944294612,
+          "slope_range": [
+            0.9865083827009117,
+            1.0119851966334559
+          ]
+        },
+        {
+          "mutation": "L17-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99091",
+            "the logits' correlation at position 25: 0.99547",
+            "the logits' correlation at position 26: 0.99729",
+            "the logits' correlation at position 27: 0.99458",
+            "the logits' correlation at position 28: 0.99667",
+            "the logits' correlation at position 29: 0.99308",
+            "the logits' correlation at position 30: 0.99570",
+            "the logits' correlation at position 31: 0.99597"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9909145722795454,
+          "slope_range": [
+            0.9914845902866459,
+            1.012066643107531
+          ]
+        },
+        {
+          "mutation": "L17-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99232",
+            "the logits' correlation at position 25: 0.99459",
+            "the logits' correlation at position 26: 0.99150",
+            "the logits' correlation at position 27: 0.99375",
+            "the logits' correlation at position 28: 0.98942",
+            "the logits' correlation at position 29: 0.98699",
+            "the logits' correlation at position 30: 0.99153",
+            "the logits' correlation at position 31: 0.99104"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.986993484316058,
+          "slope_range": [
+            0.9645780506143183,
+            1.0088260513124698
+          ]
+        },
+        {
+          "mutation": "L18-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99356",
+            "the logits' correlation at position 25: 0.98874",
+            "the logits' correlation at position 26: 0.99536",
+            "the logits' correlation at position 27: 0.99460",
+            "the logits' correlation at position 28: 0.99201",
+            "the logits' correlation at position 29: 0.99294",
+            "the logits' correlation at position 30: 0.99205",
+            "the logits' correlation at position 31: 0.99468"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9887409896714572,
+          "slope_range": [
+            0.9756630764373933,
+            1.0377218708973375
+          ]
+        },
+        {
+          "mutation": "L18-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99351",
+            "the logits' correlation at position 25: 0.98877",
+            "the logits' correlation at position 26: 0.99540",
+            "the logits' correlation at position 27: 0.99457",
+            "the logits' correlation at position 28: 0.99197",
+            "the logits' correlation at position 29: 0.99290",
+            "the logits' correlation at position 30: 0.99181",
+            "the logits' correlation at position 31: 0.99472"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9887656647960802,
+          "slope_range": [
+            0.976346727813664,
+            1.039175695404117
+          ]
+        },
+        {
+          "mutation": "L18-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98935",
+            "the logits' correlation at position 25: 0.99154",
+            "the logits' correlation at position 26: 0.98804",
+            "the logits' correlation at position 27: 0.98864",
+            "the logits' correlation at position 28: 0.99071",
+            "the logits' correlation at position 29: 0.98249",
+            "the logits' correlation at position 30: 0.98834",
+            "the logits' correlation at position 31: 0.98583"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9824927478486224,
+          "slope_range": [
+            0.9443863575446372,
+            0.9655004340599381
+          ]
+        },
+        {
+          "mutation": "L19-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99649",
+            "the logits' correlation at position 25: 0.99667",
+            "the logits' correlation at position 26: 0.99687",
+            "the logits' correlation at position 28: 0.99465",
+            "the logits' correlation at position 29: 0.99705",
+            "the logits' correlation at position 30: 0.99309",
+            "the logits' correlation at position 31: 0.99136"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9913610304505465,
+          "slope_range": [
+            0.9796961655762693,
+            1.0065080770606825
+          ]
+        },
+        {
+          "mutation": "L19-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99646",
+            "the logits' correlation at position 25: 0.99671",
+            "the logits' correlation at position 26: 0.99682",
+            "the logits' correlation at position 28: 0.99456",
+            "the logits' correlation at position 29: 0.99709",
+            "the logits' correlation at position 30: 0.99307",
+            "the logits' correlation at position 31: 0.99134"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9913365450411586,
+          "slope_range": [
+            0.9815143375848555,
+            1.0065898796798547
+          ]
+        },
+        {
+          "mutation": "L19-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98562",
+            "the logits' correlation at position 25: 0.99004",
+            "the logits' correlation at position 26: 0.98851",
+            "the logits' correlation at position 27: 0.99062",
+            "the logits' correlation at position 28: 0.98524",
+            "the logits' correlation at position 29: 0.98021",
+            "the logits' correlation at position 30: 0.98768",
+            "the logits' correlation at position 31: 0.98825"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9802100966757372,
+          "slope_range": [
+            0.9268896449933731,
+            0.9868433254155146
+          ]
+        },
+        {
+          "mutation": "L20-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99584",
+            "the logits' correlation at position 25: 0.99736",
+            "the logits' correlation at position 26: 0.99696",
+            "the logits' correlation at position 28: 0.99552",
+            "the logits' correlation at position 29: 0.99729",
+            "the logits' correlation at position 30: 0.99621",
+            "the logits' correlation at position 31: 0.99629"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9955204113741117,
+          "slope_range": [
+            0.9708402497752636,
+            1.0008126314296673
+          ]
+        },
+        {
+          "mutation": "L20-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99572",
+            "the logits' correlation at position 25: 0.99734",
+            "the logits' correlation at position 26: 0.99698",
+            "the logits' correlation at position 28: 0.99557",
+            "the logits' correlation at position 29: 0.99735",
+            "the logits' correlation at position 30: 0.99627",
+            "the logits' correlation at position 31: 0.99621"
+          ],
+          "passes_a_floor_of_0_99": true,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.995565430253171,
+          "slope_range": [
+            0.9729798143832328,
+            1.0016904615346716
+          ]
+        },
+        {
+          "mutation": "L20-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.98061",
+            "the logits' correlation at position 25: 0.98352",
+            "the logits' correlation at position 26: 0.98299",
+            "the logits' correlation at position 27: 0.98011",
+            "the logits' correlation at position 28: 0.98148",
+            "the logits' correlation at position 29: 0.97387",
+            "the logits' correlation at position 30: 0.97479",
+            "the logits' correlation at position 31: 0.97607"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9738744649644637,
+          "slope_range": [
+            0.8498387100002354,
+            0.9504984514315239
+          ]
+        },
+        {
+          "mutation": "L21-kv+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99163",
+            "the logits' correlation at position 25: 0.99429",
+            "the logits' correlation at position 26: 0.98909",
+            "the logits' correlation at position 27: 0.99468",
+            "the logits' correlation at position 28: 0.99242",
+            "the logits' correlation at position 29: 0.99322",
+            "the logits' correlation at position 30: 0.98742",
+            "the logits' correlation at position 31: 0.98437"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9843687610663487,
+          "slope_range": [
+            0.8569190275178132,
+            0.9726901018444342
+          ]
+        },
+        {
+          "mutation": "L21-ko+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.99154",
+            "the logits' correlation at position 25: 0.99418",
+            "the logits' correlation at position 26: 0.98917",
+            "the logits' correlation at position 27: 0.99480",
+            "the logits' correlation at position 28: 0.99236",
+            "the logits' correlation at position 29: 0.99325",
+            "the logits' correlation at position 30: 0.98736",
+            "the logits' correlation at position 31: 0.98423"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9842332964213707,
+          "slope_range": [
+            0.8573150444441753,
+            0.971473434901857
+          ]
+        },
+        {
+          "mutation": "L21-kd+1",
+          "caught": true,
+          "missed": [
+            "the logits' correlation at position 24: 0.95882",
+            "the logits' correlation at position 25: 0.96962",
+            "the logits' correlation at position 26: 0.95881",
+            "the logits' correlation at position 27: 0.96664",
+            "the logits' correlation at position 28: 0.96719",
+            "the logits' correlation at position 29: 0.96091",
+            "the logits' correlation at position 30: 0.95195",
+            "the logits' correlation at position 31: 0.94884"
+          ],
+          "passes_a_floor_of_0_99": false,
+          "tokens_same": true,
+          "range_failure": null,
+          "min_correlation": 0.9488436673487812,
+          "slope_range": [
+            1.1393292555320054,
+            1.316349061799904
+          ]
+        }
+      ]
+    }
+  },
+  "not_run": [
+    "any commitment or proof; no GPU was used",
+    "cp_commit's worst-case check on a GPU: step 7 computes it on a CPU with Hallmark's port (worst_case_cpu.py), which finds the gate of layer 21 short; the port has not been compared with a GPU run",
+    "cp_prove's rules beyond its parameter-file reader",
+    "any prompt other than SASH's, and any T other than 64",
+    "the make_model cases of upstream's scale tests: the target builds no make_model and sets no SMALL_MODEL, so they skip on every host (status 77, passed in part)",
+    "any proof through the verifier's NE 0 branches: the 108 equal calls are all on upstream's MoE proofs"
+  ],
+  "tinyllama_proof": false,
+  "gpu_used": false,
+  "hiding_claim": false,
+  "equal_tokens_mean": "a smoke test that the integer model agrees with SASH's answer on this request, not that FlashProve's and SASH's integer functions are equal"
+}
