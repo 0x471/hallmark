@@ -25,12 +25,15 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
   - it needs the same new scale tools as option 3 (upstream's refuse rotary base 10,000), and a
     padding exporter on top.
 
-  Both routes meet `cp_commit`'s mandatory worst-case check, which has not run for either. What
-  option 2 keeps is upstream's unchanged verifier, so its `YES` would be upstream's own. If the owner
-  prefers that, it is the fallback. Lean covers neither route (`lean/GAPS.md`: one model size).
+  What option 2 keeps is upstream's unchanged verifier, so its `YES` would be upstream's own, and
+  its standard form carries the gate's clamp `gcl 1`, which option 3's kit lacks (below). If the
+  owner prefers that, it is the fallback. Lean covers neither route (`lean/GAPS.md`: one model
+  size).
 - **Option 3, a patched FlashProve: proposed**, as Hallmark's own small patches on the pinned source.
   They are applied with `git apply`, as the SASH patches are, and each is SHA-256-pinned. It is not a
-  dependency on a fork.
+  dependency on a fork. As it stands it cannot commit the TinyLlama kit: `cp_commit`'s mandatory
+  worst-case check, computed on a CPU, refuses it at one gate row (below), so it needs one more
+  change, which the owner chooses.
 
 **Decision (proposed).** Adopt the four patches in
 [`research/probes/flashprove/tinyllama/`](../../research/probes/flashprove/tinyllama/README.md):
@@ -47,7 +50,7 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
   - adds the same three-digest form to the provers' parameter-file reader;
   - leaves `cp_commit`'s worst-case check as upstream's: mandatory. (An earlier revision left it out
     under `-public-weights`, which changed upstream's default for every such commitment; it was
-    dropped.)
+    dropped.) With it, `cp_commit` would refuse this kit (below).
 - **`tools.patch`** gives `weight_sums` and upstream's CPU integer model the same constants and dense
   form.
 - **`scales.patch`** (pinned in `kit.json`) lets upstream's scale tools fit a dense `llama` model:
@@ -106,11 +109,34 @@ every required file byte for byte, and the integer model's choices, peaks, margi
 
 The current revision of the patches passed `make verify-flashprove-tinyllama` on 2026-11-23 on Linux (upstream `verifier/build.sh`, g++ 13.3) and
 on macOS (Apple clang 17, built as `make verify-flashprove` builds it;
-[evidence](../../research/evidence/flashprove-tinyllama-2026-11-23.json)). Upstream's `integer_model` CPU suite passes on the patched tree (947, 0 failed). Apart from upstream's
+[evidence](../../research/evidence/flashprove-tinyllama-2026-11-23.json)). Upstream's `integer_model` CPU suite passed on the patched tree on 2026-11-22 (947, 0 failed), on hunks that have not changed since. Apart from upstream's
 stored proofs and their altered copies, which both builds check, these are planning, parsing and
 table checks: no TinyLlama proof exists or is checked. The answer check runs the integer model, not a
 prover, on one request. Further one-off checks and their limits:
 [README](../../research/probes/flashprove/tinyllama/README.md#checks).
+
+**`cp_commit`'s worst-case check, on a CPU.** Upstream computes it on a GPU only. Step 7 of the
+answer target computes it with Hallmark's port of upstream's `worst_case.cuh`
+(`worst_case_cpu.py`, the decisive sites' rounding emulated exactly) and checks the gate from the
+float weights alone (`gate_float_bound.py`); the two agree in every layer. Every site fits but one:
+the gate of layer 21, where one row of 5,632 can take a key of 47,481 against the limit of 32,639
+(a real input of 177.4; no other layer's gate key above 14,631). No change of the kit's
+scales fixes this: in real units the bound is the row's own. Upstream's remedy, `gcl 1`, clamps the
+key with the sigmoid table, which only a model with experts forms, and the verifier refuses it at
+NE 0. So the owner chooses one of:
+
+- **an explicit option to leave the check out under `-public-weights`** (a small change of
+  `prover.patch`, opt-in, so upstream's default stays): upstream gives weight hiding as the check's reason, and
+  with public weights nothing is hidden; soundness does not rest on it (`scales/worst-case-bounds.md`); a request that drives
+  that row past its range fails in `cp_prove` with no proof. On SASH's prompt the key reaches at
+  most 7,108;
+- **`gcl` at NE 0**: the sigmoid table formed for a dense model too, so that the clamp is checked
+  as upstream checks it. That changes what the verifier checks in a proof, a much larger patch;
+- **padded option 2**, whose standard form carries `gcl 1` (limit 4,194,175): there this row fits;
+  the padded kit's other sites have not been computed.
+
+The port has not been compared with a GPU run, and it does not cover the GPU's guards on its matrix
+products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commits-worst-case-check-on-a-cpu)).
 
 **Not done; each needs its own step.**
 
@@ -125,10 +151,10 @@ range and statement.
    kit's scales are computed from it. The card's tags and its text name different versions, and
    `research/AUTHORITY.json` excludes ambiguous licences, so the owner decides; a no means refitting
    on another text. The patches do not depend on it.
-2. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks).
-   The prover patch compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s mandatory
-   worst-case check (whether the kit passes it is not known; if not, its scales are made coarser)
-   and `cp_prove`'s rules beyond its parameter-file reader run only there.
+2. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks),
+   after the owner's choice above, since the kit as it stands would not be committed. The prover
+   patch compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s own verdict on the
+   worst-case check and `cp_prove`'s rules beyond its parameter-file reader run only there.
 3. **A dense proof's altered copies.** The 108 equal calls are all on MoE proofs, and no proof has
    gone through the verifier's NE 0 branches. Before a dense `YES` is relied on, run an
    altered-copies table (as upstream's `examples/rejected-proofs`) against the first dense proof.

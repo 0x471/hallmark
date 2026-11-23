@@ -20,7 +20,10 @@ that check, [here](evidence/flashprove-tinyllama-2026-11-22.json)). No proof, no
 upstream's integer model with the kit gives SASH's eight answer tokens on SASH's prompt, over a whole
 64-token window with no failed range condition, on Linux and on macOS
 ([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). The integer model is not a prover:
-no commitment or proof is made. Next, with owner approval and a cap: commit and prove on a GPU.
+no commitment or proof is made. `cp_commit`'s mandatory worst-case check, computed on a CPU by a port
+of upstream's code and checked against the float weights, refuses the kit at one gate row of layer
+21; no change of the kit's scales fixes that, and upstream's remedy (`gcl`) is refused at NE 0. Next:
+the owner chooses the change (decision 0094); then, with approval and a cap, commit and prove on a GPU.
 
 ## SASH and FlashProve comparison — recorded
 

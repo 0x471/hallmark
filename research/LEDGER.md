@@ -3348,3 +3348,27 @@ both on `main` on that host too. The calibration text's licence is left to the o
 stands or falls with it, the patches do not. Not shown: any proof through the verifier's NE 0
 branches (the 108 calls are all on MoE proofs), the worst-case check on the kit, any commitment or
 proof. No GPU, no spend.
+
+## 2026-11-23: cp_commit's worst-case check on a CPU (proposed)
+
+Hypothesis: the TinyLlama kit passes `cp_commit`'s mandatory worst-case check, which upstream
+computes only on a GPU, and if it does not, coarser scales fix it. Pass criterion: a CPU port of
+upstream's `worst_case.cuh` (the decisive row bounds with the GPU's rounding emulated exactly) finds
+every site within its limit, and a bound from the float weights alone agrees.
+
+Result: failed, at one site
+([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json), step 7 of both runs at
+`7004750`, identical on Linux and macOS). Every site fits but the gate of layer 21: one row of 5,632
+can take a key of 47,481 against the limit of 32,639 (0.54 bits over); no other layer's gate key
+exceeds 14,631, q, k, v and up keep at least 1.2 bits, and the stream, bounded by Frobenius norms,
+3.7 bits. The float bound agrees: that row can reach a gate input of 177.4, and in every layer the
+integer bound is the float one times the norm's ball radius over 2,048, within 2e-4. The second half
+of the hypothesis is false: in real units the bound is the row's own, so no rescaling helps, and
+upstream's remedy, `gcl 1`, needs the sigmoid table and is refused at NE 0. With these patches
+`cp_commit` would not commit this kit. Decision 0094 now asks the owner to choose: an opt-in to
+leave the check out under `-public-weights`, `gcl` at NE 0, or padded option 2, whose standard form
+carries `gcl`. On SASH's prompt the gate's key reaches 7,108. The answer target, which now records
+this step, passed on both hosts (1,786 s and 367 s) with the same tokens and figures as before; the
+66-kit shift sweep, rerun with its committed script, gave the same 66 catches. Not shown: the GPU's
+own verdict, and the GPU's guards on its matrix products. No GPU, no spend.
+

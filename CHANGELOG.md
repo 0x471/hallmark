@@ -16,7 +16,10 @@ dense `llama` model, `export_gguf.py` writes the pinned model as GGUF (BF16 bits
 verify-flashprove-tinyllama-answer` rebuilds the file and the kit on a CPU (every file byte for byte but the
 recorded `maxima.json`), in environments from hash-locked requirement files, and requires
 that upstream's integer model gives SASH's eight answer tokens on SASH's prompt, with no failed range
-condition; it passed on Linux and macOS. No commitment or proof is made.
+condition; it passed on Linux and macOS. It also computes `cp_commit`'s worst-case check on a CPU
+with a port of upstream's code, checked against a bound from the float weights: the kit fails it at
+one gate row of layer 21, so `cp_commit` would not commit this kit until the owner chooses a change.
+No commitment or proof is made.
 
 Add FlashProve as a pinned external proof backend for Mixture-of-Experts models:
 `make verify-flashprove` checks the stored upstream proofs on a Mac, and

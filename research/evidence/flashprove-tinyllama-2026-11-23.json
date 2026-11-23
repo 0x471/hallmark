@@ -321,6 +321,15 @@
           "shape": "2048,64"
         }
       ]
+    },
+    "dual_jsonl": {
+      "sha256": "98e295690f9210e7198789172a5972f7af143b17efaeda0853ad2f7bbab82fd9",
+      "exit_codes_of_both_builds": {
+        "0 0": 7,
+        "1 1": 99,
+        "4 4": 2
+      },
+      "note": "the target's per-call record; the 2 calls with exit 4 are planning calls inside check_proof.py"
     }
   },
   "linux_target_run": {
@@ -613,6 +622,15 @@
           "shape": "2048,64"
         }
       ]
+    },
+    "dual_jsonl": {
+      "sha256": "1e3dfc913677369c1a915035f078bc6df332f8d96eaa625e8e4f2440f5004a7d",
+      "exit_codes_of_both_builds": {
+        "0 0": 7,
+        "1 1": 99,
+        "4 4": 2
+      },
+      "note": "counted on the Linux host from the same record (it stays there); the 2 calls with exit 4 are planning calls inside check_proof.py"
     }
   },
   "prover_compile": {
@@ -696,5 +714,6 @@
   ],
   "synthetic_inputs_only": true,
   "tinyllama_proof": false,
-  "hiding_claim": false
+  "hiding_claim": false,
+  "other_checks": "The integer_model CPU suite (947 passed) and weight_sums/tests/run_tests.sh (24 steps) ran on 2026-11-22 (flashprove-tinyllama-2026-11-22.json, linux_other_checks) on a tree with the same tools.patch; prover.patch has changed since only by dropping its hunks for arguments.h, hf_commit.cu, isk.cuh and cp_files.h, and its other five hunks are byte for byte the same."
 }
