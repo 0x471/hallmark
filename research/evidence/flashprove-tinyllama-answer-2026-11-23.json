@@ -51,7 +51,7 @@
     "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
     "version": "0.16.0"
   },
-  "commit": "7f2c684, the code and kit of these runs",
+  "commit": "477b6fa (code at c140f03); the code and kit of these runs",
   "kit_pins": {
     "schema_id": "hallmark.flashprove-tinyllama-kit/1",
     "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
@@ -92,11 +92,11 @@
         "locks": {
           "macos-arm64": {
             "file": "scales-macos-arm64.txt",
-            "sha256": "8c70674e284ddff5566bca9a20ff962dce933c5048905b0a9aa452de647337c7"
+            "sha256": "a90ecc08252b4d47abd4f5287f5c37fff10faaeadab68a9860b8d1ef1988f40d"
           },
           "linux-x86_64": {
             "file": "scales-linux-x86_64.txt",
-            "sha256": "5e74b017f8c00ab192b17e12fa419ffff5ab348b893c76b8f5dd961e58ca5065"
+            "sha256": "141cc59c3a21f196a6753bda102d725f2d0865de4e0f0c5655fd9b10c5077c8b"
           }
         },
         "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13"
@@ -111,11 +111,11 @@
         "locks": {
           "macos-arm64": {
             "file": "integer_model-macos-arm64.txt",
-            "sha256": "43809fb499f1ef3e83661c572706d577863941da33cd7641cc9012180f1ec778"
+            "sha256": "b9d89b9e3571659760261c5c14441c99c331da76b6526f17b15edd94215df78c"
           },
           "linux-x86_64": {
             "file": "integer_model-linux-x86_64.txt",
-            "sha256": "8c45e5ca0398111b3795dccc2d88e53821f36563445d1aa40cbc1b5a5c0b2705"
+            "sha256": "bba3b40f517585fa71af22286ddc71a6ef892143ea416c91625fe8dbd5a249a2"
           }
         },
         "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13"
@@ -212,19 +212,19 @@
     "how": "FLASHPROVE_TINYLLAMA_INPUTS set to a folder of the pinned files (hard links; each checked against its pin), so no model download",
     "host": "macOS 15.7.1 (Darwin 24.6.0), Apple M4 Pro, arm64",
     "passed": true,
-    "seconds": 339.9,
+    "seconds": 248.9,
     "builds": {
       "patched": {
         "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
         "recipe": "apple-clang",
-        "seconds": 32.220395500015,
+        "seconds": 19.147910625004442,
         "sha256": "d1ad3a47ef22445c95770b12c6e5ef99b15e863ca1a4b91f3bef2b223b707ef4",
         "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52"
       },
       "upstream": {
         "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
         "recipe": "apple-clang",
-        "seconds": 31.593762708012946,
+        "seconds": 19.699745000019902,
         "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
         "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
       }
@@ -328,7 +328,7 @@
       "maxima_json_recorded_only": {
         "equal_to_committed": true
       },
-      "calibrate_seconds": 79.2,
+      "calibrate_seconds": 64.5,
       "gguf": {
         "bytes": 2200293664,
         "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
@@ -545,27 +545,27 @@
           "token": 2
         }
       ],
-      "seconds": 4.7
+      "seconds": 3.3
     }
   },
   "linux_run": {
     "command": "make verify-flashprove-tinyllama-answer",
-    "how": "fresh clone at 7f2c684; every input downloaded and checked",
+    "how": "fresh clone at 477b6fa; every input downloaded and checked",
     "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM",
     "passed": true,
-    "seconds": 1794.8,
+    "seconds": 1877.2,
     "builds": {
       "patched": {
         "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
         "recipe": "upstream verifier/build.sh",
-        "seconds": 210.4374380679801,
+        "seconds": 226.1578926499933,
         "sha256": "9bd671a98b0daecc4453ccd085f91b76475d2b07899ac822d0cb02023c9d6b26",
         "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52"
       },
       "upstream": {
         "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
         "recipe": "upstream verifier/build.sh",
-        "seconds": 205.5808870359324,
+        "seconds": 210.1258054021746,
         "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
         "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
       }
@@ -669,7 +669,7 @@
       "maxima_json_recorded_only": {
         "equal_to_committed": false
       },
-      "calibrate_seconds": 667.0,
+      "calibrate_seconds": 677.5,
       "gguf": {
         "bytes": 2200293664,
         "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
@@ -886,7 +886,7 @@
           "token": 2
         }
       ],
-      "seconds": 41.0
+      "seconds": 37.7
     }
   },
   "first_made": "The kit files were first made in a scratch run on the Mac (the same tools, before the target existed) and committed; both target runs rebuilt every required one byte for byte (maxima.json is recorded only).",
@@ -905,9 +905,9 @@
     "required_files_gguf_and_calibration_set": "identical on both hosts (each run requires byte equality with the pins)",
     "maxima_json": "recorded only: equal to the committed file on macOS, last digits differ on Linux, which upstream's scales/README.md expects across devices and libraries; words.json (the scales) is identical",
     "integer_model": "choices, every recorded peak, every top-1 margin and both controls' figures identical on both hosts",
-    "environments": "each host's environments hold exactly its platform's lock file; Python 3.13.2 (macOS) and 3.13.15 (Linux)"
+    "environments": "each host's environments hold exactly its platform's lock file (43 and 19 distributions); Python 3.13.2 (macOS) and 3.13.15 (Linux)"
   },
-  "review_history": "An earlier run of this target at 28ae047 (before two reviews) passed with a correlation floor of 0.99, no mutation controls and environments pinned only at the top level; a reviewer's one-bit mutations of the kit showed that one layer's shift off by one bit passed those bounds. These runs are at 7f2c684, with the floor at 0.998, the two controls and hash-locked environments.",
+  "review_history": "A first run of this target (before two reviews) passed with a correlation floor of 0.99, no mutation controls and environments pinned only at the top level; a reviewer's one-bit mutations of the kit showed that one layer's shift off by one bit passed those bounds. These runs are at 477b6fa, with the floor at 0.998, the two controls and hash-locked environments.",
   "make_verify_flashprove": {
     "command": "make verify-flashprove (decision 0093)",
     "host": "macOS arm64",
@@ -916,10 +916,10 @@
     "note": "scripts/flashprove.py is unchanged since 192788e"
   },
   "gates": {
-    "commit": "7f2c684 (code) and f6015d1 (these records); the records commit changes no code",
-    "macos_make_check": "passed at 7f2c684: uv lock --check, ruff check, ruff format --check, mypy (42 files), pytest 2278 passed 0 failed 102 skipped, check-spec, check-conformance, check-admission",
-    "linux_make_check": "at f6015d1: ruff and formatting pass; pytest 2367 passed, 1 failed (tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker), 12 skipped, so make stops there; check-spec, check-conformance and check-admission then passed when run on their own",
-    "linux_control_on_main": "the full pytest suite on main (e2cc6d6) on the same host, the same day: 2292 passed, 3 failed, among them the same e2e test (with tests/test_manifests.py::test_file_changed_during_read[abd] and tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]); the e2e test passed 3 of 3 runs alone at f6015d1. Its cause is not established; it fails on main too",
+    "commit": "477b6fa (the records commit after it changes no code)",
+    "macos_make_check": "passed: uv lock --check, ruff check, ruff format --check, mypy (42 files), pytest 2278 passed 0 failed 102 skipped, check-spec, check-conformance, check-admission",
+    "linux_make_check": "ruff and formatting pass; pytest 2367 passed, 1 failed (tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker), 12 skipped, so make stops there; check-spec, check-conformance and check-admission then passed when run on their own",
+    "linux_control_on_main": "the full pytest suite on main (e2cc6d6) on the same host, the same day: 2292 passed, 3 failed, among them the same e2e test (with tests/test_manifests.py::test_file_changed_during_read[abd] and tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]); the e2e test passed 3 of 3 runs alone on the branch. Its cause is not established; it fails on main too",
     "linux_package_check": "passed (uv 0.9.18)",
     "docs": "make docs passed, 176 pages",
     "live_spec_audit": "scripts/check_spec.py --live: passed, live matched (macOS)"

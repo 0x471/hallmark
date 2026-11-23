@@ -3303,8 +3303,8 @@ transformers; the integer model gives `[1576, 7483, 310, 3444, 338, 3681, 29889,
 64-token window with no failed range condition and logits within the slope and correlation bounds;
 and two one-bit mutations of the kit each fail.
 
-Result: passed on Linux x86_64 (fresh clone, every input downloaded, 1,795 s) and on macOS
-arm64 (340 s, model files from a checked local folder)
+Result: passed on Linux x86_64 (fresh clone, every input downloaded, 1,877 s) and on macOS
+arm64 (249 s, model files from a checked local folder)
 ([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). Both hosts rebuilt every
 required file byte for byte; `maxima.json`, recorded only, differs in its last digits on Linux, as
 upstream expects, with the same scales. The integer model's choices, peaks and margins are identical

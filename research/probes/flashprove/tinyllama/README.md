@@ -290,8 +290,8 @@ change):
 **Current kit** (`scales.patch`, the lock files and `kit/` as pinned in `kit.json`): **passed on
 Linux and on macOS** on 2026-11-23, every row as required
 ([evidence](../../../evidence/flashprove-tinyllama-answer-2026-11-23.json)): Ubuntu 24.04 x86_64
-(fresh clone, every input downloaded, 1,795 s) and macOS arm64 (inputs from a checked local
-folder, 340 s).
+(fresh clone, every input downloaded, 1,877 s) and macOS arm64 (inputs from a checked local
+folder, 249 s).
 
 - both environments hold exactly their lock files (43 and 19 distributions);
 - every required kit file, the GGUF file and the calibration set rebuilt byte for byte on both
