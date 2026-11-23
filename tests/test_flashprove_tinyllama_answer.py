@@ -167,12 +167,15 @@ def test_failures_passes_only_an_answer_that_meets_every_condition():
         "range": dict(range_failure=dict(position=40, condition=6)),
         "choices": dict(matches=False, choices=[1] * 8),
         "gate key": dict(gate_key_within_limit=False, peaks=dict(key=40000)),
+        "no gate key": dict(gate_key_within_limit=False, peaks=dict()),
         "positions": dict(r=23),
         "window": dict(window=[0] * 64),
         "T": dict(T=128),
     }
     for what, change in cases.items():
         assert answer.failures(a_passing_answer() | change), what
+    unrecorded = a_passing_answer() | dict(gate_key_within_limit=False, peaks=dict())
+    assert answer.failures(unrecorded) == ["the gate key is not recorded"]
     for field, value in (
         ("slope", 0.5),
         ("slope", 2.0),
@@ -242,3 +245,29 @@ def test_suite_rows_are_applied_as_suite_md_defines_them():
     assert answer.suite_passes("table_ties.py", 0, "x\nOK: 26 checks\n")
     assert not answer.suite_passes("table_ties.py", 0, "OK: 26 checks, 1 odd\n")
     assert not answer.suite_passes("table_ties.py", 0, "")
+
+
+def a_worst_case(short=(("gate", 21),), ratio=1.0, floats_over=(21,)):
+    radius = 2141.6
+    port = dict(short=[list(x) for x in short], layers=[])
+    floats = dict(layers_over_the_limit=list(floats_over), layers=[])
+    for layer in range(22):
+        key = 45406.0 if layer == 21 else 10000.0
+        floats["layers"].append(dict(layer=layer, key=key))
+        port["layers"].append(
+            dict(layer=layer, ball_2=radius, gate_key_bound=key * radius / 2048 * ratio)
+        )
+    return port, floats
+
+
+def test_worst_case_findings_require_kit_json_and_two_agreeing_computations():
+    assert KIT["worst_case"]["short"] == [["gate", 21]]
+    assert answer.worst_case_findings(*a_worst_case()) == []
+    assert answer.worst_case_findings(*a_worst_case(short=()))  # the record changed
+    assert answer.worst_case_findings(*a_worst_case(short=(("gate", 21), ("up", 3))))
+    assert answer.worst_case_findings(*a_worst_case(floats_over=()))  # the float bound disagrees
+    assert answer.worst_case_findings(*a_worst_case(ratio=1.01))  # beyond the tolerance
+    assert answer.worst_case_findings(*a_worst_case(ratio=float("nan")))
+    port, floats = a_worst_case()
+    floats["layers"].pop()
+    assert answer.worst_case_findings(port, floats)

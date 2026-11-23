@@ -24,7 +24,13 @@ them), applies the three pinned patches and scales.patch, and then requires, in 
    every file pinned and the weights checked against wsums.txt, gives SASH's eight answer tokens
    after SASH's 25 prompt tokens, in one window of 64 tokens with no failed range condition, and
    its logits follow the float logits (slope and correlation bounds in kit.json); two mutation
-   controls (s + 1, and one layer's kv + 1) must each fail at least one of these conditions.
+   controls (MF + 1, and one layer's kv + 1) must each fail at least one of these conditions;
+7. cp_commit's worst-case check, computed on a CPU and recorded: worst_case_cpu.py (Hallmark's port
+   of upstream's worst_case.cuh) on the kit and the GGUF file, and gate_float_bound.py on the float
+   weights. The verdict is not a condition of passing, but the sites that do not fit must be
+   kit.json's worst_case.short, and the two must agree on the gate: the same layers over the limit,
+   and in each layer the integer key bound must be the float one times the norm's ball radius over
+   2,048, within kit.json's tolerance.
 
 No commitment, proof or GPU run is made. Equal tokens show that the integer model agrees with
 SASH's answer on this request; they do not show that FlashProve's and SASH's integer functions are
@@ -467,7 +473,10 @@ def failures(answer):
     if not answer["matches"]:
         missed.append(f"the choices are {answer['choices']}, not SASH's {CASE['answer_ids']}")
     if not answer["gate_key_within_limit"]:
-        missed.append(f"the gate key reaches {answer['peaks']['key']}")
+        reached = answer["peaks"].get("key")
+        missed.append(
+            "the gate key is not recorded" if reached is None else f"the gate key reaches {reached}"
+        )
     req, ids = KIT["request"], CASE["prompt_ids"] + CASE["answer_ids"]
     if (answer["T"], answer["r"], answer["e"]) != (req["T"], req["r"], req["e"]):
         missed.append("the window or its range is not kit.json's request")
@@ -583,10 +592,75 @@ def check_answer(tree, output, pythons, model_dir, gguf):
     controls = {}
     for name, (policy, kl) in mutated(kit["policy.txt"], kit["KL.bin"]).items():
         found = integer_run(name, policy, kl)
-        controls[name] = dict(failed=failures(found), choices=found.get("choices"))
+        slopes = [row["slope"] for row in found.get("positions", [])]
+        controls[name] = dict(
+            failed=failures(found),
+            choices=found.get("choices"),
+            slope_range=[min(slopes), max(slopes)] if slopes else None,
+            least_correlation=min(
+                (r["correlation"] for r in found.get("positions", [])), default=None
+            ),
+        )
         require(controls[name]["failed"], f"the control {name} passes every condition")
     answer["controls"] = controls
     return floats, answer
+
+
+def worst_case_findings(port, floats):
+    """Step 7's conditions on worst_case_cpu.py's result and gate_float_bound.py's: the ones that
+    fail (none: as kit.json records)."""
+    expected = KIT["worst_case"]
+    missed = []
+    if port["short"] != expected["short"]:
+        missed.append(f"the sites that do not fit are {port['short']}, not {expected['short']}")
+    gates = [layer for site, layer in port["short"] if site == "gate"]
+    if floats["layers_over_the_limit"] != gates:
+        missed.append(
+            f"the float bound has the gates of {floats['layers_over_the_limit']} over the limit"
+        )
+    if len(port["layers"]) != len(floats["layers"]):
+        missed.append("the two computations have different numbers of layers")
+    for mine, real in zip(port["layers"], floats["layers"], strict=False):
+        ratio = mine["gate_key_bound"] / real["key"] / (mine["ball_2"] / 2048)
+        if not abs(ratio - 1) <= expected["ratio_tolerance"]:  # NaN fails too
+            missed.append(
+                f"layer {mine['layer']}: the gate key bounds differ by a factor {ratio:.5f}"
+            )
+    return missed
+
+
+def check_worst_case(tree, output, pythons, model_dir):
+    """Step 7: cp_commit's worst-case check on a CPU (see the module's docstring)."""
+    env = {
+        "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+        "HOME": str(output),
+        "PYTHONPATH": str(tree / "integrations/vllm/integer_model"),
+    }
+    port_json, float_json = output / "worst-case-cpu.json", output / "gate-float-bound.json"
+    args = [pythons["integer_model"][0], "-s", "-B", PROBE / "worst_case_cpu.py"]
+    args += [output / "integer-model-kit", output / "integer-model-kit-digests.json", port_json]
+    code, _ = run(args, output / "worst-case-cpu.log", env=env)
+    require(code == 0, "worst_case_cpu.py failed")
+    args = [pythons["scales"][0], "-I", "-B", PROBE / "gate_float_bound.py", model_dir, float_json]
+    code, _ = run(args, output / "gate-float-bound.log", env=minimal_env(output))
+    require(code == 0, "gate_float_bound.py failed")
+    port, floats = json.loads(port_json.read_text()), json.loads(float_json.read_text())
+    missed = worst_case_findings(port, floats)
+    require(not missed, "the CPU worst-case check: " + "; ".join(missed))
+    return dict(
+        short=port["short"],
+        row_sites_fit=port["row_sites_fit"],
+        public_sites_fit=port["public_sites_fit"],
+        stream_sites_fit_by_frobenius=port["stream_sites_fit_by_frobenius"],
+        worst_by_site=port["worst_by_site"],
+        gate_key_bounds=[x["gate_key_bound"] for x in port["layers"]],
+        gate_rows_beyond_the_limit=[x["gate_rows_beyond_the_limit"] for x in port["layers"]],
+        float_gate_keys=[round(x["key"], 1) for x in floats["layers"]],
+        float_rows_beyond_the_limit=[x["rows_beyond_the_limit"] for x in floats["layers"]],
+        rows_recomputed_exactly=port["rows_recomputed_exactly"],
+        port_sha256=sha(port_json),
+        float_sha256=sha(float_json),
+    )
 
 
 def verify(output):
@@ -615,6 +689,7 @@ def verify(output):
     result["float_reference"], result["answer"] = check_answer(
         tree, output, pythons, model_dir, gguf
     )
+    result["worst_case"] = check_worst_case(tree, output, pythons, model_dir)
     result["seconds"] = time.monotonic() - started
     return result
 
@@ -643,6 +718,7 @@ def main():
                 dict(
                     passed=True,
                     choices=result["answer"]["choices"],
+                    worst_case_short=result["worst_case"]["short"],
                     seconds=round(result["seconds"]),
                 )
             )

@@ -108,5 +108,15 @@
   "mutation_controls": [
     "final-norm-MF-plus-1",
     "layer-10-kv-plus-1"
-  ]
+  ],
+  "worst_case": {
+    "short": [
+      [
+        "gate",
+        21
+      ]
+    ],
+    "ratio_tolerance": 0.001,
+    "note": "cp_commit's worst-case check computed on a CPU by worst_case_cpu.py (Hallmark's port of upstream's worst_case.cuh): the gate of layer 21 does not fit (one row; without the line gcl, which the verifier refuses at NE 0, its key's limit is 32,639). Recorded, not a condition of passing the target"
+  }
 }
