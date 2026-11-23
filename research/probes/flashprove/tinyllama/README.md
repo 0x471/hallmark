@@ -13,7 +13,9 @@ TinyLlama-1.1B (width 2,048, head width 64, no experts). These three patches are
 pinned source prove and verify a dense model of TinyLlama's shape natively, so that #187 can compare
 provers on the same model. That has not been shown end to end: see "Not checked". They are applied
 with `git apply`, in the order of [`patches.json`](patches.json), as Hallmark applies its SASH
-patches; each file's SHA-256 and size are pinned there.
+patches; each file's SHA-256 and size are pinned there. A fourth patch, for upstream's scale tools,
+and a TinyLlama kit fitted with them are in "The TinyLlama kit and the answer check" below: on a
+CPU, upstream's integer model with the kit gives SASH's eight answer tokens.
 
 ## What changes
 
@@ -225,6 +227,74 @@ as noted.
 - **Syntax only.** `prover/weights_commitment/arguments.h` compiles in serving and test builds, and
   `fold_weights.cuh` compiles host-side against a CUDA stub.
 
+## The TinyLlama kit and the answer check
+
+[`scales.patch`](scales.patch), a fourth patch pinned in [`kit.json`](kit.json) (not `patches.json`, so
+the three patches above and their records stay as they are), lets upstream's scale tools fit a dense
+`llama` model. Its 7 files are all under `scales/`, each marked "Hallmark dense patch":
+
+- `gguf_weights.py`: `shape_words()` also reads the architecture `llama`, dense only: no experts,
+  the rotary encoding in every layer, and the head dimension and rotary base required from the file.
+  A `llama` file with experts, a router, rotary rescaling (`rope_freqs.weight`) or biases is
+  refused, since the float pass would not read those tensors;
+- `policy_tables.py`: at NE 0 it computes the three tables a dense model forms (24 lines, no
+  `tsig`), the form `verifier.patch` admits;
+- `words_to_policy.py`: the rotary base may be 10,000 as well as 500,000 (the verifier's
+  `rotary-table` answers `YES` with either);
+- `make_calibration_set.py --tinyllama`: upstream's own sampling rule (WikiText-2, GPTQ-style) with
+  TinyLlama's tokenizer, which is byte for byte the Llama 2 tokenizer that upstream's rule pins, and
+  TinyLlama's start token 1 in place of Llama 4's 200,000;
+- `fit_scales.py`: a comment only. Its shifts are right at width 2,048 as written, because the
+  patched conversion multiplies by RN32(sqrt(d) / 2^t), not sqrt(d) / 64, so no factor 2^(t - 6) is
+  left;
+- upstream's tests: the NE 0 rejection case of `test_policy_tables.py` becomes a test of the three
+  tables, `test_gguf_weights.py` gets 9 dense cases, and its "another architecture" case now uses a
+  name that stays unsupported.
+
+[`export_gguf.py`](export_gguf.py) writes TinyLlama-1.1B-Chat-v1.0 (the revision and file pins of
+Hallmark's SASH path, [`response-case.json`](../../sash/response-case.json)) as one GGUF file: the
+BF16 matrices' bits unchanged, the norm gains in F32, the query and key rows permuted as llama.cpp's
+converter does for `llama`, and `llama.attention.key_length 64`. `kit/` (pinned in [`kit.json`](kit.json)) holds the kit that
+upstream's route (its `scales/README.md`, "A real model", steps 1 to 5) makes from that file, with
+e_res 11 (the tools' default) and T = 64: the configuration (`policy.txt`, `KL.bin`, `layout.txt`),
+the setup files beside the weights (`wsums.txt`, `fold.txt`) and the fit (`words.json`,
+`maxima.json`). Its base parameter file is check 6's, from `tinyllama_plan.py`.
+
+`make verify-flashprove-tinyllama-answer` (CPU only, no GPU, no spend; it downloads the pinned
+model, about 2.2 GB, and needs about 8 GB of disk and `uv`) rebuilds all of it and requires, in order
+(with `FLASHPROVE_TINYLLAMA_INPUTS` set to a folder of the pinned files it skips the downloads; each file
+is checked against its pin and then read in place, so that folder must be one that only you can
+change):
+
+| step | requirement |
+|---|---|
+| export | the GGUF file's SHA-256 is the pin in `kit.json` |
+| setup files | `weight_sums` (patched) and `fold.txt` equal `kit/` byte for byte |
+| calibration set | `--tinyllama` gives the pinned set, and its drawn rows have upstream's own `DRAWS_SHA256` (steps 1 to 3 of upstream's rule run on byte-identical inputs) |
+| fit | `calibrate.py` gives `kit/words.json` byte for byte; `maxima.json` is compared and recorded |
+| configuration | `words_to_policy.py` ends `w2p end 0`; it and `pack_layout.py` give `kit/policy.txt`, `KL.bin` and `layout.txt` byte for byte |
+| planning | on the kit and on SASH's request (66 words: 25 prompt ids, 8 answer ids, 31 filler 0, r = 24, e = 32), the patched planner prints its whole ending in the standard parameter form with three tables and the pinned `h_par` and `configuration`; the unpatched build ends `NO: policy-tables`; the provers' parameter-file reader admits the kit |
+| upstream's scale tests | `test_policy_tables.py`, `table_ties.py`, `test_calibrate.py` and `test_gguf_weights.py` pass on the patched tree, as `SUITE.md` runs them (`make_model` cases skip without SHA-NI) |
+| float reference | upstream's float pass on the GGUF agrees with Hugging Face transformers on the safetensors at the final norm (relative L2 at most 1e-4), and transformers' greedy decoding gives SASH's answer |
+| **the answer** | upstream's integer model (patched, torch 2.13.0), with every file pinned and the weights' integers checked against `wsums.txt`, run over the whole 64-token window: no range condition fails at any position; the greedy choices at positions 24 to 31 are SASH's `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]`; the gate's key stays at most 32,639; and at each checked position the integer logits over 2^s have a slope of 0.75 to 1.33 and a correlation of at least 0.99 against the float logits (a shift off by one bit would give a slope near 0.5 or 2) |
+
+**Current kit** (`scales.patch` and `kit/` as pinned in `kit.json`): **passed on Linux and on
+macOS** on 2026-11-23, every row as required
+([evidence](../../../evidence/flashprove-tinyllama-answer-2026-11-23.json)): Ubuntu 24.04 x86_64
+(fresh clone, every input downloaded, 1,541 s) and macOS arm64 (inputs from a checked local
+folder, 343 s).
+
+- every kit file, the GGUF file and the calibration set rebuilt byte for byte on both hosts;
+  `maxima.json` equals the committed one on macOS and differs in its last digits on Linux, as
+  upstream's `scales/README.md` expects across devices, while `words.json` (the scales) is the same;
+  the calibration set's drawn rows have upstream's `DRAWS_SHA256`;
+- float reference: relative L2 3.9e-6 at the final norm; transformers' greedy reply is SASH's;
+- the integer model: SASH's eight tokens, no failed range condition over the 64 positions, the
+  gate's key at most 7,108, with every recorded peak and margin identical on the two hosts; logit slopes 0.988 to 1.004 and correlations of at least 0.9991; the
+  smallest top-1 margin 0.86 logits (float: 1.06), at the full stop;
+- the planner's bounds for the kit: a proof of at most 14,061,196 bytes, 126.21 bits, the same as
+  check 6, whose proof-system lines the kit keeps.
+
 ## Not checked
 
 - **The prover patch has never run.** It compiles with nvcc (above), but no `cp_commit` or `cp_prove`
@@ -234,26 +304,27 @@ as noted.
   - Upstream's `weight_sums/tests/run_tests.sh`;
   - `integer_model`'s `tests/test_gguf_files.py` (it builds `make_model`);
   - the prover rows `parameter_file_one_bits_test` and `parameter_file_one_place_test`.
-- **At TinyLlama's own shape only planning is checked.** The 2,048/64 checks are the constants,
-  `weight_sums` on synthetic files, and the planner on `tinyllama_plan.py`'s file. A planning status
-  checks no proof.
-  - That file's scales are the full kit's, and the lines that the shape forces away from the full
-    kit's values (`ll`, which 22 layers force from 2 to 1; `la`, `lB`, `lmS`, `kFD`, `iotaA_0`,
-    `iotaH_0` to `iotaH_2`, `ranges-part`) were set from the verifier's own rules and refusals. They are placeholders, not a fitted kit; `cp_prove` asks more of
-    some of them (`lmS` among them) and has not planned this file.
-  - Its sizes and bits from `-plan accounting` are those of placeholder lines and are no measurement.
-  - No dense GGUF has been read by `integer_model`; that comes with the TinyLlama kit.
-- **`scales/` is not patched yet.**
-  - Its converter reads `llama4` MoE files only (`scales/README.md`), and `scales/policy_tables.py`
-    refuses NE 0.
-  - The shifts and E_logit assume t = 6, and theta 500,000.
-  - A dense conversion must also set the per-layer rotary flags and keep Q and K rows in the order that
-    the integer model reads.
-  - So there is no dense kit for TinyLlama itself, and no check that FlashProve's integer TinyLlama
-    gives SASH's answer. Even when it does, eight equal answer tokens are a smoke test: they do not
-    show that the two provers' integer functions are equal.
-- **The TinyLlama GGUF must state `llama.attention.key_length 64`.** Without the key, the provers and
-  `weight_sums` read 128 (`docs/model.md`, 11.1) and refuse the model.
+- **No TinyLlama commitment or proof.** The kit is fitted and the integer model gives SASH's answer
+  on a CPU, but `cp_commit` and `cp_prove` have not run on it.
+  - `cp_commit`'s worst-case check has not run (it needs a GPU), and `prover.patch` leaves it out
+    under `-public-weights`. Whether TinyLlama's scales would pass it is not known.
+  - Of the provers' rules, only their parameter-file reader has judged the kit (it admits it).
+- **The kit's proof-system lines are check 6's**, not sized for speed: the full kit's values, with
+  the lines that TinyLlama's shape forces (`ll`, which 22 layers force from 2 to 1; `la`, `lB`,
+  `lmS`, `kFD`, `iotaA_0`, `iotaH_0` to `iotaH_2`, `ranges-part`) set from the verifier's own rules
+  and refusals. The fit changes only the scales and the six lines that depend on them. The
+  planner's sizes and bits for the kit are bounds of these lines, not measurements, and #187 may
+  want smaller ones.
+- **One request.** The answer check covers SASH's one prompt in one window of T = 64. Another prompt
+  can clamp a cell or fail a range condition. #187's sweep over the number of checked tokens needs a
+  kit for each T.
+- **Equal tokens are a smoke test.** They show that this integer model is TinyLlama on this request,
+  not that FlashProve's and SASH's integer functions are equal.
+- **The calibration text is WikiText-2** (CC BY-SA 3.0 and GFDL, by its dataset card), as in
+  upstream's rule. Only token ids derived from it are used, and none is committed. Whether it suits
+  Hallmark's source rules is the owner's call.
+- **The float reference is Hugging Face transformers 5.15.1**, run as a check of the export. It is
+  not part of any statement.
 
 ## Prior work
 

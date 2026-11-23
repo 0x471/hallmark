@@ -1,0 +1,654 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-answer-evidence/1",
+  "recorded_at": "2026-11-23",
+  "decision": "docs/decisions/0094-flashprove-tinyllama.md",
+  "decision_status": "proposed",
+  "source": {
+    "bytes": 157799758,
+    "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+    "examples": {
+      "accepted-proof": {
+        "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+        "next_token": 199,
+        "range": "60:64"
+      },
+      "full-size": {
+        "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+        "next_token": 52599,
+        "range": "23:1024"
+      }
+    },
+    "gpu_kit": {
+      "name": "target_small_f2_roomy",
+      "range": "15:64"
+    },
+    "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+    "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+    "licence": "Apache-2.0",
+    "nvcc_release": "V13.2.86",
+    "rejection_tables": [
+      [
+        "accepted-proof",
+        "altered_copies.tsv",
+        10
+      ],
+      [
+        "accepted-proof",
+        "every_kind_of_item.tsv",
+        79
+      ],
+      [
+        "accepted-proof-clipped-gap",
+        "altered_copies_clipped_gap.tsv",
+        10
+      ]
+    ],
+    "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+    "schema_id": "hallmark.flashprove-source/1",
+    "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+    "upstream": "https://github.com/anthropics/FlashProve",
+    "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+    "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+    "version": "0.16.0"
+  },
+  "commit": "28ae047, the code and kit of these runs",
+  "kit_pins": {
+    "schema_id": "hallmark.flashprove-tinyllama-kit/1",
+    "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+    "patches_json_sha256": "c3ef0c5f274e41d46cf688b5704e9acb70d7c842f9e770156b5565dd17beb72e",
+    "scales_patch": {
+      "name": "scales.patch",
+      "sha256": "5eff281641dd27b35c617f01de3f1a2c8a223520a1c19a47acd0b95d215d6907",
+      "bytes": 28858
+    },
+    "model": {
+      "case": "research/probes/sash/response-case.json",
+      "files": [
+        "config.json",
+        "model.safetensors",
+        "tokenizer.json"
+      ],
+      "note": "id, revision, licence, sizes and SHA-256 come from the case file, the pins of Hallmark's SASH path"
+    },
+    "calibration_text": {
+      "what": "WikiText-2 (raw), training split, as upstream's make_calibration_set.py pins it",
+      "url": "https://huggingface.co/datasets/Salesforce/wikitext/resolve/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-2-raw-v1/train-00000-of-00001.parquet",
+      "bytes": 6357543,
+      "sha256": "e83889baabc497075506f91975be5fac0d45c5290b6b20582c8cd1e853d0c9f7",
+      "licence": "CC BY-SA 3.0 and GFDL (the dataset card); only token ids derived from it are used, and none is committed"
+    },
+    "environments": {
+      "scales": {
+        "python": "3.13",
+        "packages": {
+          "torch": "2.9.1",
+          "numpy": "2.3.5",
+          "gguf": "0.19.0",
+          "pyarrow": "23.0.1",
+          "tokenizers": "0.22.2",
+          "safetensors": "0.8.0",
+          "transformers": "5.15.1"
+        }
+      },
+      "integer_model": {
+        "python": "3.13",
+        "packages": {
+          "torch": "2.13.0",
+          "numpy": "2.4.6",
+          "gguf": "0.19.0"
+        }
+      }
+    },
+    "e_res": 11,
+    "gguf": {
+      "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+      "bytes": 2200293664,
+      "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+    },
+    "calibration_set": {
+      "bytes": 131200,
+      "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31",
+      "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c"
+    },
+    "base_policy_sha256": "84f867cd0e5d6217b14158b43862fd924f40d189a107750e0b8b604bfc2dd5b2",
+    "files": {
+      "policy.txt": "2af02e144eaa03ba3e23587f305d9bebdf8f56bad4f5b97a512f055e5c5ed602",
+      "KL.bin": "1658bb72676fd6b774c83ff163b3c24211a603a281f5df0644a9c966684d7282",
+      "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+      "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c",
+      "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+      "words.json": "3465d8977ab6c3d0dcc40a2ce27b35e6b4962c8e14bef2f8bc9bd9e94119bf81",
+      "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31"
+    },
+    "h_par": "df7a40e52e295044e1452e46e7f58bfed53b8abd4e0816dd7ae0ff16b60ddd09",
+    "configuration": "e5407adf4450292e462e45e1fe8bf5e7bd8a3bd5dd16084e16ffe07a09dd0db6",
+    "request": {
+      "T": 64,
+      "filler": 0,
+      "r": 24,
+      "e": 32
+    },
+    "bounds": {
+      "final_norm_relative_l2": 0.0001,
+      "logit_slope": [
+        0.75,
+        1.33
+      ],
+      "logit_correlation": 0.99
+    }
+  },
+  "statement_compared": {
+    "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+    "prompt": "Name the capital of France in one short sentence.",
+    "prompt_ids": [
+      529,
+      29989,
+      1792,
+      29989,
+      29958,
+      13,
+      1170,
+      278,
+      7483,
+      310,
+      3444,
+      297,
+      697,
+      3273,
+      10541,
+      29889,
+      2,
+      13,
+      29966,
+      29989,
+      465,
+      22137,
+      29989,
+      29958,
+      13
+    ],
+    "sash_answer_ids": [
+      1576,
+      7483,
+      310,
+      3444,
+      338,
+      3681,
+      29889,
+      2
+    ],
+    "sash_response": "The capital of France is Paris.",
+    "note": "SASH's answer is from Hallmark's SASH path (research/probes/sash/response-case.json)"
+  },
+  "mac_run": {
+    "command": "make verify-flashprove-tinyllama-answer",
+    "how": "FLASHPROVE_TINYLLAMA_INPUTS set to a folder of the pinned files (hard links; each checked against its pin), so no model download",
+    "host": "macOS 15.7.1 (Darwin 24.6.0), Apple M4 Pro, arm64",
+    "passed": true,
+    "seconds": 343.5,
+    "builds": {
+      "patched": {
+        "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+        "recipe": "apple-clang",
+        "seconds": 31.547634457994718,
+        "sha256": "d1ad3a47ef22445c95770b12c6e5ef99b15e863ca1a4b91f3bef2b223b707ef4",
+        "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52"
+      },
+      "upstream": {
+        "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+        "recipe": "apple-clang",
+        "seconds": 32.17065374998492,
+        "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
+        "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+      }
+    },
+    "environments": {
+      "integer_model": {
+        "gguf": "0.19.0",
+        "numpy": "2.4.6",
+        "python": "3.13.2",
+        "torch": "2.13.0"
+      },
+      "scales": {
+        "gguf": "0.19.0",
+        "numpy": "2.3.5",
+        "pyarrow": "23.0.1",
+        "python": "3.13.2",
+        "safetensors": "0.8.0",
+        "tokenizers": "0.22.2",
+        "torch": "2.9.1",
+        "transformers": "5.15.1"
+      }
+    },
+    "kit": {
+      "reproduced_byte_for_byte": true,
+      "files": [
+        "KL.bin",
+        "fold.txt",
+        "layout.txt",
+        "maxima.json",
+        "policy.txt",
+        "words.json",
+        "wsums.txt"
+      ],
+      "maxima_equal_to_committed": true,
+      "calibrate_seconds": 89.3,
+      "gguf": {
+        "bytes": 2200293664,
+        "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+        "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+      },
+      "calibration_set": {
+        "bytes": 131200,
+        "drawn_rows_match_upstream": true,
+        "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c",
+        "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+      }
+    },
+    "planning": {
+      "bits_compiled_bound": 126.21,
+      "configuration": "e5407adf4450292e462e45e1fe8bf5e7bd8a3bd5dd16084e16ffe07a09dd0db6",
+      "h_par": "df7a40e52e295044e1452e46e7f58bfed53b8abd4e0816dd7ae0ff16b60ddd09",
+      "patched": "standard parameter form, three tables, PLAN ONLY (accounting and request)",
+      "proof_bytes_at_most": 14061196,
+      "provers_parameter_file_reader": "admitted",
+      "unpatched_accounting": "NO: policy-tables",
+      "unpatched_request": "NO: policy-tables"
+    },
+    "scale_tool_tests": {
+      "table_ties.py": {
+        "last_line": "OK: 26 checks",
+        "status": 0
+      },
+      "test_calibrate.py": {
+        "last_line": "in part: 19 cases passed; SMALL_MODEL is not set, so program_on_the_small_model was not run",
+        "status": 77
+      },
+      "test_gguf_weights.py": {
+        "last_line": "in part: 88 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
+        "status": 77
+      },
+      "test_policy_tables.py": {
+        "last_line": "OK",
+        "status": 0
+      }
+    },
+    "float_reference": {
+      "final_norm_relative_l2": 3.946445303881774e-06,
+      "final_norm_max_abs": 0.00011444091796875,
+      "float_greedy": [
+        1576,
+        7483,
+        310,
+        3444,
+        338,
+        3681,
+        29889,
+        2
+      ],
+      "float_greedy_is_the_answer": true
+    },
+    "answer": {
+      "T": 64,
+      "s": 17,
+      "r": 24,
+      "e": 32,
+      "choices": [
+        1576,
+        7483,
+        310,
+        3444,
+        338,
+        3681,
+        29889,
+        2
+      ],
+      "matches_sash": true,
+      "range_failure": null,
+      "largest_gate_key": 7108,
+      "gate_key_limit": 32639,
+      "peaks": {
+        "a": 1678,
+        "aF": 1075,
+        "aF_Rc": 581060445,
+        "aF_sigma": 85557,
+        "aF_w": 1075,
+        "a_Rc": 60041590595,
+        "a_sigma": 421505,
+        "a_w": 1678,
+        "first_choice": 29989,
+        "gw": 7108,
+        "k": 1890,
+        "key": 7108,
+        "kw": 1890,
+        "lam": 3635195,
+        "m": 1678,
+        "m_Rc": 21718748203,
+        "m_sigma": 421364,
+        "m_w": 1678,
+        "o": 1117,
+        "q": 771,
+        "qw": 771,
+        "s": 1533,
+        "u": 1756,
+        "v": 2047,
+        "vw": 2233,
+        "x": 344950,
+        "x_last": 36249,
+        "x_mid": 344840
+      },
+      "positions": [
+        {
+          "correlation": 0.9991,
+          "float_margin": 1.3528,
+          "margin": 1.5227,
+          "position": 24,
+          "slope": 0.9998,
+          "token": 1576
+        },
+        {
+          "correlation": 0.9996,
+          "float_margin": 4.83,
+          "margin": 4.7868,
+          "position": 25,
+          "slope": 1.0044,
+          "token": 7483
+        },
+        {
+          "correlation": 0.9995,
+          "float_margin": 3.1157,
+          "margin": 3.4291,
+          "position": 26,
+          "slope": 0.9999,
+          "token": 310
+        },
+        {
+          "correlation": 0.9995,
+          "float_margin": 7.9305,
+          "margin": 8.12,
+          "position": 27,
+          "slope": 1.0036,
+          "token": 3444
+        },
+        {
+          "correlation": 0.9993,
+          "float_margin": 3.7941,
+          "margin": 4.4836,
+          "position": 28,
+          "slope": 0.9994,
+          "token": 338
+        },
+        {
+          "correlation": 0.9995,
+          "float_margin": 4.2248,
+          "margin": 4.0264,
+          "position": 29,
+          "slope": 0.9991,
+          "token": 3681
+        },
+        {
+          "correlation": 0.9994,
+          "float_margin": 1.0628,
+          "margin": 0.857,
+          "position": 30,
+          "slope": 0.9881,
+          "token": 29889
+        },
+        {
+          "correlation": 0.9992,
+          "float_margin": 3.1626,
+          "margin": 3.5459,
+          "position": 31,
+          "slope": 0.9916,
+          "token": 2
+        }
+      ],
+      "seconds": 5.4
+    }
+  },
+  "linux_run": {
+    "command": "make verify-flashprove-tinyllama-answer",
+    "how": "fresh clone at 28ae047; every input downloaded and checked",
+    "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM",
+    "passed": true,
+    "seconds": 1541.5,
+    "builds": {
+      "patched": {
+        "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+        "recipe": "upstream verifier/build.sh",
+        "seconds": 191.11501673189923,
+        "sha256": "9bd671a98b0daecc4453ccd085f91b76475d2b07899ac822d0cb02023c9d6b26",
+        "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52"
+      },
+      "upstream": {
+        "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+        "recipe": "upstream verifier/build.sh",
+        "seconds": 192.937474722974,
+        "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+        "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+      }
+    },
+    "environments": {
+      "integer_model": {
+        "gguf": "0.19.0",
+        "numpy": "2.4.6",
+        "python": "3.13.15",
+        "torch": "2.13.0+cpu"
+      },
+      "scales": {
+        "gguf": "0.19.0",
+        "numpy": "2.3.5",
+        "pyarrow": "23.0.1",
+        "python": "3.13.15",
+        "safetensors": "0.8.0",
+        "tokenizers": "0.22.2",
+        "torch": "2.9.1+cpu",
+        "transformers": "5.15.1"
+      }
+    },
+    "kit": {
+      "reproduced_byte_for_byte": true,
+      "files": [
+        "KL.bin",
+        "fold.txt",
+        "layout.txt",
+        "maxima.json",
+        "policy.txt",
+        "words.json",
+        "wsums.txt"
+      ],
+      "maxima_equal_to_committed": false,
+      "calibrate_seconds": 594.2,
+      "gguf": {
+        "bytes": 2200293664,
+        "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+        "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+      },
+      "calibration_set": {
+        "bytes": 131200,
+        "drawn_rows_match_upstream": true,
+        "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c",
+        "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+      }
+    },
+    "planning": {
+      "bits_compiled_bound": 126.21,
+      "configuration": "e5407adf4450292e462e45e1fe8bf5e7bd8a3bd5dd16084e16ffe07a09dd0db6",
+      "h_par": "df7a40e52e295044e1452e46e7f58bfed53b8abd4e0816dd7ae0ff16b60ddd09",
+      "patched": "standard parameter form, three tables, PLAN ONLY (accounting and request)",
+      "proof_bytes_at_most": 14061196,
+      "provers_parameter_file_reader": "admitted",
+      "unpatched_accounting": "NO: policy-tables",
+      "unpatched_request": "NO: policy-tables"
+    },
+    "scale_tool_tests": {
+      "table_ties.py": {
+        "last_line": "OK: 26 checks",
+        "status": 0
+      },
+      "test_calibrate.py": {
+        "last_line": "in part: 19 cases passed; SMALL_MODEL is not set, so program_on_the_small_model was not run",
+        "status": 77
+      },
+      "test_gguf_weights.py": {
+        "last_line": "in part: 88 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
+        "status": 77
+      },
+      "test_policy_tables.py": {
+        "last_line": "OK",
+        "status": 0
+      }
+    },
+    "float_reference": {
+      "final_norm_relative_l2": 1.2930851198689197e-06,
+      "final_norm_max_abs": 0.000110626220703125,
+      "float_greedy": [
+        1576,
+        7483,
+        310,
+        3444,
+        338,
+        3681,
+        29889,
+        2
+      ],
+      "float_greedy_is_the_answer": true
+    },
+    "answer": {
+      "T": 64,
+      "s": 17,
+      "r": 24,
+      "e": 32,
+      "choices": [
+        1576,
+        7483,
+        310,
+        3444,
+        338,
+        3681,
+        29889,
+        2
+      ],
+      "matches_sash": true,
+      "range_failure": null,
+      "largest_gate_key": 7108,
+      "gate_key_limit": 32639,
+      "peaks": {
+        "a": 1678,
+        "aF": 1075,
+        "aF_Rc": 581060445,
+        "aF_sigma": 85557,
+        "aF_w": 1075,
+        "a_Rc": 60041590595,
+        "a_sigma": 421505,
+        "a_w": 1678,
+        "first_choice": 29989,
+        "gw": 7108,
+        "k": 1890,
+        "key": 7108,
+        "kw": 1890,
+        "lam": 3635195,
+        "m": 1678,
+        "m_Rc": 21718748203,
+        "m_sigma": 421364,
+        "m_w": 1678,
+        "o": 1117,
+        "q": 771,
+        "qw": 771,
+        "s": 1533,
+        "u": 1756,
+        "v": 2047,
+        "vw": 2233,
+        "x": 344950,
+        "x_last": 36249,
+        "x_mid": 344840
+      },
+      "positions": [
+        {
+          "correlation": 0.9991,
+          "float_margin": 1.3528,
+          "margin": 1.5227,
+          "position": 24,
+          "slope": 0.9998,
+          "token": 1576
+        },
+        {
+          "correlation": 0.9996,
+          "float_margin": 4.8299,
+          "margin": 4.7868,
+          "position": 25,
+          "slope": 1.0044,
+          "token": 7483
+        },
+        {
+          "correlation": 0.9995,
+          "float_margin": 3.1156,
+          "margin": 3.4291,
+          "position": 26,
+          "slope": 0.9999,
+          "token": 310
+        },
+        {
+          "correlation": 0.9995,
+          "float_margin": 7.9305,
+          "margin": 8.12,
+          "position": 27,
+          "slope": 1.0036,
+          "token": 3444
+        },
+        {
+          "correlation": 0.9993,
+          "float_margin": 3.7941,
+          "margin": 4.4836,
+          "position": 28,
+          "slope": 0.9994,
+          "token": 338
+        },
+        {
+          "correlation": 0.9995,
+          "float_margin": 4.2248,
+          "margin": 4.0264,
+          "position": 29,
+          "slope": 0.9991,
+          "token": 3681
+        },
+        {
+          "correlation": 0.9994,
+          "float_margin": 1.0627,
+          "margin": 0.857,
+          "position": 30,
+          "slope": 0.9881,
+          "token": 29889
+        },
+        {
+          "correlation": 0.9992,
+          "float_margin": 3.1625,
+          "margin": 3.5459,
+          "position": 31,
+          "slope": 0.9916,
+          "token": 2
+        }
+      ],
+      "seconds": 32.7
+    }
+  },
+  "first_made": "The kit files were first made in a scratch run on the Mac (the same tools, before the target existed) and committed; both target runs rebuilt every one of them byte for byte.",
+  "not_run": [
+    "any commitment or proof; no GPU was used",
+    "cp_commit's worst-case check (GPU only; prover.patch leaves it out under -public-weights)",
+    "cp_prove's rules beyond its parameter-file reader",
+    "any prompt other than SASH's, and any T other than 64",
+    "the make_model cases of upstream's scale tests (they need SHA-NI); status 77, passed in part"
+  ],
+  "tinyllama_proof": false,
+  "gpu_used": false,
+  "hiding_claim": false,
+  "equal_tokens_mean": "a smoke test that the integer model is TinyLlama on this request, not that FlashProve's and SASH's integer functions are equal",
+  "cross_host": {
+    "kit_files_gguf_and_calibration_set": "identical on both hosts (each run requires byte equality with the pins)",
+    "maxima_json": "equal to the committed file on macOS; differs in last digits on Linux, which upstream's scales/README.md expects across devices and libraries; words.json (the scales) is identical",
+    "integer_model": "choices, every recorded peak and every top-1 margin identical on both hosts",
+    "python": "3.13.2 (macOS) and 3.13.15 (Linux): the same calibration set"
+  }
+}

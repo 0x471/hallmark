@@ -34,7 +34,7 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
   They are applied with `git apply`, as the SASH patches are, and each is SHA-256-pinned. It is not a
   dependency on a fork.
 
-**Decision (proposed).** Adopt the three patches in
+**Decision (proposed).** Adopt the four patches in
 [`research/probes/flashprove/tinyllama/`](../../research/probes/flashprove/tinyllama/README.md):
 
 - **`verifier.patch`** lets a dense model (NE 0) reach the standard parameter form:
@@ -50,6 +50,13 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
     safeguard on which soundness does not rest, and nothing is hidden under a public seed.
 - **`tools.patch`** gives `weight_sums` and upstream's CPU integer model the same constants and dense
   form.
+- **`scales.patch`** (pinned in `kit.json`) lets upstream's scale tools fit a dense `llama` model:
+  `gguf_weights.py` reads it (dense only), `policy_tables.py` writes its three tables' digests,
+  `words_to_policy.py` takes the rotary base 10,000, and `make_calibration_set.py --tinyllama` makes
+  upstream's calibration set with TinyLlama's tokenizer and start token.
+
+With these, `kit/` holds a TinyLlama-1.1B kit (T = 64, e_res 11) fitted by upstream's own route from a
+GGUF file that `export_gguf.py` writes from the published safetensors (BF16 bits unchanged).
 
 Decision 0093 and `make verify-flashprove` stay as they are. The patched verifier is a second build
 with its own source digest, `6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52`.
@@ -86,30 +93,40 @@ builds both verifiers and requires:
   `routed-experts`, `both-clamps` and `table-digests` unmet there, and the patched build only
   `table-digests`: at this shape the patch changes admission and nothing else that the planner sees.
 
+`make verify-flashprove-tinyllama-answer` (CPU, downloads the pinned model) rebuilds the GGUF file
+and the kit byte for byte from pinned inputs, checks the kit with both planners and the provers'
+reader, runs upstream's scale-tool tests on the patched tree and a float reference against
+transformers, and then requires **the decisive check**: upstream's integer model, with the kit and
+every file pinned, gives SASH's eight answer tokens after SASH's 25 prompt tokens, over a whole
+64-token window with no failed range condition and the gate's key at most 32,639.
+It passed on 2026-11-23 on Linux (x86_64, every input downloaded) and on macOS (arm64); both rebuilt
+the kit byte for byte, and the integer model's results are identical on the two
+([evidence](../../research/evidence/flashprove-tinyllama-answer-2026-11-23.json)).
+
 The current revision passed it on 2026-11-22 on Linux (upstream `verifier/build.sh`, g++ 13.3) and
 on macOS (Apple clang 17, built as `make verify-flashprove` builds it;
 [evidence](../../research/evidence/flashprove-tinyllama-2026-11-22.json)). Upstream's `integer_model` CPU suite passes on the patched tree (947, 0 failed). Apart from upstream's
 stored proofs and their altered copies, which both builds check, these are planning, parsing and
-table checks: no TinyLlama proof exists or is checked. At TinyLlama's 2,048/64 shape the planner runs
-on placeholder scales only, and nothing yet runs through `integer_model`'s GGUF reader. Further one-off
-checks and their limits:
+table checks: no TinyLlama proof exists or is checked. The answer check runs the integer model, not a
+prover, on one request. Further one-off checks and their limits:
 [README](../../research/probes/flashprove/tinyllama/README.md#checks).
 
 **Not done; each needs its own step.**
 
-1. **`scales/` for TinyLlama**: a dense, `llama`-file converter (today `llama4` MoE only), digest
-   lines at NE 0 (`policy_tables.py` refuses them), theta 10,000, and the shifts for t = 5. Then a
-   planning check with fitted scales and a dense GGUF through `integer_model`.
-2. **The kit**: a dense parameter file and scale file at T = 64, with a calibration text whose
-   licence is reviewed.
-3. **A pinned GGUF export** that states `llama.attention.key_length 64`. llama.cpp's converter is a new
-   source to review.
-4. **The decisive free check.** Upstream's integer model, run on the CPU on Hallmark's 25 prompt
-   tokens, must give SASH's eight answer tokens. No GPU money before this passes. Equal tokens are a
-   smoke test, not a proof that the two integer functions are equal; #187's like-for-like section must
-   name each backend's model, conversion, request, window, range and statement.
-5. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks).
-   The prover patch already compiles with nvcc 13.2.86 on a host without a GPU.
+Done since the first draft: the scale tools for TinyLlama, the kit, a pinned GGUF export (our own
+`export_gguf.py` on the `gguf` package that upstream pins, in place of llama.cpp's converter) and the
+decisive free check above. Equal tokens are a smoke test, not a proof that the two integer functions
+are equal; #187's like-for-like section must name each backend's model, conversion, request, window,
+range and statement.
+
+1. **The calibration text's licence**: WikiText-2 (CC BY-SA 3.0, GFDL), as in upstream's rule; only
+   token ids derived from it are used, and none is committed. The owner decides.
+2. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks).
+   The prover patch already compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s
+   worst-case check, which `prover.patch` leaves out under `-public-weights`, and `cp_prove`'s rules
+   beyond its parameter-file reader run only there.
+3. **#187's proof-system lines.** The kit keeps check 6's lines, set from the verifier's rules, not
+   sized for speed; a kit for each number of checked tokens in #187's sweep.
 
 **Not claimed.** No dense proof exists. There is no claim of soundness of the patched C++ or CUDA code,
 no Lean coverage, no hiding, and no like-for-like numbers yet.

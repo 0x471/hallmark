@@ -10,6 +10,13 @@ requires equal results. It also checks that a TinyLlama-shaped parameter file pa
 verifier's planner. The prover patch compiles with nvcc 13.2.86 but has not run, and no TinyLlama
 proof exists. `make verify-flashprove` (decision 0093) is unchanged.
 
+Fit a TinyLlama-1.1B kit for the proposed patches: `scales.patch` lets upstream's scale tools read a
+dense `llama` model, `export_gguf.py` writes the pinned model as GGUF (BF16 bits unchanged), and
+`research/probes/flashprove/tinyllama/kit/` holds the kit made by upstream's route. `make
+verify-flashprove-tinyllama-answer` rebuilds the file and the kit byte for byte on a CPU and requires
+that upstream's integer model gives SASH's eight answer tokens on SASH's prompt, with no failed range
+condition; it passed on Linux and macOS. No commitment or proof is made.
+
 Add FlashProve as a pinned external proof backend for Mixture-of-Experts models:
 `make verify-flashprove` checks the stored upstream proofs on a Mac, and
 `make e2e-flashprove` proves upstream's synthetic small kit on one HF H200

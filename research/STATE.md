@@ -1,6 +1,6 @@
 # Research state
 
-Updated: 2026-11-22. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
+Updated: 2026-11-23. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
 
 ## TinyLlama on FlashProve (dense-model patches) — proposed, CPU-checked
 
@@ -11,8 +11,15 @@ such as TinyLlama-1.1B reach the verifier's standard form, give the provers and 
 constants for width 2,048, and leave the worst-case check out under `-public-weights`.
 `make verify-flashprove-tinyllama` checks them on the CPU and passed on Linux and macOS, including
 a TinyLlama-shaped planning check with placeholder scales; the prover patch compiles with nvcc
-([evidence](evidence/flashprove-tinyllama-2026-11-22.json)). No proof, no GPU run. Next: a TinyLlama kit (scale tools for a dense `llama` file, calibration, GGUF
-export), then the CPU check that FlashProve's integer TinyLlama gives SASH's answer.
+([evidence](evidence/flashprove-tinyllama-2026-11-22.json)). No proof, no GPU run.
+
+2026-11-23. A fourth patch, `scales.patch`, lets upstream's scale tools fit a dense `llama` model, and
+`kit/` holds a TinyLlama-1.1B kit fitted by upstream's route from a GGUF export of the pinned model.
+`make verify-flashprove-tinyllama-answer` rebuilds the export and the kit byte for byte, and
+upstream's integer model with the kit gives SASH's eight answer tokens on SASH's prompt, over a whole
+64-token window with no failed range condition, on Linux and on macOS
+([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). The integer model is not a prover:
+no commitment or proof is made. Next, with owner approval and a cap: commit and prove on a GPU.
 
 ## SASH and FlashProve comparison — recorded
 
