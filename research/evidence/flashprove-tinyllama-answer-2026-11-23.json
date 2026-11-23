@@ -51,15 +51,15 @@
     "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
     "version": "0.16.0"
   },
-  "commit": "477b6fa (code at c140f03); the code and kit of these runs",
+  "commit": "1208545 (the code and kit of these runs)",
   "kit_pins": {
     "schema_id": "hallmark.flashprove-tinyllama-kit/1",
     "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
-    "patches_json_sha256": "c3ef0c5f274e41d46cf688b5704e9acb70d7c842f9e770156b5565dd17beb72e",
+    "patches_json_sha256": "38df89f40050b6fea68314edb6ea0959aa3182a166ef2c9dba5d27a8ac8aa523",
     "scales_patch": {
       "name": "scales.patch",
-      "sha256": "85f6a2ca63c94350a61c44c4b3366831cd2cbad0fccae0328eacb270a1478578",
-      "bytes": 33646
+      "sha256": "5abff47e1ea05ffb36cfae7677655661ad17ddc9ae1a31ec9564bf3ca0421179",
+      "bytes": 34344
     },
     "model": {
       "case": "research/probes/sash/response-case.json",
@@ -75,7 +75,8 @@
       "url": "https://huggingface.co/datasets/Salesforce/wikitext/resolve/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-2-raw-v1/train-00000-of-00001.parquet",
       "bytes": 6357543,
       "sha256": "e83889baabc497075506f91975be5fac0d45c5290b6b20582c8cd1e853d0c9f7",
-      "licence": "CC BY-SA 3.0 and GFDL (the dataset card); only token ids derived from it are used, and none is committed"
+      "licence": "CC BY-SA: the dataset card's tags name CC BY-SA 3.0 and GFDL, its text CC BY-SA 4.0 (WikiText, S. Merity et al., 'Pointer Sentinel Mixture Models', arXiv:1609.07843, 2016). No text and no token id from it is committed; scale statistics computed from it are (kit/maxima.json, words.json, KL.bin, six lines of policy.txt) and the calibration set's SHA-256",
+      "licence_review": "not cleared by the owner. Reviewed only by this proposal's contributor: the dataset card's tags (CC BY-SA 3.0, GFDL) and its text (CC BY-SA 4.0) name different versions, and research/AUTHORITY.json excludes ambiguous licences. The owner decides (decision 0094, not done 1); a no means refitting the kit on another text. The patches do not depend on it"
     },
     "environments": {
       "scales": {
@@ -159,7 +160,7 @@
       "logit_correlation": 0.998
     },
     "mutation_controls": [
-      "logit-exponent-s-plus-1",
+      "final-norm-MF-plus-1",
       "layer-10-kv-plus-1"
     ]
   },
@@ -211,20 +212,21 @@
     "command": "make verify-flashprove-tinyllama-answer",
     "how": "FLASHPROVE_TINYLLAMA_INPUTS set to a folder of the pinned files (hard links; each checked against its pin), so no model download",
     "host": "macOS 15.7.1 (Darwin 24.6.0), Apple M4 Pro, arm64",
+    "result_json_sha256": "bfe8ddf52aa32403b08386c8b360fb098877235d90bdf5fd2f876bbff87867a2",
     "passed": true,
-    "seconds": 248.9,
+    "seconds": 257.9,
     "builds": {
       "patched": {
         "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
         "recipe": "apple-clang",
-        "seconds": 19.147910625004442,
+        "seconds": 21.98162241699174,
         "sha256": "d1ad3a47ef22445c95770b12c6e5ef99b15e863ca1a4b91f3bef2b223b707ef4",
         "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52"
       },
       "upstream": {
         "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
         "recipe": "apple-clang",
-        "seconds": 19.699745000019902,
+        "seconds": 22.2321253750124,
         "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
         "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
       }
@@ -328,7 +330,7 @@
       "maxima_json_recorded_only": {
         "equal_to_committed": true
       },
-      "calibrate_seconds": 64.5,
+      "calibrate_seconds": 69.1,
       "gguf": {
         "bytes": 2200293664,
         "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
@@ -361,7 +363,7 @@
         "status": 77
       },
       "test_gguf_weights.py": {
-        "last_line": "in part: 96 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
+        "last_line": "in part: 100 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
         "status": 77
       },
       "test_policy_tables.py": {
@@ -385,6 +387,28 @@
       "float_greedy_is_the_answer": true
     },
     "mutation_controls": {
+      "final-norm-MF-plus-1": {
+        "choices": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "failed": [
+          "the logits' scale at position 24: 2.0006",
+          "the logits' scale at position 25: 2.0113",
+          "the logits' scale at position 26: 1.9981",
+          "the logits' scale at position 27: 2.0096",
+          "the logits' scale at position 28: 1.9965",
+          "the logits' scale at position 29: 1.9975",
+          "the logits' scale at position 30: 1.9768",
+          "the logits' scale at position 31: 1.9861"
+        ]
+      },
       "layer-10-kv-plus-1": {
         "choices": [
           1576,
@@ -405,28 +429,6 @@
           "the logits' correlation at position 29: 0.99614",
           "the logits' correlation at position 30: 0.99578",
           "the logits' correlation at position 31: 0.99483"
-        ]
-      },
-      "logit-exponent-s-plus-1": {
-        "choices": [
-          1576,
-          7483,
-          310,
-          3444,
-          338,
-          3681,
-          29889,
-          2
-        ],
-        "failed": [
-          "the logits' scale at position 24: 0.4999",
-          "the logits' scale at position 25: 0.5022",
-          "the logits' scale at position 26: 0.4999",
-          "the logits' scale at position 27: 0.5018",
-          "the logits' scale at position 28: 0.4997",
-          "the logits' scale at position 29: 0.4995",
-          "the logits' scale at position 30: 0.4940",
-          "the logits' scale at position 31: 0.4958"
         ]
       }
     },
@@ -449,6 +451,18 @@
       "range_failure": null,
       "largest_gate_key": 7108,
       "gate_key_limit": 32639,
+      "clamped": [
+        {
+          "entries": 1,
+          "largest": 2233,
+          "layer": 2,
+          "name": "vw",
+          "positions": [
+            32
+          ]
+        }
+      ],
+      "clamp_limit": 2047,
       "peaks": {
         "a": 1678,
         "aF": 1075,
@@ -545,27 +559,28 @@
           "token": 2
         }
       ],
-      "seconds": 3.3
+      "seconds": 6.0
     }
   },
   "linux_run": {
     "command": "make verify-flashprove-tinyllama-answer",
-    "how": "fresh clone at 477b6fa; every input downloaded and checked",
+    "how": "a clone at 1208545; every input downloaded and checked",
     "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM",
+    "result_json_sha256": "1adbd9bf114083c2479932d3c72ba7c87a1af6e4383f81d63824337844da03e0",
     "passed": true,
-    "seconds": 1877.2,
+    "seconds": 1832.9,
     "builds": {
       "patched": {
         "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
         "recipe": "upstream verifier/build.sh",
-        "seconds": 226.1578926499933,
+        "seconds": 221.40229775570333,
         "sha256": "9bd671a98b0daecc4453ccd085f91b76475d2b07899ac822d0cb02023c9d6b26",
         "source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52"
       },
       "upstream": {
         "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
         "recipe": "upstream verifier/build.sh",
-        "seconds": 210.1258054021746,
+        "seconds": 212.7395213926211,
         "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
         "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
       }
@@ -669,7 +684,7 @@
       "maxima_json_recorded_only": {
         "equal_to_committed": false
       },
-      "calibrate_seconds": 677.5,
+      "calibrate_seconds": 675.2,
       "gguf": {
         "bytes": 2200293664,
         "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
@@ -702,7 +717,7 @@
         "status": 77
       },
       "test_gguf_weights.py": {
-        "last_line": "in part: 96 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
+        "last_line": "in part: 100 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
         "status": 77
       },
       "test_policy_tables.py": {
@@ -726,6 +741,28 @@
       "float_greedy_is_the_answer": true
     },
     "mutation_controls": {
+      "final-norm-MF-plus-1": {
+        "choices": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "failed": [
+          "the logits' scale at position 24: 2.0006",
+          "the logits' scale at position 25: 2.0113",
+          "the logits' scale at position 26: 1.9981",
+          "the logits' scale at position 27: 2.0096",
+          "the logits' scale at position 28: 1.9965",
+          "the logits' scale at position 29: 1.9975",
+          "the logits' scale at position 30: 1.9768",
+          "the logits' scale at position 31: 1.9861"
+        ]
+      },
       "layer-10-kv-plus-1": {
         "choices": [
           1576,
@@ -746,28 +783,6 @@
           "the logits' correlation at position 29: 0.99614",
           "the logits' correlation at position 30: 0.99578",
           "the logits' correlation at position 31: 0.99483"
-        ]
-      },
-      "logit-exponent-s-plus-1": {
-        "choices": [
-          1576,
-          7483,
-          310,
-          3444,
-          338,
-          3681,
-          29889,
-          2
-        ],
-        "failed": [
-          "the logits' scale at position 24: 0.4999",
-          "the logits' scale at position 25: 0.5022",
-          "the logits' scale at position 26: 0.4999",
-          "the logits' scale at position 27: 0.5018",
-          "the logits' scale at position 28: 0.4997",
-          "the logits' scale at position 29: 0.4995",
-          "the logits' scale at position 30: 0.4940",
-          "the logits' scale at position 31: 0.4958"
         ]
       }
     },
@@ -790,6 +805,18 @@
       "range_failure": null,
       "largest_gate_key": 7108,
       "gate_key_limit": 32639,
+      "clamped": [
+        {
+          "entries": 1,
+          "largest": 2233,
+          "layer": 2,
+          "name": "vw",
+          "positions": [
+            32
+          ]
+        }
+      ],
+      "clamp_limit": 2047,
       "peaks": {
         "a": 1678,
         "aF": 1075,
@@ -886,42 +913,756 @@
           "token": 2
         }
       ],
-      "seconds": 37.7
+      "seconds": 35.4
     }
+  },
+  "shift_sweep": {
+    "how": "one-off, on the Mac, not a make target: for each of the 22 layers and each of kv, ko and kd, the kit with that one KL.bin word + 1, through answer_check.py and the target's failures() (verify_sums off for speed; KL.bin is the only changed file), with an integer_model folder identical to the one the target patches (diff -r)",
+    "kits": 66,
+    "caught": 66,
+    "tokens_changed": 5,
+    "highest_min_correlation_with_tokens_kept": 0.9962221672366639,
+    "would_pass_a_floor_of_0_99": 30,
+    "rows": [
+      {
+        "mutation": "L0-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9926640731475612,
+        "slope_range": [
+          0.9754449644585104,
+          1.0198847454291045
+        ]
+      },
+      {
+        "mutation": "L0-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9919254873018731,
+        "slope_range": [
+          0.9768460028535987,
+          1.02965384431615
+        ]
+      },
+      {
+        "mutation": "L0-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9921399001970981,
+        "slope_range": [
+          0.9843501669706893,
+          1.0299264670569908
+        ]
+      },
+      {
+        "mutation": "L1-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.995218389797586,
+        "slope_range": [
+          0.9877229877862473,
+          1.014317528873946
+        ]
+      },
+      {
+        "mutation": "L1-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9944044576156228,
+        "slope_range": [
+          0.9943365434478122,
+          1.0208626938542882
+        ]
+      },
+      {
+        "mutation": "L1-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9936209886735974,
+        "slope_range": [
+          0.9497599315313777,
+          1.0043717362041915
+        ]
+      },
+      {
+        "mutation": "L2-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9944414430363957,
+        "slope_range": [
+          0.9762815766390602,
+          1.0194254721577432
+        ]
+      },
+      {
+        "mutation": "L2-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9960542221421658,
+        "slope_range": [
+          0.9875300442473609,
+          1.0124863263037038
+        ]
+      },
+      {
+        "mutation": "L2-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.98949851085724,
+        "slope_range": [
+          0.9719030559938028,
+          1.0254636063484097
+        ]
+      },
+      {
+        "mutation": "L3-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9924521910383257,
+        "slope_range": [
+          0.9850442974321781,
+          1.0169646379097248
+        ]
+      },
+      {
+        "mutation": "L3-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.99380669400139,
+        "slope_range": [
+          0.9857793184983505,
+          1.012005664619593
+        ]
+      },
+      {
+        "mutation": "L3-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9947527292454097,
+        "slope_range": [
+          0.9719729755670242,
+          1.0117051222546418
+        ]
+      },
+      {
+        "mutation": "L4-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9949502226091732,
+        "slope_range": [
+          0.9801351058929714,
+          1.0013392553021927
+        ]
+      },
+      {
+        "mutation": "L4-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9946369005807688,
+        "slope_range": [
+          0.9765072098445392,
+          1.0027553855147178
+        ]
+      },
+      {
+        "mutation": "L4-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9937937476957719,
+        "slope_range": [
+          0.9823186385021832,
+          1.0103406262775299
+        ]
+      },
+      {
+        "mutation": "L5-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9951919967865108,
+        "slope_range": [
+          0.9866312327214216,
+          1.015964350252699
+        ]
+      },
+      {
+        "mutation": "L5-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9935373797940796,
+        "slope_range": [
+          0.9844488638917119,
+          1.0179866032156388
+        ]
+      },
+      {
+        "mutation": "L5-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9887478414768497,
+        "slope_range": [
+          0.9888871069762032,
+          1.0349645889917143
+        ]
+      },
+      {
+        "mutation": "L6-kv+1",
+        "caught": true,
+        "tokens_same": false,
+        "range_failure": null,
+        "min_correlation": 0.9877352025255998,
+        "slope_range": [
+          0.9829764536727151,
+          1.041117176465537
+        ]
+      },
+      {
+        "mutation": "L6-ko+1",
+        "caught": true,
+        "tokens_same": false,
+        "range_failure": null,
+        "min_correlation": 0.9889079384259151,
+        "slope_range": [
+          0.988843145343814,
+          1.0346342719039143
+        ]
+      },
+      {
+        "mutation": "L6-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9648702398695913,
+        "slope_range": [
+          0.9221513797471492,
+          1.0591311936525913
+        ]
+      },
+      {
+        "mutation": "L7-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.990789033701193,
+        "slope_range": [
+          0.9724736649960822,
+          1.013097806857758
+        ]
+      },
+      {
+        "mutation": "L7-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9906465445762133,
+        "slope_range": [
+          0.965198424293901,
+          1.009505219320792
+        ]
+      },
+      {
+        "mutation": "L7-kd+1",
+        "caught": true,
+        "tokens_same": false,
+        "range_failure": null,
+        "min_correlation": 0.9732084199127945,
+        "slope_range": [
+          0.9725112908424689,
+          1.0254944564334736
+        ]
+      },
+      {
+        "mutation": "L8-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9962221672366639,
+        "slope_range": [
+          0.9799901803528822,
+          1.010308997258307
+        ]
+      },
+      {
+        "mutation": "L8-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9958085619758256,
+        "slope_range": [
+          0.982668212768459,
+          1.0043293378505018
+        ]
+      },
+      {
+        "mutation": "L8-kd+1",
+        "caught": true,
+        "tokens_same": false,
+        "range_failure": null,
+        "min_correlation": 0.98477312608875,
+        "slope_range": [
+          0.9663311781245939,
+          1.0231075434112475
+        ]
+      },
+      {
+        "mutation": "L9-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9824153331969974,
+        "slope_range": [
+          0.9745121136498114,
+          1.0353890680374311
+        ]
+      },
+      {
+        "mutation": "L9-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.980991011614351,
+        "slope_range": [
+          0.9720687689126648,
+          1.0287745938071877
+        ]
+      },
+      {
+        "mutation": "L9-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9733255546381245,
+        "slope_range": [
+          0.9672984667455132,
+          1.0202053458582192
+        ]
+      },
+      {
+        "mutation": "L10-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9942268775410992,
+        "slope_range": [
+          0.9791184986617665,
+          1.0084240646258618
+        ]
+      },
+      {
+        "mutation": "L10-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9939485722145693,
+        "slope_range": [
+          0.9802022560240756,
+          1.0037880355475999
+        ]
+      },
+      {
+        "mutation": "L10-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9867729033151234,
+        "slope_range": [
+          0.9640981298861899,
+          1.004778701495225
+        ]
+      },
+      {
+        "mutation": "L11-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9730284570990599,
+        "slope_range": [
+          0.9469690586718987,
+          1.0082029433784339
+        ]
+      },
+      {
+        "mutation": "L11-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9712232559704741,
+        "slope_range": [
+          0.9435913226440139,
+          1.0102447912544117
+        ]
+      },
+      {
+        "mutation": "L11-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9672145802286861,
+        "slope_range": [
+          0.9475708869009717,
+          0.998252169816762
+        ]
+      },
+      {
+        "mutation": "L12-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9879788836310648,
+        "slope_range": [
+          0.9715362784607529,
+          1.0223204310535707
+        ]
+      },
+      {
+        "mutation": "L12-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9879105419084385,
+        "slope_range": [
+          0.9751103898905356,
+          1.0186129452684052
+        ]
+      },
+      {
+        "mutation": "L12-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9801712646547325,
+        "slope_range": [
+          0.9730596304740493,
+          1.0151332031590177
+        ]
+      },
+      {
+        "mutation": "L13-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9849144218715288,
+        "slope_range": [
+          0.9833666919342609,
+          1.020358020416165
+        ]
+      },
+      {
+        "mutation": "L13-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9841687387421686,
+        "slope_range": [
+          0.9882003405479421,
+          1.0194868913679733
+        ]
+      },
+      {
+        "mutation": "L13-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9702294309802375,
+        "slope_range": [
+          0.912472388509114,
+          0.9986151364742706
+        ]
+      },
+      {
+        "mutation": "L14-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9877190691927081,
+        "slope_range": [
+          0.9708950481412116,
+          1.0109639020205554
+        ]
+      },
+      {
+        "mutation": "L14-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9874641524090965,
+        "slope_range": [
+          0.9693561356585614,
+          1.0146725270255412
+        ]
+      },
+      {
+        "mutation": "L14-kd+1",
+        "caught": true,
+        "tokens_same": false,
+        "range_failure": null,
+        "min_correlation": 0.9834893181175942,
+        "slope_range": [
+          0.9616613014917462,
+          1.006209735744037
+        ]
+      },
+      {
+        "mutation": "L15-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9891932223229556,
+        "slope_range": [
+          0.9964527750255012,
+          1.0439710933042732
+        ]
+      },
+      {
+        "mutation": "L15-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9888141065458588,
+        "slope_range": [
+          1.0018213090068377,
+          1.0420513630559602
+        ]
+      },
+      {
+        "mutation": "L15-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.987576032657586,
+        "slope_range": [
+          0.9781847427542744,
+          1.015714691896437
+        ]
+      },
+      {
+        "mutation": "L16-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9909461499830529,
+        "slope_range": [
+          0.9848454587078657,
+          1.0113572593930542
+        ]
+      },
+      {
+        "mutation": "L16-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9909516769387932,
+        "slope_range": [
+          0.9850565346519755,
+          1.0108653023931848
+        ]
+      },
+      {
+        "mutation": "L16-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9845890293163754,
+        "slope_range": [
+          0.9735177811933987,
+          1.0134760743406819
+        ]
+      },
+      {
+        "mutation": "L17-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9904749944294612,
+        "slope_range": [
+          0.9865083827009117,
+          1.0119851966334559
+        ]
+      },
+      {
+        "mutation": "L17-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9909145722795454,
+        "slope_range": [
+          0.9914845902866459,
+          1.012066643107531
+        ]
+      },
+      {
+        "mutation": "L17-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.986993484316058,
+        "slope_range": [
+          0.9645780506143183,
+          1.0088260513124698
+        ]
+      },
+      {
+        "mutation": "L18-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9887409896714572,
+        "slope_range": [
+          0.9756630764373933,
+          1.0377218708973375
+        ]
+      },
+      {
+        "mutation": "L18-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9887656647960802,
+        "slope_range": [
+          0.976346727813664,
+          1.039175695404117
+        ]
+      },
+      {
+        "mutation": "L18-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9824927478486224,
+        "slope_range": [
+          0.9443863575446372,
+          0.9655004340599381
+        ]
+      },
+      {
+        "mutation": "L19-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9913610304505465,
+        "slope_range": [
+          0.9796961655762693,
+          1.0065080770606825
+        ]
+      },
+      {
+        "mutation": "L19-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9913365450411586,
+        "slope_range": [
+          0.9815143375848555,
+          1.0065898796798547
+        ]
+      },
+      {
+        "mutation": "L19-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9802100966757372,
+        "slope_range": [
+          0.9268896449933731,
+          0.9868433254155146
+        ]
+      },
+      {
+        "mutation": "L20-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9955204113741117,
+        "slope_range": [
+          0.9708402497752636,
+          1.0008126314296673
+        ]
+      },
+      {
+        "mutation": "L20-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.995565430253171,
+        "slope_range": [
+          0.9729798143832328,
+          1.0016904615346716
+        ]
+      },
+      {
+        "mutation": "L20-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9738744649644637,
+        "slope_range": [
+          0.8498387100002354,
+          0.9504984514315239
+        ]
+      },
+      {
+        "mutation": "L21-kv+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9843687610663487,
+        "slope_range": [
+          0.8569190275178132,
+          0.9726901018444342
+        ]
+      },
+      {
+        "mutation": "L21-ko+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9842332964213707,
+        "slope_range": [
+          0.8573150444441753,
+          0.971473434901857
+        ]
+      },
+      {
+        "mutation": "L21-kd+1",
+        "caught": true,
+        "tokens_same": true,
+        "range_failure": null,
+        "min_correlation": 0.9488436673487812,
+        "slope_range": [
+          1.1393292555320054,
+          1.316349061799904
+        ]
+      }
+    ]
   },
   "first_made": "The kit files were first made in a scratch run on the Mac (the same tools, before the target existed) and committed; both target runs rebuilt every required one byte for byte (maxima.json is recorded only).",
   "not_run": [
     "any commitment or proof; no GPU was used",
-    "cp_commit's worst-case check (GPU only; prover.patch leaves it out under -public-weights)",
+    "cp_commit's worst-case check (GPU only; mandatory, as upstream's; whether the kit passes it is not known)",
     "cp_prove's rules beyond its parameter-file reader",
     "any prompt other than SASH's, and any T other than 64",
-    "the make_model cases of upstream's scale tests: the target builds no make_model and sets no SMALL_MODEL, so they skip on every host (status 77, passed in part)"
+    "the make_model cases of upstream's scale tests: the target builds no make_model and sets no SMALL_MODEL, so they skip on every host (status 77, passed in part)",
+    "any proof through the verifier's NE 0 branches: the 108 equal calls are all on upstream's MoE proofs"
   ],
   "tinyllama_proof": false,
   "gpu_used": false,
   "hiding_claim": false,
-  "equal_tokens_mean": "a smoke test that the integer model agrees with SASH's answer on this request, not that FlashProve's and SASH's integer functions are equal",
-  "cross_host": {
-    "required_files_gguf_and_calibration_set": "identical on both hosts (each run requires byte equality with the pins)",
-    "maxima_json": "recorded only: equal to the committed file on macOS, last digits differ on Linux, which upstream's scales/README.md expects across devices and libraries; words.json (the scales) is identical",
-    "integer_model": "choices, every recorded peak, every top-1 margin and both controls' figures identical on both hosts",
-    "environments": "each host's environments hold exactly its platform's lock file (43 and 19 distributions); Python 3.13.2 (macOS) and 3.13.15 (Linux)"
-  },
-  "review_history": "A first run of this target (before two reviews) passed with a correlation floor of 0.99, no mutation controls and environments pinned only at the top level; a reviewer's one-bit mutations of the kit showed that one layer's shift off by one bit passed those bounds. These runs are at 477b6fa, with the floor at 0.998, the two controls and hash-locked environments.",
-  "make_verify_flashprove": {
-    "command": "make verify-flashprove (decision 0093)",
-    "host": "macOS arm64",
-    "commit": "192788e",
-    "result": "passed, 99 rejections, 225.6 s, with 0093's pinned unpatched source digest",
-    "note": "scripts/flashprove.py is unchanged since 192788e"
-  },
-  "gates": {
-    "commit": "477b6fa (the records commit after it changes no code)",
-    "macos_make_check": "passed: uv lock --check, ruff check, ruff format --check, mypy (42 files), pytest 2278 passed 0 failed 102 skipped, check-spec, check-conformance, check-admission",
-    "linux_make_check": "ruff and formatting pass; pytest 2367 passed, 1 failed (tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker), 12 skipped, so make stops there; check-spec, check-conformance and check-admission then passed when run on their own",
-    "linux_control_on_main": "the full pytest suite on main (e2cc6d6) on the same host, the same day: 2292 passed, 3 failed, among them the same e2e test (with tests/test_manifests.py::test_file_changed_during_read[abd] and tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]); the e2e test passed 3 of 3 runs alone on the branch. Its cause is not established; it fails on main too",
-    "linux_package_check": "passed (uv 0.9.18)",
-    "docs": "make docs passed, 176 pages",
-    "live_spec_audit": "scripts/check_spec.py --live: passed, live matched (macOS)"
-  }
+  "equal_tokens_mean": "a smoke test that the integer model agrees with SASH's answer on this request, not that FlashProve's and SASH's integer functions are equal"
 }
