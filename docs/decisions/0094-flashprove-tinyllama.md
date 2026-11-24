@@ -50,9 +50,8 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
     same from width 4,096 to 16,383, twice it at 2,048, so that the fit needs no change. It also makes `cp_commit` check the model file's width, head width and expert
     layers against the parameter file, as `cp_prove` already does;
   - adds the same three-digest form to the provers' parameter-file reader;
-  - leaves `cp_commit`'s worst-case check as upstream's: mandatory. (An earlier revision left it out
-    under `-public-weights`, which changed upstream's default for every such commitment; it was
-    dropped.) With the kit's `eg 7` the check, computed on a CPU, passes (below).
+  - leaves `cp_commit`'s worst-case check as upstream's: mandatory. With the kit's `eg 7` the check,
+    computed on a CPU, passes (below).
 - **`tools.patch`** gives `weight_sums` and upstream's CPU integer model the same constants and dense
   form.
 - **`scales.patch`** (pinned in `kit.json`) lets upstream's scale tools fit a dense `llama` model:
@@ -149,12 +148,6 @@ products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commi
 
 **Not done; each needs its own step.**
 
-Done since the first draft: the scale tools for TinyLlama, the kit, a pinned GGUF export (our own
-`export_gguf.py` on the `gguf` package that upstream pins, in place of llama.cpp's converter) and the
-decisive free check above. Equal tokens are a smoke test, not a proof that the two integer functions
-are equal; #187's like-for-like section must name each backend's model, conversion, request, window,
-range and statement.
-
 1. **The calibration text's licence**: WikiText-2 (CC BY-SA; its dataset card's tags name 3.0 and
    GFDL, its text 4.0), as in upstream's rule. No text or token id from it is committed, but the
    kit's scales are computed from it. The card's tags and its text name different versions, and
@@ -173,7 +166,9 @@ range and statement.
    for each number of checked tokens in #187's sweep.
 
 **Not claimed.** No dense proof exists. There is no claim of soundness of the patched C++ or CUDA code,
-no Lean coverage, no hiding, and no like-for-like numbers yet.
+no Lean coverage, no hiding, and no like-for-like numbers yet. Equal tokens are a smoke test, not a
+proof that the two integer functions are equal; #187's like-for-like section must name each
+backend's model, conversion, request, window, range and statement.
 
 **Prior work.** `marcellobardus/FlashProve-TinyLlama1.1B` at `1a94f01` (Apache-2.0) reports two
 single-token proofs of a dense model at its own shape, by its own logs, which Hallmark has not
