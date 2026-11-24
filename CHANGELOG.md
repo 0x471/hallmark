@@ -9,7 +9,8 @@ under `research/probes/flashprove/tinyllama/` and a TinyLlama kit fitted by upst
 the unpatched and the patched verifier and requires equal results, and checks a TinyLlama-shaped
 parameter file with the patched planner. `make verify-flashprove-tinyllama-answer` rebuilds the GGUF
 export and the kit on a CPU from pinned inputs and requires that upstream's integer model gives
-SASH's eight answer tokens on SASH's prompt, and that `cp_commit`'s mandatory worst-case check,
+SASH's eight answer tokens on SASH's prompt, that the part of `cp_prove`'s set-up that needs only
+the kit admits it on a CPU, and that `cp_commit`'s mandatory worst-case check,
 computed on a CPU, finds every site within its limit. The prover patch compiles with nvcc 13.2.86
 but has not run; no commitment or proof is made. `make verify-flashprove` (decision 0093) is
 unchanged.

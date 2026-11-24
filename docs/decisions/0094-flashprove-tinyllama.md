@@ -104,7 +104,8 @@ builds both verifiers and requires:
 `make verify-flashprove-tinyllama-answer` (CPU, downloads the pinned model) rebuilds the GGUF file
 and the kit from pinned inputs (every file byte for byte but `maxima.json`, which is device-dependent
 and recorded only), in environments from hash-locked requirement files, checks the kit with both planners and the provers'
-reader, runs upstream's scale-tool tests on the patched tree and a float reference against
+reader, runs the part of `cp_prove`'s set-up that needs only the kit on a CPU with upstream's code
+(the plan of attention of each layer group and the layer layouts), runs upstream's scale-tool tests on the patched tree and a float reference against
 transformers, and then requires **the decisive check**: upstream's integer model, with the kit and
 every file pinned, gives SASH's eight answer tokens after SASH's 25 prompt tokens, over a whole
 64-token window with no failed range condition and the gate's key at most 32,639, with its logits
@@ -129,7 +130,7 @@ answer target computes it with Hallmark's port of upstream's `worst_case.cuh`
 (`worst_case_cpu.py`, the decisive sites' rounding emulated exactly) and checks the gate from the
 float weights alone (`gate_float_bound.py`); the two agree in every layer. At `eg 8` every site
 fits but one ([evidence](../../research/evidence/flashprove-tinyllama-answer-2026-11-24.json),
-`retained_failure`): the gate of layer 21, where one row of 5,632 can take a key of 47,481 against the
+`retained_failures`): the gate of layer 21, where one row of 5,632 can take a key of 47,481 against the
 limit of 32,639 (a real input of 177.4; no other layer's gate key above 14,631). No change of the kit's
 scales fixes this: in real units the bound is the row's own. Upstream's remedy, `gcl 1`, clamps the
 key with the sigmoid table, which only a model with experts forms, and the verifier refuses it at
@@ -166,13 +167,13 @@ products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commi
    program has run on this model. The ceiling, and with it the number of attempts, is the owner's.
    The prover patch compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s own verdict
    on the worst-case check (on a CPU, every site fits at `eg 7`) and `cp_prove`'s rules beyond its
-   parameter-file reader run only there.
+   parameter-file reader and the set-up above run only there.
 3. **A dense proof's altered copies.** The 108 equal calls are all on MoE proofs, and no proof has
    gone through the verifier's NE 0 branches. Before a dense `YES` is relied on, run an
    altered-copies table (as upstream's `examples/rejected-proofs`) against the first dense proof.
 4. **#187's proof-system lines.** The kit keeps check 6's lines: placeholders set from the verifier's
-   rules, not sized for speed, which `cp_prove` has judged only by its parameter-file reader; a kit
-   for each number of checked tokens in #187's sweep.
+   rules (`kFM` and `kFD` by `cp_prove`'s plan of attention), not sized for speed, which `cp_prove`
+   has judged only at set-up; a kit for each number of checked tokens in #187's sweep.
 
 **Not claimed.** No dense proof exists. There is no claim of soundness of the patched C++ or CUDA code,
 no Lean coverage, no hiding, and no like-for-like numbers yet. Equal tokens are a smoke test, not a
@@ -182,4 +183,5 @@ backend's model, conversion, request, window, range and statement.
 **Prior work.** `marcellobardus/FlashProve-TinyLlama1.1B` at `1a94f01` (Apache-2.0) reports two
 single-token proofs of a dense model at its own shape, by its own logs, which Hallmark has not
 reproduced. Hallmark uses none of its code,
-proofs, kits, seeds or commitments.
+proofs, kits, seeds or commitments. Its commit `1c5c2aa` sets `kFM` by the same rule of `cp_prove`'s
+plan of attention (14 at TinyLlama's shape).

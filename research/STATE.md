@@ -14,7 +14,8 @@ passed on Linux and macOS: on upstream's stored proofs and altered copies the pa
 the unpatched one's results; separately, the prover patch compiles with nvcc
 ([evidence](evidence/flashprove-tinyllama-2026-11-24.json)). `make
 verify-flashprove-tinyllama-answer` rebuilds the export and the kit byte for byte, and upstream's
-integer model with the kit gives SASH's eight answer tokens on SASH's prompt; `cp_commit`'s
+integer model with the kit gives SASH's eight answer tokens on SASH's prompt; the part of
+`cp_prove`'s set-up that needs only the kit, run on a CPU with upstream's code, admits it; `cp_commit`'s
 mandatory worst-case check, computed on a CPU by a port of upstream's code, finds every site within
 its limit. At the default `eg 8` one gate row of layer 21 is over it, so the kit uses `eg 7`, a key
 one bit coarser, which `verifier.patch` admits at NE 0. It passed on Linux and macOS
