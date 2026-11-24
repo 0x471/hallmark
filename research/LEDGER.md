@@ -3318,7 +3318,8 @@ bounds with the GPU's rounding upwards emulated exactly) finds every site within
 bound from the float weights alone agrees on the gate.
 
 Result: failed at upstream's default `eg 8`; passed at `eg 7`. At `eg 8` (the kit as first fitted;
-runs at `7004750` on 2026-11-23, identical on Linux and macOS), every site fits but the gate of
+runs at `7004750` on 2026-11-23, identical on Linux and macOS;
+[retained failure](evidence/flashprove-tinyllama-answer-2026-11-24.json)), every site fits but the gate of
 layer 21: one row of 5,632 can take a key of 47,481 against the limit of 32,639 (0.54 bits over); no
 other layer's gate key exceeds 14,631, q, k, v and up keep at least 1.2 bits, and the stream,
 bounded by Frobenius norms, 3.7 bits. The float bound agrees: that row can reach a gate input of

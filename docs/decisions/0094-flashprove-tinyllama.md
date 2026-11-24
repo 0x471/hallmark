@@ -128,7 +128,8 @@ prover, on one request. Further one-off checks and their limits:
 answer target computes it with Hallmark's port of upstream's `worst_case.cuh`
 (`worst_case_cpu.py`, the decisive sites' rounding emulated exactly) and checks the gate from the
 float weights alone (`gate_float_bound.py`); the two agree in every layer. At `eg 8` every site
-fits but one: the gate of layer 21, where one row of 5,632 can take a key of 47,481 against the
+fits but one ([evidence](../../research/evidence/flashprove-tinyllama-answer-2026-11-24.json),
+`retained_failure`): the gate of layer 21, where one row of 5,632 can take a key of 47,481 against the
 limit of 32,639 (a real input of 177.4; no other layer's gate key above 14,631). No change of the kit's
 scales fixes this: in real units the bound is the row's own. Upstream's remedy, `gcl 1`, clamps the
 key with the sigmoid table, which only a model with experts forms, and the verifier refuses it at

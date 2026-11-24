@@ -309,7 +309,8 @@ its record (`isk.txt`, `ranges`). Upstream computes it on a GPU only. Step 7 of
   safetensors, sqrt(d) ||W_gate[j] * g|| is the largest input of gate row j over all normed rows.
 
 **At the default `eg 8` a kit fails at one site** (the kit as first fitted; the same on both
-hosts, to the last digit):
+hosts, to the last digit;
+[`retained_failure`](../../../evidence/flashprove-tinyllama-answer-2026-11-24.json)):
 
 | site | worst layer | bound | limit | |
 |---|---|---|---|---|
