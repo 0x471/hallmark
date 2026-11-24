@@ -2,25 +2,17 @@
 
 ## Unreleased
 
-Propose dense TinyLlama on pinned FlashProve
-([decision 0094](docs/decisions/0094-flashprove-tinyllama.md), proposed): three pinned patches
-under `research/probes/flashprove/tinyllama/` and `make verify-flashprove-tinyllama`, a CPU check that runs
-upstream's stored proofs and altered copies through the unpatched and the patched verifier and
-requires equal results. It also checks that a TinyLlama-shaped parameter file passes the patched
-verifier's planner. The prover patch keeps upstream's mandatory worst-case check; it compiles with
-nvcc 13.2.86 but has not run, and no TinyLlama proof exists. `make verify-flashprove` (decision 0093) is unchanged.
-
-Fit a TinyLlama-1.1B kit for the proposed patches: `scales.patch` lets upstream's scale tools read a
-dense `llama` model, `export_gguf.py` writes the pinned model as GGUF (BF16 bits unchanged), and
-`research/probes/flashprove/tinyllama/kit/` holds the kit made by upstream's route. `make
-verify-flashprove-tinyllama-answer` rebuilds the file and the kit on a CPU (every file byte for byte but the
-recorded `maxima.json`), in environments from hash-locked requirement files, and requires
-that upstream's integer model gives SASH's eight answer tokens on SASH's prompt, with no failed range
-condition; it passed on Linux and macOS. It also computes `cp_commit`'s worst-case check on a CPU
-with a port of upstream's code, checked against a bound from the float weights: the kit fails it at
-one gate row of layer 21 at the default `eg 8`; the kit is fitted at `eg 7` instead, which
-`verifier.patch` admits at NE 0, and then every site fits.
-No commitment or proof is made.
+Propose dense TinyLlama-1.1B on pinned FlashProve
+([decision 0094](docs/decisions/0094-flashprove-tinyllama.md), proposed): four pinned patches
+under `research/probes/flashprove/tinyllama/` and a TinyLlama kit fitted by upstream's route at
+`eg 7`. `make verify-flashprove-tinyllama` runs upstream's stored proofs and altered copies through
+the unpatched and the patched verifier and requires equal results, and checks a TinyLlama-shaped
+parameter file with the patched planner. `make verify-flashprove-tinyllama-answer` rebuilds the GGUF
+export and the kit on a CPU from pinned inputs and requires that upstream's integer model gives
+SASH's eight answer tokens on SASH's prompt, and that `cp_commit`'s mandatory worst-case check,
+computed on a CPU, finds every site within its limit. The prover patch compiles with nvcc 13.2.86
+but has not run; no commitment or proof is made. `make verify-flashprove` (decision 0093) is
+unchanged.
 
 Add FlashProve as a pinned external proof backend for Mixture-of-Experts models:
 `make verify-flashprove` checks the stored upstream proofs on a Mac, and

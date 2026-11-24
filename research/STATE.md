@@ -4,33 +4,23 @@ Updated: 2026-11-24. Phase: MIT-licensed research software in a public repositor
 
 ## TinyLlama on FlashProve (dense-model patches) — proposed, CPU-checked
 
-2026-11-22. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed) adds
-three pinned patches on FlashProve `9e2bdd8`
-([`research/probes/flashprove/tinyllama/`](probes/flashprove/tinyllama/README.md)). They let a dense model
-such as TinyLlama-1.1B reach the verifier's standard form, give the provers and CPU tools the
-constants for width 2,048, and keep upstream's mandatory worst-case check.
-`make verify-flashprove-tinyllama` checks them on the CPU and passed on Linux and macOS, including
-a TinyLlama-shaped planning check with placeholder scales; the prover patch compiles with nvcc
-([evidence](evidence/flashprove-tinyllama-2026-11-23.json); the 2026-11-22 revision, which skipped
-that check, [here](evidence/flashprove-tinyllama-2026-11-22.json)). No proof, no GPU run.
-
-2026-11-23. A fourth patch, `scales.patch`, lets upstream's scale tools fit a dense `llama` model, and
-`kit/` holds a TinyLlama-1.1B kit fitted by upstream's route from a GGUF export of the pinned model.
-`make verify-flashprove-tinyllama-answer` rebuilds the export and the kit (every required file byte for byte), and
-upstream's integer model with the kit gives SASH's eight answer tokens on SASH's prompt, over a whole
-64-token window with no failed range condition, on Linux and on macOS
-([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). The integer model is not a prover:
-no commitment or proof is made. `cp_commit`'s mandatory worst-case check, computed on a CPU by a port
-of upstream's code and checked against the float weights, refuses the kit at one gate row of layer
-21 (at the default `eg 8`); no change of the scales fixes that, and upstream's remedy (`gcl`) is
-refused at NE 0.
-
-2026-11-24. The kit is fitted at `eg 7` instead, upstream's other remedy for a short gate (a key one
-bit coarser), which `verifier.patch` now admits at NE 0: every site of the worst-case check then fits,
-and the integer model still gives SASH's tokens. Both targets passed on Linux and macOS
-([patches](evidence/flashprove-tinyllama-2026-11-24.json),
-[kit and answer](evidence/flashprove-tinyllama-answer-2026-11-24.json)). Next, with owner approval
-and a cap: commit and prove on a GPU.
+2026-11-24. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed) adds four
+pinned patches on FlashProve `9e2bdd8`
+([`research/probes/flashprove/tinyllama/`](probes/flashprove/tinyllama/README.md)). Three let a dense
+model such as TinyLlama-1.1B reach the verifier's standard form and give the provers and CPU tools
+the constants for width 2,048; the fourth lets upstream's scale tools fit a dense `llama` model, and
+`kit/` holds a TinyLlama-1.1B kit fitted by upstream's route. `make verify-flashprove-tinyllama`
+passed on Linux and macOS: on upstream's stored proofs and altered copies the patched verifier gives
+the unpatched one's results; separately, the prover patch compiles with nvcc
+([evidence](evidence/flashprove-tinyllama-2026-11-24.json)). `make
+verify-flashprove-tinyllama-answer` rebuilds the export and the kit byte for byte, and upstream's
+integer model with the kit gives SASH's eight answer tokens on SASH's prompt; `cp_commit`'s
+mandatory worst-case check, computed on a CPU by a port of upstream's code, finds every site within
+its limit. At the default `eg 8` one gate row of layer 21 is over it, so the kit uses `eg 7`, a key
+one bit coarser, which `verifier.patch` admits at NE 0. It passed on Linux and macOS
+([evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)). The integer model is not a
+prover: no commitment, proof or GPU run. Next, with owner approval and a cap: commit and prove on a
+GPU.
 
 ## SASH and FlashProve comparison — recorded
 
