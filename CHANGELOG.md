@@ -2,8 +2,8 @@
 
 ## Unreleased
 
-Probe dense TinyLlama on pinned FlashProve
-([decision 0094](docs/decisions/0094-flashprove-tinyllama.md), option 3 of #186, not adopted): three pinned patches
+Propose dense TinyLlama on pinned FlashProve
+([decision 0094](docs/decisions/0094-flashprove-tinyllama.md), proposed): three pinned patches
 under `research/probes/flashprove/tinyllama/` and `make verify-flashprove-tinyllama`, a CPU check that runs
 upstream's stored proofs and altered copies through the unpatched and the patched verifier and
 requires equal results. It also checks that a TinyLlama-shaped parameter file passes the patched
@@ -18,9 +18,8 @@ recorded `maxima.json`), in environments from hash-locked requirement files, and
 that upstream's integer model gives SASH's eight answer tokens on SASH's prompt, with no failed range
 condition; it passed on Linux and macOS. It also computes `cp_commit`'s worst-case check on a CPU
 with a port of upstream's code, checked against a bound from the float weights: the kit fails it at
-one gate row of layer 21, so `cp_commit` would not commit this kit. Decision 0094 therefore proposes
-TinyLlama padded into FlashProve's MoE format with FlashProve unchanged (#186's option 2), and keeps
-the patches as the probe of option 3. No commitment or proof is made.
+one gate row of layer 21, so `cp_commit` would not commit this kit until the owner chooses a change.
+No commitment or proof is made.
 
 Add FlashProve as a pinned external proof backend for Mixture-of-Experts models:
 `make verify-flashprove` checks the stored upstream proofs on a Mac, and

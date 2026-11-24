@@ -1,10 +1,8 @@
 # TinyLlama-1.1B on pinned FlashProve: dense-model patches
 
-Status: **[#186](https://github.com/AbdelStark/hallmark/issues/186)'s option 3, tested and not
-adopted.** Decision [0094](../../../../docs/decisions/0094-flashprove-tinyllama.md) proposes option 2
-instead: TinyLlama padded into FlashProve's MoE format, with FlashProve unchanged. This probe is the
-record of the test, and the reason (below: `cp_commit`'s worst-case check refuses the kit). No proof
-has been made with these patches. The prover patch compiles with upstream's nvcc 13.2.86 (building needs
+Status: **proposed, not owner-approved** ([#186](https://github.com/AbdelStark/hallmark/issues/186),
+option 3; decision draft [0094](../../../../docs/decisions/0094-flashprove-tinyllama.md)). No proof has
+been made with these patches. The prover patch compiles with upstream's nvcc 13.2.86 (building needs
 no GPU), but neither prover program has run: that needs an H100-class GPU. Nothing here changes
 `make verify-flashprove` or decision 0093's pins.
 
@@ -95,7 +93,7 @@ What a patched `YES` means that upstream's does not:
   `isk.cuh` and a comment in `cp_files.h` are upstream's again). Computed since on a CPU, the check
   refuses the TinyLlama kit at one gate row, and no change of the kit's scales can fix that: see
   "cp_commit's worst-case check, on a CPU" below. So with these patches `cp_commit` would make no
-  commitment of this kit, and decision 0094 proposes padded option 2 instead.
+  commitment of this kit; which change to make is the owner's call.
 - **Not changed: `moe_at_layer`** (`prover/prover/layout.h`). It reads the prover's own profile,
   which is `mo ? 3 : 2` with `mo = NE > 0` (`prover/inputs.cuh`, `prover/layer_setup.cuh`). So at
   NE 0 no layer takes the MoE path, though the function itself does not test NE.
@@ -367,15 +365,14 @@ What follows:
 - Upstream's remedy is the line `gcl 1`, which clamps the gate's key and raises its limit to
   4,194,175. The clamp is read from the sigmoid table (`FS`), which only a model with experts forms,
   and the verifier refuses `gcl` at NE 0 (`policy-gcl`); the patches keep that refusal.
-- So option 3 could commit this kit only by leaving the check out (an opt-in under
-  `-public-weights`: upstream gives weight hiding as the check's reason, soundness does not rest on
-  it, `scales/worst-case-bounds.md`, and a request that drives that row past its range would fail
-  with no proof), or by making `gcl` work at NE 0, which needs the sigmoid table there and so changes
-  what the verifier checks in a proof, a much larger patch. Both leave decision 0093's "unchanged
-  upstream" rule, and no Hallmark patch has dropped a check without a replacement. Decision 0094
-  therefore proposes padded option 2, whose standard form carries `gcl 1`: under it this row (a real
-  input of 177.4, a key of about 45,400 plus its ball's slack) fits far within 4,194,175. The padded
-  kit's other sites have not been computed.
+- So option 3 needs one more change before a commitment, and which is the owner's call (decision
+  0094): an explicit option to leave the check out under `-public-weights` (upstream gives weight hiding
+  as the check's reason, and with public weights nothing is hidden; soundness does not rest on it,
+  `scales/worst-case-bounds.md`; a request that drives that row past its range fails, with no proof); or `gcl` at NE 0, which
+  needs the sigmoid table there and so changes what the verifier checks in a proof, a much larger
+  patch. Padded option 2's standard form carries `gcl 1`, under which this row (a real input of
+  177.4: a key of about 45,400, plus its ball's slack) fits far within 4,194,175; the padded kit's
+  other sites have not been computed.
 - Not covered: the GPU's guards on its matrix products, which can only make a site fail; and that
   `cp_commit`'s own conversion gives the integers read here (it is compared with `wsums.txt` only
   through that file). The port has not been compared with a GPU run.

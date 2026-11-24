@@ -3365,9 +3365,9 @@ exceeds 14,631, q, k, v and up keep at least 1.2 bits, and the stream, bounded b
 integer bound is the float one times the norm's ball radius over 2,048, within 2e-4. The second half
 of the hypothesis is false: in real units the bound is the row's own, so no rescaling helps, and
 upstream's remedy, `gcl 1`, needs the sigmoid table and is refused at NE 0. With these patches
-`cp_commit` would not commit this kit. The ways past it, an opt-in to leave the check out under
-`-public-weights` or `gcl` at NE 0, both leave decision 0093's "unchanged upstream" rule, so decision
-0094 now proposes padded option 2, on unchanged FlashProve, whose standard form carries `gcl`. On SASH's prompt the gate's key reaches 7,108. The answer target, which now records
+`cp_commit` would not commit this kit. Decision 0094 now asks the owner to choose: an opt-in to
+leave the check out under `-public-weights`, `gcl` at NE 0, or padded option 2, whose standard form
+carries `gcl`. On SASH's prompt the gate's key reaches 7,108. The answer target, which now records
 this step, passed on both hosts (1,786 s and 367 s) with the same tokens and figures as before; the
 66-kit shift sweep, rerun with its committed script, gave the same 66 catches. Not shown: the GPU's
 own verdict, and the GPU's guards on its matrix products. No GPU, no spend.

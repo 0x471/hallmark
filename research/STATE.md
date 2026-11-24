@@ -2,9 +2,9 @@
 
 Updated: 2026-11-23. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
 
-## TinyLlama on FlashProve — proposed padded on unchanged FlashProve; dense-patch probe CPU-checked
+## TinyLlama on FlashProve (dense-model patches) — proposed, CPU-checked
 
-2026-11-22. The probe of option 3 in decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) adds
+2026-11-22. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed) adds
 three pinned patches on FlashProve `9e2bdd8`
 ([`research/probes/flashprove/tinyllama/`](probes/flashprove/tinyllama/README.md)). They let a dense model
 such as TinyLlama-1.1B reach the verifier's standard form, give the provers and CPU tools the
@@ -22,11 +22,8 @@ upstream's integer model with the kit gives SASH's eight answer tokens on SASH's
 ([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). The integer model is not a prover:
 no commitment or proof is made. `cp_commit`'s mandatory worst-case check, computed on a CPU by a port
 of upstream's code and checked against the float weights, refuses the kit at one gate row of layer
-21; no change of the kit's scales fixes that, and upstream's remedy (`gcl`) is refused at NE 0.
-Decision 0094 therefore now proposes #186's option 2 instead: TinyLlama padded into FlashProve's MoE
-format, with FlashProve unchanged as decision 0093 drives it, where `gcl` is part of the standard
-form; the patches stay as the probe of option 3. Next: the padding exporter, a padded kit and its CPU
-checks; then, with approval and a cap, commit and prove on a GPU.
+21; no change of the kit's scales fixes that, and upstream's remedy (`gcl`) is refused at NE 0. Next:
+the owner chooses the change (decision 0094); then, with approval and a cap, commit and prove on a GPU.
 
 ## SASH and FlashProve comparison — recorded
 

@@ -13,16 +13,15 @@ Hallmark drives FlashProve as a pinned external backend: upstream commit
 models only, so Hallmark's dense TinyLlama response stays on
 [SASH](LLM-PROOF.md). [SASH and FlashProve compared](PROVER-COMPARISON.md) sets
 the two side by side. Proposed, not adopted:
-[decision 0094](decisions/0094-flashprove-tinyllama.md) would prove TinyLlama-1.1B
-padded into FlashProve's MoE format, with FlashProve unchanged; no proof of it
-exists yet. Its research probe of the other route, Hallmark's own patches for
-dense layers, is the two targets below.
+[decision 0094](decisions/0094-flashprove-tinyllama.md) adds small pinned
+patches so that the same FlashProve can take dense TinyLlama-1.1B; no proof of it
+exists yet.
 
 | Command | What it does | Needs |
 |---|---|---|
 | `make verify-flashprove` | Builds `cp_verify`, checks the two stored upstream proofs, runs 99 rejection cases | Mac or Linux, a C++17 compiler, about 5 GB RAM, no GPU, no spend |
-| `make verify-flashprove-tinyllama` | Research probe (decision 0094, option 3, not adopted): builds the unpatched and the patched `cp_verify` and checks the TinyLlama patches against upstream's proofs and tests ([details](../research/probes/flashprove/tinyllama/README.md#checks)) | Mac or Linux, a C++17 compiler, git, about 5 GB RAM and 1 GB of disk, no GPU, no spend |
-| `make verify-flashprove-tinyllama-answer` | Research probe (decision 0094, option 3, not adopted): rebuilds TinyLlama-1.1B's GGUF file and fitted kit from pinned inputs (every required file byte for byte), in environments from hash-locked requirement files, plans them with both verifiers, and requires that upstream's integer model gives SASH's eight answer tokens on SASH's prompt; it also records `cp_commit`'s worst-case check computed on a CPU, which the kit fails at one gate row ([details](../research/probes/flashprove/tinyllama/README.md#the-tinyllama-kit-and-the-answer-check)) | macOS arm64 or Linux x86_64, a C++17 compiler, git, `uv`, about 8 GB of disk; downloads the pinned model (2.2 GB), the upstream archive and the locked Python packages; no GPU, no spend |
+| `make verify-flashprove-tinyllama` | Proposed (decision 0094): builds the unpatched and the patched `cp_verify` and checks the TinyLlama patches against upstream's proofs and tests ([details](../research/probes/flashprove/tinyllama/README.md#checks)) | Mac or Linux, a C++17 compiler, git, about 5 GB RAM and 1 GB of disk, no GPU, no spend |
+| `make verify-flashprove-tinyllama-answer` | Proposed (decision 0094): rebuilds TinyLlama-1.1B's GGUF file and fitted kit from pinned inputs (every required file byte for byte), in environments from hash-locked requirement files, plans them with both verifiers, and requires that upstream's integer model gives SASH's eight answer tokens on SASH's prompt; it also records `cp_commit`'s worst-case check computed on a CPU, which the kit fails at one gate row ([details](../research/probes/flashprove/tinyllama/README.md#the-tinyllama-kit-and-the-answer-check)) | macOS arm64 or Linux x86_64, a C++17 compiler, git, `uv`, about 8 GB of disk; downloads the pinned model (2.2 GB), the upstream archive and the locked Python packages; no GPU, no spend |
 | `make e2e-flashprove GPU_CREDIT_BALANCE_USD=…` | Builds the prover, commits to and proves the small synthetic kit on one HF H200, rechecks the proof here | `HF_TOKEN`, prepaid HF credit; worst case USD 3.27 |
 | `make compare-provers FLASHPROVE_RUN=…` | Re-times `cp_verify` on three proofs and gathers the recorded SASH and FlashProve figures | A passed `e2e-flashprove` run; no spend |
 

@@ -1,132 +1,171 @@
-# 0094: TinyLlama on pinned FlashProve, padded into its MoE format
+# 0094: Dense TinyLlama on pinned FlashProve through Hallmark's own patches
 
-Date: 2026-11-21, revised 2026-11-23. Status: **proposed**. No proof, GPU run or paid compute so
-far.
+Date: 2026-11-21. Status: **proposed**; needs owner approval
+([#186](https://github.com/AbdelStark/hallmark/issues/186): option 3 "needs owner approval"). No
+proof, GPU run or paid compute so far.
 
 **Context.** #186 asks how Hallmark's LLM case, dense TinyLlama-1.1B, can be proved with FlashProve,
-which decision 0093 pins at `9e2bdd8` and drives unchanged ("No upstream source file is changed").
-FlashProve reads real weights only at Llama 4 Maverick's widths and proves MoE models only. #187 asks
-for "comparable LLM statements" and a like-for-like section in
-[PROVER-COMPARISON](../PROVER-COMPARISON.md): the same model under both provers. #186 lists three
-paths and makes the third, a fork or extension of FlashProve, the last resort that needs owner
-approval.
+which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama 4 Maverick's widths. #187 asks for
+"comparable LLM statements" and a like-for-like section in
+[PROVER-COMPARISON](../PROVER-COMPARISON.md): the same model under both provers. The aim is to see whether FlashProve can take over the TinyLlama case from SASH: that needs FlashProve's numbers on TinyLlama itself, not on Maverick, which is far heavier than this demo needs. No fair comparison of the two provers exists yet; this work is meant to make one.
 
 - **Option 1, a small public MoE model: rejected.** The unchanged prover reads real weights only at
   width 5,120 and head width 128 (`prover/weights_blocks/gguf_source.cuh`), in Llama 4's MoE layout:
   with experts, every odd layer is an MoE layer with one routed expert per token
   (`verifier/docs/parameter-file.md`). The models known here in that layout are Meta's Llama 4, which
   #186 rules out (gated weights). A different model would not be like-for-like either.
-- **Option 2, TinyLlama as an MoE on unchanged upstream: proposed, in a padded form.** As #186 words
-  it, one expert, it fails: NE is 0 or a power of two from 2 (`verifier/docs/parameter-file.md`). With
-  four experts it works: TinyLlama zero-padded to width 5,120 and head width 128; on the odd layers
-  its feed-forward block becomes the shared expert, beside four zero routed experts and a zero
-  router.
-- **Option 3, Hallmark's own patches for dense layers: tested, not adopted.** Four small pinned
-  patches let the pinned source take TinyLlama at its own shape, and on a CPU upstream's integer model
-  with a kit fitted through them gives SASH's answer. But `cp_commit`'s mandatory worst-case check
-  refuses that kit (below), and the only ways past it are to leave an upstream check out or a much
-  larger patch. The patches and their checks stay in
-  [`research/probes/flashprove/tinyllama/`](../../research/probes/flashprove/tinyllama/README.md) as
-  the record of this test.
+- **Option 2, TinyLlama as an MoE on unchanged upstream: rejected, though possible in a padded form.**
+  As written it fails: NE 1 is refused, since NE is 0 or a power of two from 2
+  (`verifier/docs/parameter-file.md`). TinyLlama zero-padded to width 5,120 with four zero experts is
+  exact in float, and passes the unchanged verifier's planning check and the provers' parameter rules
+  (a local CPU probe, not in the repository; no proof). It is rejected because:
+  - every #187 number would describe the padded model: by its shapes about 11.4 billion committed
+    parameters, mostly zeros, against TinyLlama's 1.1 billion, and about seven times the
+    multiplications per token (computed from the shapes, not measured);
+  - it needs the same new scale tools as option 3 (upstream's refuse rotary base 10,000), and a
+    padding exporter on top.
 
-**Decision (proposed).** Prove TinyLlama-1.1B-Chat, at the revision of Hallmark's SASH path, padded
-into FlashProve's MoE format, with FlashProve `9e2bdd8` unchanged, as decision 0093 drives it:
+  What option 2 keeps is upstream's unchanged verifier, so its `YES` would be upstream's own, and
+  its standard form carries the gate's clamp `gcl 1`, which option 3's kit lacks (below). If the
+  owner prefers that, it is the fallback. Lean covers neither route (`lean/GAPS.md`: one model
+  size).
+- **Option 3, a patched FlashProve: proposed**, as Hallmark's own small patches on the pinned source.
+  They are applied with `git apply`, as the SASH patches are, and each is SHA-256-pinned. It is not a
+  dependency on a fork. As it stands it cannot commit the TinyLlama kit: `cp_commit`'s mandatory
+  worst-case check, computed on a CPU, refuses it at one gate row (below), so it needs one more
+  change, which the owner chooses.
 
-- **No upstream source file changes.** The verifier, `cp_commit` and `cp_prove` are upstream's, so a
-  `YES` is upstream's own. That is decision 0093's rule and #186's option 2.
-- **Every upstream check runs.** None of Hallmark's patches to SASH drops a check without putting
-  another in its place: they fix faults or add guards
-  ([`research/probes/sash/`](../../research/probes/sash/README.md)). Among the checks is `cp_commit`'s
-  worst-case check: the standard parameter form carries the gate's clamp `gcl 1`, whose limit (a key
-  of 4,194,175) is far above the gate row that stops option 3 (in real units the same row, a key of
-  roughly 47,000).
-- **Hallmark's own offline tools** make the padded file and its kit: a padding exporter, and a kit
-  fitter for the padded file, since upstream's scale fitter is Maverick-specific (`llama4` files, no
-  rotation on every fourth layer, Llama 4's float pass) and refuses TinyLlama's rotary base 10,000.
-  They change no upstream file.
+**Decision (proposed).** Adopt the four patches in
+[`research/probes/flashprove/tinyllama/`](../../research/probes/flashprove/tinyllama/README.md):
 
-What this costs:
+- **`verifier.patch`** lets a dense model (NE 0) reach the standard parameter form:
+  - it takes the digests of the three tables that a dense model forms (no `tsig`), only at NE 0;
+  - it does not ask `routed-experts` or `both-clamps` at NE 0;
+  - no check of a proof's bytes changes; only admission does.
+- **`prover.patch`**:
+  - adds the fold constants for width 2,048 and head width 64 (`0x3FB504F3`, `0x3E3504F3`). Their
+    rule, RN32(sqrt(d) / 2^t), is Hallmark's generalisation of upstream's RN32(sqrt(d) / 64): the
+    same from width 4,096 to 16,383, twice it at 2,048, so that the fit needs no change. It also makes `cp_commit` check the model file's width, head width and expert
+    layers against the parameter file, as `cp_prove` already does;
+  - adds the same three-digest form to the provers' parameter-file reader;
+  - leaves `cp_commit`'s worst-case check as upstream's: mandatory. (An earlier revision left it out
+    under `-public-weights`, which changed upstream's default for every such commitment; it was
+    dropped.) With it, `cp_commit` would refuse this kit (below).
+- **`tools.patch`** gives `weight_sums` and upstream's CPU integer model the same constants and dense
+  form.
+- **`scales.patch`** (pinned in `kit.json`) lets upstream's scale tools fit a dense `llama` model:
+  `gguf_weights.py` reads it (dense only), `policy_tables.py` writes its three tables' digests,
+  `words_to_policy.py` takes the rotary base 10,000, and `make_calibration_set.py --tinyllama` makes
+  upstream's calibration set with TinyLlama's tokenizer and start token.
 
-- every #187 number describes the padded model: by its shapes about 11.4 billion committed
-  parameters, mostly zeros, against TinyLlama's 1.1 billion, and about seven times the
-  multiplications per token (computed from the shapes, not measured);
-- the CPU checks of a padded kit (the integer model, the worst-case check) hold about 23 GB of
-  integer weights, more than the hosts used so far;
-- the padding is part of the statement: a client must know that NE 4, the zero experts and the zero
-  router are TinyLlama, padded.
+With these, `kit/` holds a TinyLlama-1.1B kit (T = 64, e_res 11) fitted by upstream's own route from a
+GGUF file that `export_gguf.py` writes from the published safetensors (BF16 bits unchanged).
 
-Established so far, in a local CPU probe that is not in the repository: on a small TinyLlama-like
-model with random weights the padded form gives the same logits (largest difference 3.1e-15) and
-never picks a pad token; and a padded parameter file at TinyLlama's shape, with placeholder scales,
-passes the unchanged verifier's planner in the standard parameter form and the provers' parameter
-reader (NE 1 is refused with `shape-NE`, a wrong rotary base with `rotary-table`). Not yet: the
-padded export, a fitted padded kit, its worst-case check, its integer-model answer, any commitment or
-proof.
-
+Decision 0093 and `make verify-flashprove` stay as they are. The patched verifier is a second build
+with its own source digest, `6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52`.
 SASH stays Hallmark's LLM proof path, and its code is unchanged. A switch to FlashProve needs it to
-match SASH first and gets its own decision (#186). Decision 0093 and `make verify-flashprove` stay as
-they are. Lean covers neither route (`lean/GAPS.md`: one model size).
+match SASH first and gets its own decision (#186).
 
-**Why not option 3.** Its probe ([README](../../research/probes/flashprove/tinyllama/README.md))
-holds four patches on the pinned source: `verifier.patch` lets NE 0 reach the standard parameter form
-(three table digests, no `routed-experts` or `both-clamps` at NE 0; no check of a proof's bytes
-changes), `prover.patch` adds the fold constants for width 2,048 and head width 64 and keeps the
-worst-case check mandatory, `tools.patch` gives `weight_sums` and the integer model the same, and
-`scales.patch` lets upstream's scale tools fit a dense `llama` file. On a CPU:
+**What a patched `YES` means.** Upstream's proof checks passed on a dense model's statement under
+parameters that upstream itself does not admit to `YES`. NE 0 is among the forms its documents name
+as never accepted, and the pinned repository ships no NE 0 FlashProve kit or proof. Without the gate's clamp (`gcl`, refused at
+NE 0), the gate's key is range-checked rather than clamped; the shipped provers make no proof for a
+key above 32,639. With a public seed nothing is hidden. The dense form
+is chosen by NE alone: as upstream's, a `YES` is about the enrolled integer commitment and the caller's
+request and range, not about which checkpoint was converted, the tokenizer, or SASH's integer function.
 
-- `make verify-flashprove-tinyllama`: upstream's stored proofs and 99 altered copies give the same
-  108 results from the unpatched and the patched verifier (all MoE proofs), and a TinyLlama-shaped
-  file passes the patched planner, on Linux and macOS at `1208545`
-  ([evidence](../../research/evidence/flashprove-tinyllama-2026-11-23.json)). The prover patch
-  compiles with nvcc 13.2.86; no program ran.
-- `make verify-flashprove-tinyllama-answer`: the kit rebuilt byte for byte from pinned inputs, and
-  upstream's integer model with it gives SASH's eight answer tokens on SASH's prompt over a 64-token
-  window, with two one-bit mutations of the kit caught, on Linux and macOS at `7004750`
-  ([evidence](../../research/evidence/flashprove-tinyllama-answer-2026-11-23.json)).
-- **`cp_commit`'s worst-case check, computed on a CPU** by Hallmark's port of upstream's
-  `worst_case.cuh` (`worst_case_cpu.py`, the deciding rows' rounding emulated exactly) and checked
-  from the float weights alone (`gate_float_bound.py`), the two agreeing in every layer: every site
-  fits but the gate of layer 21, where one row of 5,632 can take a key of 47,481 against the limit
-  of 32,639 (a real input of 177.4; no other layer's gate key above 14,631; on SASH's prompt the key
-  reaches 7,108). No change of the kit's scales fixes this: in real units the bound is the row's
-  own. Upstream's remedy, `gcl 1`, reads the clamp from the sigmoid table, which only a model with
-  experts forms, and the verifier refuses it at NE 0.
+**Checks so far.** `make verify-flashprove-tinyllama` (CPU) checks the pinned patches and archive,
+builds both verifiers and requires:
 
-So option 3 could commit this kit only by leaving the worst-case check out (an opt-in under
-`-public-weights`: upstream gives weight hiding as the check's reason, and soundness does not rest on
-it, `scales/worst-case-bounds.md`; but no Hallmark patch has dropped a check without a
-replacement), or by
-making `gcl` work at NE 0, which changes what the verifier checks in a proof. Either way it leaves
-0093's "unchanged upstream" rule, as #186's last resort. The port has not been compared with a GPU
-run, and it does not cover the GPU's guards on its matrix products.
+- **Upstream inputs.** On upstream's stored proofs and 99 altered copies, every one of 108 calls gives
+  the same result and output from both builds, apart from the build digest and cp_verify's timed
+  fields.
+- **Standard-form test.** Upstream's test, with the dense cases, passes on the patched build. On the
+  unpatched build it fails exactly the five cases that only the patch meets.
+- **Provers' reader.** It admits the dense file with three digests and refuses the forms the verifier
+  refuses.
+- **Constants.** The four implementations' constants agree with an exact derivation.
+- **`weight_sums`.** It matches upstream's exact oracle at both widths.
+- **nvcc.** Outside the target, upstream's `prover/build.sh` built `serving_cp_commit` and
+  `serving_cp_prove`, and the test builds of both, from the patched source with nvcc 13.2.86 on
+  Linux, without a GPU. No program has run.
+- **TinyLlama's shape, planning only.** A dense parameter file at TinyLlama-1.1B's shape, with
+  placeholder scales, passes the patched planner in the standard parameter form; the unpatched build
+  refuses it for its three table digests. Without those digests, the unpatched build finds exactly
+  `routed-experts`, `both-clamps` and `table-digests` unmet there, and the patched build only
+  `table-digests`: at this shape the patch changes admission and nothing else that the planner sees.
 
-**What carries over.** From the probe: the GGUF export of the pinned model (`export_gguf.py`, BF16
-bits unchanged, llama.cpp's query and key permutation), the calibration rule with TinyLlama's
-tokenizer, the hash-locked environments, the integer-model answer check and the CPU worst-case port
-(to be extended to layers with experts).
+`make verify-flashprove-tinyllama-answer` (CPU, downloads the pinned model) rebuilds the GGUF file
+and the kit from pinned inputs (every file byte for byte but `maxima.json`, which is device-dependent
+and recorded only), in environments from hash-locked requirement files, checks the kit with both planners and the provers'
+reader, runs upstream's scale-tool tests on the patched tree and a float reference against
+transformers, and then requires **the decisive check**: upstream's integer model, with the kit and
+every file pinned, gives SASH's eight answer tokens after SASH's 25 prompt tokens, over a whole
+64-token window with no failed range condition and the gate's key at most 32,639, with its logits
+following the float logits; two one-bit mutations of the kit must each fail that check.
+It passed on 2026-11-23 on Linux (x86_64, every input downloaded) and on macOS (arm64); both rebuilt
+every required file byte for byte, and the integer model's choices, peaks, margins and clamped cells are identical on the two
+([evidence](../../research/evidence/flashprove-tinyllama-answer-2026-11-23.json)).
+
+The current revision of the patches passed `make verify-flashprove-tinyllama` on 2026-11-23 on Linux (upstream `verifier/build.sh`, g++ 13.3) and
+on macOS (Apple clang 17, built as `make verify-flashprove` builds it;
+[evidence](../../research/evidence/flashprove-tinyllama-2026-11-23.json)). Upstream's `integer_model` CPU suite passed on the patched tree on 2026-11-22 (947, 0 failed), on hunks that have not changed since. Apart from upstream's
+stored proofs and their altered copies, which both builds check, these are planning, parsing and
+table checks: no TinyLlama proof exists or is checked. The answer check runs the integer model, not a
+prover, on one request. Further one-off checks and their limits:
+[README](../../research/probes/flashprove/tinyllama/README.md#checks).
+
+**`cp_commit`'s worst-case check, on a CPU.** Upstream computes it on a GPU only. Step 7 of the
+answer target computes it with Hallmark's port of upstream's `worst_case.cuh`
+(`worst_case_cpu.py`, the decisive sites' rounding emulated exactly) and checks the gate from the
+float weights alone (`gate_float_bound.py`); the two agree in every layer. Every site fits but one:
+the gate of layer 21, where one row of 5,632 can take a key of 47,481 against the limit of 32,639
+(a real input of 177.4; no other layer's gate key above 14,631). No change of the kit's
+scales fixes this: in real units the bound is the row's own. Upstream's remedy, `gcl 1`, clamps the
+key with the sigmoid table, which only a model with experts forms, and the verifier refuses it at
+NE 0. So the owner chooses one of:
+
+- **an explicit option to leave the check out under `-public-weights`** (a small change of
+  `prover.patch`, opt-in, so upstream's default stays): upstream gives weight hiding as the check's reason, and
+  with public weights nothing is hidden; soundness does not rest on it (`scales/worst-case-bounds.md`); a request that drives
+  that row past its range fails in `cp_prove` with no proof. On SASH's prompt the key reaches at
+  most 7,108;
+- **`gcl` at NE 0**: the sigmoid table formed for a dense model too, so that the clamp is checked
+  as upstream checks it. That changes what the verifier checks in a proof, a much larger patch;
+- **padded option 2**, whose standard form carries `gcl 1` (limit 4,194,175): there this row fits;
+  the padded kit's other sites have not been computed.
+
+The port has not been compared with a GPU run, and it does not cover the GPU's guards on its matrix
+products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commits-worst-case-check-on-a-cpu)).
 
 **Not done; each needs its own step.**
 
-1. **The calibration text's licence**: upstream's rule calibrates on WikiText-2 (CC BY-SA; its
-   dataset card's tags name 3.0 and GFDL, its text 4.0), as the probe's kit does. No text or token
-   id from it is committed, but a kit's scales are computed from it. The card's tags and its text
-   name different versions, and `research/AUTHORITY.json` excludes ambiguous licences, so the owner
-   decides; a no means calibrating on another text.
-2. **The padded route**: the padding exporter, the kit fitter, a fitted padded kit, its CPU
-   worst-case check and integer-model answer check on SASH's request, on a host with room for them.
-3. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks);
-   `cp_commit`'s own verdict on the worst-case check runs only there. Then altered copies of the first
-   proof, as decision 0093 did for its own.
-4. **#187's proof-system lines**: a kit for each number of checked tokens in #187's sweep, sized for
-   speed rather than as placeholders.
-
-**Not claimed.** No TinyLlama proof exists, padded or dense. There is no claim of soundness of the
-C++ or CUDA code, no Lean coverage, no hiding (the weights are public), and no like-for-like numbers
-yet. Equal tokens are a smoke test, not a proof that FlashProve's and SASH's integer functions are
-equal; #187's like-for-like section must name each backend's model, conversion, request, window,
+Done since the first draft: the scale tools for TinyLlama, the kit, a pinned GGUF export (our own
+`export_gguf.py` on the `gguf` package that upstream pins, in place of llama.cpp's converter) and the
+decisive free check above. Equal tokens are a smoke test, not a proof that the two integer functions
+are equal; #187's like-for-like section must name each backend's model, conversion, request, window,
 range and statement.
+
+1. **The calibration text's licence**: WikiText-2 (CC BY-SA; its dataset card's tags name 3.0 and
+   GFDL, its text 4.0), as in upstream's rule. No text or token id from it is committed, but the
+   kit's scales are computed from it. The card's tags and its text name different versions, and
+   `research/AUTHORITY.json` excludes ambiguous licences, so the owner decides; a no means refitting
+   on another text. The patches do not depend on it.
+2. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks),
+   after the owner's choice above, since the kit as it stands would not be committed. The prover
+   patch compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s own verdict on the
+   worst-case check and `cp_prove`'s rules beyond its parameter-file reader run only there.
+3. **A dense proof's altered copies.** The 108 equal calls are all on MoE proofs, and no proof has
+   gone through the verifier's NE 0 branches. Before a dense `YES` is relied on, run an
+   altered-copies table (as upstream's `examples/rejected-proofs`) against the first dense proof.
+4. **#187's proof-system lines.** The kit keeps check 6's lines: placeholders set from the verifier's
+   rules, not sized for speed, which `cp_prove` has judged only by its parameter-file reader; a kit
+   for each number of checked tokens in #187's sweep.
+
+**Not claimed.** No dense proof exists. There is no claim of soundness of the patched C++ or CUDA code,
+no Lean coverage, no hiding, and no like-for-like numbers yet.
 
 **Prior work.** `marcellobardus/FlashProve-TinyLlama1.1B` at `1a94f01` (Apache-2.0) reports two
 single-token proofs of a dense model at its own shape, by its own logs, which Hallmark has not
-reproduced; its plan leaves `cp_commit`'s worst-case check out under `-public-weights`. Hallmark uses
-none of its code, proofs, kits, seeds or commitments.
+reproduced. Hallmark uses none of its code,
+proofs, kits, seeds or commitments.
