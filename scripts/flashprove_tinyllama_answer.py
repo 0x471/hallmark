@@ -49,6 +49,7 @@ the downloads; each file is checked against its pin before it is read.
 
 import argparse
 import hashlib
+import http.client
 import json
 import os
 import platform
@@ -202,13 +203,26 @@ def inputs(output):
             )
         else:
             path = folder / name
-            fetch(url, path, pin["sha256"], pin["bytes"])
+            fetch_retrying(url, path, pin)
         paths[name] = path
     model_dir = folder / "model"
     model_dir.mkdir()
     for name in KIT["model"]["files"]:
         (model_dir / name).symlink_to(paths[name].resolve())
     return model_dir, paths[parquet]
+
+
+def fetch_retrying(url, path, pin, attempts=3, wait=5):
+    """fetch(), tried again after a failed or short download: its one connection has a timeout of
+    120 s and no retry of its own. The file must still have the pinned size and SHA-256."""
+    for attempt in range(1, attempts + 1):
+        try:
+            return fetch(url, path, pin["sha256"], pin["bytes"])
+        except (OSError, http.client.HTTPException, ValueError):
+            path.unlink(missing_ok=True)
+            if attempt == attempts:
+                raise
+            time.sleep(wait * attempt)
 
 
 def minimal_env(output):

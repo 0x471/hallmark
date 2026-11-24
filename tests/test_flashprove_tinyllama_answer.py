@@ -100,6 +100,31 @@ def test_the_committed_table_is_sized_for_the_kit_s_weight_rows():
     assert table[0] + table[1] == 35
 
 
+def test_a_failed_download_is_tried_again(tmp_path, monkeypatch):
+    calls = []
+
+    def flaky(url, path, digest, size):
+        calls.append(url)
+        path.write_bytes(b"part")
+        if len(calls) < 3:
+            raise TimeoutError("timed out")
+
+    monkeypatch.setattr(answer, "fetch", flaky)
+    pin = dict(sha256="0" * 64, bytes=4)
+    answer.fetch_retrying("https://example.invalid/x", tmp_path / "x", pin, wait=0)
+    assert len(calls) == 3 and (tmp_path / "x").exists()
+
+    def broken(url, path, digest, size):
+        calls.append(url)
+        path.write_bytes(b"part")
+        raise ValueError("download identity mismatch")
+
+    monkeypatch.setattr(answer, "fetch", broken)
+    with pytest.raises(ValueError, match="identity"):
+        answer.fetch_retrying("https://example.invalid/y", tmp_path / "y", pin, wait=0)
+    assert len(calls) == 6 and not (tmp_path / "y").exists()
+
+
 def test_the_softmax_tables_fit_cp_prove_s_plan_of_attention_at_every_shift():
     # APlan::build() (prover/attn/plan.cuh) refuses a kit unless 0 <= 2^kFM - u0 - nHM <= nHM and
     # 0 <= 2^kFD - u0 - nHD <= nHD at every layer's attention shift; cp_verify does not read kFM.
