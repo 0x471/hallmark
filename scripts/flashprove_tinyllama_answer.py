@@ -16,7 +16,10 @@ them), applies the three pinned patches and scales.patch, and then requires, in 
    only;
 3. the patched verifier's planner admits the kit in the standard parameter form, for the whole kit
    and for SASH's request, with the pinned h_par and configuration; the unpatched one refuses it
-   (policy-tables); the provers' parameter-file reader admits it;
+   (policy-tables); the provers' parameter-file reader admits it; and the part of cp_prove's set-up
+   that needs only the kit, run on a CPU with upstream's code (tinyllama/prover_setup.cpp: the
+   plan of attention of each layer group and each group's layer layout), admits it, while the
+   same kit with kFM one higher is refused by the plan of attention;
 4. upstream's scale-tool tests pass on the patched tree, run as SUITE.md runs its two scales rows
    (the other two tests have no row); status 77 means passed in part: this target builds no
    make_model and sets no SMALL_MODEL, so those cases skip;
@@ -426,6 +429,32 @@ def check_planning(tree, output, verifiers):
         f"provers' reader: {done.stdout.strip()}",
     )
     found["provers_parameter_file_reader"] = "admitted"
+    setup = build_tool(
+        tree,
+        output,
+        PROBE / "prover_setup.cpp",
+        "prover_setup",
+        ["-DBLK_FIELD=2", "-DBLK_HASH=1", "-I", tree / "prover", "-I", tree / "blocks"],
+    )
+    code, text = ft.stdout_of([setup, folder], output / "prover-setup.log")
+    last = text.rstrip().splitlines()[-1] if text.strip() else ""
+    require(code == 0 and last.startswith("prover set-up: admitted"), f"cp_prove's set-up: {last}")
+    hiding = next(x for x in text.splitlines() if x.startswith("hiding conditions"))
+    control = output / "kit-kFM-plus-1"
+    control.mkdir()
+    shutil.copyfile(folder / "KL.bin", control / "KL.bin")
+    policy = (folder / "policy.txt").read_text().splitlines()
+    kfm = next(int(x.split(" ")[1]) for x in policy if x.startswith("kFM "))
+    (control / "policy.txt").write_text(
+        "".join((f"kFM {kfm + 1}" if x.startswith("kFM ") else x) + "\n" for x in policy)
+    )
+    code, text = ft.stdout_of([setup, control], output / "prover-setup-kFM-plus-1.log")
+    refused = text.rstrip().splitlines()[-1] if text.strip() else ""
+    require(
+        code == 2 and refused.startswith("attention: the shift sh = "),
+        f"the control kFM + 1: {code} {refused}",
+    )
+    found["prover_setup"] = dict(kit=last, hiding=hiding, control_kFM_plus_1=refused)
     return found
 
 

@@ -1,0 +1,165 @@
+// Runs on a CPU the part of cp_prove's set-up that needs only a kit (policy.txt and KL.bin), with
+// upstream's code: the parameter-file reader (prover/prover/policy.h), the version word (s8::set),
+// the plan of attention of each layer group (APlan::build(), prover/attn/plan.cuh) and the layer
+// layout of each group (make_layer_layout(), prover/prover/layout.h). They are filled as
+// read_inputs() (prover/prover/inputs.cuh), other_setup.cuh and layer_setup.cuh fill them. A few
+// checks that live in CUDA files are copied here, each marked with its source. A refusal prints
+// upstream's message and ends with status 2; an admitted kit ends with the line
+// "prover set-up: admitted ..." and status 0.
+// Not run here: anything on a GPU or a commitment, the forward kernels' layer_words_fit()
+// (prover/prover/forward.cuh) and the hiding conditions, which are only printed (a commitment made
+// with -test-seed is not held to them).
+// usage: prover_setup <kit folder>
+// Build (from the patched tree's prover/ folder): c++ -std=c++17 -O2 -DBLK_FIELD=2 -DBLK_HASH=1
+//   -I . -I ../blocks prover_setup.cpp
+#include "common/field_host.h" // u32 and u64, as the prover's build has them before plan.cuh
+#include "prover/policy.h"
+#include "attn/plan.cuh"
+#include "frame/hiding_conditions.h"
+#include "prover/layout.h"
+#include <map>
+#include <string>
+#include <vector>
+
+static int log2_ceil(size_t x) { // l2i() of prover/hiding/tail.cuh
+  int l = 0;
+  while (((size_t)1 << l) < x) l++;
+  return l;
+}
+
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    printf("usage: prover_setup <kit folder>\n");
+    return 2;
+  }
+  const std::string kit = argv[1];
+  Policy policy;
+  if (!policy.read(kit + "/policy.txt")) return 2;
+  if (const std::string why = s8::set(policy.frame); !why.empty()) {
+    printf("policy: %s\n", why.c_str());
+    return 2;
+  }
+  const std::string missed = blk::hiding_conditions_missed_by_the_file(policy.frame);
+  printf("hiding conditions that follow from the file alone: %s\n", missed.empty() ? "met" : missed.c_str());
+  const int lt = policy["lt"], Lr = policy["L"], ll = policy["ll"], d = policy["d"], f = policy["f"];
+  const int la = policy["la"], nmin = policy["nmin"], D = policy["D"], H = policy["H"], Gk = policy["G"];
+  const int dh = policy["dh"], NE = policy["NE"], fe = policy["fe"], xl = (int)policy.value("xl");
+  const int Lam = 1 << ll, NGr = Lr / Lam, ldh = log2_ceil(dh), mo = NE > 0, KLW = 13;
+  identity_cap() = (int)policy.value("lidb");
+  if (identity_cap() > EIDB) { // read_inputs()
+    printf("policy: plan-identity-cap: lidb %d is above this build's EIDB %d\n", identity_cap(), EIDB);
+    return 2;
+  }
+  std::vector<u32> KL;
+  {
+    size_t words = (size_t)KLW * Lr;
+    for (int l = 0; l < Lr; l++) words += moe_at_layer(mo ? 3 : 2, l) ? 3 : 0;
+    KL.assign(words, 0);
+    FILE *kf = fopen((kit + "/KL.bin").c_str(), "rb");
+    const bool whole = kf && fread(KL.data(), 4, KL.size(), kf) == KL.size() && fgetc(kf) == EOF;
+    if (kf) fclose(kf);
+    if (!whole) { // read_inputs()
+      printf("layer constants: KL.bin is not 13 words per layer plus 3 per layer with experts\n");
+      return 2;
+    }
+    for (int l = 0; l < Lr; l++) // read_inputs()
+      if (KL[(size_t)KLW * l + 11] < 4 || KL[(size_t)KLW * l + 11] > 12) {
+        printf("layer constants: af-policy-sh: layer %d: word 11, attention's shift, must be from 4 to 12\n", l);
+        return 2;
+      }
+  }
+  // Attention: one plan for each distinct list of the groups' shifts (other_setup.cuh).
+  std::map<std::vector<int>, int> plans;
+  for (int g = 0; g < NGr; g++) {
+    std::vector<int> sh;
+    for (int lam = 0; lam < Lam; lam++) sh.push_back((int)KL[(size_t)KLW * (g * Lam + lam) + 11]);
+    if (plans.count(sh)) continue;
+    APlan P;
+    AP &p = P.p;
+    p.lt = lt;
+    p.lB = policy["lB"];
+    p.H = H;
+    p.lgk = log2_ceil(Gk);
+    p.ldh = ldh;
+    p.ll = ll;
+    p.S = policy["S"];
+    p.rx = policy["rx"];
+    p.kFM = policy["kFM"];
+    p.kFD = policy["kFD"];
+    p.D = D;
+    p.lmS = policy["lmS"];
+    p.lwH = (int)policy["lmh"] - lt;
+    p.lwO = (int)policy["lmo"] - lt;
+    p.lwQ = (int)policy["lmq"] - lt;
+    p.la = la;
+    p.lmb = policy["lmbA"];
+    p.nmin = nmin;
+    p.iota = policy["iotaA_0"];
+    P.sh = sh;
+    P.form = 3;
+    if (p.D != 2048) { // AForkHid::setup(), prover/attn/fork.cuh
+      printf("attention: this prover supports only the ring degree D = 2,048\n");
+      return 2;
+    }
+    P.build();
+    int shm = 0; // a_forward_ok(), prover/attn/forward.cuh
+    for (int s : P.sh) shm = std::max(shm, s);
+    if (!((p.dh == 32 || p.dh == 64 || p.dh == 128) && p.lt >= 6 && p.lt <= 15 && p.lB >= 4 && p.S <= 14 &&
+          4 * p.Smax + ((I64)p.u0 << shm) < ((I64)1 << 32) && p.Lam <= 16)) {
+      printf("attention: the forward pass does not support this shape (a_forward_ok)\n");
+      return 2;
+    }
+    if (P.dT < std::max(p.lmS, p.lt + p.ldh)) { // AFront::plan(), prover/attn/front.cuh
+      printf("policy: forest-depth-A: a tree has 2^%d keys, fewer than 2^%d\n", P.dT, std::max(p.lmS, p.lt + p.ldh));
+      return 2;
+    }
+    if (p.iota != 32 + P.dT) { // AFront::plan()
+      printf("policy: policy-iotaA: the line iotaA_0 must be 32 + %d; it is %d\n", P.dT, p.iota);
+      return 2;
+    }
+    plans[sh] = P.dT;
+  }
+  // Layers: one layout per group (layer_setup.cuh, Prover::g_setup_layout()).
+  std::string lists;
+  for (auto &c : policy.cl) {
+    lists += c.name + ":";
+    for (size_t i = 0; i < c.seg.size(); i++) lists += (i ? "," : "") + c.seg[i];
+    lists += ";";
+  }
+  lists.pop_back();
+  for (int g = 0; g < NGr; g++) {
+    LayerShape S{lt,
+                 ll,
+                 d,
+                 H,
+                 Gk,
+                 dh,
+                 f,
+                 fe,
+                 mo ? NE : 0,
+                 {(int)KL[7], (int)KL[9]},
+                 {(int)KL[8], (int)KL[10]},
+                 {(long long)(policy["eps1_lo"] | ((u64)policy["eps1_hi"] << 32)),
+                  (long long)(policy["eps2_lo"] | ((u64)policy["eps2_hi"] << 32))},
+                 g,
+                 mo ? 3 : 2,
+                 nmin,
+                 la};
+    S.hqk = policy["hq"]; // Prover::digit_forms(), prover/prover/prover.h
+    S.hv = policy["hv"];
+    S.ho = policy["ho"];
+    S.hg = policy["hgD"];
+    S.hu = policy["huD"];
+    S.hdn = policy["hdD"];
+    S.hr = mo ? (int)policy["hr"] : 0;
+    S.rcl = policy.m.count("rcl") ? 1 : 0;
+    S.gcl = policy.m.count("gcl") ? 1 : 0;
+    S.xl = xl;
+    S.att = 1;
+    S.lists = lists.c_str();
+    make_layer_layout(S);
+  }
+  printf("prover set-up: admitted (%d layer groups, %zu attention plans, kFM %u, kFD %u)\n", NGr, plans.size(),
+         policy["kFM"], policy["kFD"]);
+  return 0;
+}
