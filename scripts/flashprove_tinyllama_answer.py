@@ -16,10 +16,13 @@ them), applies the three pinned patches and scales.patch, and then requires, in 
    only;
 3. the patched verifier's planner admits the kit in the standard parameter form, for the whole kit
    and for SASH's request, with the pinned h_par and configuration; the unpatched one refuses it
-   (policy-tables); the provers' parameter-file reader admits it; and the part of cp_prove's set-up
-   that needs only the kit, run on a CPU with upstream's code (tinyllama/prover_setup.cpp: the
-   plan of attention of each layer group and each group's layer layout), admits it, while the
-   same kit with kFM one higher is refused by the plan of attention;
+   (policy-tables); the provers' parameter-file reader admits it; and the part of cp_commit's and
+   cp_prove's set-up that needs only the kit, run on a CPU with upstream's code
+   (tinyllama/prover_setup.cpp: the weight table's parameters for W's rows, the plan of attention
+   of each layer group and each group's layer layout), admits it, while the same kit with kFM one
+   higher is refused by the plan of attention and with one step less of the table's message
+   entries by the table's own check; the kit's line table must be the one that
+   tinyllama_plan.table_numbers() gives for the rows that upstream's layoutW() counts;
 4. upstream's scale-tool tests pass on the patched tree, run as SUITE.md runs its two scales rows
    (the other two tests have no row); status 77 means passed in part: this target builds no
    make_model and sets no SMALL_MODEL, so those cases skip;
@@ -64,6 +67,9 @@ from run_e2e import write_json
 from run_llm_e2e import fetch, require
 
 ROOT, PROBE = ft.ROOT, ft.PROBE
+sys.path.insert(0, str(PROBE))
+import tinyllama_plan  # noqa: E402
+
 KIT_DIR = PROBE / "kit"
 KIT = json.loads((PROBE / "kit.json").read_text())
 CASE_PATH = ROOT / KIT["model"]["case"]
@@ -440,22 +446,63 @@ def check_planning(tree, output, verifiers):
     last = text.rstrip().splitlines()[-1] if text.strip() else ""
     require(code == 0 and last.startswith("prover set-up: admitted"), f"cp_prove's set-up: {last}")
     hiding = next(x for x in text.splitlines() if x.startswith("hiding conditions"))
-    control = output / "kit-kFM-plus-1"
-    control.mkdir()
-    shutil.copyfile(folder / "KL.bin", control / "KL.bin")
     policy = (folder / "policy.txt").read_text().splitlines()
-    kfm = next(int(x.split(" ")[1]) for x in policy if x.startswith("kFM "))
-    (control / "policy.txt").write_text(
-        "".join((f"kFM {kfm + 1}" if x.startswith("kFM ") else x) + "\n" for x in policy)
-    )
-    code, text = ft.stdout_of([setup, control], output / "prover-setup-kFM-plus-1.log")
-    refused = text.rstrip().splitlines()[-1] if text.strip() else ""
+    # The weight table: upstream's layoutW() and HfParams::from_policy() admit the kit's line
+    # table, W has the rows that tinyllama_plan.py sized it for, and the line is that rule's.
+    tables = [x for x in text.splitlines() if x.startswith("weight table: admitted (W: ")]
+    require(len(tables) == 1, "cp_commit's set-up of the weight table")
+    table, rows = table_of(policy)
     require(
-        code == 2 and refused.startswith("attention: the shift sh = "),
-        f"the control kFM + 1: {code} {refused}",
+        tables[0].startswith(f"weight table: admitted (W: {rows} rows of 2^{table[5]} columns "),
+        f"layoutW() gives other rows than {rows}: {tables[0]}",
     )
-    found["prover_setup"] = dict(kit=last, hiding=hiding, control_kFM_plus_1=refused)
+    require(
+        tinyllama_plan.table_numbers(rows, table[0], table[3], table[5]) == table,
+        "the kit's line table is not the rule's",
+    )
+
+    def control(name, change, wanted):
+        """The kit with one line changed must be refused by upstream's set-up code."""
+        folder_c = output / f"kit-{name}"
+        folder_c.mkdir()
+        shutil.copyfile(folder / "KL.bin", folder_c / "KL.bin")
+        (folder_c / "policy.txt").write_text("".join(change(x) + "\n" for x in policy))
+        code, text = ft.stdout_of([setup, folder_c], output / f"prover-setup-{name}.log")
+        refused = text.rstrip().splitlines()[-1] if text.strip() else ""
+        require(code == 2 and wanted in refused, f"the control {name}: {code} {refused}")
+        return refused
+
+    kfm = next(int(x.split(" ")[1]) for x in policy if x.startswith("kFM "))
+    refused = control(
+        "kFM-plus-1",
+        lambda x: f"kFM {kfm + 1}" if x.startswith("kFM ") else x,
+        "attention: the shift sh = ",
+    )
+    # One step of fi0 less leaves no room for a row's pads.
+    step = max(1 << (table[5] - table[0]), 1 << (table[3] - 1).bit_length())
+    short = " ".join(map(str, [*table[:2], table[2] - step, *table[3:]]))
+    too_short = control(
+        "table-one-step-short",
+        lambda x: "table " + short if x.startswith("table ") else x,
+        "policy-pad-place",
+    )
+    found["prover_setup"] = dict(
+        kit=last,
+        hiding=hiding,
+        weight_table=tables[0],
+        control_kFM_plus_1=refused,
+        control_table_one_step_short=too_short,
+    )
     return found
+
+
+def table_of(policy):
+    """The numbers of the kit's line table, and W's rows by tinyllama_plan.weight_rows()."""
+    table = tinyllama_plan.frame_numbers(policy, "table")
+    words = {
+        w[0]: int(w[1]) for w in (x.split(" ") for x in policy) if len(w) == 2 and w[1].isdigit()
+    }
+    return table, tinyllama_plan.weight_rows(words | {"table": table})
 
 
 # SUITE.md's rows for two of the tests: status 0, a pattern the last line must match, and patterns

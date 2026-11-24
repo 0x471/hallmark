@@ -88,6 +88,18 @@ def test_the_parameter_file_is_tinyllama_dense_and_fitted():
     assert words["e_res"] == KIT["e_res"] and words["theta"] == 10000
 
 
+def test_the_committed_table_is_sized_for_the_kit_s_weight_rows():
+    # The kit's line table is the rule's (tinyllama_plan.table_numbers()) for the rows of W that
+    # follow from the kit's own model lines; the answer target compares those rows with upstream's
+    # layoutW() and lets HfParams::from_policy() judge the line.
+    table, rows = answer.table_of(lines("policy.txt"))
+    assert rows == 10240
+    assert answer.tinyllama_plan.table_numbers(rows, table[0], table[3], table[5]) == table
+    assert table == [11, 24, 1376256, 65535, 0, 18]
+    # 2^(fb + fln) table entries: 2^35, against the full kit's 2^43.
+    assert table[0] + table[1] == 35
+
+
 def test_the_softmax_tables_fit_cp_prove_s_plan_of_attention_at_every_shift():
     # APlan::build() (prover/attn/plan.cuh) refuses a kit unless 0 <= 2^kFM - u0 - nHM <= nHM and
     # 0 <= 2^kFD - u0 - nHD <= nHD at every layer's attention shift; cp_verify does not read kFM.
