@@ -760,7 +760,7 @@ def check_worst_case(tree, output, pythons, model_dir):
         float_gate_keys=[round(x["key"], 1) for x in floats["layers"]],
         float_rows_beyond_the_limit=[x["rows_beyond_the_limit"] for x in floats["layers"]],
         rows_recomputed_exactly=port["rows_recomputed_exactly"],
-        port_sha256=sha(port_json),
+        # No hash of the port's file: it holds the run's seconds, so its hash cannot be recomputed.
         float_sha256=sha(float_json),
     )
 
