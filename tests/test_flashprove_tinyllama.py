@@ -371,8 +371,8 @@ def test_the_generator_writes_the_pinned_shape():
 
 # The same TinyLlama-shaped file without its digest lines, as the unpatched build plans it.
 UNMET_THREE = (
-    "plan: not the standard parameter form (routed-experts, both-clamps, table-digests): no run"
-    " with these public inputs can be a verification (at best status 14)"
+    "plan: not the standard parameter form (routed-experts, both-clamps, table-digests,"
+    " no-range-words): no run with these public inputs can be a verification (at best status 14)"
 )
 BARE = changed(THREE, [UNMET_THREE])
 WITHOUT_DIGESTS = harness.PINS["tinyllama_plan"]["unmet_without_digests"]

@@ -10,10 +10,13 @@ way the patched verifier/tests/served_form_test.py does for its dense case:
 - the shape lines become TinyLlama-1.1B's, with T = 64 tokens (lt 6);
 - NE 0 and hr 0, the expert-only weight widths 0, no rcl or gcl lines, and the router's and the
   clamps' segments taken out of the call lines;
+- the line eg 7, which verifier.patch admits in the standard form at NE 0 only: without gcl a gate's
+  key must fit two limbs, and eg 7 doubles the gate inputs that this covers;
 - iota_0 .. iota_7 refitted with upstream's verifier/tests/forest_lines.py;
-- the three table digests a dense model forms (no tsig), from upstream's scales/policy_tables.py.
-  It refuses NE 0, but no table's entries depend on NE (NE only decides whether the sigmoid table
-  is formed), so they are computed on a copy with NE 4; the verifier compares them with its own;
+- the three table digests a dense model forms (no tsig), from upstream's scales/policy_tables.py,
+  the SiLU table's for eg 7. It refuses NE 0, but no table's entries depend on NE (NE only decides
+  whether the sigmoid table is formed), so they are computed on a copy with NE 4; the verifier
+  compares them with its own;
 - KL.bin: the full kit's first 22 layer records, with rotary positions in every layer.
 
 Every other line is the full kit's, except the few that TinyLlama's shape forces, set in FORCED.
@@ -48,6 +51,7 @@ FORCED = {
     "ranges-part": 13,
 }
 BASE = "prover/examples/target_full_f2"
+GATE_KEY = "eg 7"  # a key c of the SiLU table means c / 2^7 (parameter-file.md, 9)
 MOE_SEGMENTS = {"XR", "LR", "LT", "DD", "LH", "SEL", "L3", "CLR", "MR", "G0", "CG"}
 
 
@@ -73,6 +77,10 @@ def policy(tree):
     for name, value in (SHAPE | DENSE | FORCED).items():
         put(lines, name, value)
     lines = [x for x in lines if x.split(" ")[0] not in ("rcl", "gcl")]
+    at = next(
+        i for i, x in enumerate(lines) if x.startswith("nminH ")
+    )  # eg comes directly after it
+    lines = lines[: at + 1] + [GATE_KEY] + lines[at + 1 :]
     calls = []
     for x in lines:
         if x.startswith("call "):

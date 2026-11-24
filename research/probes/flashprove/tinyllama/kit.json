@@ -1,7 +1,7 @@
 {
   "schema_id": "hallmark.flashprove-tinyllama-kit/1",
   "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
-  "patches_json_sha256": "38df89f40050b6fea68314edb6ea0959aa3182a166ef2c9dba5d27a8ac8aa523",
+  "patches_json_sha256": "a95a1c89cc29d76a7c7ede9bf1d742aeafa0382b427ea95b8828291b2547b2e0",
   "scales_patch": {
     "name": "scales.patch",
     "sha256": "73c42a3c16a6b7440f378b4703d312eb5d7f82a697f2bd6a051cbca4b3501c2c",
@@ -69,6 +69,7 @@
     }
   },
   "e_res": 11,
+  "eg": 7,
   "gguf": {
     "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
     "bytes": 2200293664,
@@ -79,14 +80,14 @@
     "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31",
     "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c"
   },
-  "base_policy_sha256": "84f867cd0e5d6217b14158b43862fd924f40d189a107750e0b8b604bfc2dd5b2",
+  "base_policy_sha256": "6caab1eb423a755d64d0d493b305cf193bb25e5ed9bd4b48fc76d464d07ebe70",
   "files": {
-    "policy.txt": "2af02e144eaa03ba3e23587f305d9bebdf8f56bad4f5b97a512f055e5c5ed602",
-    "KL.bin": "1658bb72676fd6b774c83ff163b3c24211a603a281f5df0644a9c966684d7282",
+    "policy.txt": "c708d034d652faf1ff45b3f5a01554a6db633006d048e92f3be7190207b79eff",
+    "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
     "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
     "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c",
     "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
-    "words.json": "3465d8977ab6c3d0dcc40a2ce27b35e6b4962c8e14bef2f8bc9bd9e94119bf81",
+    "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
     "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31"
   },
   "h_par": "df7a40e52e295044e1452e46e7f58bfed53b8abd4e0816dd7ae0ff16b60ddd09",
@@ -110,13 +111,8 @@
     "layer-10-kv-plus-1"
   ],
   "worst_case": {
-    "short": [
-      [
-        "gate",
-        21
-      ]
-    ],
+    "short": [],
     "ratio_tolerance": 0.001,
-    "note": "cp_commit's worst-case check computed on a CPU by worst_case_cpu.py (Hallmark's port of upstream's worst_case.cuh): the gate of layer 21 does not fit (one row; without the line gcl, which the verifier refuses at NE 0, its key's limit is 32,639). Recorded, not a condition of passing the target"
+    "note": "cp_commit's worst-case check computed on a CPU by worst_case_cpu.py (Hallmark's port of upstream's worst_case.cuh): every site fits at eg 7; at eg 8 the gate of layer 21 does not (one row; without the line gcl, which the verifier refuses at NE 0, its key's limit is 32,639)"
   }
 }

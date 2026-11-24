@@ -8,10 +8,12 @@ them), applies the three pinned patches and scales.patch, and then requires, in 
 
 1. the export: export_gguf.py writes the GGUF file with the pinned SHA-256;
 2. the kit, rebuilt by upstream's own route (scales/README.md, "A real model", steps 1 to 5) with
-   the patched tools: weight_sums, make_calibration_set.py --tinyllama, calibrate.py and
-   words_to_policy.py from check 6's dense base file, -plan arrays and pack_layout.py. Every kit
-   file but maxima.json must equal the committed kit (tinyllama/kit/) byte for byte; maxima.json,
-   whose last digits depend on the device and libraries, is compared and recorded only;
+   the patched tools: weight_sums, make_calibration_set.py --tinyllama, calibrate.py, then its
+   fit again at kit.json's eg (fit_eg.py, which at eg 8 must give calibrate.py's words.json byte
+   for byte), words_to_policy.py from check 6's dense base file, -plan arrays, pack_layout.py.
+   Every kit file but maxima.json must equal the committed kit (tinyllama/kit/) byte for byte;
+   maxima.json, whose last digits depend on the device and libraries, is compared and recorded
+   only;
 3. the patched verifier's planner admits the kit in the standard parameter form, for the whole kit
    and for SASH's request, with the pinned h_par and configuration; the unpatched one refuses it
    (policy-tables); the provers' parameter-file reader admits it;
@@ -25,12 +27,12 @@ them), applies the three pinned patches and scales.patch, and then requires, in 
    after SASH's 25 prompt tokens, in one window of 64 tokens with no failed range condition, and
    its logits follow the float logits (slope and correlation bounds in kit.json); two mutation
    controls (MF + 1, and one layer's kv + 1) must each fail at least one of these conditions;
-7. cp_commit's worst-case check, computed on a CPU and recorded: worst_case_cpu.py (Hallmark's port
-   of upstream's worst_case.cuh) on the kit and the GGUF file, and gate_float_bound.py on the float
-   weights. The verdict is not a condition of passing, but the sites that do not fit must be
-   kit.json's worst_case.short, and the two must agree on the gate: the same layers over the limit,
-   and in each layer the integer key bound must be the float one times the norm's ball radius over
-   2,048, within kit.json's tolerance.
+7. cp_commit's worst-case check, computed on a CPU: worst_case_cpu.py (Hallmark's port of
+   upstream's worst_case.cuh) on the kit and the GGUF file, and gate_float_bound.py on the float
+   weights. The sites that do not fit must be kit.json's worst_case.short (none: at eg 7 every site
+   fits), and the two must agree on the gate: the same layers over the limit, and in each layer the
+   integer key bound must be the float one times the norm's ball radius over 2,048, within
+   kit.json's tolerance.
 
 No commitment, proof or GPU run is made. Equal tokens show that the integer model agrees with
 SASH's answer on this request; they do not show that FlashProve's and SASH's integer functions are
@@ -284,7 +286,16 @@ def rebuild_kit(tree, output, pythons, model_dir, parquet, gguf_dir, expected, v
     code, _ = run(args, output / "calibrate.log", env=minimal_env(output))
     require(code == 0, "calibrate.py failed")
     found["calibrate_seconds"] = time.monotonic() - started
-    same(fit / "words.json", expected["words.json"], "words.json")
+    # calibrate.py fits at eg 8. fit_eg.py makes the same call at kit.json's eg; at eg 8 it must
+    # give calibrate.py's words.json byte for byte, which shows that it is that fit.
+    for eg, words in ((8, fit / "words-eg8.json"), (KIT["eg"], fit / "words-eg.json")):
+        args = [scales, "-s", "-B", PROBE / "fit_eg.py", tree, gguf_dir, gguf_dir / "wsums.txt"]
+        args += [fit / "maxima.json", KIT["e_res"], eg, words]
+        code, _ = run(args, output / f"fit-eg{eg}.log", env=minimal_env(output))
+        require(code == 0, f"fit_eg.py failed at eg {eg}")
+    eg8 = (fit / "words-eg8.json").read_bytes() == (fit / "words.json").read_bytes()
+    require(eg8, "fit_eg.py at eg 8 does not give calibrate.py's words.json")
+    same(fit / "words-eg.json", expected["words.json"], "words.json")
     found["maxima_equal_to_committed"] = (fit / "maxima.json").read_bytes() == expected[
         "maxima.json"
     ]
@@ -304,7 +315,7 @@ def rebuild_kit(tree, output, pythons, model_dir, parquet, gguf_dir, expected, v
         "-s",
         tree / "scales/words_to_policy.py",
         base / "policy.txt",
-        fit / "words.json",
+        fit / "words-eg.json",
     ]
     args += [gguf_dir / "wsums.txt", config / "policy.txt", config / "KL.bin"]
     code, text = run(args, output / "words_to_policy.log", env=minimal_env(output))
@@ -641,7 +652,8 @@ def check_worst_case(tree, output, pythons, model_dir):
     args += [output / "integer-model-kit", output / "integer-model-kit-digests.json", port_json]
     code, _ = run(args, output / "worst-case-cpu.log", env=env)
     require(code == 0, "worst_case_cpu.py failed")
-    args = [pythons["scales"][0], "-I", "-B", PROBE / "gate_float_bound.py", model_dir, float_json]
+    args = [pythons["scales"][0], "-I", "-B", PROBE / "gate_float_bound.py", model_dir, KIT["eg"]]
+    args += [float_json]
     code, _ = run(args, output / "gate-float-bound.log", env=minimal_env(output))
     require(code == 0, "gate_float_bound.py failed")
     port, floats = json.loads(port_json.read_text()), json.loads(float_json.read_text())

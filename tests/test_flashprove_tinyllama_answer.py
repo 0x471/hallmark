@@ -247,12 +247,13 @@ def test_suite_rows_are_applied_as_suite_md_defines_them():
     assert not answer.suite_passes("table_ties.py", 0, "")
 
 
-def a_worst_case(short=(("gate", 21),), ratio=1.0, floats_over=(21,)):
+def a_worst_case(short=(), ratio=1.0, floats_over=(), key_21=22703.0):
+    """A port result and a float result as for the kit at eg 7: every site fits."""
     radius = 2141.6
     port = dict(short=[list(x) for x in short], layers=[])
     floats = dict(layers_over_the_limit=list(floats_over), layers=[])
     for layer in range(22):
-        key = 45406.0 if layer == 21 else 10000.0
+        key = key_21 if layer == 21 else 7000.0
         floats["layers"].append(dict(layer=layer, key=key))
         port["layers"].append(
             dict(layer=layer, ball_2=radius, gate_key_bound=key * radius / 2048 * ratio)
@@ -261,11 +262,13 @@ def a_worst_case(short=(("gate", 21),), ratio=1.0, floats_over=(21,)):
 
 
 def test_worst_case_findings_require_kit_json_and_two_agreeing_computations():
-    assert KIT["worst_case"]["short"] == [["gate", 21]]
+    assert KIT["eg"] == 7 and KIT["worst_case"]["short"] == []
     assert answer.worst_case_findings(*a_worst_case()) == []
-    assert answer.worst_case_findings(*a_worst_case(short=()))  # the record changed
-    assert answer.worst_case_findings(*a_worst_case(short=(("gate", 21), ("up", 3))))
-    assert answer.worst_case_findings(*a_worst_case(floats_over=()))  # the float bound disagrees
+    # A site that does not fit, as at eg 8 (the gate of layer 21), fails the target.
+    at_eg8 = dict(short=(("gate", 21),), floats_over=(21,), key_21=45406.0)
+    assert answer.worst_case_findings(*a_worst_case(**at_eg8))
+    assert answer.worst_case_findings(*a_worst_case(short=(("up", 3),)))
+    assert answer.worst_case_findings(*a_worst_case(floats_over=(21,)))  # the float bound disagrees
     assert answer.worst_case_findings(*a_worst_case(ratio=1.01))  # beyond the tolerance
     assert answer.worst_case_findings(*a_worst_case(ratio=float("nan")))
     port, floats = a_worst_case()

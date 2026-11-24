@@ -302,7 +302,7 @@ def main(model_dir, digests_path, out_json):
     ]
     if any(words[i][n] != getattr(p.layers[i], n) for i in range(p.L) for n in LAYER_WORDS):
         raise SystemExit("KL.bin's words differ from the integer model's")
-    for name in ("eg", "smax", "rcl", "dcl", "gcl"):
+    for name in ("smax", "rcl", "dcl", "gcl"):
         if name in policy:
             raise SystemExit(f"this port does not cover the line {name}")
     if "cw" in policy and policy["cw"] != ["12"]:
@@ -310,11 +310,12 @@ def main(model_dir, digests_path, out_json):
     if (policy["cs"], policy["ut"], policy["prof"]) != (["12"], ["1"], ["20"]):
         raise SystemExit("the check supports only cs 12, ut 1 and prof 20")
     xl = int(policy["xl"][0]) if "xl" in policy else 4
-    if (p.NX, p.eg, p.smax, p.gate_clamp, p.router_clamp) != (xl, 8, 4095, False, False):
+    eg = int(policy["eg"][0]) if "eg" in policy else GATE_KEY_BITS
+    if (p.NX, p.eg, p.smax, p.gate_clamp, p.router_clamp) != (xl, eg, 4095, False, False):
         raise SystemExit("the parameter file's xl, eg, smax, gcl or rcl is not as read here")
     eps1, eps2, epsF, MF, KF = p.eps1, p.eps2, p.epsF, p.MF, p.KF
     d, dh, H, G, f, box = p.d, p.dh, p.n_h, p.n_g, p.f, CELL_TOP
-    table = gate_most()
+    table = gate_most(eg)
     half = div_up(sqrt_up(float(d)), 2.0)
     half_dh = div_up(sqrt_up(float(dh)), 2.0)
     turn = sqrt_up(4096.0 * 4096.0 + 5794.0)
@@ -463,6 +464,7 @@ def main(model_dir, digests_path, out_json):
         program="research/probes/flashprove/tinyllama/worst_case_cpu.py",
         port_of="prover/weights_commitment/worst_case.cuh at upstream 9e2bdd8",
         xl=xl,
+        eg=eg,
         short=sorted([r["site"], r["layer"]] for r in lines if r["shortfall"]),
         row_sites_fit=all(not r["shortfall"] for r in lines if r["site"] in ROW_SITES),
         public_sites_fit=all(not r["shortfall"] for r in lines if r["site"] in PUBLIC_SITES),

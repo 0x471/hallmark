@@ -8,8 +8,8 @@
   ],
   "patches": {
     "verifier.patch": {
-      "sha256": "b78c47e5d552a22c6174d2449e0bb165badc7d9c552db744bf424fbf7e524f8d",
-      "bytes": 14123
+      "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0",
+      "bytes": 16739
     },
     "prover.patch": {
       "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1",
@@ -20,7 +20,7 @@
       "bytes": 37858
     }
   },
-  "verifier_source_digest": "6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52",
+  "verifier_source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
   "fold_constants": {
     "5120,128": [
       "0x3F8F1BBD",
@@ -36,7 +36,10 @@
     "routed-experts.dense-three-digests",
     "routed-experts.dense-three-silu-altered",
     "routed-experts.dense-three-rope-altered",
-    "routed-experts.dense-three-exp-altered"
+    "routed-experts.dense-three-exp-altered",
+    "no-range-words.dense-eg-7",
+    "no-range-words.dense-eg-6",
+    "no-range-words.dense-eg-7-smax"
   ],
   "weight_sums_oracle_cases": [
     [
@@ -66,8 +69,8 @@
       "V": 32000,
       "theta0_lo": 10000
     },
-    "h_par": "252ffdf7478c1d69609b5412dd1a540d66aac0916fd29298da52a5cbcc6cb8b9",
-    "configuration": "f7fd2f25691d8c4712549b600d541add91c0aa669892d26fcba552dab9b86ccc",
+    "h_par": "f09efa8377348b4e43505b163ffd08be795da5edfc37de029f024fe8545276fc",
+    "configuration": "83fa9ef04e8b3477165b5043be08fd3feda55d7902de37fce84f029ffc765254",
     "unmet_without_digests": {
       "patched": [
         "table-digests"
@@ -75,7 +78,8 @@
       "unpatched": [
         "routed-experts",
         "both-clamps",
-        "table-digests"
+        "table-digests",
+        "no-range-words"
       ]
     }
   }

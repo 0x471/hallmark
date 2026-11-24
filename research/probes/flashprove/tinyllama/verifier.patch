@@ -1,5 +1,5 @@
 diff --git a/verifier/src/cp_verify.cpp b/verifier/src/cp_verify.cpp
-index 18de720..dd421aa 100644
+index 18de720..bbabd02 100644
 --- a/verifier/src/cp_verify.cpp
 +++ b/verifier/src/cp_verify.cpp
 @@ -1,5 +1,7 @@
@@ -58,22 +58,28 @@ index 18de720..dd421aa 100644
    return y;
  }
  // Requested bits: an integer from 0 to 1,000,000. A program that links this unit passes a double.
-@@ -2395,8 +2407,13 @@ static int runStage(const StageInputs &in) {
+@@ -2395,9 +2407,18 @@ static int runStage(const StageInputs &in) {
          onePlacement = placedAlike(layoutH.find(l, "M" + std::to_string(linksH[l].tl->pxMat[i])),
                                     layoutH.find(0, "M" + std::to_string(linksH[0].tl->pxMat[i])));
      }
 +  // Hallmark dense patch: a model without routed experts (NE 0) can be in the standard form too. It
 +  // has no router, and the scan refuses the lines rcl and gcl at NE 0 (policy-rcl, policy-gcl), so
 +  // neither routed-experts nor both-clamps is asked of it; table-digests is met by the digests of the
-+  // three tables that it forms (polLayout()). Every other condition is asked as before.
++  // three tables that it forms (polLayout()). no-range-words is met at NE 0 by the line eg 7 too, and
++  // by no other eg and no smax: without gcl, which needs experts, a gate's key must fit two limbs (at
++  // most 32,639), and eg 7 doubles the gate inputs that this covers, at half the key's resolution
++  // (scales/worst_case.py: each step of eg below 8 raises a gate's limit by one bit). Every other
++  // condition is asked as before.
 +  const bool dense = h.NE == 0;
    string notServed =
 -      servedForm({h.NE > 0, residualStreamLimbs == 5, RCL && GCL, h.toksrc == 1, layoutP != nullptr,
+-                    tblAt == TBLW, !egSeen && !smaxSeen, h.Sx < 32, h.D == 2048, oneShift, onePlacement,
 +      servedForm({true /* routed-experts: met at NE 0 as well */, residualStreamLimbs == 5, (RCL && GCL) || dense, h.toksrc == 1, layoutP != nullptr,
-                     tblAt == TBLW, !egSeen && !smaxSeen, h.Sx < 32, h.D == 2048, oneShift, onePlacement,
++                    tblAt == TBLW, (!egSeen || (dense && gateTableInputFractionBits == 7)) && !smaxSeen, h.Sx < 32, h.D == 2048, oneShift, onePlacement,
                      h.Sx == 12 && h.rx == 8, rotaryServed(h.theta0, dh, h.lt),
                      normShifts, twoCodesH,
-@@ -2450,7 +2467,10 @@ static int runStage(const StageInputs &in) {
+                     !ask.nextTokenAsked || ((u64)so.r + 1 == T && so.e == T),
+@@ -2450,7 +2471,10 @@ static int runStage(const StageInputs &in) {
      if (RCL) printf("plan: the router's logits are clamped (line rcl)\n");
      if (GCL) printf("plan: the input of the SiLU table is clamped (line gcl)\n");
      if (residualStreamLimbs == 5) printf("plan: a value of the residual stream has five limbs (line xl)\n");
@@ -86,7 +92,7 @@ index 18de720..dd421aa 100644
               DW - 1);
      // The statement's length in words, and the place of y in it; words are counted from 0.
 diff --git a/verifier/src/vf_common.h b/verifier/src/vf_common.h
-index 6081a4e..15ec78d 100644
+index 6081a4e..f1140b4 100644
 --- a/verifier/src/vf_common.h
 +++ b/verifier/src/vf_common.h
 @@ -1,5 +1,7 @@
@@ -97,7 +103,7 @@ index 6081a4e..15ec78d 100644
  
  // Terms: docs/glossary.md.
  
-@@ -551,12 +553,13 @@ static constexpr bool TEST_BUILD = false;
+@@ -551,13 +553,14 @@ static constexpr bool TEST_BUILD = false;
  // a small example configuration, ends at best with NOT-A-VERIFICATION; a stage's second-to-last
  // line ("result:") lists the conditions that it finds unmet. A field is true if met.
  struct Served {
@@ -109,13 +115,15 @@ index 6081a4e..15ec78d 100644
    bool promptSource;   // toksrc 1
    bool placementTable; // the configuration directory contains a layout file
 -  bool tableDigests;   // the 4 DW lines for the digests of the four public tables
+-  bool noRangeWords;   // neither line eg nor smax
 +  bool tableDigests;   // the 4 DW lines for the digests of the four public tables (at NE 0: 3 DW,
 +                       // no tsig; Hallmark dense patch)
-   bool noRangeWords;   // neither line eg nor smax
++  bool noRangeWords;   // neither line eg nor smax; Hallmark dense patch: at NE 0 also eg 7 without smax
    bool threeBytes;     // three bytes for a remainder of the division in attention
    bool ringDegree;     // D = 2,048: the committed matrix's rows are rounded up to a multiple of D
+   bool oneShift;       // one attention shift per layer group: sh in KL.bin (quantization scales)
 diff --git a/verifier/tests/served_form_test.py b/verifier/tests/served_form_test.py
-index dddd15c..9695d7c 100755
+index dddd15c..3fcf2f6 100755
 --- a/verifier/tests/served_form_test.py
 +++ b/verifier/tests/served_form_test.py
 @@ -1,6 +1,7 @@
@@ -126,7 +134,7 @@ index dddd15c..9695d7c 100755
  
  # Terms: docs/glossary.md.
  
-@@ -31,10 +32,12 @@ met. "--list" prints every case with what it changes and what is expected, one o
+@@ -31,10 +32,14 @@ met. "--list" prints every case with what it changes and what is expected, one o
    - "met": exit status 4 and no line "plan: not ..": a control, which changes the same values and
      violates nothing (the case none.kit changes nothing).
  Conditions without a case in which that condition alone is not met:
@@ -140,14 +148,34 @@ index dddd15c..9695d7c 100755
 +    The four tables' lines are rejected at NE 0, and the three tables' lines above it
 +    (policy-tables). Cases show these
 +    rejections, the three digests compared one by one, and a dense kit that meets every condition;
++    at NE 0 the line eg 7 also meets no-range-words, and eg 6 and smax do not (cases with the SiLU
++    table's digest computed again for those lines);
    - prompt-source, three-bytes: the verifier rejects the files of their cases;
    - placement-table: without a layout file the planning call is rejected (plan-layout).
  Two parts of rotary-table have no case: lt (log2 of a request's tokens) at most 10, dh (a head's
-@@ -370,6 +373,12 @@ def the_cases(verifier, kit, work):
+@@ -370,6 +375,30 @@ def the_cases(verifier, kit, work):
          name, value = digests[i].split(" ")
          return with_digests(digests[:i] + ["%s %d" % (name, int(value) ^ 1)] + digests[i + 1 :])
  
 +    three = [x for x in digests if not x.startswith("tsig")]  # Hallmark dense patch: SiLU, RoPE, softmax
++
++    def three_for(*range_lines):
++        """Hallmark dense patch: the three digests (no tsig) of the kit with these lines eg, smax,
++        computed again by policy_tables.py on the kit, which has experts: the tables do not depend on NE."""
++        at = [i for i, x in enumerate(good) if x.startswith(before_eg + " ")][0]
++        lines = good[: at + 1] + list(range_lines) + good[at + 1 :]
++        return [x for x in tables_anew(lines, "range") if DIGEST.match(x) and not x.startswith("tsig")]
++
++    def dense_with(*range_lines):
++        """Hallmark dense patch: the dense kit (no_experts()) with these lines eg, smax before xl and
++        the three digests computed for them, before the line that follows the kit's digest lines."""
++        def make():
++            lines, words_kl, table = no_experts()
++            at = [i for i, x in enumerate(lines) if x.startswith("xl ")][0]
++            lines = lines[:at] + list(range_lines) + lines[at:]
++            at = [i for i, x in enumerate(lines) if x.startswith(behind_digests)][0]
++            return lines[:at] + three_for(*range_lines) + lines[at:], words_kl, table
++        return make
 +
 +    def flipped(lines, i):
 +        name, value = lines[i].split(" ")
@@ -156,7 +184,7 @@ index dddd15c..9695d7c 100755
      def kit_with(lines=None, words_kl=None, table=placed):
          return lambda: (good if lines is None else lines(), scales if words_kl is None else words_kl, table() if callable(table) else table)
  
-@@ -384,10 +393,17 @@ def the_cases(verifier, kit, work):
+@@ -384,10 +413,21 @@ def the_cases(verifier, kit, work):
          ("profile", "prof-19", "prof 19 and nothing else", kit_with(lambda: put("prof", 19)), 0, "policy-profile"),
          ("routed-experts", "NE-0", "NE 0 and nothing else", kit_with(lambda: put("NE", 0)), 0, "header-absent-class"),
          ("routed-experts", "dense", "NE 0 with all that follows from it: no router, no experts' weight kinds, no clamps, no digest lines; the layout file made again",
@@ -172,10 +200,14 @@ index dddd15c..9695d7c 100755
 +        ("routed-experts", "dense-three-exp-altered", "the same, one bit of the last word of the softmax table's digest", lambda: and_lines(no_experts, flipped(three, 23), behind_digests), 0, "table-digest-exp"),
 +        ("routed-experts", "dense-three-last-missing", "the same, the last of the three digests' lines missing", lambda: and_lines(no_experts, three[:-1], behind_digests), 0, "policy-tables"),
 +        ("routed-experts", "dense-sig-for-rope", "the same, the lines tsig in place of trope", lambda: and_lines(no_experts, digests[:16] + digests[24:], behind_digests), 0, "policy-tables"),
++        # Hallmark dense patch: at NE 0 the line eg 7 meets no-range-words; eg 6 and smax do not.
++        ("no-range-words", "dense-eg-7", "the dense kit with its three digests and a line eg 7, the SiLU table's digest computed for it", dense_with("eg 7"), 0, "met"),
++        ("no-range-words", "dense-eg-6", "the same with eg 6", dense_with("eg 6"), 0, ("no-range-words",)),
++        ("no-range-words", "dense-eg-7-smax", "the same with eg 7 and smax 2047", dense_with("eg 7", "smax 2047"), 0, ("no-range-words",)),
          ("five-limbs", "no-xl", "no line xl; the layout file made again", lambda: anew("five-limbs", put("xl", None), scales), 0, ("five-limbs",)),
          ("both-clamps", "no-gcl", "no line gcl, its two segments removed from the call lines, the lines iota_q fitted, the table digest lines computed again; the layout file made again",
           lambda: anew("both-clamps", tables_anew(forest_fitted(segments_out(put("gcl", None), "G0", "CG")), "gcl"), scales), 0, ("both-clamps",)),
-@@ -402,6 +418,7 @@ def the_cases(verifier, kit, work):
+@@ -402,6 +442,7 @@ def the_cases(verifier, kit, work):
          ("table-digests", "rope-altered", "one bit of a word of the rotary tables' digest", kit_with(lambda: altered(21)), 0, "table-digest-rope"),
          ("table-digests", "exp-altered", "one bit of the last word of the softmax table's digest", kit_with(lambda: altered(31)), 0, "table-digest-exp"),
          ("table-digests", "last-missing", "the last of the digest lines missing", kit_with(lambda: with_digests(digests[:-1])), 0, "policy-tables"),
