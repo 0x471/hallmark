@@ -3372,3 +3372,24 @@ this step, passed on both hosts (1,786 s and 367 s) with the same tokens and fig
 66-kit shift sweep, rerun with its committed script, gave the same 66 catches. Not shown: the GPU's
 own verdict, and the GPU's guards on its matrix products. No GPU, no spend.
 
+## 2026-11-24: eg 7 passes cp_commit's worst-case check (proposed)
+
+Hypothesis: with the SiLU table's key one bit coarser (`eg 7`), upstream's own remedy for a short
+gate (`scales/worst_case.py`), the TinyLlama kit passes `cp_commit`'s worst-case check at every
+site and still gives SASH's answer, provided that `verifier.patch` admits `eg 7` at NE 0
+(`no-range-words`). Pass criterion: both targets pass with the kit fitted at `eg 7`, the CPU
+worst-case check finds no site short, and the decisive check and its controls hold.
+
+Result: passed at `206c6c7` on Linux and macOS (the verify target at `551c8ff`, whose files it reads are the same). The fit at `eg 7` (`fit_eg.py`: `calibrate.py`'s call of
+`fit_scales.fit()` again at `eg 7`, which at `eg 8` gives `calibrate.py`'s `words.json` byte for
+byte) raises each layer's `kg` by one. Every worst-case site fits: the gate of layer 21 at a key of
+23,741 against 32,639 (0.46 bits to spare), the float bound putting it at 22,703. The decisive
+check: SASH's eight tokens, the gate's key at most 3,970, slopes 0.993 to 1.005, correlation at
+least 0.99909, the smallest top-1 margin 0.77 logits (0.86 at `eg 8`); `MF` + 1 and layer 10's `kv`
++ 1 are caught; the 66-kit shift sweep caught all 66 (4 by their tokens, the closest at 0.9963; 28
+would pass a floor of 0.99). The patched verifier's standard-form test passes with three new dense
+cases (`eg 7` met; `eg 6`, and `eg 7` with `smax`, not), and upstream's `eg 7` case with experts
+still misses `no-range-words`. An opt-in to leave the check out, tried before this on the branch,
+is dropped: no check is left out. Not shown: the GPU's own verdict on the check, any commitment or
+proof. No GPU, no spend.
+

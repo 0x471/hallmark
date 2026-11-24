@@ -1,6 +1,6 @@
 # Research state
 
-Updated: 2026-11-23. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
+Updated: 2026-11-24. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
 
 ## TinyLlama on FlashProve (dense-model patches) — proposed, CPU-checked
 
@@ -22,8 +22,15 @@ upstream's integer model with the kit gives SASH's eight answer tokens on SASH's
 ([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). The integer model is not a prover:
 no commitment or proof is made. `cp_commit`'s mandatory worst-case check, computed on a CPU by a port
 of upstream's code and checked against the float weights, refuses the kit at one gate row of layer
-21; no change of the kit's scales fixes that, and upstream's remedy (`gcl`) is refused at NE 0. Next:
-the owner chooses the change (decision 0094); then, with approval and a cap, commit and prove on a GPU.
+21 (at the default `eg 8`); no change of the scales fixes that, and upstream's remedy (`gcl`) is
+refused at NE 0.
+
+2026-11-24. The kit is fitted at `eg 7` instead, upstream's other remedy for a short gate (a key one
+bit coarser), which `verifier.patch` now admits at NE 0: every site of the worst-case check then fits,
+and the integer model still gives SASH's tokens. Both targets passed on Linux and macOS
+([patches](evidence/flashprove-tinyllama-2026-11-24.json),
+[kit and answer](evidence/flashprove-tinyllama-answer-2026-11-24.json)). Next, with owner approval
+and a cap: commit and prove on a GPU.
 
 ## SASH and FlashProve comparison — recorded
 

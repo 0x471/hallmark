@@ -18,7 +18,8 @@ recorded `maxima.json`), in environments from hash-locked requirement files, and
 that upstream's integer model gives SASH's eight answer tokens on SASH's prompt, with no failed range
 condition; it passed on Linux and macOS. It also computes `cp_commit`'s worst-case check on a CPU
 with a port of upstream's code, checked against a bound from the float weights: the kit fails it at
-one gate row of layer 21, so `cp_commit` would not commit this kit until the owner chooses a change.
+one gate row of layer 21 at the default `eg 8`; the kit is fitted at `eg 7` instead, which
+`verifier.patch` admits at NE 0, and then every site fits.
 No commitment or proof is made.
 
 Add FlashProve as a pinned external proof backend for Mixture-of-Experts models:
