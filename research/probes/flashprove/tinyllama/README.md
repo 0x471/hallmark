@@ -85,15 +85,22 @@ What a patched `YES` means that upstream's does not:
     Tensor sizes alone cannot tell dh 64 with H 32, G 4 from dh 128 with H 16, G 2.
 - **Three digests (P3).** The provers' parameter-file reader (`common/parameter_file.h`) takes the
   same two digest forms as the verifier, with the same rule.
-- **No change to the worst-case check.** `cp_commit` runs upstream's mandatory worst-case check, and
-  `cp_prove` requires `isk.txt`'s line `ranges`, as upstream does. An earlier revision of this patch
-  left the check out under `-public-weights`; a review found that this changed the default for
-  every `-public-weights` commitment, upstream's own Maverick route included, on the speculation
-  that the kit might fail the check. It was dropped (four files: `arguments.h`, `hf_commit.cu`,
-  `isk.cuh` and a comment in `cp_files.h` are upstream's again). Computed since on a CPU, the check
-  refuses the TinyLlama kit at one gate row, and no change of the kit's scales can fix that: see
-  "cp_commit's worst-case check, on a CPU" below. So with these patches `cp_commit` would make no
-  commitment of this kit; which change to make is the owner's call.
+- **An opt-in `-without-worst-case` (P4).** Upstream's `cp_commit` runs its worst-case check on
+  every commitment from model files, and `cp_prove` requires `isk.txt`'s line `ranges`. Computed on
+  a CPU, the check refuses the TinyLlama kit at one gate row, and no change of the kit's scales can
+  fix that ("cp_commit's worst-case check, on a CPU" below). So both programs get an option, in
+  production builds only, and only with `-public-weights`:
+  - `cp_commit -without-worst-case` (first form only, not with `-worst-case` or
+    `-worst-case-table`) leaves the check out, so `isk.txt` gets no line `ranges`, and says so;
+  - `cp_prove -without-worst-case` serves a commitment without that line; `read_isk()` already
+    takes `-public-weights` only together with `isk.txt`'s "seed public". A line `ranges` that is
+    there must still match.
+  - Without the option both programs behave as upstream's. Files: `weights_commitment/arguments.h`,
+    `hash_commitment/hf_commit.cu`, `prover/arguments.h`, `prover/isk.cuh` and a comment in
+    `common/cp_files.h`.
+  An earlier revision left the check out by default under `-public-weights`; a review found that
+  this changed the default for every such commitment, upstream's own Maverick route included, on
+  speculation. That was dropped; the option changes no default, and it rests on the CPU result.
 - **Not changed: `moe_at_layer`** (`prover/prover/layout.h`). It reads the prover's own profile,
   which is `mo ? 3 : 2` with `mo = NE > 0` (`prover/inputs.cuh`, `prover/layer_setup.cuh`). So at
   NE 0 no layer takes the MoE path, though the function itself does not test NE.
@@ -152,6 +159,7 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
 | fold constants in the 4 patched implementations | equal to each other, to the pins and to an exact derivation |
 | `weight_sums` (patched) against upstream's exact oracle | the same sums at 5,120/128 (seed 1) and 2,048/64 (seeds 1 and 100) |
 | a dense parameter file and `KL.bin` at TinyLlama-1.1B's shape, from [`tinyllama_plan.py`](tinyllama_plan.py) (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22 layers, vocabulary 32,000, rotary base 10,000, T = 64) | the patched build's planner (`-plan arrays`, `request`, `accounting`) admits it in the standard parameter form, with its three tables matching their digests. Both calls must print the planner's whole ending in upstream's order (the standard-form line can only be missing after it) and name the same files (`h_par`, `configuration`). The unpatched build refuses it with `policy-tables` alone, as its last line. Without its digest lines, the unpatched build finds exactly `routed-experts`, `both-clamps` and `table-digests` unmet, and the patched build only `table-digests`. The shape, `h_par` and `configuration` must equal the pins in `patches.json` |
+| `-without-worst-case` (P4), from [`option_rules.cpp`](option_rules.cpp) built on the host from the patched sources | `cp_commit`'s parser (serving and test builds): without the option the check runs as upstream's; with `-public-weights` the option leaves it out; it is refused without `-public-weights`, with `-worst-case` or `-worst-case-table`, in the second form and in a test build, each refusal beside a control that differs only by the option and is accepted. On Linux, `cp_prove`'s parser (serving build) takes it only with `-public-weights` (its headers need Linux, so macOS skips it) |
 
 **Current revision** (patched verifier digest `6f7ac148…`, the patch hashes in `patches.json`):
 **passed on Linux and on macOS** on 2026-11-23, every row above as required
@@ -365,14 +373,13 @@ What follows:
 - Upstream's remedy is the line `gcl 1`, which clamps the gate's key and raises its limit to
   4,194,175. The clamp is read from the sigmoid table (`FS`), which only a model with experts forms,
   and the verifier refuses `gcl` at NE 0 (`policy-gcl`); the patches keep that refusal.
-- So option 3 needs one more change before a commitment, and which is the owner's call (decision
-  0094): an explicit option to leave the check out under `-public-weights` (upstream gives weight hiding
-  as the check's reason, and with public weights nothing is hidden; soundness does not rest on it,
-  `scales/worst-case-bounds.md`; a request that drives that row past its range fails, with no proof); or `gcl` at NE 0, which
-  needs the sigmoid table there and so changes what the verifier checks in a proof, a much larger
-  patch. Padded option 2's standard form carries `gcl 1`, under which this row (a real input of
-  177.4: a key of about 45,400, plus its ball's slack) fits far within 4,194,175; the padded kit's
-  other sites have not been computed.
+- So the TinyLlama commitment is made with `-public-weights -without-worst-case` (P4 above).
+  Upstream gives weight hiding as the check's reason, and with public weights nothing is hidden;
+  soundness does not rest on it (`scales/worst-case-bounds.md`). What it costs is availability: a
+  request that drives that row past its range ends `failed` in `cp_prove`, with no proof. The
+  alternatives were larger: `gcl` at NE 0 needs the sigmoid table there and so changes what the
+  verifier checks in a proof; padded option 2's standard form carries `gcl 1`, under which this row
+  (a real input of 177.4) fits, but it measures a padded model of about 11.4 billion parameters.
 - Not covered: the GPU's guards on its matrix products, which can only make a site fail; and that
   `cp_commit`'s own conversion gives the integers read here (it is compared with `wsums.txt` only
   through that file). The port has not been compared with a GPU run.
@@ -392,9 +399,10 @@ What follows:
   - the prover rows `parameter_file_one_bits_test` and `parameter_file_one_place_test`.
 - **No TinyLlama commitment or proof.** The kit is fitted and the integer model gives SASH's answer
   on a CPU, but `cp_commit` and `cp_prove` have not run on it.
-  - `cp_commit`'s worst-case check, mandatory as upstream's, has not run on a GPU. Hallmark's CPU
-    port of it finds the kit short at one gate row (below), so `cp_commit` would make no commitment
-    (status 7). The GPU's own verdict is not known: the port has not been compared with it.
+  - `cp_commit`'s worst-case check has not run on a GPU. Hallmark's CPU port of it finds the kit
+    short at one gate row (above), so the commitment is to be made with `-without-worst-case`. The
+    GPU's own verdict is not known: the port has not been compared with it. Neither option has run
+    in a CUDA program; their rules are checked on the host (check 7).
   - Of the provers' rules, only their parameter-file reader has judged the kit (it admits it).
 - **The kit's proof-system lines are check 6's**, not sized for speed: the full kit's values, with
   the lines that TinyLlama's shape forces (`ll`, which 22 layers force from 2 to 1; `la`, `lB`,
@@ -415,10 +423,11 @@ What follows:
   arXiv:1609.07843), as in upstream's rule, at the revision upstream pins. Licence: CC BY-SA (its
   dataset card's tags name CC BY-SA 3.0 and GFDL, its text CC BY-SA 4.0). No text and no token id
   from it is committed, but numbers computed from it are: `kit/maxima.json`, `words.json`, `KL.bin`,
-  six lines of `policy.txt`, and the calibration set's SHA-256 in `kit.json`. The owner has not
-  cleared this source: the card's tags and its text name different versions, and
-  `research/AUTHORITY.json` excludes ambiguous licences. Until the owner decides, the kit and the
-  answer check are a proposal; a no means refitting on another text. The patches do not depend on it.
+  six lines of `policy.txt`, and the calibration set's SHA-256 in `kit.json`. The licence was
+  reviewed by the research agent, to which `research/AUTHORITY.json` delegates source selection and
+  licence review, not by the owner: the text is 2016 Wikipedia, under CC BY-SA 3.0 and GFDL (the
+  card's tags); the card's text names CC BY-SA 4.0, which CC BY-SA 3.0 section 4(b) allows for
+  adaptations, so the versions agree on what they permit and the licence is not ambiguous.
 - **The environments pin every distribution by hash, but not Python's patch version** (uv's choice
   of 3.13, which uv may download if the host has none; the runs had 3.13.2 and 3.13.15) nor uv's own
   version, and only for macOS arm64 and Linux x86_64. They are installed from PyPI and, for torch on

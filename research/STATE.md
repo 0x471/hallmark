@@ -8,7 +8,7 @@ Updated: 2026-11-23. Phase: MIT-licensed research software in a public repositor
 three pinned patches on FlashProve `9e2bdd8`
 ([`research/probes/flashprove/tinyllama/`](probes/flashprove/tinyllama/README.md)). They let a dense model
 such as TinyLlama-1.1B reach the verifier's standard form, give the provers and CPU tools the
-constants for width 2,048, and keep upstream's mandatory worst-case check.
+constants for width 2,048, and keep upstream's worst-case check as the default.
 `make verify-flashprove-tinyllama` checks them on the CPU and passed on Linux and macOS, including
 a TinyLlama-shaped planning check with placeholder scales; the prover patch compiles with nvcc
 ([evidence](evidence/flashprove-tinyllama-2026-11-23.json); the 2026-11-22 revision, which skipped
@@ -22,8 +22,10 @@ upstream's integer model with the kit gives SASH's eight answer tokens on SASH's
 ([evidence](evidence/flashprove-tinyllama-answer-2026-11-23.json)). The integer model is not a prover:
 no commitment or proof is made. `cp_commit`'s mandatory worst-case check, computed on a CPU by a port
 of upstream's code and checked against the float weights, refuses the kit at one gate row of layer
-21; no change of the kit's scales fixes that, and upstream's remedy (`gcl`) is refused at NE 0. Next:
-the owner chooses the change (decision 0094); then, with approval and a cap, commit and prove on a GPU.
+21; no change of the kit's scales fixes that, and upstream's remedy (`gcl`) is refused at NE 0. So
+`prover.patch` adds an opt-in `-without-worst-case` to `cp_commit` and `cp_prove`, for public weights
+only, which leaves the check out and changes no default; its option rules are checked on the host.
+Next, with owner approval and a cap: commit with `-public-weights -without-worst-case` and prove on a GPU.
 
 ## SASH and FlashProve comparison — recorded
 

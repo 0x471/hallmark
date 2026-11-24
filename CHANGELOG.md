@@ -7,7 +7,7 @@ Propose dense TinyLlama on pinned FlashProve
 under `research/probes/flashprove/tinyllama/` and `make verify-flashprove-tinyllama`, a CPU check that runs
 upstream's stored proofs and altered copies through the unpatched and the patched verifier and
 requires equal results. It also checks that a TinyLlama-shaped parameter file passes the patched
-verifier's planner. The prover patch keeps upstream's mandatory worst-case check; it compiles with
+verifier's planner. The prover patch keeps upstream's worst-case check as the default; it compiles with
 nvcc 13.2.86 but has not run, and no TinyLlama proof exists. `make verify-flashprove` (decision 0093) is unchanged.
 
 Fit a TinyLlama-1.1B kit for the proposed patches: `scales.patch` lets upstream's scale tools read a
@@ -18,7 +18,8 @@ recorded `maxima.json`), in environments from hash-locked requirement files, and
 that upstream's integer model gives SASH's eight answer tokens on SASH's prompt, with no failed range
 condition; it passed on Linux and macOS. It also computes `cp_commit`'s worst-case check on a CPU
 with a port of upstream's code, checked against a bound from the float weights: the kit fails it at
-one gate row of layer 21, so `cp_commit` would not commit this kit until the owner chooses a change.
+one gate row of layer 21; `prover.patch` therefore adds an opt-in `-without-worst-case`, for public
+weights only, that leaves the check out, and the verify target checks its option rules.
 No commitment or proof is made.
 
 Add FlashProve as a pinned external proof backend for Mixture-of-Experts models:
