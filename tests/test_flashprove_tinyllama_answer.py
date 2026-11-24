@@ -5,6 +5,7 @@ No file is fetched and no model runs: `make verify-flashprove-tinyllama-answer` 
 
 import hashlib
 import json
+import math
 import re
 import struct
 import sys
@@ -85,6 +86,22 @@ def test_the_parameter_file_is_tinyllama_dense_and_fitted():
     # eps = d * 1e-5 * 4^e_res, rounded, by the converter's exact formula
     assert words["eps1"] == (2 * 2048 * 4 ** KIT["e_res"] + 100000) // 200000
     assert words["e_res"] == KIT["e_res"] and words["theta"] == 10000
+
+
+def test_the_softmax_tables_fit_cp_prove_s_plan_of_attention_at_every_shift():
+    # APlan::build() (prover/attn/plan.cuh) refuses a kit unless 0 <= 2^kFM - u0 - nHM <= nHM and
+    # 0 <= 2^kFD - u0 - nHD <= nHD at every layer's attention shift; cp_verify does not read kFM.
+    v = {k: int(x) for k, x in values("policy.txt").items() if x.isdigit()}
+    u0 = 0  # the length of APlan::expTable(S, rx)
+    while round(math.ldexp(math.exp(-u0 / 2 ** v["rx"]), v["S"] % 32)) >= 1:
+        u0 += 1
+    smax = v["dh"] * 2047**2
+    shifts = {row["sh"] for row in json.loads((PROBE / "kit/words.json").read_text())["KL"]}
+    for sh in shifts:
+        rho = 65536 - 2**sh
+        for name, times in (("kFM", 2), ("kFD", 4)):
+            n = (times * smax + rho) // rho
+            assert 0 <= 2 ** v[name] - u0 - n <= n, (name, sh)
 
 
 def test_kl_bin_holds_the_fitted_words_of_every_layer():

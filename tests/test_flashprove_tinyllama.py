@@ -369,6 +369,15 @@ def test_the_generator_writes_the_pinned_shape():
     assert shape == harness.PINS["tinyllama_plan"]["shape"]
 
 
+def test_the_generator_sets_the_softmax_tables_rows_by_cp_prove_s_rule():
+    import tinyllama_plan
+
+    # The upstream kits in prover/examples (head width 128) have kFM 15 and kFD 16; the same rule
+    # gives one less of each at TinyLlama's head width 64.
+    assert tinyllama_plan.softmax_rows(dict(S=12, rx=8, dh=128)) == dict(kFM=15, kFD=16)
+    assert tinyllama_plan.softmax_rows(dict(S=12, rx=8, dh=64)) == dict(kFM=14, kFD=15)
+
+
 # The same TinyLlama-shaped file without its digest lines, as the unpatched build plans it.
 UNMET_THREE = (
     "plan: not the standard parameter form (routed-experts, both-clamps, table-digests,"

@@ -12,6 +12,8 @@ way the patched verifier/tests/served_form_test.py does for its dense case:
   clamps' segments taken out of the call lines;
 - the line eg 7, which verifier.patch admits in the standard form at NE 0 only: without gcl a gate's
   key must fit two limbs, and eg 7 doubles the gate inputs that this covers;
+- kFM and kFD, the log2 of the rows of the two tables that hold the softmax table, set by the rule
+  of cp_prove's plan of attention (softmax_rows());
 - iota_0 .. iota_7 refitted with upstream's verifier/tests/forest_lines.py;
 - the three table digests a dense model forms (no tsig), from upstream's scales/policy_tables.py,
   the SiLU table's for eg 7. It refuses NE 0, but no table's entries depend on NE (NE only decides
@@ -24,6 +26,7 @@ The scales and those lines are placeholders for planning, not a fitted kit: they
 verifier's planner admits this shape, not that a proof can be made with them. It reads no weights.
 """
 
+import math
 import struct
 import sys
 from pathlib import Path
@@ -40,7 +43,6 @@ FORCED = {
     "la": 12,  # la - lt stays the full kit's 6 (16 - 10); 2^6 divides d, f, G dh and (H + G) dh
     "lB": 4,  # at most lt - 2 (af-shape-tiles); the full kit's 6 is above it
     "lmS": 12,  # at most log2 G + lt + lB = 2 + 6 + 4 (af-shape-lmS); the full kit's is 16
-    "kFD": 15,  # the softmax table's rows must fit 2^kFD with little room to spare (af-policy-kF)
     "iotaA_0": 52,  # 32 + dT of the attention forest, dT 20 at this shape (policy-iotaA)
     "iotaH_0": 0,  # n - dT of the output head's calls, 0 at V 32000 (shape-call-H-*)
     "iotaH_1": 0,
@@ -53,6 +55,27 @@ FORCED = {
 BASE = "prover/examples/target_full_f2"
 GATE_KEY = "eg 7"  # a key c of the SiLU table means c / 2^7 (parameter-file.md, 9)
 MOE_SEGMENTS = {"XR", "LR", "LT", "DD", "LH", "SEL", "L3", "CLR", "MR", "G0", "CG"}
+
+
+def softmax_rows(words):
+    """kFM and kFD: for each, the one k with u0 + n <= 2^k <= u0 + 2 n at every attention shift sh
+    from 4 to 12, where n is nHM (kFM) or nHD (kFD). cp_prove's plan of attention refuses a file
+    that misses it at a layer's shift (APlan::build(), prover/attn/plan.cuh); cp_verify checks it
+    for kFD only (af-policy-kF) and does not read kFM. u0 is the length of the exponential table
+    (APlan::expTable()), nHM = (2 Smax + rho) // rho and nHD = (4 Smax + rho) // rho with
+    Smax = dh 2047^2 and rho = 65536 - 2^sh (APlan::shd())."""
+    s, rx, smax = words["S"] % 32, words["rx"], words["dh"] * 2047 * 2047
+    u0 = 0
+    while round(math.ldexp(math.exp(-u0 / (1 << rx)), s)) >= 1:  # nearbyint: half to even
+        u0 += 1
+    rows = {}
+    for name, times in (("kFM", 2), ("kFD", 4)):
+        sizes = [(times * smax + rho) // rho for rho in (65536 - (1 << sh) for sh in range(4, 13))]
+        fits = [k for k in range(31) if all(u0 + n <= 1 << k <= u0 + 2 * n for n in sizes)]
+        if len(fits) != 1:
+            sys.exit(f"tinyllama_plan.py: {name}: {len(fits)} values fit every shift")
+        rows[name] = fits[0]
+    return rows
 
 
 def put(lines, name, value):
@@ -75,6 +98,11 @@ def policy(tree):
     forest_lines, policy_tables = upstream(tree)
     lines = (tree / BASE / "policy.txt").read_text().splitlines()
     for name, value in (SHAPE | DENSE | FORCED).items():
+        put(lines, name, value)
+    words = {
+        w[0]: int(w[1]) for w in (x.split(" ") for x in lines) if len(w) == 2 and w[1].isdigit()
+    }
+    for name, value in softmax_rows(words).items():
         put(lines, name, value)
     lines = [x for x in lines if x.split(" ")[0] not in ("rcl", "gcl")]
     at = next(

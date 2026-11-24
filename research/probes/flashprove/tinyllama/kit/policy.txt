@@ -94,7 +94,7 @@ seed_hi 0
 lB 4
 S 12
 rx 8
-kFM 15
+kFM 14
 kFD 15
 lmS 12
 NAs 1
