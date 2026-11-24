@@ -69,8 +69,9 @@
       "V": 32000,
       "theta0_lo": 10000
     },
-    "h_par": "bc61522eeb44d377692e062f06f8cca36675b0135e13f3031eea39db0f430ff9",
-    "configuration": "2e5261bc77d344eb2f062e69a3ccf80613b0756603f3135edb39ea1ef90f430f",
+    "table": "table 11 24 1376256 65535 0 18",
+    "h_par": "0f6cc99a523961a164d05ce3b7ccc58778dbf7595f84be39348d521c735527f8",
+    "configuration": "9ac96c0fa1613952e35cd06487c5ccb759f7db7839be845f1c528d34f8275573",
     "unmet_without_digests": {
       "patched": [
         "table-digests"

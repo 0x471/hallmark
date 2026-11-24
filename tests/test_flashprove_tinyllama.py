@@ -378,6 +378,78 @@ def test_the_generator_sets_the_softmax_tables_rows_by_cp_prove_s_rule():
     assert tinyllama_plan.softmax_rows(dict(S=12, rx=8, dh=64)) == dict(kFM=14, kFD=15)
 
 
+# Upstream's example kits at the pinned commit: the model lines that decide W's rows, the rows
+# that upstream's code names (59,392 and 3,076,096: prover/hash_commitment/hf_opening_params.h,
+# toy_shape() and full()), and each kit's line `table`.
+UPSTREAM_KITS = {
+    "target_small_f2": (
+        dict(prof=20, L=8, d=512, H=4, G=2, dh=128, f=1024, fe=512, NE=4, V=512, D=2048),
+        59392,
+        [8, 23, 524288, 65535, 0, 11],
+    ),
+    "target_small_file_f2": (
+        dict(prof=20, L=4, d=5120, H=40, G=8, dh=128, f=2048, fe=1024, NE=16, V=2048, D=2048),
+        114688,
+        [8, 26, 7864320, 524287, 0, 14],
+    ),
+    "target_full_f2": (
+        dict(prof=20, L=48, d=5120, H=40, G=8, dh=128, f=16384, fe=8192, NE=128, V=202048, D=2048),
+        3076096,
+        [11, 32, 402653184, 44040191, 0, 18],
+    ),
+}
+TINYLLAMA_TABLE = [11, 24, 1376256, 65535, 0, 18]
+
+
+@pytest.mark.parametrize("kit", sorted(UPSTREAM_KITS))
+def test_the_table_rule_gives_each_upstream_kit_its_own_line(kit):
+    import tinyllama_plan
+
+    words, rows, table = UPSTREAM_KITS[kit]
+    assert tinyllama_plan.weight_rows(words | {"table": table}) == rows
+    assert tinyllama_plan.table_numbers(rows, table[0], table[3], table[5]) == table
+
+
+def test_the_table_is_sized_for_tinyllama_s_weight_rows():
+    import tinyllama_plan
+
+    words = tinyllama_plan.SHAPE | tinyllama_plan.DENSE | dict(prof=20, fe=8192, D=2048)
+    full = UPSTREAM_KITS["target_full_f2"][2]
+    rows = tinyllama_plan.weight_rows(words | {"table": full})
+    assert rows == 10240
+    # The full kit's fb and lkW, the small kit's masks.
+    small = UPSTREAM_KITS["target_small_f2"][2]
+    table = tinyllama_plan.table_numbers(rows, full[0], small[3], full[5])
+    assert table == TINYLLAMA_TABLE
+    fb, fln, fi0, fnm, _, lkw = table
+    data = rows << (lkw - fb)
+    # table_derive()'s conditions (prover/hash_commitment/hf_table_params.h), and the least fi0.
+    step = max(1 << (lkw - fb), 1 << (fnm - 1).bit_length())
+    assert fi0 % step == 0 and fi0 % 2 == 0 and fnm % 2 == 1
+    assert fi0 - step < data + 3 <= fi0
+    assert fln == (fi0 + fnm - 1).bit_length() + 3 <= 32
+    # The full kit's line would hold this model's data in a 307th of a row's entries.
+    assert full[2] // data == 307
+
+
+@pytest.mark.parametrize(
+    ("rows", "fb", "fnm", "lkw"),
+    [
+        (10240, 15, 65535, 18),  # more long rows than W has rows (policy-rows)
+        (10240, 18, 65535, 18),  # fb is not below lkW
+        (1 << 20, 14, 65535, 18),  # fb above 13 (policy-rows)
+        (10240, 11, 65535, 19),  # lkW above 18 (w-shape-lk)
+        (10240, 11, 65536, 18),  # an even number of masks (policy-mask-shape)
+        (1 << 22, 4, 65535, 18),  # a code longer than 2^32
+    ],
+)
+def test_the_table_rule_refuses_what_the_provers_refuse(rows, fb, fnm, lkw):
+    import tinyllama_plan
+
+    with pytest.raises(SystemExit, match="table"):
+        tinyllama_plan.table_numbers(rows, fb, fnm, lkw)
+
+
 # The same TinyLlama-shaped file without its digest lines, as the unpatched build plans it.
 UNMET_THREE = (
     "plan: not the standard parameter form (routed-experts, both-clamps, table-digests,"

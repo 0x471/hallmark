@@ -1,7 +1,7 @@
 {
   "schema_id": "hallmark.flashprove-tinyllama-kit/1",
   "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
-  "patches_json_sha256": "7a31bf32f9857de955e9164ea72531ebd274525ba9581f202b97b9f356289ddf",
+  "patches_json_sha256": "7e0a518f51d2cd96b9c64a18a12d0b7eddb69f3759615966d8f63a6c2d37696c",
   "scales_patch": {
     "name": "scales.patch",
     "sha256": "73c42a3c16a6b7440f378b4703d312eb5d7f82a697f2bd6a051cbca4b3501c2c",
@@ -80,9 +80,9 @@
     "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31",
     "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c"
   },
-  "base_policy_sha256": "05f818d0baabcc848ad0529efa535ff0586cd5dfcaf6fa45f2cc333bb30887b4",
+  "base_policy_sha256": "68e4ff9f007b7d5cf73aa7e9145a404d84b1dfe46ba35c22580266f083829488",
   "files": {
-    "policy.txt": "a2b23870f4cf8820d3b0575158ab584cb5235f69f41cdcce1c051155e69e2f94",
+    "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
     "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
     "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
     "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c",
@@ -90,8 +90,8 @@
     "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
     "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31"
   },
-  "h_par": "439d758a7576acccb25d64605f3865dfef518a56817f089d3409379107425165",
-  "configuration": "8a759d43ccac767560645db2df65385f568a51ef9d087f819137093465514207",
+  "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+  "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
   "request": {
     "T": 64,
     "filler": 0,

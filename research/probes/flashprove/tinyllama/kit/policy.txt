@@ -29,7 +29,7 @@ stages once-own 4 3 18 15 3 3 15 14 3 3 13 13 0 0 15 15
 group once-ranges 1 22 18 16 12
 stages once-ranges 4 3 19 17 3 3 17 17 0 0 20 20
 ranges-part 13
-table 11 32 402653184 44040191 0 18
+table 11 24 1376256 65535 0 18
 prof 20
 lt 6
 L 22

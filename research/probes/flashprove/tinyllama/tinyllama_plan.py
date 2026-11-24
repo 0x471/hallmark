@@ -14,6 +14,8 @@ way the patched verifier/tests/served_form_test.py does for its dense case:
   key must fit two limbs, and eg 7 doubles the gate inputs that this covers;
 - kFM and kFD, the log2 of the rows of the two tables that hold the softmax table, set by the rule
   of cp_prove's plan of attention (softmax_rows());
+- the line table, the committed table's size, set for this model's weight rows (table_numbers());
+  the full kit's line would have cp_commit encode Maverick's table for a model 300 times smaller;
 - iota_0 .. iota_7 refitted with upstream's verifier/tests/forest_lines.py;
 - the three table digests a dense model forms (no tsig), from upstream's scales/policy_tables.py,
   the SiLU table's for eg 7. It refuses NE 0, but no table's entries depend on NE (NE only decides
@@ -24,6 +26,8 @@ way the patched verifier/tests/served_form_test.py does for its dense case:
 Every other line is the full kit's, except the few that TinyLlama's shape forces, set in FORCED.
 The scales and those lines are placeholders for planning, not a fitted kit: they test that the
 verifier's planner admits this shape, not that a proof can be made with them. It reads no weights.
+The other proof-system lines (group, stages and the matrices' sizes) stay the full kit's: they are
+admitted, and larger than this model needs.
 """
 
 import math
@@ -53,6 +57,11 @@ FORCED = {
     "ranges-part": 13,
 }
 BASE = "prover/examples/target_full_f2"
+# The committed table's masks (the fourth number of the line table) come from upstream's small
+# example kit, 65,535. The full kit's 44,040,191 are sized for hundreds of thousands of batches on
+# one stored copy and would force a row of at least 2^26 message entries, 51 times this model's
+# data. The masks bound how many batches a stored copy bears; the planner prints the number.
+SMALL = "prover/examples/target_small_f2"
 GATE_KEY = "eg 7"  # a key c of the SiLU table means c / 2^7 (parameter-file.md, 9)
 MOE_SEGMENTS = {"XR", "LR", "LT", "DD", "LH", "SEL", "L3", "CLR", "MR", "G0", "CG"}
 
@@ -76,6 +85,86 @@ def softmax_rows(words):
             sys.exit(f"tinyllama_plan.py: {name}: {len(fits)} values fit every shift")
         rows[name] = fits[0]
     return rows
+
+
+def weight_rows(words):
+    """The rows of W, the matrix of weight digits that cp_commit commits to: upstream's layoutW()
+    (prover/common/weight_layout.h) as HfShape::from_policy() calls it
+    (prover/hash_commitment/hf_shape.cuh), for the row count alone. Each unit (one layer's
+    tensors of one kind, the embedding, the output head) gives some of its index bits to W's
+    2^lkW columns and the rest to rows; the sum is rounded up to a multiple of the ring degree D.
+    The answer target compares the result with layoutW() itself (prover_setup.cpp)."""
+    lk, ring, experts = words["table"][5], words["D"], words["NE"]
+    d, dh, f, fe = words["d"], words["dh"], words["f"], words["fe"]
+    keys, queries = words["G"] * dh, words["H"] * dh
+    moe_layers = (words["prof"] & 15) >= 3 and experts > 0
+
+    def rows(digits, *groups):
+        left, total = lk, digits
+        for extent, kind in groups:
+            if kind == "A":  # the whole index goes to the columns, or none of it
+                bits = (extent - 1).bit_length()
+                take = bits if bits <= left and extent > 1 else 0
+                total *= 1 if take or extent == 1 else extent
+            else:  # "S", "P": as many of the index's trailing zero bits as are left
+                take = min((extent & -extent).bit_length() - 1, left)
+                total *= extent >> take
+            left -= take
+        return total
+
+    total = 0
+    for layer in range(words["L"]):
+        moe = moe_layers and layer % 2 == 1
+        total += rows(2, (64, "A"), (dh, "A"), (d, "S"))  # ShapeW::hdR is 64
+        total += rows(2, (d, "S"), (keys, "P")) + rows(2, (queries, "S"), (d, "P"))
+        if moe:
+            total += 2 * rows(2, (d, "S"), (fe, "P"))
+            total += 2 * rows(2, (d, "S"), (experts, "S"), (fe, "P"))
+            total += rows(2, (fe, "S"), (d, "P"))
+            total += rows(2, (fe, "S"), (experts, "S"), (d, "P"))
+            total += rows(2, (d, "S"), (experts, "P"))
+        else:
+            total += 2 * rows(2, (d, "S"), (f, "P")) + rows(2, (f, "S"), (d, "P"))
+    if words["prof"] >> 4:  # the embedding and the output head
+        total += rows(4, (words["V"], "A"), (d, "P")) + rows(2, (words["V"], "A"), (d, "S"))
+    return -(-total // ring) * ring
+
+
+def table_numbers(rows, row_bits, masks, column_bits, answers=1):
+    """The six numbers of the line `table` (fb fln fi0 fnm 0 lkW) for a matrix W of `rows` rows of
+    2^column_bits columns, held in 2^row_bits long rows with `masks` random entries each.
+
+    - fi0, a long row's message entries: the least number that HfTableParams::table_derive()
+      (prover/hash_commitment/hf_table_params.h) admits: at least the row's data entries,
+      rows 2^(lkW - fb), and three pads for each answer, and a multiple of both 2^(lkW - fb) and
+      the least power of two that is at least fnm;
+    - fln, the log2 of the code's length: three more than the bits of fi0 + fnm - 1, as in each
+      of upstream's example kits (table_derive() asks for at least one more).
+
+    With upstream's own rows, row_bits and masks this gives the line of each of upstream's example
+    kits (target_small_f2, target_small_file_f2, target_full_f2; tested). The rule is read off
+    those kits and that function; upstream states none."""
+    low = column_bits - row_bits
+    # table_lines_first() and table_derive(): lkW from 4 to 18, fb from 3 to 13 and below lkW, fb
+    # at most the bits of a row number of W, fnm odd.
+    shape = 4 <= column_bits <= 18 and 3 <= row_bits <= 13 and row_bits < column_bits
+    if not (shape and row_bits <= (rows - 1).bit_length() and masks % 2):
+        sys.exit("tinyllama_plan.py: table: fb, lkW or fnm is not admitted")
+    step = max(1 << low, 1 << (masks - 1).bit_length(), 2)
+    needed = (rows << low) + 3 * answers
+    data = -(-needed // step) * step
+    length = (data + masks - 1).bit_length() + 3
+    if length > 32 or data >> 32:
+        sys.exit("tinyllama_plan.py: table: the code would be longer than 2^32")
+    return [row_bits, length, data, masks, 0, column_bits]
+
+
+def frame_numbers(lines, name):
+    """The numbers of the one line that begins with `name` and a blank."""
+    hits = [x for x in lines if x.startswith(name + " ")]
+    if len(hits) != 1:
+        sys.exit(f"tinyllama_plan.py: {len(hits)} lines {name}")
+    return [int(w) for w in hits[0].split(" ")[len(name.split(" ")) :]]
 
 
 def put(lines, name, value):
@@ -104,6 +193,12 @@ def policy(tree):
     }
     for name, value in softmax_rows(words).items():
         put(lines, name, value)
+    # The committed table: the full kit's fb and lkW, the small kit's number of masks.
+    full = frame_numbers(lines, "table")
+    masks = frame_numbers((tree / SMALL / "policy.txt").read_text().splitlines(), "table")[3]
+    answers = frame_numbers(lines, "answers")[0]
+    table = table_numbers(weight_rows(words | {"table": full}), full[0], masks, full[5], answers)
+    lines[lines.index("table " + " ".join(map(str, full)))] = "table " + " ".join(map(str, table))
     lines = [x for x in lines if x.split(" ")[0] not in ("rcl", "gcl")]
     at = next(
         i for i, x in enumerate(lines) if x.startswith("nminH ")

@@ -470,6 +470,7 @@ def check_tinyllama_plan(tree, output, verifiers):
     values = dict(x.split(" ") for x in policy if len(x.split(" ")) == 2)
     shape = {k: int(values[k]) for k in pin["shape"]}
     require(shape == pin["shape"], f"the generated file's shape is {shape}")
+    require(pin["table"] in policy, "the generated file's line table is not the pinned one")
     ids = (summary["h_par"], summary["configuration"])
     require(
         ids == (pin["h_par"], pin["configuration"]), "the generated files are not the pinned ones"
