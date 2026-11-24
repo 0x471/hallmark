@@ -277,7 +277,7 @@ change):
 - the integer model: SASH's eight tokens, no failed range condition over the 64 positions, the
   gate's key at most 3,970, with every recorded peak, margin and clamped cell identical on the two
   hosts (the slopes and correlations, against each host's own float pass, differ by at most 1.1e-6);
-  logit slopes 0.993 to 1.005 and correlations of at least 0.99909; the smallest top-1 margin 0.77
+  logit slopes 0.993 to 1.005 and correlations of at least 0.99908; the smallest top-1 margin 0.77
   logits (0.86 at `eg 8`), at the full stop; one value entry beyond its clamp, `vw` in layer 2 at
   position 32 (the final EOS), 2,241 against 2,047;
 - the mutation controls, identical on the two hosts: with `MF` + 1 the tokens stay and the slope is
@@ -351,7 +351,7 @@ What follows:
 
 The float bound at `eg 7` puts that row's key at 22,703; no layer is over the limit. The cost is the
 SiLU table's input resolution, 2^-7 in place of 2^-8: on SASH's request the logits' correlation with
-the float logits stays at least 0.99909 (0.99912 at `eg 8`), and the smallest top-1 margin is
+the float logits stays at least 0.99908 (0.99911 at `eg 8`), and the smallest top-1 margin is
 0.77 logits (0.86 at `eg 8`).
 
 - Not covered: the GPU's guards on its matrix products, which can only make a site fail; and that

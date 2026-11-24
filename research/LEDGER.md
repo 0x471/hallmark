@@ -3300,7 +3300,7 @@ upstream expects, with the same scales. The drawn calibration rows have upstream
 64 positions (one value cell clamps, `vw` in layer 2 at the final EOS, 2,241 against 2,047), the
 gate's key peaks at 3,970 (limit 32,639), and its choices, peaks and margins are identical on the two
 hosts. Its logits over 2^17 follow the float logits with a slope of 0.993 to 1.005 and a correlation
-of at least 0.99909; the smallest top-1 margin is 0.77, at the full stop. The controls fail as
+of at least 0.99908; the smallest top-1 margin is 0.77, at the full stop. The controls fail as
 required: `MF` + 1 doubles the slope with the tokens unchanged, and layer 10's `kv` + 1 lowers the
 correlation to 0.9939, below the floor of 0.998. That floor was set by hand after
 one-bit shift errors passed an earlier floor of 0.99. A one-off sweep over every layer's `kv`, `ko`
