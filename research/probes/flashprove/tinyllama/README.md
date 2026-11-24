@@ -92,11 +92,7 @@ What a patched `YES` means that upstream's does not:
 - **Three digests (P3).** The provers' parameter-file reader (`common/parameter_file.h`) takes the
   same two digest forms as the verifier, with the same rule.
 - **No change to the worst-case check.** `cp_commit` runs upstream's mandatory worst-case check, and
-  `cp_prove` requires `isk.txt`'s line `ranges`, as upstream does. An earlier revision of this patch
-  left the check out under `-public-weights`; a review found that this changed the default for
-  every `-public-weights` commitment, upstream's own Maverick route included, on the speculation
-  that the kit might fail the check. It was dropped (four files: `arguments.h`, `hf_commit.cu`,
-  `isk.cuh` and a comment in `cp_files.h` are upstream's again). Computed since on a CPU, the check
+  `cp_prove` requires `isk.txt`'s line `ranges`, as upstream does. Computed on a CPU, the check
   refuses a TinyLlama kit at the default `eg 8` at one gate row; the kit is therefore fitted at
   `eg 7`, which `verifier.patch` admits at NE 0, and then every site fits ("cp_commit's worst-case
   check, on a CPU" below). No check is left out.
@@ -167,10 +163,7 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
 - Ubuntu 24.04, x86_64, upstream `verifier/build.sh` with g++ 13.3. 108 of 108 calls compared equal,
   with exit codes 99 times 1, 7 times 0, and 2 times 4 (planning calls inside `check_proof.py`),
   1,647 s. The standard-form test passed, and the unpatched build missed exactly the eight cases
-  that only the patch meets. Earlier revisions passed the same rows
-  ([2026-11-23](../../../evidence/flashprove-tinyllama-2026-11-23.json),
-  [2026-11-22](../../../evidence/flashprove-tinyllama-2026-11-22.json)); the one of 2026-11-22 had a
-  `prover.patch` that also left the worst-case check out.
+  that only the patch meets.
 - macOS arm64, Apple clang 17 (`apple-clang`, built as `make verify-flashprove` builds it): 108 of 108
   calls equal, with the same exit codes, 367 s.
 - Both hosts' planning calls name the same TinyLlama-shaped files (equal `h_par` and
@@ -208,49 +201,10 @@ Also at this revision, on the same Linux host
   `tests/test_native_llm.py::test_sandbox_nested_spawn_with_large_inherited_descriptor_limit` fails
   on macOS, on Hallmark's `main` too.
 
-**Recorded runs, of an earlier revision.** Three runs on 2026-11-21 (macOS arm64, `apple-clang`, 328-396
-s) passed the target as it then was:
-
-- patched verifier digest `f363b8e0…`;
-- earlier patch hashes;
-- an earlier `dual_verify.py`, which masked every three-decimal number on any line containing
-  "seconds" or ending in "<n>.<nnn> s";
-- no check of the timed formats or of the negative control's last line.
-
-They recorded 108 equal calls, the standard-form test on the patched build, its negative control's
-five misses (not its last line), the provers' reader, the fold constants and `weight_sums`. They had
-no timed-output row and no TinyLlama row. They establish those results for that revision only.
-
-Other checks, run once on 2026-11-21 outside the make target, each on an earlier revision (scratch
-copies). The verifier sources then differed from today's in comments only. The other files differed
-as noted.
-
-- **Eight more of upstream's CPU verifier rows** (`SUITE.md`), with the earlier two-build stand-in:
-  2,294 calls, 0 differ, every row passing on the patched build.
-  - Rows: `example_kits`, `kit_rounds`, `kit_rounds_second`, `plan_tau`, `commitment_id.examples`,
-    `record_altered_sets.example`, `made_up_files.work`, `extreme_files`.
-- **Upstream's unmodified `served_form_test.py` on the patched build.** Exactly one case differs,
-  `routed-experts.dense`, which now misses only `table-digests`.
-- **`weight_sums.cpp` and `weight_sums.py` against the oracle.** Seeds 1-4 and 100-102 at both shapes
-  (all storage types), all equal, before the later type rules for the added pair.
-  - `weight_sums.py` was re-run on seeds 1 and 100 at both shapes after the first of them.
-  - Upstream's build refuses the 2,048/64 models (exit 25, `bound`).
-  - Both programs refuse width 2,048 with head 128 or no `key_length` (absent means 128), width 4,096,
-    and width 5,120 with head 64.
-- **`integer_model`,** before the `hr` rule and the dense message:
-  - `tests/test_parameter_file.py`: 449 passed. It compares the reader with the provers' reader built
-    from the patched header.
-  - `tests/test_against_recorded_values.py`: 81 passed.
-  - Both under Python 3.13 and torch 2.13.0, with a `g++` shim for Apple clang.
-- **`prover/tests/guards_stand.py`** (upstream's source pins of the provers' guards): `ALL AS EXPECTED`,
-  before the `cp_commit` shape check.
-- **Syntax only.** `prover/weights_commitment/arguments.h` compiles in serving and test builds, and
-  `fold_weights.cuh` compiles host-side against a CUDA stub.
-
 ## The TinyLlama kit and the answer check
 
-[`scales.patch`](scales.patch), a fourth patch pinned in [`kit.json`](kit.json) (not `patches.json`, so
-the three patches above and their records stay as they are), lets upstream's scale tools fit a dense
+[`scales.patch`](scales.patch), a fourth patch pinned in [`kit.json`](kit.json) (not `patches.json`: only
+the answer check applies it), lets upstream's scale tools fit a dense
 `llama` model. Its 8 files are under `scales/`, and `SUITE.md`, each marked "Hallmark dense patch":
 
 - `gguf_weights.py`: `shape_words()` also reads the architecture `llama`, dense only: no experts,
