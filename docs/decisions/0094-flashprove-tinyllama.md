@@ -31,9 +31,9 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
   size).
 - **Option 3, a patched FlashProve: proposed**, as Hallmark's own small patches on the pinned source.
   They are applied with `git apply`, as the SASH patches are, and each is SHA-256-pinned. It is not a
-  dependency on a fork. With upstream's mandatory worst-case check `cp_commit` would not commit
-  the TinyLlama kit (below), so `prover.patch` also adds an opt-in `-without-worst-case`, for
-  public weights only.
+  dependency on a fork. As it stands it cannot commit the TinyLlama kit: `cp_commit`'s mandatory
+  worst-case check, computed on a CPU, refuses it at one gate row (below), so it needs one more
+  change, which the owner chooses.
 
 **Decision (proposed).** Adopt the four patches in
 [`research/probes/flashprove/tinyllama/`](../../research/probes/flashprove/tinyllama/README.md):
@@ -48,14 +48,9 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
     same from width 4,096 to 16,383, twice it at 2,048, so that the fit needs no change. It also makes `cp_commit` check the model file's width, head width and expert
     layers against the parameter file, as `cp_prove` already does;
   - adds the same three-digest form to the provers' parameter-file reader;
-  - keeps `cp_commit`'s worst-case check upstream's default and adds the opt-in
-    `-without-worst-case`: `cp_commit` takes it only with `-public-weights`, in the first form, and
-    with neither `-worst-case` nor `-worst-case-table`, and then leaves the check out, so `isk.txt`
-    gets no line `ranges`; `cp_prove` serves such a commitment only with its own
-    `-without-worst-case`, which it takes only with `-public-weights` (so under "seed public").
-    Without the option both programs behave as upstream's. (An earlier revision left the check out
-    by default under `-public-weights`, which changed upstream's default for every such commitment;
-    it was dropped.)
+  - leaves `cp_commit`'s worst-case check as upstream's: mandatory. (An earlier revision left it out
+    under `-public-weights`, which changed upstream's default for every such commitment; it was
+    dropped.) With it, `cp_commit` would refuse this kit (below).
 - **`tools.patch`** gives `weight_sums` and upstream's CPU integer model the same constants and dense
   form.
 - **`scales.patch`** (pinned in `kit.json`) lets upstream's scale tools fit a dense `llama` model:
@@ -65,13 +60,6 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
 
 With these, `kit/` holds a TinyLlama-1.1B kit (T = 64, e_res 11) fitted by upstream's own route from a
 GGUF file that `export_gguf.py` writes from the published safetensors (BF16 bits unchanged).
-It is calibrated on WikiText-2, as upstream's rule does, at the revision upstream pins. Its licence
-was reviewed by the research agent, to which `research/AUTHORITY.json` delegates source selection
-and licence review, not by the owner: the text is 2016 Wikipedia, under CC BY-SA 3.0 and GFDL (the
-dataset card's tags); the card's text names CC BY-SA 4.0, which CC BY-SA 3.0 section 4(b) allows
-for adaptations, so the versions agree on what they permit and the licence is not ambiguous. No
-text or token id from it is committed; the kit holds scale statistics computed from it, and
-`kit.json` records the source and the review.
 
 Decision 0093 and `make verify-flashprove` stay as they are. The patched verifier is a second build
 with its own source digest, `6f7ac148a57bd03f24bd029ba41c7001772cc83578e80b7bd2ef25a13dee3a52`.
@@ -135,20 +123,17 @@ the gate of layer 21, where one row of 5,632 can take a key of 47,481 against th
 (a real input of 177.4; no other layer's gate key above 14,631). No change of the kit's
 scales fixes this: in real units the bound is the row's own. Upstream's remedy, `gcl 1`, clamps the
 key with the sigmoid table, which only a model with experts forms, and the verifier refuses it at
-NE 0. So the TinyLlama commitment is made with `-public-weights -without-worst-case`:
+NE 0. So the owner chooses one of:
 
-- upstream gives weight hiding as the check's reason (`scales/worst-case-bounds.md`), and under
-  `-public-weights` nothing is hidden; soundness does not rest on the check: every proof shows
-  again that its values lie in the model's ranges;
-- what it costs is availability: a request that drives that gate row past its range ends `failed`
-  in `cp_prove`, with no proof. On SASH's prompt the key reaches at most 7,108;
-- the alternatives were larger: `gcl` at NE 0 needs the sigmoid table for a dense model and so
-  changes what the verifier checks in a proof; padded option 2, whose standard form carries
-  `gcl 1` (limit 4,194,175), measures a padded model of about 11.4 billion parameters.
-
-`make verify-flashprove-tinyllama` checks the option's rules on the host from the patched sources:
-`cp_commit`'s in a serving and a test build, and on Linux `cp_prove`'s, each refusal with a control
-that differs only by the option.
+- **an explicit option to leave the check out under `-public-weights`** (a small change of
+  `prover.patch`, opt-in, so upstream's default stays): upstream gives weight hiding as the check's reason, and
+  with public weights nothing is hidden; soundness does not rest on it (`scales/worst-case-bounds.md`); a request that drives
+  that row past its range fails in `cp_prove` with no proof. On SASH's prompt the key reaches at
+  most 7,108;
+- **`gcl` at NE 0**: the sigmoid table formed for a dense model too, so that the clamp is checked
+  as upstream checks it. That changes what the verifier checks in a proof, a much larger patch;
+- **padded option 2**, whose standard form carries `gcl 1` (limit 4,194,175): there this row fits;
+  the padded kit's other sites have not been computed.
 
 The port has not been compared with a GPU run, and it does not cover the GPU's guards on its matrix
 products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commits-worst-case-check-on-a-cpu)).
@@ -161,14 +146,19 @@ decisive free check above. Equal tokens are a smoke test, not a proof that the t
 are equal; #187's like-for-like section must name each backend's model, conversion, request, window,
 range and statement.
 
-1. **GPU jobs, only with owner approval and a cap** (#186): commit with `-public-weights
-   -without-worst-case` and prove (`cp_prove` x3, as #187 asks). The prover
+1. **The calibration text's licence**: WikiText-2 (CC BY-SA; its dataset card's tags name 3.0 and
+   GFDL, its text 4.0), as in upstream's rule. No text or token id from it is committed, but the
+   kit's scales are computed from it. The card's tags and its text name different versions, and
+   `research/AUTHORITY.json` excludes ambiguous licences, so the owner decides; a no means refitting
+   on another text. The patches do not depend on it.
+2. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks),
+   after the owner's choice above, since the kit as it stands would not be committed. The prover
    patch compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s own verdict on the
    worst-case check and `cp_prove`'s rules beyond its parameter-file reader run only there.
-2. **A dense proof's altered copies.** The 108 equal calls are all on MoE proofs, and no proof has
+3. **A dense proof's altered copies.** The 108 equal calls are all on MoE proofs, and no proof has
    gone through the verifier's NE 0 branches. Before a dense `YES` is relied on, run an
    altered-copies table (as upstream's `examples/rejected-proofs`) against the first dense proof.
-3. **#187's proof-system lines.** The kit keeps check 6's lines: placeholders set from the verifier's
+4. **#187's proof-system lines.** The kit keeps check 6's lines: placeholders set from the verifier's
    rules, not sized for speed, which `cp_prove` has judged only by its parameter-file reader; a kit
    for each number of checked tokens in #187's sweep.
 
