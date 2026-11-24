@@ -1,0 +1,784 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-evidence/1",
+  "recorded_at": "2026-11-24",
+  "decision": "docs/decisions/0094-flashprove-tinyllama.md",
+  "decision_status": "proposed",
+  "commit": "551c8ff (verify; the next commit, 206c6c7, changes only kit.json, which this target does not read)",
+  "patches": {
+    "verifier.patch": {
+      "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0",
+      "bytes": 16739
+    },
+    "prover.patch": {
+      "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1",
+      "bytes": 13205
+    },
+    "tools.patch": {
+      "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040",
+      "bytes": 37858
+    }
+  },
+  "apply_order": [
+    "verifier.patch",
+    "prover.patch",
+    "tools.patch"
+  ],
+  "prover_patch_files": [
+    "prover/common/parameter_file.h",
+    "prover/hash_commitment/hf_commit_weights.cuh",
+    "prover/weights_blocks/gguf_source.cuh",
+    "prover/weights_commitment/fold_source.cuh",
+    "prover/weights_commitment/fold_weights.cuh"
+  ],
+  "supersedes": "flashprove-tinyllama-2026-11-23.json for verifier.patch: that revision (14,123 bytes, b78c47e5...) did not admit eg 7 at NE 0; this one does (no-range-words), with three standard-form cases for it, and check 6's file has eg 7. prover.patch and tools.patch are unchanged.",
+  "mac_target_run": {
+    "host": "macOS 15.7.1 (Darwin 24.6.0), Apple M4 Pro, arm64",
+    "result_json_sha256": "1e8dad4b84fac56529c61fbc3f605510f19b23c1cca50695cf4348a3dff1371d",
+    "result": {
+      "builds": {
+        "patched": {
+          "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+          "recipe": "apple-clang",
+          "seconds": 22.17770845798077,
+          "sha256": "c5d95ec0d68a7779204fdd3fa694e8dec7a20a2f6d22e8cd1db0ee9bd0a5de5c",
+          "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+        },
+        "upstream": {
+          "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+          "recipe": "apple-clang",
+          "seconds": 22.65734220901504,
+          "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
+          "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+        }
+      },
+      "fold_constants": {
+        "integer_model": [
+          "2048,64",
+          "5120,128"
+        ],
+        "prover": [
+          "2048,64",
+          "5120,128"
+        ],
+        "weight_sums.cpp": [
+          "2048,64",
+          "5120,128"
+        ],
+        "weight_sums.py": [
+          "2048,64",
+          "5120,128"
+        ]
+      },
+      "hiding_claim": false,
+      "host": {
+        "machine": "arm64",
+        "system": "Darwin"
+      },
+      "passed": true,
+      "patches": {
+        "apply_order": [
+          "verifier.patch",
+          "prover.patch",
+          "tools.patch"
+        ],
+        "fold_constants": {
+          "2048,64": [
+            "0x3FB504F3",
+            "0x3E3504F3"
+          ],
+          "5120,128": [
+            "0x3F8F1BBD",
+            "0x3DCA62C2"
+          ]
+        },
+        "patches": {
+          "prover.patch": {
+            "bytes": 13205,
+            "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+          },
+          "tools.patch": {
+            "bytes": 37858,
+            "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+          },
+          "verifier.patch": {
+            "bytes": 16739,
+            "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+          }
+        },
+        "schema_id": "hallmark.flashprove-tinyllama-patches/1",
+        "served_form_cases_only_the_patch_meets": [
+          "routed-experts.dense",
+          "routed-experts.dense-three-digests",
+          "routed-experts.dense-three-silu-altered",
+          "routed-experts.dense-three-rope-altered",
+          "routed-experts.dense-three-exp-altered",
+          "no-range-words.dense-eg-7",
+          "no-range-words.dense-eg-6",
+          "no-range-words.dense-eg-7-smax"
+        ],
+        "tinyllama_plan": {
+          "configuration": "83fa9ef04e8b3477165b5043be08fd3feda55d7902de37fce84f029ffc765254",
+          "h_par": "f09efa8377348b4e43505b163ffd08be795da5edfc37de029f024fe8545276fc",
+          "shape": {
+            "G": 4,
+            "H": 32,
+            "L": 22,
+            "NE": 0,
+            "V": 32000,
+            "d": 2048,
+            "dh": 64,
+            "f": 5632,
+            "ll": 1,
+            "lt": 6,
+            "theta0_lo": 10000
+          },
+          "unmet_without_digests": {
+            "patched": [
+              "table-digests"
+            ],
+            "unpatched": [
+              "routed-experts",
+              "both-clamps",
+              "table-digests",
+              "no-range-words"
+            ]
+          }
+        },
+        "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "verifier_source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+        "weight_sums_oracle_cases": [
+          [
+            "5120,128",
+            1
+          ],
+          [
+            "2048,64",
+            1
+          ],
+          [
+            "2048,64",
+            100
+          ]
+        ]
+      },
+      "prover_compiled_by_this_run": false,
+      "provers_parameter_file_reader": {
+        "prover/tests/configurations/pinned/policy.txt": "admitted",
+        "served-form-patched/routed-experts.dense-sig-for-rope/policy.txt": "policy-tables",
+        "served-form-patched/routed-experts.dense-three-digests/policy.txt": "admitted",
+        "served-form-patched/routed-experts.dense-with-digests/policy.txt": "policy-tables",
+        "served-form-patched/routed-experts.dense/policy.txt": "admitted",
+        "served-form-patched/table-digests.no-tsig/policy.txt": "policy-tables"
+      },
+      "qualified_backend": false,
+      "schema_id": "hallmark.flashprove-tinyllama-verify/1",
+      "seconds": 367.33685758302454,
+      "source": {
+        "bytes": 157799758,
+        "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+        "examples": {
+          "accepted-proof": {
+            "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+            "next_token": 199,
+            "range": "60:64"
+          },
+          "full-size": {
+            "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+            "next_token": 52599,
+            "range": "23:1024"
+          }
+        },
+        "gpu_kit": {
+          "name": "target_small_f2_roomy",
+          "range": "15:64"
+        },
+        "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+        "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+        "licence": "Apache-2.0",
+        "nvcc_release": "V13.2.86",
+        "rejection_tables": [
+          [
+            "accepted-proof",
+            "altered_copies.tsv",
+            10
+          ],
+          [
+            "accepted-proof",
+            "every_kind_of_item.tsv",
+            79
+          ],
+          [
+            "accepted-proof-clipped-gap",
+            "altered_copies_clipped_gap.tsv",
+            10
+          ]
+        ],
+        "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "schema_id": "hallmark.flashprove-source/1",
+        "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+        "upstream": "https://github.com/anthropics/FlashProve",
+        "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+        "version": "0.16.0"
+      },
+      "standard_form": {
+        "patched": "served_form_test.py: all as expected",
+        "unpatched_misses": [
+          "no-range-words.dense-eg-6",
+          "no-range-words.dense-eg-7",
+          "no-range-words.dense-eg-7-smax",
+          "routed-experts.dense",
+          "routed-experts.dense-three-digests",
+          "routed-experts.dense-three-exp-altered",
+          "routed-experts.dense-three-rope-altered",
+          "routed-experts.dense-three-silu-altered"
+        ]
+      },
+      "synthetic_inputs_only": true,
+      "timed_formats": 9,
+      "tinyllama_plan": {
+        "bits_compiled_bound": 126.21,
+        "configuration": "83fa9ef04e8b3477165b5043be08fd3feda55d7902de37fce84f029ffc765254",
+        "h_par": "f09efa8377348b4e43505b163ffd08be795da5edfc37de029f024fe8545276fc",
+        "proof_bytes_at_most": 14061196,
+        "shape": {
+          "G": 4,
+          "H": 32,
+          "L": 22,
+          "NE": 0,
+          "V": 32000,
+          "d": 2048,
+          "dh": 64,
+          "f": 5632,
+          "ll": 1,
+          "lt": 6,
+          "theta0_lo": 10000
+        },
+        "unmet_without_digests": {
+          "patched": [
+            "table-digests"
+          ],
+          "unpatched": [
+            "routed-experts",
+            "both-clamps",
+            "table-digests",
+            "no-range-words"
+          ]
+        },
+        "unpatched": "policy-tables"
+      },
+      "upstream_inputs": {
+        "calls_compared": 108,
+        "calls_differing": 0,
+        "examples": {
+          "accepted-proof": {
+            "exit_code": 0,
+            "result": [
+              "result: outcome=verified commitment_id=79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183 range=60:64 checked_tokens=3 end_token=not_checked claim=exact-match policy=exact next_token=199 C=256 theta=256 cap=0 s=16 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=49 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+              "check_proof: verified: exact match: every checked token (tokens 61 to 63 of the request) is the model's greedy choice; the next token, 199, is the model's greedy choice; the end of the reply was not checked; commitment: 49 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 38 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+            ],
+            "seconds": 2.9148761659744196
+          },
+          "full-size": {
+            "exit_code": 0,
+            "result": [
+              "result: outcome=verified commitment_id=7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe range=23:1024 checked_tokens=1000 end_token=not_checked claim=exact-match policy=exact next_token=52599 C=256 theta=256 cap=0 s=15 limits=exact request_tokens=1024 leaf=0 commitment_assumed_rounds=86 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+              "check_proof: verified: exact match: every checked token (tokens 24 to 1023 of the request) is the model's greedy choice; the next token, 52599, is the model's greedy choice; the end of the reply was not checked; commitment: 86 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 71 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+            ],
+            "seconds": 21.224866000004113
+          }
+        },
+        "rejection_tables": [
+          {
+            "example": "accepted-proof",
+            "exit_code": 0,
+            "last_line": "10 altered sets: all rejected",
+            "seconds": 22.56288650003262,
+            "table": "altered_copies.tsv"
+          },
+          {
+            "example": "accepted-proof",
+            "exit_code": 0,
+            "last_line": "79 altered sets: all rejected",
+            "seconds": 162.0976158340345,
+            "table": "every_kind_of_item.tsv"
+          },
+          {
+            "example": "accepted-proof-clipped-gap",
+            "exit_code": 0,
+            "last_line": "10 altered sets: all rejected",
+            "seconds": 21.877413749985863,
+            "table": "altered_copies_clipped_gap.tsv"
+          }
+        ]
+      },
+      "weight_sums_against_oracle": [
+        {
+          "same": true,
+          "seed": 1,
+          "shape": "5120,128"
+        },
+        {
+          "same": true,
+          "seed": 1,
+          "shape": "2048,64"
+        },
+        {
+          "same": true,
+          "seed": 100,
+          "shape": "2048,64"
+        }
+      ]
+    },
+    "dual_jsonl": {
+      "sha256": "9a952e865af4cbd9f19ba3ee262e771ac1f9e9b10c9656f47466f3e72b66a225",
+      "exit_codes_of_both_builds": {
+        "0 0": 7,
+        "1 1": 99,
+        "4 4": 2
+      },
+      "note": "the target's per-call record; the 2 calls with exit 4 are planning calls inside check_proof.py"
+    }
+  },
+  "linux_target_run": {
+    "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM; no GPU",
+    "result_json_sha256": "930f138f61df1c4934609630dbc1240ac140f140b9f33ecd05f947575002baae",
+    "result": {
+      "builds": {
+        "patched": {
+          "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+          "recipe": "upstream verifier/build.sh",
+          "seconds": 206.75027062790468,
+          "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+          "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+        },
+        "upstream": {
+          "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+          "recipe": "upstream verifier/build.sh",
+          "seconds": 210.10805146209896,
+          "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+          "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+        }
+      },
+      "fold_constants": {
+        "integer_model": [
+          "2048,64",
+          "5120,128"
+        ],
+        "prover": [
+          "2048,64",
+          "5120,128"
+        ],
+        "weight_sums.cpp": [
+          "2048,64",
+          "5120,128"
+        ],
+        "weight_sums.py": [
+          "2048,64",
+          "5120,128"
+        ]
+      },
+      "hiding_claim": false,
+      "host": {
+        "machine": "x86_64",
+        "system": "Linux"
+      },
+      "passed": true,
+      "patches": {
+        "apply_order": [
+          "verifier.patch",
+          "prover.patch",
+          "tools.patch"
+        ],
+        "fold_constants": {
+          "2048,64": [
+            "0x3FB504F3",
+            "0x3E3504F3"
+          ],
+          "5120,128": [
+            "0x3F8F1BBD",
+            "0x3DCA62C2"
+          ]
+        },
+        "patches": {
+          "prover.patch": {
+            "bytes": 13205,
+            "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+          },
+          "tools.patch": {
+            "bytes": 37858,
+            "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+          },
+          "verifier.patch": {
+            "bytes": 16739,
+            "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+          }
+        },
+        "schema_id": "hallmark.flashprove-tinyllama-patches/1",
+        "served_form_cases_only_the_patch_meets": [
+          "routed-experts.dense",
+          "routed-experts.dense-three-digests",
+          "routed-experts.dense-three-silu-altered",
+          "routed-experts.dense-three-rope-altered",
+          "routed-experts.dense-three-exp-altered",
+          "no-range-words.dense-eg-7",
+          "no-range-words.dense-eg-6",
+          "no-range-words.dense-eg-7-smax"
+        ],
+        "tinyllama_plan": {
+          "configuration": "83fa9ef04e8b3477165b5043be08fd3feda55d7902de37fce84f029ffc765254",
+          "h_par": "f09efa8377348b4e43505b163ffd08be795da5edfc37de029f024fe8545276fc",
+          "shape": {
+            "G": 4,
+            "H": 32,
+            "L": 22,
+            "NE": 0,
+            "V": 32000,
+            "d": 2048,
+            "dh": 64,
+            "f": 5632,
+            "ll": 1,
+            "lt": 6,
+            "theta0_lo": 10000
+          },
+          "unmet_without_digests": {
+            "patched": [
+              "table-digests"
+            ],
+            "unpatched": [
+              "routed-experts",
+              "both-clamps",
+              "table-digests",
+              "no-range-words"
+            ]
+          }
+        },
+        "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "verifier_source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+        "weight_sums_oracle_cases": [
+          [
+            "5120,128",
+            1
+          ],
+          [
+            "2048,64",
+            1
+          ],
+          [
+            "2048,64",
+            100
+          ]
+        ]
+      },
+      "prover_compiled_by_this_run": false,
+      "provers_parameter_file_reader": {
+        "prover/tests/configurations/pinned/policy.txt": "admitted",
+        "served-form-patched/routed-experts.dense-sig-for-rope/policy.txt": "policy-tables",
+        "served-form-patched/routed-experts.dense-three-digests/policy.txt": "admitted",
+        "served-form-patched/routed-experts.dense-with-digests/policy.txt": "policy-tables",
+        "served-form-patched/routed-experts.dense/policy.txt": "admitted",
+        "served-form-patched/table-digests.no-tsig/policy.txt": "policy-tables"
+      },
+      "qualified_backend": false,
+      "schema_id": "hallmark.flashprove-tinyllama-verify/1",
+      "seconds": 1647.2972029340453,
+      "source": {
+        "bytes": 157799758,
+        "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+        "examples": {
+          "accepted-proof": {
+            "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+            "next_token": 199,
+            "range": "60:64"
+          },
+          "full-size": {
+            "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+            "next_token": 52599,
+            "range": "23:1024"
+          }
+        },
+        "gpu_kit": {
+          "name": "target_small_f2_roomy",
+          "range": "15:64"
+        },
+        "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+        "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+        "licence": "Apache-2.0",
+        "nvcc_release": "V13.2.86",
+        "rejection_tables": [
+          [
+            "accepted-proof",
+            "altered_copies.tsv",
+            10
+          ],
+          [
+            "accepted-proof",
+            "every_kind_of_item.tsv",
+            79
+          ],
+          [
+            "accepted-proof-clipped-gap",
+            "altered_copies_clipped_gap.tsv",
+            10
+          ]
+        ],
+        "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "schema_id": "hallmark.flashprove-source/1",
+        "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+        "upstream": "https://github.com/anthropics/FlashProve",
+        "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+        "version": "0.16.0"
+      },
+      "standard_form": {
+        "patched": "served_form_test.py: all as expected",
+        "unpatched_misses": [
+          "no-range-words.dense-eg-6",
+          "no-range-words.dense-eg-7",
+          "no-range-words.dense-eg-7-smax",
+          "routed-experts.dense",
+          "routed-experts.dense-three-digests",
+          "routed-experts.dense-three-exp-altered",
+          "routed-experts.dense-three-rope-altered",
+          "routed-experts.dense-three-silu-altered"
+        ]
+      },
+      "synthetic_inputs_only": true,
+      "timed_formats": 9,
+      "tinyllama_plan": {
+        "bits_compiled_bound": 126.21,
+        "configuration": "83fa9ef04e8b3477165b5043be08fd3feda55d7902de37fce84f029ffc765254",
+        "h_par": "f09efa8377348b4e43505b163ffd08be795da5edfc37de029f024fe8545276fc",
+        "proof_bytes_at_most": 14061196,
+        "shape": {
+          "G": 4,
+          "H": 32,
+          "L": 22,
+          "NE": 0,
+          "V": 32000,
+          "d": 2048,
+          "dh": 64,
+          "f": 5632,
+          "ll": 1,
+          "lt": 6,
+          "theta0_lo": 10000
+        },
+        "unmet_without_digests": {
+          "patched": [
+            "table-digests"
+          ],
+          "unpatched": [
+            "routed-experts",
+            "both-clamps",
+            "table-digests",
+            "no-range-words"
+          ]
+        },
+        "unpatched": "policy-tables"
+      },
+      "upstream_inputs": {
+        "calls_compared": 108,
+        "calls_differing": 0,
+        "examples": {
+          "accepted-proof": {
+            "exit_code": 0,
+            "result": [
+              "result: outcome=verified commitment_id=79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183 range=60:64 checked_tokens=3 end_token=not_checked claim=exact-match policy=exact next_token=199 C=256 theta=256 cap=0 s=16 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=49 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+              "check_proof: verified: exact match: every checked token (tokens 61 to 63 of the request) is the model's greedy choice; the next token, 199, is the model's greedy choice; the end of the reply was not checked; commitment: 49 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 38 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+            ],
+            "seconds": 12.599486009217799
+          },
+          "full-size": {
+            "exit_code": 0,
+            "result": [
+              "result: outcome=verified commitment_id=7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe range=23:1024 checked_tokens=1000 end_token=not_checked claim=exact-match policy=exact next_token=52599 C=256 theta=256 cap=0 s=15 limits=exact request_tokens=1024 leaf=0 commitment_assumed_rounds=86 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+              "check_proof: verified: exact match: every checked token (tokens 24 to 1023 of the request) is the model's greedy choice; the next token, 52599, is the model's greedy choice; the end of the reply was not checked; commitment: 86 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 71 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+            ],
+            "seconds": 125.93546777777374
+          }
+        },
+        "rejection_tables": [
+          {
+            "example": "accepted-proof",
+            "exit_code": 0,
+            "last_line": "10 altered sets: all rejected",
+            "seconds": 71.26712713204324,
+            "table": "altered_copies.tsv"
+          },
+          {
+            "example": "accepted-proof",
+            "exit_code": 0,
+            "last_line": "79 altered sets: all rejected",
+            "seconds": 545.9399770242162,
+            "table": "every_kind_of_item.tsv"
+          },
+          {
+            "example": "accepted-proof-clipped-gap",
+            "exit_code": 0,
+            "last_line": "10 altered sets: all rejected",
+            "seconds": 72.9637237880379,
+            "table": "altered_copies_clipped_gap.tsv"
+          }
+        ]
+      },
+      "weight_sums_against_oracle": [
+        {
+          "same": true,
+          "seed": 1,
+          "shape": "5120,128"
+        },
+        {
+          "same": true,
+          "seed": 1,
+          "shape": "2048,64"
+        },
+        {
+          "same": true,
+          "seed": 100,
+          "shape": "2048,64"
+        }
+      ]
+    },
+    "dual_jsonl": {
+      "sha256": "707cf505aaf43471176f5cc2729b49df560c9e34b13a6b1b80e3e900ad6e14f7",
+      "exit_codes_of_both_builds": {
+        "0 0": 7,
+        "1 1": 99,
+        "4 4": 2
+      },
+      "note": "the target's per-call record; the 2 calls with exit 4 are planning calls inside check_proof.py"
+    }
+  },
+  "prover_compile": {
+    "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM; no GPU",
+    "toolchain": "Build cuda_13.2.r13.2/compiler.37953736_0",
+    "toolchain_note": "as on 2026-11-22 and 2026-11-23: pip cuda-toolkit 13.2.2, the pin in research/probes/flashprove/source.json; libcuda.so link stub from NVIDIA's cudart 13.2.86 archive; g++ 13.3",
+    "source": "the pinned archive with the three pinned patches applied on the build host by git apply; 0 entries (build outputs aside) differ from the tree that make verify-flashprove-tinyllama patched on that host at 551c8ff, whose 30,873 files have the same SHA-256s as the tree it patched on the Mac at 551c8ff",
+    "steps": [
+      {
+        "command": "verifier/build.sh",
+        "exit_code": 0,
+        "seconds": 193,
+        "warnings": 0
+      },
+      {
+        "command": "prover/build.sh serving_cp_commit",
+        "exit_code": 0,
+        "seconds": 1468,
+        "warnings": 46,
+        "sha256": "235aa7d5ad0ca9fdbc6d9f12fd8c7f005a866213d129ed0154a8e13a19a576cd"
+      },
+      {
+        "command": "prover/build.sh serving_cp_prove",
+        "exit_code": 0,
+        "seconds": 3993,
+        "warnings": 98,
+        "sha256": "4689229a7538b62910a192b9ee1ba6561a49a756def2a24cacdc8bfb4c94919e"
+      },
+      {
+        "command": "prover/build.sh cp_commit",
+        "exit_code": 0,
+        "seconds": 1270,
+        "warnings": 46,
+        "sha256": "6e14b8a6a9c721f4fd7e6461aca6e1b9e06bab15b59e489464eb7f755d28369e"
+      },
+      {
+        "command": "prover/build.sh cp_prove",
+        "exit_code": 0,
+        "seconds": 3078,
+        "warnings": 98,
+        "sha256": "b6fb97557d9393486100ca864c4a98773d8ebf983b2b5047aaa6ae5829a93357"
+      }
+    ],
+    "build_record_sources": [
+      "7f304c426fcab1e63b2a543a7c5e183000c98116d9d11ec28a6c9eeedaae6a63"
+    ],
+    "verifier_beside_sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+    "verifier_beside_note": "the cp_verify that cp_commit's build record names beside it; equal to the patched build of the Linux target run (linux_target_run.result.builds.patched.sha256)",
+    "warnings_only_in": [
+      "attn/front.cuh",
+      "common/zeroing_heap.h",
+      "field/lazy_gl64.cuh",
+      "field/transform_groups_gl64.cuh",
+      "hiding/forest_fused.cuh",
+      "prover/layer_prove.cuh",
+      "prover/layer_walk.cuh"
+    ],
+    "warnings_in_patched_files": [],
+    "least_available_memory_mib": 5524,
+    "not_run": "no program ran: they need an H100-class GPU (sm_90a)",
+    "logs": "kept outside the repository, since they hold the build host's paths; the exit codes, times, warning counts and digests above are read from them",
+    "log_sha256": {
+      "verifier.log": "f6eb09f86a0a5072398d617997d68d16e2da5a51fe578c5c993104353908dd13",
+      "serving_cp_commit.log": "e7847158348aaf62669fc948d66ef0196edce0c1fd8b0df4f2f7487ba01d386b",
+      "serving_cp_prove.log": "ebeacc078abdf90459dc7b914bb057b449501b893df09cb814272c7a2dd19970",
+      "cp_commit.log": "8ba858575fafcf3200ed6b9c332821d01a652533306b27323fbe9f4a8093ae06",
+      "cp_prove.log": "23d639f99be2f06d39ae7452516c64ebea35d81e483493036b4936e032b64d1d"
+    }
+  },
+  "make_check": {
+    "commit": "206c6c7, the last code change",
+    "macos_arm64": "as CI's core job, on a clean clone: uv 0.9.18 and uv's own Python 3.12.12, 3.13.15 and 3.14.7; for each, make check passed (ruff, ruff format, mypy, pytest 2287 passed, 0 failed, 102 skipped, spec, conformance, admission) and make package-check passed",
+    "macos_arm64_note": "with Homebrew's Python 3.13.2 and 3.14.3 in place of uv's, tests/test_native_llm.py::test_sandbox_nested_spawn_with_large_inherited_descriptor_limit fails (the sandboxed child aborts), on main e2cc6d6 too; with uv's 3.13.15 it passes there",
+    "linux_x86_64": "as CI's core job, on a clean clone: uv 0.9.18 and uv's own Python 3.12.12, 3.13.15 and 3.14.2; make package-check passed for each; make check stopped at pytest for each (ruff, ruff format and mypy passed before it), with 1, 3 and 2 failed (2,274, 2,272 and 2,273 passed, 114 skipped), all of them tests that fail on main e2cc6d6 on that host too: tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker (each Python), tests/test_manifests.py::test_file_changed_during_read[abd] (3.13, 3.14) and tests/test_worker.py::test_stream_copy_retains_rejected_output[modified] (3.13); check-spec, check-conformance and check-admission, run on their own for each Python, passed",
+    "linux_x86_64_main": "on main e2cc6d6 on the same host, 2026-11-24: test_file_changed_during_read[abd] failed 2 of 3 runs and test_stream_copy_retains_rejected_output[modified] 1 of 3 (run alone), and a full make check failed at the latter; test_timeout_allows_controller_to_reap_separate_worker failed in main's full suite there on 2026-11-23. The branch changes no file under src/ and none of these tests; pytest runs them serially, before the branch's own test files"
+  },
+  "other_checks": {
+    "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM; no GPU",
+    "tree": "the patched tree of the Linux target run (verifier.patch, prover.patch and tools.patch as pinned above)",
+    "python": "Python 3.13.15, torch 2.13.0+cpu",
+    "integer_model": {
+      "command": "pytest -m \"not vllm and not prover\" in integrations/vllm/integer_model",
+      "exit_code": 0,
+      "passed": 947,
+      "failed": 0,
+      "skipped": 16,
+      "skipped_why": "4 need an NVIDIA GPU, 12 need transformers (not installed)",
+      "log_sha256": "26dc41253f4ae0ce1ffafd4351a657b9d5238cd6750b832dcef2988d110ad15f"
+    },
+    "weight_sums": {
+      "command": "weight_sums/tests/run_tests.sh",
+      "exit_code": 1,
+      "passed": 24,
+      "passed_steps": [
+        "build",
+        "unit",
+        "oracle.1.cpp",
+        "oracle.1.py",
+        "oracle.2.cpp",
+        "oracle.2.py",
+        "oracle.3.cpp",
+        "oracle.3.py",
+        "oracle.4.cpp",
+        "oracle.4.py",
+        "oracle.100.cpp",
+        "oracle.100.py",
+        "oracle.101.cpp",
+        "oracle.101.py",
+        "oracle.102.cpp",
+        "oracle.102.py",
+        "oracle.2.py.decode-twice",
+        "oracle.1.eres10.cpp",
+        "oracle.1.eres10.py",
+        "edge.cpp",
+        "edge.py",
+        "refusals.cpp",
+        "refusals.py",
+        "fork-failure.py"
+      ],
+      "failed_steps": [
+        "model.cpp",
+        "model.py"
+      ],
+      "failed_why": "make_model ends with SIGILL (Illegal instruction): the build host's CPU has no SHA-NI; model.py then has no file to read. As on 2026-11-22",
+      "log_sha256": "44579d63abc991dabaf2913815125859a3bd4fa2f91a0bf41062760d44e2b70a"
+    }
+  },
+  "not_run": [
+    "any commitment or proof (no GPU run), so cp_commit's worst-case check has not run on a GPU (on a CPU, Hallmark's port finds every site of the eg 7 kit within its limit)",
+    "any proof through the verifier's NE 0 branches: the 108 equal calls are all on upstream's MoE proofs"
+  ],
+  "synthetic_inputs_only": true,
+  "tinyllama_proof": false,
+  "hiding_claim": false
+}
