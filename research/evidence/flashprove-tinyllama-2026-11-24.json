@@ -30,7 +30,6 @@
     "prover/weights_commitment/fold_source.cuh",
     "prover/weights_commitment/fold_weights.cuh"
   ],
-  "supersedes": "flashprove-tinyllama-2026-11-23.json for verifier.patch: that revision (14,123 bytes, b78c47e5...) did not admit eg 7 at NE 0; this one does (no-range-words), with three standard-form cases for it, and check 6's file has eg 7. prover.patch and tools.patch are unchanged.",
   "mac_target_run": {
     "host": "macOS 15.7.1 (Darwin 24.6.0), Apple M4 Pro, arm64",
     "result_json_sha256": "1e8dad4b84fac56529c61fbc3f605510f19b23c1cca50695cf4348a3dff1371d",
@@ -652,7 +651,7 @@
   "prover_compile": {
     "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM; no GPU",
     "toolchain": "Build cuda_13.2.r13.2/compiler.37953736_0",
-    "toolchain_note": "as on 2026-11-22 and 2026-11-23: pip cuda-toolkit 13.2.2, the pin in research/probes/flashprove/source.json; libcuda.so link stub from NVIDIA's cudart 13.2.86 archive; g++ 13.3",
+    "toolchain_note": "pip cuda-toolkit 13.2.2, the pin in research/probes/flashprove/source.json; libcuda.so link stub from NVIDIA's cudart 13.2.86 archive; g++ 13.3",
     "source": "the pinned archive with the three pinned patches applied on the build host by git apply; 0 entries (build outputs aside) differ from the tree that make verify-flashprove-tinyllama patched on that host at 551c8ff, whose 30,873 files have the same SHA-256s as the tree it patched on the Mac at 551c8ff",
     "steps": [
       {
@@ -771,7 +770,7 @@
         "model.cpp",
         "model.py"
       ],
-      "failed_why": "make_model ends with SIGILL (Illegal instruction): the build host's CPU has no SHA-NI; model.py then has no file to read. As on 2026-11-22",
+      "failed_why": "make_model ends with SIGILL (Illegal instruction): the build host's CPU has no SHA-NI; model.py then has no file to read",
       "log_sha256": "44579d63abc991dabaf2913815125859a3bd4fa2f91a0bf41062760d44e2b70a"
     }
   },

@@ -52,7 +52,6 @@
     "version": "0.16.0"
   },
   "commit": "206c6c7, the last code change",
-  "supersedes": "flashprove-tinyllama-answer-2026-11-23.json (runs at 7004750, the kit at eg 8, whose gate of layer 21 the worst-case check finds short). Since then verifier.patch admits eg 7 at NE 0 and the kit is fitted at eg 7 (fit_eg.py): each layer's kg is one higher, policy.txt has the line eg 7 and the SiLU table's digest for it, and kit.json pins these",
   "kit_pins": {
     "schema_id": "hallmark.flashprove-tinyllama-kit/1",
     "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
