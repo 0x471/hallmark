@@ -19,7 +19,7 @@ mandatory worst-case check, computed on a CPU by a port of upstream's code, find
 its limit. At the default `eg 8` one gate row of layer 21 is over it, so the kit uses `eg 7`, a key
 one bit coarser, which `verifier.patch` admits at NE 0. It passed on Linux and macOS
 ([evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)). The integer model is not a
-prover: no commitment, proof or GPU run. Next, with owner approval and a cap: commit and prove on a
+prover: no commitment, proof or GPU run. Next, with owner approval and a ceiling: commit and prove on a
 GPU.
 
 ## SASH and FlashProve comparison — recorded

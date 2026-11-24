@@ -154,14 +154,18 @@ products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commi
    kit's scales are computed from it. The card's tags and its text name different versions, and
    `research/AUTHORITY.json` excludes ambiguous licences, so the owner decides; a no means refitting
    on another text. The patches do not depend on it.
-2. **GPU jobs, only with owner approval and a cap**: commit and prove (`cp_prove` x3, as #187 asks),
-   with a controller like `make e2e-flashprove`'s, not yet written. Proposed bound, by decision
-   0093's cost formula and the HF prices it ran at (cpu-xl USD 1.00 and H200 USD 5.00 an hour,
-   which give its USD 3.27): one cpu-xl build of at most 3,600 s and one H200 job of at most 3,600 s
-   for the commit and the three proofs, one attempt each, no retries: at most USD 7.02. The times
-   are ceilings, not estimates, since no prover program has run on this model. The prover patch
-   compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s own verdict on the
-   worst-case check (on a CPU, every site fits at `eg 7`) and `cp_prove`'s rules beyond its
+2. **GPU jobs, only with owner approval and a ceiling**: commit and prove (`cp_prove` x3, as #187
+   asks), with a controller like `make e2e-flashprove`'s, not yet written. One attempt is one cpu-xl
+   build of at most 3,600 s and one H200 job of at most 3,600 s for the commit and the three proofs.
+   By 0093's cost formula (`planned_cost`, which counts HF's 600 s startup window per phase) at the
+   HF rates recorded on 2026-10-20, cpu-xl USD 0.016667 and H200 USD 0.083333 a minute
+   ([evidence](../../research/evidence/w13-compute-options-2026-10-20.json); they give 0093's
+   USD 3.27), an attempt costs at most USD 7.02, and a second H200 job that reuses the build, as
+   0093's did after its first prove job failed, at most USD 5.85. 0093's controller recomputes the
+   bound at live prices before it starts. The times are ceilings, not estimates, since no prover
+   program has run on this model. The ceiling, and with it the number of attempts, is the owner's.
+   The prover patch compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s own verdict
+   on the worst-case check (on a CPU, every site fits at `eg 7`) and `cp_prove`'s rules beyond its
    parameter-file reader run only there.
 3. **A dense proof's altered copies.** The 108 equal calls are all on MoE proofs, and no proof has
    gone through the verifier's NE 0 branches. Before a dense `YES` is relied on, run an
