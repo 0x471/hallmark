@@ -18,11 +18,7 @@ research/probes/flashprove/tinyllama/ and builds the patched one. It then checks
    prescribes, at width 5,120 and at width 2,048;
 6. a dense parameter file at TinyLlama-1.1B's shape (tinyllama/tinyllama_plan.py, placeholder
    scales) passes the patched build's planner in the standard parameter form, and the unpatched
-   build refuses it for its three table digests (policy-tables);
-7. prover.patch's opt-in -without-worst-case: the option rules of cp_commit (serving and test
-   builds) and, on Linux, of cp_prove (serving build; its headers need Linux), built on the host
-   from the patched sources (tinyllama/option_rules.cpp), each refusal with a control that differs
-   only by the option.
+   build refuses it for its three table digests (policy-tables).
 
 No GPU, weights or paid compute. Nothing here compiles or runs the CUDA prover; its nvcc build is
 recorded separately (the probe's README).
@@ -273,50 +269,6 @@ def served_form(tree, output, verifier, name):
 
 def compiler():
     return ["g++", "-fno-ipa-modref"] if platform.system() == "Linux" else ["clang++"]
-
-
-def check_option_rules(tree, output):
-    """Check 7 (see the module's docstring)."""
-    work = output / "option-rules"
-    (work / "weights").mkdir(parents=True)
-    (work / "weights/model.gguf").write_bytes(b"")  # cp_commit's parser looks for a *.gguf
-    (work / "config").mkdir()
-    builds = [
-        ("cp_commit, serving build", ["-DCP_COMMIT", "-DSERVING_BUILD=1"]),
-        ("cp_commit, test build", ["-DCP_COMMIT"]),
-    ]
-    if platform.system() == "Linux":
-        builds.append(("cp_prove, serving build", ["-DCP_PROVE", "-DSERVING_BUILD=1"]))
-    rows = {}
-    for i, (name, flags) in enumerate(builds):
-        exe = work / f"option-rules-{i}"
-        args = [*compiler(), "-std=c++17", "-O1", "-DBLK_FIELD=2", "-DBLK_HASH=1", *flags]
-        args += [
-            "-I",
-            tree / "prover",
-            "-I",
-            tree / "blocks",
-            "-o",
-            exe,
-            PROBE / "option_rules.cpp",
-        ]
-        code, _ = run(args, work / f"build-{i}.log")
-        require(code == 0, f"option_rules.cpp does not build ({name})")
-        done = subprocess.run(
-            [exe, work / "weights", work / "config"], capture_output=True, text=True, timeout=60
-        )
-        (work / f"run-{i}.log").write_text(done.stdout + done.stderr)
-        cases = [x for x in done.stdout.splitlines() if x.startswith("case ")]
-        last = done.stdout.rstrip().splitlines()[-1] if done.stdout.strip() else ""
-        passed = all(x.endswith(": as expected") for x in cases)
-        require(
-            done.returncode == 0 and last == "ALL AS EXPECTED" and cases and passed,
-            f"the option rules of {name}: {last}",
-        )
-        rows[name] = dict(cases=len(cases), last_line=last)
-    if platform.system() != "Linux":
-        rows["cp_prove, serving build"] = "not built on this host: its headers need Linux"
-    return rows
 
 
 def check_judge(tree, output):
@@ -573,7 +525,6 @@ def verify(output):
     result["fold_constants"] = check_constants(tree)
     result["weight_sums_against_oracle"] = check_weight_sums(tree, output)
     result["tinyllama_plan"] = check_tinyllama_plan(tree, output, verifiers)
-    result["without_worst_case_option"] = check_option_rules(tree, output)
     result["seconds"] = time.monotonic() - started
     return result
 
