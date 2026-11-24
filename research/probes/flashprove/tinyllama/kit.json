@@ -1,7 +1,7 @@
 {
   "schema_id": "hallmark.flashprove-tinyllama-kit/1",
   "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
-  "patches_json_sha256": "38df89f40050b6fea68314edb6ea0959aa3182a166ef2c9dba5d27a8ac8aa523",
+  "patches_json_sha256": "f0b82602f2f0dd0d65534be8ca9cee7dae7ea1e981993f4f4a66f0d41b9f2a1b",
   "scales_patch": {
     "name": "scales.patch",
     "sha256": "73c42a3c16a6b7440f378b4703d312eb5d7f82a697f2bd6a051cbca4b3501c2c",

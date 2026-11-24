@@ -12,8 +12,8 @@
       "bytes": 14123
     },
     "prover.patch": {
-      "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1",
-      "bytes": 13205
+      "sha256": "d0b5d4e50a366007a5eb051b062401af028eaf27cae67da3b9785588543cbdda",
+      "bytes": 26501
     },
     "tools.patch": {
       "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040",
