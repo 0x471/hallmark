@@ -3327,8 +3327,9 @@ Result: failed at upstream's default `eg 8`; passed at `eg 7`. At `eg 8` (the ki
 runs at `7004750` on 2026-11-23, identical on Linux and macOS;
 [retained failures](evidence/flashprove-tinyllama-answer-2026-11-24.json)), every site fits but the gate of
 layer 21: one row of 5,632 can take a key of 47,481 against the limit of 32,639 (0.54 bits over); no
-other layer's gate key exceeds 14,631, q, k, v and up keep at least 1.2 bits, and the stream,
-bounded by Frobenius norms, 3.7 bits. The float bound agrees: that row can reach a gate input of
+other layer's gate key exceeds 14,631, q, k, v and up keep at least 1.2 bits, the head's margin
+0.64 bits (after the gate the tightest site), the norms' quotients 2.9 bits, and the stream, bounded
+by Frobenius norms, 3.7 bits. The float bound agrees: that row can reach a gate input of
 177.4, and in every layer the integer bound is the float one times the norm's ball radius over
 2,048, within 2e-4. In real units the bound is the row's own, so no rescaling helps, and upstream's
 remedy, `gcl 1`, needs the sigmoid table and is refused at NE 0. Upstream's other remedy is a
@@ -3337,6 +3338,6 @@ coarser key (`scales/worst_case.py`), which takes a file out of the standard for
 `calibrate.py`'s call of `fit_scales.fit()` at `eg 7` (at `eg 8` it gives `calibrate.py`'s
 `words.json` byte for byte), which raises each layer's `kg` by one. At `eg 7` (step 7 of both runs
 at `bf3add1`, [evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)) every site fits:
-the gate of layer 21 at a key of 23,741 against 32,639 (0.46 bits to spare), no other layer above
+the gate of layer 21 at a key of 23,741 against 32,639 (0.45 bits to spare), no other layer above
 7,316, the float bound putting it at 22,703. Not shown: the GPU's own verdict on the check, which
 the port has not been compared with, and the GPU's guards on its matrix products. No GPU, no spend.

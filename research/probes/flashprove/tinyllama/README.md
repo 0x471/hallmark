@@ -12,8 +12,10 @@ synthetic models (the pinned kit: width 512, head width 128). Hallmark's LLM cas
 TinyLlama-1.1B (width 2,048, head width 64, no experts). These three patches are meant to let the same
 pinned source prove and verify a dense model of TinyLlama's shape natively, so that #187 can compare
 provers on the same model. That has not been shown end to end: see "Not checked". They are applied
-with `git apply`, in the order of [`patches.json`](patches.json), as Hallmark applies its SASH
-patches; each file's SHA-256 and size are pinned there. A fourth patch, for upstream's scale tools,
+with `git apply`, in the order of [`patches.json`](patches.json); each file's SHA-256 and size are
+pinned there. That is the mechanism of Hallmark's SASH patches and no more: SASH's Linux prover and
+verifier are built from unchanged upstream source and its Mac verifier patch strengthens checks,
+while `verifier.patch` here widens what the verifier admits. A fourth patch, for upstream's scale tools,
 and a TinyLlama kit fitted with them are in "The TinyLlama kit and the answer check" below: on a
 CPU, upstream's integer model with the kit gives SASH's eight answer tokens.
 
@@ -344,7 +346,7 @@ What follows:
 
 | site | worst layer | bound | limit | |
 |---|---|---|---|---|
-| gate | 21 (shift `kg` 11) | a key of 23,741 | 32,639 | fits, 0.46 bits to spare; no other layer's above 7,316 |
+| gate | 21 (shift `kg` 11) | a key of 23,741 | 32,639 | fits, 0.45 bits to spare; no other layer's above 7,316 |
 | q, k, v, up, the norms, the head's margin | | | | as above |
 | the stream, by Frobenius norms | after the last layer | 2^35.25 | 2^38.99 | fits |
 
@@ -374,7 +376,7 @@ the float logits stays at least 0.99908 (0.99911 at `eg 8`), and the smallest to
   on a CPU, but `cp_commit` and `cp_prove` have not run on it.
   - `cp_commit`'s worst-case check, mandatory as upstream's, has not run on a GPU. Hallmark's CPU
     port of it finds every site of the `eg 7` kit within its limit (above), the gate of layer 21
-    by 0.46 bits. The GPU's own verdict is not known: the port has not been compared with it.
+    by 0.45 bits. The GPU's own verdict is not known: the port has not been compared with it.
   - Of the provers' rules, their parameter-file reader and the part of `cp_prove`'s set-up that
     needs only the kit (above) admit it. `cp_prove`'s other checks, among them the forward
     kernels' `layer_words_fit()`, run only on a GPU.

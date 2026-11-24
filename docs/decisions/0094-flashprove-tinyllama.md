@@ -30,8 +30,11 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
   replaces with `eg 7` (below). If the owner prefers that, it is the fallback. Lean covers neither
   route (`lean/GAPS.md`: one model size).
 - **Option 3, a patched FlashProve: proposed**, as Hallmark's own small patches on the pinned source.
-  They are applied with `git apply`, as the SASH patches are, and each is SHA-256-pinned. It is not a
-  dependency on a fork. At the SiLU key's default exponent (eg 8) `cp_commit`'s mandatory
+  They are applied with `git apply` and each is SHA-256-pinned: the mechanism of Hallmark's SASH
+  patches, and the likeness ends there. SASH's Linux prover and verifier are built from unchanged
+  upstream source and its Mac verifier patch strengthens checks
+  ([ARCHITECTURE](../ARCHITECTURE.md#how-sash-is-integrated)), while `verifier.patch` here widens
+  what the verifier admits. It is not a dependency on a fork. At the SiLU key's default exponent (eg 8) `cp_commit`'s mandatory
   worst-case check would refuse the TinyLlama kit at one gate row; the kit therefore has the line
   `eg 7`, which `verifier.patch` admits at NE 0, and with it every site fits (below).
 
