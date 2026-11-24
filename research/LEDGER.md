@@ -3302,7 +3302,7 @@ gate's key peaks at 3,970 (limit 32,639), and its choices, peaks and margins are
 hosts. Its logits over 2^17 follow the float logits with a slope of 0.993 to 1.005 and a correlation
 of at least 0.99909; the smallest top-1 margin is 0.77, at the full stop. The controls fail as
 required: `MF` + 1 doubles the slope with the tokens unchanged, and layer 10's `kv` + 1 lowers the
-correlation to 0.9939, below the floor of 0.998. That floor was set by hand after a reviewer's
+correlation to 0.9939, below the floor of 0.998. That floor was set by hand after
 one-bit shift errors passed an earlier floor of 0.99. A one-off sweep over every layer's `kv`, `ko`
 and `kd` + 1, 66 kits, caught all 66 (4 by their tokens, the closest at 0.9963); 28 would pass a
 floor of 0.99. The margin is thin. The planner bounds the kit's proof at 14,061,196 bytes and
