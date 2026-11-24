@@ -194,13 +194,14 @@ Also at this revision, on the same Linux host
   because that CPU has no SHA-NI;
 - Hallmark's `make check` and `make package-check` at the last code change (`206c6c7`), as CI's
   core job runs them (a clean clone, uv 0.9.18, uv's Python 3.12.12, 3.13.15 and 3.14.2):
-  `make package-check` passed for all three; `make check` failed only at tests that also fail on
-  Hallmark's `main` on that host, in files the branch does not touch (it does not touch `src/`
-  either): `tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker` (all three;
-  its cause is not established), `tests/test_manifests.py::test_file_changed_during_read[abd]`
-  (3.13, 3.14; there two back-to-back writes can leave a file's `st_mtime_ns` unchanged) and
-  `tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]` (3.13); pytest 2,272
-  to 2,274 passed. Every other step passed (`check-spec`, `check-conformance` and
+  `make package-check` passed for all three; `make check` failed only at two tests that also fail
+  on Hallmark's `main` on that host (in 5 and 4 of 7 full runs there), in files the branch does not
+  touch (nor `src/`): `tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]`
+  (all three) and `tests/test_manifests.py::test_file_changed_during_read[abd]` (3.14; there two
+  back-to-back writes can leave a file's `st_mtime_ns` unchanged); pytest 2,273 or 2,274 passed.
+  (`tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker` fails on any branch
+  when the suite is started in the background of a non-interactive shell, which ignores SIGINT;
+  it passes in the foreground.) Every other step passed (`check-spec`, `check-conformance` and
   `check-admission` run on their own, since `make` stops at pytest).
   On macOS (uv's Python 3.12.12, 3.13.15 and 3.14.7) both passed for all three (pytest 2,287
   passed, 0 failed, 102 skipped), and so does `make docs`. With Homebrew's Python 3.13.2 or 3.14.3 in place of uv's,
