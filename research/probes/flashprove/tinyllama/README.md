@@ -39,8 +39,14 @@ The patch:
   is compared;
 - treats `routed-experts` and `both-clamps` as met at NE 0. `rcl` and `gcl` stay refused at NE 0, as
   upstream refuses them;
+- treats `no-range-words` as met at NE 0 when the file has the line `eg 7` (the SiLU table's key in
+  steps of 2^-7) and no `smax`. Without `gcl`, which needs experts, a gate's key must fit two limbs
+  (at most 32,639), and `eg 7` doubles the gate inputs that this covers, at half the key's
+  resolution; upstream's own `scales/worst_case.py` names a lower `eg` as the way to raise a gate's
+  limit. No other `eg`, no `smax`, and nothing above NE 0 changes: upstream's `eg 7` case with
+  experts still misses the condition;
 - extends upstream's own standard-form test (`verifier/tests/served_form_test.py`) with the dense
-  cases.
+  cases, `eg 7`, `eg 6` and `eg 7` with `smax` among them.
 
 No check of a proof's bytes changes. What changes is admission: which parameter files can reach `YES`,
 and, at NE 0, three table digests that are now compared where upstream refused the lines. Upstream's
@@ -91,9 +97,9 @@ What a patched `YES` means that upstream's does not:
   every `-public-weights` commitment, upstream's own Maverick route included, on the speculation
   that the kit might fail the check. It was dropped (four files: `arguments.h`, `hf_commit.cu`,
   `isk.cuh` and a comment in `cp_files.h` are upstream's again). Computed since on a CPU, the check
-  refuses the TinyLlama kit at one gate row, and no change of the kit's scales can fix that: see
-  "cp_commit's worst-case check, on a CPU" below. So with these patches `cp_commit` would make no
-  commitment of this kit; which change to make is the owner's call.
+  refuses a TinyLlama kit at the default `eg 8` at one gate row; the kit is therefore fitted at
+  `eg 7`, which `verifier.patch` admits at NE 0, and then every site fits ("cp_commit's worst-case
+  check, on a CPU" below). No check is left out.
 - **Not changed: `moe_at_layer`** (`prover/prover/layout.h`). It reads the prover's own profile,
   which is `mo ? 3 : 2` with `mo = NE > 0` (`prover/inputs.cuh`, `prover/layer_setup.cuh`). So at
   NE 0 no layer takes the MoE path, though the function itself does not test NE.
@@ -147,54 +153,59 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
 | timed output | every wall-clock time (`%.3f`) in the verifier's sources is one of the 9 timed line formats in [`dual_verify.py`](dual_verify.py) (14 times) |
 | upstream's stored proofs and altered copies; every `cp_verify` call made by both builds through `dual_verify.py` | exactly 108 calls. Each gives the same exit code and output from both builds, apart from the build digest and the times on those 9 formats. The two stored proofs end `YES`. Each table's unaltered control passes (the clipped-gap control ends `WITHIN LIMITS`), and all 99 altered sets are rejected by the expected check |
 | `served_form_test.py` (patched) on the patched build | `all as expected` |
-| the same test on the unpatched build (negative control) | fails exactly the 5 cases that only the patch meets, and says so in its last line |
+| the same test on the unpatched build (negative control) | fails exactly the 8 cases that only the patch meets (five dense cases and three `eg` cases at NE 0), and says so in its last line |
 | the provers' parameter-file reader, built from the patched source | admits the upstream kit, the dense kit and the dense kit with three digests; refuses four digests at NE 0, `tsig` for `trope`, and no `tsig` with experts (`policy-tables`) |
 | fold constants in the 4 patched implementations | equal to each other, to the pins and to an exact derivation |
 | `weight_sums` (patched) against upstream's exact oracle | the same sums at 5,120/128 (seed 1) and 2,048/64 (seeds 1 and 100) |
-| a dense parameter file and `KL.bin` at TinyLlama-1.1B's shape, from [`tinyllama_plan.py`](tinyllama_plan.py) (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22 layers, vocabulary 32,000, rotary base 10,000, T = 64) | the patched build's planner (`-plan arrays`, `request`, `accounting`) admits it in the standard parameter form, with its three tables matching their digests. Both calls must print the planner's whole ending in upstream's order (the standard-form line can only be missing after it) and name the same files (`h_par`, `configuration`). The unpatched build refuses it with `policy-tables` alone, as its last line. Without its digest lines, the unpatched build finds exactly `routed-experts`, `both-clamps` and `table-digests` unmet, and the patched build only `table-digests`. The shape, `h_par` and `configuration` must equal the pins in `patches.json` |
+| a dense parameter file and `KL.bin` at TinyLlama-1.1B's shape, from [`tinyllama_plan.py`](tinyllama_plan.py) (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22 layers, vocabulary 32,000, rotary base 10,000, T = 64) | the patched build's planner (`-plan arrays`, `request`, `accounting`) admits it in the standard parameter form, with its three tables matching their digests. Both calls must print the planner's whole ending in upstream's order (the standard-form line can only be missing after it) and name the same files (`h_par`, `configuration`). The unpatched build refuses it with `policy-tables` alone, as its last line. The file has `eg 7`, as the kit has. Without its digest lines, the unpatched build finds exactly `routed-experts`, `both-clamps`, `table-digests` and `no-range-words` unmet, and the patched build only `table-digests`. The shape, `h_par` and `configuration` must equal the pins in `patches.json` |
 
-**Current revision** (patched verifier digest `6f7ac148…`, the patch hashes in `patches.json`):
-**passed on Linux and on macOS** on 2026-11-23, every row above as required
-([evidence](../../../evidence/flashprove-tinyllama-2026-11-23.json)):
+**Current revision** (patched verifier digest `33e9d53e…`, the patch hashes in `patches.json`):
+**passed on Linux and on macOS** on 2026-11-24 at `551c8ff` (the next commit changes only
+`kit.json`, which this target does not read), every row above as required
+([evidence](../../../evidence/flashprove-tinyllama-2026-11-24.json)):
 
 - Ubuntu 24.04, x86_64, upstream `verifier/build.sh` with g++ 13.3. 108 of 108 calls compared equal,
-  with exit codes 99 times 1, 7 times 0, and 2 times 4 (planning calls inside `check_proof.py`), 1,638 s.
-  The revision of 2026-11-22, whose `prover.patch` also left the worst-case check out, passed the
-  same rows with the same two verifier binaries
-  ([evidence](../../../evidence/flashprove-tinyllama-2026-11-22.json)); earlier runs, without the
-  TinyLlama row or with looser forms of it, passed too.
+  with exit codes 99 times 1, 7 times 0, and 2 times 4 (planning calls inside `check_proof.py`),
+  1,647 s. The standard-form test passed, and the unpatched build missed exactly the eight cases
+  that only the patch meets. Earlier revisions passed the same rows
+  ([2026-11-23](../../../evidence/flashprove-tinyllama-2026-11-23.json),
+  [2026-11-22](../../../evidence/flashprove-tinyllama-2026-11-22.json)); the one of 2026-11-22 had a
+  `prover.patch` that also left the worst-case check out.
 - macOS arm64, Apple clang 17 (`apple-clang`, built as `make verify-flashprove` builds it): 108 of 108
-  calls equal, with the same exit codes, 351 s.
+  calls equal, with the same exit codes, 367 s.
 - Both hosts' planning calls name the same TinyLlama-shaped files (equal `h_par` and
   `configuration`).
 
-Also at this revision, on the same Linux host:
+Also at this revision, on the same Linux host
+([evidence](../../../evidence/flashprove-tinyllama-2026-11-24.json), `prover_compile` and
+`other_checks`):
 - **nvcc 13.2.86** (no GPU): upstream's `verifier/build.sh`, then `prover/build.sh serving_cp_commit`,
   `serving_cp_prove`, `cp_commit` and `cp_prove`, built both production programs and both test
-  builds from the patched source (exit 0; 25, 65, 23 and 53 minutes). Every compiler warning is in a
+  builds from the patched source (exit 0; 24, 67, 21 and 51 minutes). Every compiler warning is in a
   file that no patch changes. No program has run. Without a GPU, `build.sh` built its compiler
   sample but could not run it (status 77), so it checked the compiler by its version only. The build
-  records name the sources' digest `61295b3d…`, which upstream's `build.sh` computes from the
-  sources and anyone can recompute from the pinned archive with the three patches applied;
-- on 2026-11-22, on a tree that the target patched from the pins with the same `tools.patch` as now
-  (`1f185426…`; [evidence](../../../evidence/flashprove-tinyllama-2026-11-22.json),
-  `linux_other_checks`), the `integer_model` CPU suite (`pytest -m "not vllm and not prover"`,
-  Python 3.13, torch 2.13.0+cpu): 947 passed, 0 failed, 16 skipped (4 need a GPU, 12
+  records name the sources' digest `7f304c42…`, which upstream's `build.sh` computes from the
+  sources and anyone can recompute from the pinned archive with the three patches applied, and as
+  the verifier beside `cp_commit` the target's own patched `cp_verify` (`a163a90a…`);
+- on the target's patched tree, the `integer_model` CPU suite (`pytest -m "not vllm and not
+  prover"`, Python 3.13, torch 2.13.0+cpu): 947 passed, 0 failed, 16 skipped (4 need a GPU, 12
   `transformers`); and `weight_sums/tests/run_tests.sh`: 24 steps passed, among them both
   programs' refusal suites and every oracle step. The two `make_model` steps end with SIGILL,
-  because that CPU has no SHA-NI. Since then only `prover.patch` has changed, by dropping its hunks
-  for four files that neither uses; its other five hunks, among them the `parameter_file.h` that
-  `test_parameter_file.py` builds, are byte for byte the same;
-- Hallmark's `make check` at the last code change (`1208545`): 2,367 passed, 2 failed.
-  `tests/test_manifests.py::test_file_changed_during_read[abd]` fails on Hallmark's `main` on that
-  host too (5 of 6 runs): there two back-to-back writes leave a file's `st_mtime_ns` unchanged, so a
-  same-size rewrite during a read is not seen.
-  `tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker` fails on `main` there
-  too; its cause is not established. On 2026-11-22 the failure was the first alone, or
-  `tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]` (4 of 5 on `main`). The
-  branch touches none of these tests and not `src/`. Every other step passed (`check-spec`,
-  `check-conformance` and `check-admission` run on their own, since `make` stops at pytest). On
-  macOS `make check` passes (pytest 2,279 passed, 0 failed), and so does `make docs`.
+  because that CPU has no SHA-NI;
+- Hallmark's `make check` and `make package-check` at the last code change (`206c6c7`), as CI's
+  core job runs them (a clean clone, uv 0.9.18, uv's Python 3.12.12, 3.13.15 and 3.14.2):
+  `make package-check` passed for all three; `make check` failed only at tests that also fail on
+  Hallmark's `main` on that host, in files the branch does not touch (it does not touch `src/`
+  either): `tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker` (all three;
+  its cause is not established), `tests/test_manifests.py::test_file_changed_during_read[abd]`
+  (3.13, 3.14; there two back-to-back writes can leave a file's `st_mtime_ns` unchanged) and
+  `tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]` (3.13); pytest 2,272
+  to 2,274 passed. Every other step passed (`check-spec`, `check-conformance` and
+  `check-admission` run on their own, since `make` stops at pytest).
+  On macOS (uv's Python 3.12.12, 3.13.15 and 3.14.7) both passed for all three (pytest 2,287
+  passed, 0 failed, 102 skipped), and so does `make docs`. With Homebrew's Python 3.13.2 or 3.14.3 in place of uv's,
+  `tests/test_native_llm.py::test_sandbox_nested_spawn_with_large_inherited_descriptor_limit` fails
+  on macOS, on Hallmark's `main` too.
 
 **Recorded runs, of an earlier revision.** Three runs on 2026-11-21 (macOS arm64, `apple-clang`, 328-396
 s) passed the target as it then was:
@@ -270,9 +281,9 @@ Hallmark's SASH path, [`response-case.json`](../../sash/response-case.json)) as 
 BF16 matrices' bits unchanged, the norm gains in F32, the query and key rows permuted as llama.cpp's
 converter does for `llama`, and `llama.attention.key_length 64`. `kit/` (pinned in [`kit.json`](kit.json)) holds the kit that
 upstream's route (its `scales/README.md`, "A real model", steps 1 to 5) makes from that file, with
-e_res 11 (the tools' default) and T = 64: the configuration (`policy.txt`, `KL.bin`, `layout.txt`),
+e_res 11 (the tools' default), `eg 7` and T = 64: the configuration (`policy.txt`, `KL.bin`, `layout.txt`),
 the setup files beside the weights (`wsums.txt`, `fold.txt`) and the fit (`words.json`,
-`maxima.json`). Its base parameter file is check 6's, from `tinyllama_plan.py`.
+`maxima.json`). Its base parameter file is check 6's, from `tinyllama_plan.py`, `eg 7` included.
 
 `make verify-flashprove-tinyllama-answer` (CPU only, no GPU, no spend; it downloads the pinned
 model, about 2.2 GB, and needs about 8 GB of disk and `uv`) rebuilds all of it and requires, in order
@@ -286,20 +297,20 @@ change):
 | environments | two virtual environments made by uv from this platform's hash-locked file in `requirements/` (macOS arm64 or Linux x86_64; pinned in `kit.json`), installed with `--require-hashes`; the top-level versions must be upstream's, and the full installed set is recorded |
 | setup files | `weight_sums` (patched) and `fold.txt` equal `kit/` byte for byte |
 | calibration set | `--tinyllama` gives the pinned set, and its drawn rows have upstream's own `DRAWS_SHA256` (steps 1 to 3 of upstream's rule run on byte-identical inputs) |
-| fit | `calibrate.py` gives `kit/words.json` byte for byte; `maxima.json` is compared and recorded |
+| fit | `calibrate.py` runs (its fit is at `eg 8`); [`fit_eg.py`](fit_eg.py), the same call of `fit_scales.fit()`, gives `calibrate.py`'s `words.json` byte for byte at `eg 8` and `kit/words.json` byte for byte at `kit.json`'s `eg 7`; `maxima.json` is compared and recorded |
 | configuration | `words_to_policy.py` ends `w2p end 0`; it and `pack_layout.py` give `kit/policy.txt`, `KL.bin` and `layout.txt` byte for byte |
 | planning | on the kit and on SASH's request (66 words: 25 prompt ids, 8 answer ids, 31 filler 0, r = 24, e = 32), the patched planner prints its whole ending in the standard parameter form with three tables and the pinned `h_par` and `configuration`; the unpatched build ends `NO: policy-tables`; the provers' parameter-file reader admits the kit |
 | upstream's scale tests | `test_policy_tables.py`, `table_ties.py`, `test_calibrate.py` and `test_gguf_weights.py` pass on the patched tree, the first two with `SUITE.md`'s commands (the other two have no row). Status 77, passed in part, is accepted with an "in part" last line: the target builds no `make_model` and sets no `SMALL_MODEL`, so those cases skip on every host |
 | float reference | upstream's float pass on the GGUF agrees with Hugging Face transformers on the safetensors at the final norm (relative L2 at most 1e-4), and transformers' greedy decoding gives SASH's answer |
-| **the answer** | upstream's integer model (patched, torch 2.13.0), with every file pinned and the weights' integers checked against `wsums.txt`, run over the whole 64-token window: no range condition fails at any position; the greedy choices at positions 24 to 31 are SASH's `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]`; the gate's key stays at most 32,639 (the integer model's condition for a key without the clamp `gcl`; it is meant to match the provers' refusal, but upstream has not compared its range tests with the released `cp_prove`); and at each checked position the integer logits over 2^s have a slope of 0.75 to 1.33 and a correlation of at least 0.998 against the float logits. The slope bound catches an error in the logits' overall scale (`MF` off by one bit doubles every logit). The correlation floor, 0.998, was set by hand after a reviewer's samples showed one-bit shift errors passing the earlier 0.99: between the real kit's 0.9991 and the layer-10 control's 0.9972. A one-off sweep afterwards on macOS ([`shift_sweep.py`](shift_sweep.py)), which changed every layer's `kv`, `ko` and `kd` by one bit, 66 kits, caught all 66 (5 changed the tokens; the other 61 kept SASH's tokens and slopes within the bound, and fell below the floor, the closest at 0.9962). With the earlier floor of 0.99, 30 of the 66 would have passed. The margin is thin, and other errors may still pass |
+| **the answer** | upstream's integer model (patched, torch 2.13.0), with every file pinned and the weights' integers checked against `wsums.txt`, run over the whole 64-token window: no range condition fails at any position; the greedy choices at positions 24 to 31 are SASH's `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]`; the gate's key stays at most 32,639 (the integer model's condition for a key without the clamp `gcl`; it is meant to match the provers' refusal, but upstream has not compared its range tests with the released `cp_prove`); and at each checked position the integer logits over 2^s have a slope of 0.75 to 1.33 and a correlation of at least 0.998 against the float logits. The slope bound catches an error in the logits' overall scale (`MF` off by one bit doubles every logit). The correlation floor, 0.998, was set by hand after a reviewer's samples showed one-bit shift errors passing the earlier 0.99: between the kit's 0.9991 (then at `eg 8`) and the layer-10 control's 0.9972. A one-off sweep on macOS ([`shift_sweep.py`](shift_sweep.py)), which changes every layer's `kv`, `ko` and `kd` by one bit, 66 kits, caught all 66 on the `eg 7` kit (4 changed the tokens; the other 62 kept SASH's tokens and slopes within the bound, and fell below the floor, the closest at 0.9963). With the earlier floor of 0.99, 28 of the 66 would have passed. The margin is thin, and other errors may still pass |
 | mutation controls | the same check on two one-bit changes of the kit must fail at least one condition: `MF` + 1 in `policy.txt`, and layer 10's `kv` + 1 in `KL.bin` (not the line `s`: the forward pass reads it only to add seeded noise, and this check gives no seed, so changing it would test only this target's divisor); each control's slopes and least correlation are recorded |
-| `cp_commit`'s worst-case check, on a CPU | recorded, not a condition of passing: `worst_case_cpu.py` and `gate_float_bound.py` (next section) on the kit. The sites that do not fit must be `kit.json`'s `worst_case.short` (the gate of layer 21), and the two must agree on the gate: the same layers over the limit, and in each layer the integer key bound must be the float one times the norm's ball radius over 2,048, within 0.1 % |
+| `cp_commit`'s worst-case check, on a CPU | `worst_case_cpu.py` and `gate_float_bound.py` (next section) on the kit: every site must fit (`kit.json`'s `worst_case.short` is empty), and the two must agree on the gate: the same layers over the limit (none), and in each layer the integer key bound must be the float one times the norm's ball radius over 2,048, within 0.1 % |
 
-**Current kit** (`scales.patch`, the lock files and `kit/` as pinned in `kit.json`): **passed on
-Linux and on macOS** on 2026-11-23 at `7004750`, every row as required
-([evidence](../../../evidence/flashprove-tinyllama-answer-2026-11-23.json), with both runs'
-`result.json`): Ubuntu 24.04 x86_64 (a clone, every input downloaded, 1,786 s) and macOS arm64
-(inputs from a checked local folder, 367 s).
+**Current kit** (`scales.patch`, the lock files and `kit/` as pinned in `kit.json`, at `eg 7`):
+**passed on Linux and on macOS** on 2026-11-24 at `206c6c7`, every row as required
+([evidence](../../../evidence/flashprove-tinyllama-answer-2026-11-24.json), with both runs'
+`result.json`): Ubuntu 24.04 x86_64 (a clone, every input downloaded, 1,756 s) and macOS arm64
+(inputs from a checked local folder, 270 s).
 
 - both environments hold exactly their lock files (43 and 19 distributions);
 - every required kit file, the GGUF file and the calibration set rebuilt byte for byte on both
@@ -309,15 +320,15 @@ Linux and on macOS** on 2026-11-23 at `7004750`, every row as required
 - float reference: relative L2 3.9e-6 (macOS) and 1.3e-6 (Linux) at the final norm; transformers'
   greedy reply is SASH's;
 - the integer model: SASH's eight tokens, no failed range condition over the 64 positions, the
-  gate's key at most 7,108, with every recorded peak, margin and clamped cell identical on the two
+  gate's key at most 3,970, with every recorded peak, margin and clamped cell identical on the two
   hosts (the slopes and correlations, against each host's own float pass, differ by at most 1.1e-6);
-  logit slopes 0.988 to 1.004 and correlations of at least 0.9991; the smallest top-1 margin 0.86
-  logits (float: 1.06), at the full stop; one value entry beyond its clamp, `vw` in layer 2 at
-  position 32 (the final EOS), 2,233 against 2,047;
+  logit slopes 0.993 to 1.005 and correlations of at least 0.99909; the smallest top-1 margin 0.77
+  logits (0.86 at `eg 8`), at the full stop; one value entry beyond its clamp, `vw` in layer 2 at
+  position 32 (the final EOS), 2,241 against 2,047;
 - the mutation controls, identical on the two hosts: with `MF` + 1 the tokens stay and the slope is
-  1.98 to 2.01 at every checked position; with layer 10's `kv` + 1 the tokens stay, the slopes
-  move to 0.979 to 1.008 (within the bound), and the correlation falls to 0.994 to 0.997, below the
-  floor;
+  1.99 to 2.01 at every checked position; with layer 10's `kv` + 1 the tokens stay, the slopes
+  move to 0.982 to 1.008 (within the bound), and the correlation falls to 0.9939, below the floor;
+- the worst-case check, identical on the two hosts: every site fits (next section);
 - the planner's bounds for the kit: a proof of at most 14,061,196 bytes, 126.21 bits, the same as
   check 6, whose proof-system lines the kit keeps.
 
@@ -342,7 +353,8 @@ its record (`isk.txt`, `ranges`). Upstream computes it on a GPU only. Step 7 of
 - [`gate_float_bound.py`](gate_float_bound.py), which shares no code or file with it: from the float
   safetensors, sqrt(d) ||W_gate[j] * g|| is the largest input of gate row j over all normed rows.
 
-**The kit fails at one site** (the same on both hosts, to the last digit):
+**At the default `eg 8` a kit fails at one site** (the kit as first fitted; the same on both
+hosts, to the last digit):
 
 | site | worst layer | bound | limit | |
 |---|---|---|---|---|
@@ -355,24 +367,37 @@ its record (`isk.txt`, `ranges`). Upstream computes it on a GPU only. Step 7 of
 The float bound agrees: row 1,104 of layer 21 can reach a gate input of 177.4 (a key of 45,406 at
 `eg` 8), no other layer above 54.7. In every layer the integer key bound is the float one times the
 norm's ball radius over 2,048 (1.0457), within 2e-4, as it should be when the kit's scales are right.
-A real request is far below it: on SASH's prompt the gate's key reaches at most 7,108.
+A real request is far below it: on SASH's prompt the gate's key reaches at most 7,108 at `eg 8`
+(3,970 at `eg 7`).
 
 What follows:
 
-- No change of the kit fixes it. In real units the bound is the row's own, sqrt(d) ||W_j * g||, for
-  any scales; `scales/worst_case.py` cannot make a gate coarser (its key reads a public table with a
-  fixed step); a coarser key (`eg` below 8) leaves the standard parameter form.
+- No change of the scales at `eg 8` fixes it. In real units the bound is the row's own,
+  sqrt(d) ||W_j * g||, for any scales; `scales/worst_case.py` cannot make a gate's shift coarser
+  (its key reads a public table with a fixed step).
 - Upstream's remedy is the line `gcl 1`, which clamps the gate's key and raises its limit to
   4,194,175. The clamp is read from the sigmoid table (`FS`), which only a model with experts forms,
   and the verifier refuses `gcl` at NE 0 (`policy-gcl`); the patches keep that refusal.
-- So option 3 needs one more change before a commitment, and which is the owner's call (decision
-  0094): an explicit option to leave the check out under `-public-weights` (upstream gives weight hiding
-  as the check's reason, and with public weights nothing is hidden; soundness does not rest on it,
-  `scales/worst-case-bounds.md`; a request that drives that row past its range fails, with no proof); or `gcl` at NE 0, which
-  needs the sigmoid table there and so changes what the verifier checks in a proof, a much larger
-  patch. Padded option 2's standard form carries `gcl 1`, under which this row (a real input of
-  177.4: a key of about 45,400, plus its ball's slack) fits far within 4,194,175; the padded kit's
-  other sites have not been computed.
+- Upstream's other remedy is a coarser key: each step of `eg` below 8 halves the key and raises the
+  gate's limit by one bit (`scales/worst_case.py`; `fit_scales.py --eg`), but any `eg` takes a file
+  out of the standard parameter form (`no-range-words`). So `verifier.patch` admits `eg 7` at NE 0,
+  and the kit is fitted at `eg 7`: [`fit_eg.py`](fit_eg.py) makes `calibrate.py`'s call of
+  `fit_scales.fit()` again at `eg 7` (at `eg 8` it gives `calibrate.py`'s `words.json` byte for
+  byte), which raises each layer's `kg` by one and changes nothing else.
+
+**At `eg 7`, the committed kit: every site fits** (both hosts, to the last digit):
+
+| site | worst layer | bound | limit | |
+|---|---|---|---|---|
+| gate | 21 (shift `kg` 11) | a key of 23,741 | 32,639 | fits, 0.46 bits to spare; no other layer's above 7,316 |
+| q, k, v, up, the norms, the head's margin | | | | as above |
+| the stream, by Frobenius norms | after the last layer | 2^35.25 | 2^38.99 | fits |
+
+The float bound at `eg 7` puts that row's key at 22,703; no layer is over the limit. The cost is the
+SiLU table's input resolution, 2^-7 in place of 2^-8: on SASH's request the logits' correlation with
+the float logits stays at least 0.99909 (0.99912 at `eg 8`), and the smallest top-1 margin is
+0.77 logits (0.86 at `eg 8`).
+
 - Not covered: the GPU's guards on its matrix products, which can only make a site fail; and that
   `cp_commit`'s own conversion gives the integers read here (it is compared with `wsums.txt` only
   through that file). The port has not been compared with a GPU run.
@@ -393,8 +418,8 @@ What follows:
 - **No TinyLlama commitment or proof.** The kit is fitted and the integer model gives SASH's answer
   on a CPU, but `cp_commit` and `cp_prove` have not run on it.
   - `cp_commit`'s worst-case check, mandatory as upstream's, has not run on a GPU. Hallmark's CPU
-    port of it finds the kit short at one gate row (below), so `cp_commit` would make no commitment
-    (status 7). The GPU's own verdict is not known: the port has not been compared with it.
+    port of it finds every site of the `eg 7` kit within its limit (above), the gate of layer 21
+    by 0.46 bits. The GPU's own verdict is not known: the port has not been compared with it.
   - Of the provers' rules, only their parameter-file reader has judged the kit (it admits it).
 - **The kit's proof-system lines are check 6's**, not sized for speed: the full kit's values, with
   the lines that TinyLlama's shape forces (`ll`, which 22 layers force from 2 to 1; `la`, `lB`,
@@ -404,7 +429,7 @@ What follows:
   checks at run time (for example `forest-depth-A` in `prover/attn/front.cuh`). The planner's sizes
   and bits for the kit are bounds of these lines, not measurements, and #187 may want smaller ones.
 - **One request.** The answer check covers SASH's one prompt in one window of T = 64. On it one value
-  cell clamps (`v` in layer 2, 2,233 to 2,047, at position 32, the final EOS, after the checked
+  cell clamps (`v` in layer 2, 2,241 to 2,047, at position 32, the final EOS, after the checked
   positions); another prompt
   can clamp other cells or fail a range condition. #187's sweep over the number of checked tokens needs a
   kit for each T.
