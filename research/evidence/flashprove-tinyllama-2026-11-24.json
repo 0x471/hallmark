@@ -3,7 +3,7 @@
   "recorded_at": "2026-11-24",
   "decision": "docs/decisions/0094-flashprove-tinyllama.md",
   "decision_status": "proposed",
-  "commit": "551c8ff (verify; the next commit, 206c6c7, changes only kit.json, which this target does not read)",
+  "commit": "bf3add1, the last code change",
   "patches": {
     "verifier.patch": {
       "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0",
@@ -32,20 +32,20 @@
   ],
   "mac_target_run": {
     "host": "macOS 15.7.1 (Darwin 24.6.0), Apple M4 Pro, arm64",
-    "result_json_sha256": "1e8dad4b84fac56529c61fbc3f605510f19b23c1cca50695cf4348a3dff1371d",
+    "result_json_sha256": "87a7063b7513a66b5b6f12e946500f090ccec7f90457969c130223a7a234a372",
     "result": {
       "builds": {
         "patched": {
           "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
           "recipe": "apple-clang",
-          "seconds": 22.17770845798077,
+          "seconds": 30.40555070800474,
           "sha256": "c5d95ec0d68a7779204fdd3fa694e8dec7a20a2f6d22e8cd1db0ee9bd0a5de5c",
           "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
         },
         "upstream": {
           "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
           "recipe": "apple-clang",
-          "seconds": 22.65734220901504,
+          "seconds": 30.352636166964658,
           "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
           "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
         }
@@ -116,8 +116,8 @@
           "no-range-words.dense-eg-7-smax"
         ],
         "tinyllama_plan": {
-          "configuration": "83fa9ef04e8b3477165b5043be08fd3feda55d7902de37fce84f029ffc765254",
-          "h_par": "f09efa8377348b4e43505b163ffd08be795da5edfc37de029f024fe8545276fc",
+          "configuration": "2e5261bc77d344eb2f062e69a3ccf80613b0756603f3135edb39ea1ef90f430f",
+          "h_par": "bc61522eeb44d377692e062f06f8cca36675b0135e13f3031eea39db0f430ff9",
           "shape": {
             "G": 4,
             "H": 32,
@@ -171,7 +171,7 @@
       },
       "qualified_backend": false,
       "schema_id": "hallmark.flashprove-tinyllama-verify/1",
-      "seconds": 367.33685758302454,
+      "seconds": 512.849250499974,
       "source": {
         "bytes": 157799758,
         "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
@@ -237,8 +237,8 @@
       "timed_formats": 9,
       "tinyllama_plan": {
         "bits_compiled_bound": 126.21,
-        "configuration": "83fa9ef04e8b3477165b5043be08fd3feda55d7902de37fce84f029ffc765254",
-        "h_par": "f09efa8377348b4e43505b163ffd08be795da5edfc37de029f024fe8545276fc",
+        "configuration": "2e5261bc77d344eb2f062e69a3ccf80613b0756603f3135edb39ea1ef90f430f",
+        "h_par": "bc61522eeb44d377692e062f06f8cca36675b0135e13f3031eea39db0f430ff9",
         "proof_bytes_at_most": 14061196,
         "shape": {
           "G": 4,
@@ -276,7 +276,7 @@
               "result: outcome=verified commitment_id=79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183 range=60:64 checked_tokens=3 end_token=not_checked claim=exact-match policy=exact next_token=199 C=256 theta=256 cap=0 s=16 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=49 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
               "check_proof: verified: exact match: every checked token (tokens 61 to 63 of the request) is the model's greedy choice; the next token, 199, is the model's greedy choice; the end of the reply was not checked; commitment: 49 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 38 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
             ],
-            "seconds": 2.9148761659744196
+            "seconds": 4.099294250016101
           },
           "full-size": {
             "exit_code": 0,
@@ -284,7 +284,7 @@
               "result: outcome=verified commitment_id=7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe range=23:1024 checked_tokens=1000 end_token=not_checked claim=exact-match policy=exact next_token=52599 C=256 theta=256 cap=0 s=15 limits=exact request_tokens=1024 leaf=0 commitment_assumed_rounds=86 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
               "check_proof: verified: exact match: every checked token (tokens 24 to 1023 of the request) is the model's greedy choice; the next token, 52599, is the model's greedy choice; the end of the reply was not checked; commitment: 86 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 71 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
             ],
-            "seconds": 21.224866000004113
+            "seconds": 28.853349292010535
           }
         },
         "rejection_tables": [
@@ -292,21 +292,21 @@
             "example": "accepted-proof",
             "exit_code": 0,
             "last_line": "10 altered sets: all rejected",
-            "seconds": 22.56288650003262,
+            "seconds": 31.94653804198606,
             "table": "altered_copies.tsv"
           },
           {
             "example": "accepted-proof",
             "exit_code": 0,
             "last_line": "79 altered sets: all rejected",
-            "seconds": 162.0976158340345,
+            "seconds": 226.02535379200708,
             "table": "every_kind_of_item.tsv"
           },
           {
             "example": "accepted-proof-clipped-gap",
             "exit_code": 0,
             "last_line": "10 altered sets: all rejected",
-            "seconds": 21.877413749985863,
+            "seconds": 30.425761458987836,
             "table": "altered_copies_clipped_gap.tsv"
           }
         ]
@@ -330,7 +330,7 @@
       ]
     },
     "dual_jsonl": {
-      "sha256": "9a952e865af4cbd9f19ba3ee262e771ac1f9e9b10c9656f47466f3e72b66a225",
+      "sha256": "8c36b0c751a5016035c4f9e5af3f4bdb009628dadc1f41f56a30f4fc53787282",
       "exit_codes_of_both_builds": {
         "0 0": 7,
         "1 1": 99,
@@ -341,20 +341,20 @@
   },
   "linux_target_run": {
     "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM; no GPU",
-    "result_json_sha256": "930f138f61df1c4934609630dbc1240ac140f140b9f33ecd05f947575002baae",
+    "result_json_sha256": "b379d643a5a260fae4dad5630bda515624306b16dddd19b51c161e1a180ef835",
     "result": {
       "builds": {
         "patched": {
           "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
           "recipe": "upstream verifier/build.sh",
-          "seconds": 206.75027062790468,
+          "seconds": 197.45971338823438,
           "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
           "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
         },
         "upstream": {
           "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
           "recipe": "upstream verifier/build.sh",
-          "seconds": 210.10805146209896,
+          "seconds": 199.1476984829642,
           "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
           "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
         }
@@ -425,8 +425,8 @@
           "no-range-words.dense-eg-7-smax"
         ],
         "tinyllama_plan": {
-          "configuration": "83fa9ef04e8b3477165b5043be08fd3feda55d7902de37fce84f029ffc765254",
-          "h_par": "f09efa8377348b4e43505b163ffd08be795da5edfc37de029f024fe8545276fc",
+          "configuration": "2e5261bc77d344eb2f062e69a3ccf80613b0756603f3135edb39ea1ef90f430f",
+          "h_par": "bc61522eeb44d377692e062f06f8cca36675b0135e13f3031eea39db0f430ff9",
           "shape": {
             "G": 4,
             "H": 32,
@@ -480,7 +480,7 @@
       },
       "qualified_backend": false,
       "schema_id": "hallmark.flashprove-tinyllama-verify/1",
-      "seconds": 1647.2972029340453,
+      "seconds": 1604.5387043631636,
       "source": {
         "bytes": 157799758,
         "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
@@ -546,8 +546,8 @@
       "timed_formats": 9,
       "tinyllama_plan": {
         "bits_compiled_bound": 126.21,
-        "configuration": "83fa9ef04e8b3477165b5043be08fd3feda55d7902de37fce84f029ffc765254",
-        "h_par": "f09efa8377348b4e43505b163ffd08be795da5edfc37de029f024fe8545276fc",
+        "configuration": "2e5261bc77d344eb2f062e69a3ccf80613b0756603f3135edb39ea1ef90f430f",
+        "h_par": "bc61522eeb44d377692e062f06f8cca36675b0135e13f3031eea39db0f430ff9",
         "proof_bytes_at_most": 14061196,
         "shape": {
           "G": 4,
@@ -585,7 +585,7 @@
               "result: outcome=verified commitment_id=79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183 range=60:64 checked_tokens=3 end_token=not_checked claim=exact-match policy=exact next_token=199 C=256 theta=256 cap=0 s=16 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=49 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
               "check_proof: verified: exact match: every checked token (tokens 61 to 63 of the request) is the model's greedy choice; the next token, 199, is the model's greedy choice; the end of the reply was not checked; commitment: 49 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 38 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
             ],
-            "seconds": 12.599486009217799
+            "seconds": 11.240723947063088
           },
           "full-size": {
             "exit_code": 0,
@@ -593,7 +593,7 @@
               "result: outcome=verified commitment_id=7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe range=23:1024 checked_tokens=1000 end_token=not_checked claim=exact-match policy=exact next_token=52599 C=256 theta=256 cap=0 s=15 limits=exact request_tokens=1024 leaf=0 commitment_assumed_rounds=86 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
               "check_proof: verified: exact match: every checked token (tokens 24 to 1023 of the request) is the model's greedy choice; the next token, 52599, is the model's greedy choice; the end of the reply was not checked; commitment: 86 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 71 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
             ],
-            "seconds": 125.93546777777374
+            "seconds": 130.44487100932747
           }
         },
         "rejection_tables": [
@@ -601,21 +601,21 @@
             "example": "accepted-proof",
             "exit_code": 0,
             "last_line": "10 altered sets: all rejected",
-            "seconds": 71.26712713204324,
+            "seconds": 69.89545813109726,
             "table": "altered_copies.tsv"
           },
           {
             "example": "accepted-proof",
             "exit_code": 0,
             "last_line": "79 altered sets: all rejected",
-            "seconds": 545.9399770242162,
+            "seconds": 535.3730723350309,
             "table": "every_kind_of_item.tsv"
           },
           {
             "example": "accepted-proof-clipped-gap",
             "exit_code": 0,
             "last_line": "10 altered sets: all rejected",
-            "seconds": 72.9637237880379,
+            "seconds": 68.23263897607103,
             "table": "altered_copies_clipped_gap.tsv"
           }
         ]
@@ -639,7 +639,7 @@
       ]
     },
     "dual_jsonl": {
-      "sha256": "707cf505aaf43471176f5cc2729b49df560c9e34b13a6b1b80e3e900ad6e14f7",
+      "sha256": "7b08f0cada68d2154af3b90e22d8d2b03d918465785a05a123dcda763fec0fff",
       "exit_codes_of_both_builds": {
         "0 0": 7,
         "1 1": 99,
@@ -652,7 +652,7 @@
     "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM; no GPU",
     "toolchain": "Build cuda_13.2.r13.2/compiler.37953736_0",
     "toolchain_note": "pip cuda-toolkit 13.2.2, the pin in research/probes/flashprove/source.json; libcuda.so link stub from NVIDIA's cudart 13.2.86 archive; g++ 13.3",
-    "source": "the pinned archive with the three pinned patches applied on the build host by git apply; 0 entries (build outputs aside) differ from the tree that make verify-flashprove-tinyllama patched on that host at 551c8ff, whose 30,873 files have the same SHA-256s as the tree it patched on the Mac at 551c8ff",
+    "source": "the pinned archive with the three pinned patches applied on the build host by git apply; 0 entries (build outputs aside) differ from the tree that make verify-flashprove-tinyllama patched on that host at bf3add1, whose 30,873 files have the same SHA-256s as the tree it patched on the Mac at bf3add1",
     "steps": [
       {
         "command": "verifier/build.sh",

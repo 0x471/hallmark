@@ -3261,10 +3261,9 @@ in the cases that only the patch meets; a dense parameter file at TinyLlama's sh
 patched planner, and the unpatched build refuses it. And upstream's `prover/build.sh` builds the
 patched provers with nvcc 13.2.86.
 
-Result: passed at `551c8ff` (the next commit, `206c6c7`, changes only `kit.json`, which this
-target does not read; [decision 0094](../docs/decisions/0094-flashprove-tinyllama.md),
+Result: passed at `bf3add1` ([decision 0094](../docs/decisions/0094-flashprove-tinyllama.md),
 [evidence](evidence/flashprove-tinyllama-2026-11-24.json)). Linux (upstream `verifier/build.sh`,
-g++ 13.3, 1,647 s) and macOS (Apple clang 17, 367 s): 108 of 108 calls equal, 99 of 99 altered sets
+g++ 13.3, 1,605 s) and macOS (Apple clang 17, 513 s): 108 of 108 calls equal, 99 of 99 altered sets
 rejected, patched verifier source digest `33e9d53e...`. The unpatched build misses exactly the eight
 cases that only the patch meets (five dense, three `eg` at NE 0); upstream's own `eg 7` case, with
 experts, still misses `no-range-words`. The patched planner admits the TinyLlama-shaped file; the
@@ -3285,14 +3284,21 @@ SASH's eight answer tokens on SASH's 25 prompt tokens. Pass criterion: `make
 verify-flashprove-tinyllama-answer` passes: environments made from hash-locked requirement files
 hold exactly those files; the export and every kit file but the device-dependent `maxima.json` are
 rebuilt byte for byte from pinned inputs; both planners and the provers' reader judge the kit as
-expected; upstream's scale-tool tests pass on the patched tree; the float pass agrees with
+expected; the part of `cp_prove`'s set-up that needs only the kit, run on a CPU with upstream's
+code, admits it and refuses it with `kFM` one higher; upstream's scale-tool tests pass on the patched tree; the float pass agrees with
 transformers; the integer model gives `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]` over a whole
 64-token window with no failed range condition and logits within the slope and correlation bounds;
 two one-bit mutations of the kit each fail; and the next entry's worst-case check passes.
 
-Result: passed at `206c6c7` on Linux x86_64 (a clone, every input downloaded, 1,756 s) and macOS
-arm64 (model files from a checked local folder, 270 s)
-([evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)). Both hosts rebuilt every
+Result: passed at `bf3add1` on Linux x86_64 (a clone, every input downloaded, 1,870 s) and macOS
+arm64 (model files from a checked local folder, 377 s)
+([evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)). `cp_prove`'s set-up for the kit
+alone admits it (11 layer groups, one plan of attention) and refuses `kFM 15`. Retained failure:
+until `bf3add1` the kit had upstream's full-kit `kFM 15`, and every run passed with it: `cp_verify`
+does not read `kFM`, and `cp_prove`'s plan of attention refuses it at head width 64
+(2^kFM - u0 - nHM is 22,260 against nHM = 8,201 at the kit's shift 7), so the first prove job
+would have stopped at set-up. `tinyllama_plan.py` now sets `kFM` and `kFD` by that rule (14, 15);
+only the kit's line `kFM` changed, and with it `h_par` and `configuration`. Both hosts rebuilt every
 required file byte for byte; `maxima.json`, recorded only, differs in its last digits on Linux, as
 upstream expects, with the same scales. The drawn calibration rows have upstream's own
 `DRAWS_SHA256`. The float pass agrees with transformers to a relative L2 of 3.9e-6 (macOS) and
@@ -3319,7 +3325,7 @@ bound from the float weights alone agrees on the gate.
 
 Result: failed at upstream's default `eg 8`; passed at `eg 7`. At `eg 8` (the kit as first fitted;
 runs at `7004750` on 2026-11-23, identical on Linux and macOS;
-[retained failure](evidence/flashprove-tinyllama-answer-2026-11-24.json)), every site fits but the gate of
+[retained failures](evidence/flashprove-tinyllama-answer-2026-11-24.json)), every site fits but the gate of
 layer 21: one row of 5,632 can take a key of 47,481 against the limit of 32,639 (0.54 bits over); no
 other layer's gate key exceeds 14,631, q, k, v and up keep at least 1.2 bits, and the stream,
 bounded by Frobenius norms, 3.7 bits. The float bound agrees: that row can reach a gate input of
@@ -3330,7 +3336,7 @@ coarser key (`scales/worst_case.py`), which takes a file out of the standard for
 (`no-range-words`); so `verifier.patch` admits `eg 7` at NE 0, and `fit_eg.py` refits the kit with
 `calibrate.py`'s call of `fit_scales.fit()` at `eg 7` (at `eg 8` it gives `calibrate.py`'s
 `words.json` byte for byte), which raises each layer's `kg` by one. At `eg 7` (step 7 of both runs
-at `206c6c7`, [evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)) every site fits:
+at `bf3add1`, [evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)) every site fits:
 the gate of layer 21 at a key of 23,741 against 32,639 (0.46 bits to spare), no other layer above
 7,316, the float bound putting it at 22,703. Not shown: the GPU's own verdict on the check, which
 the port has not been compared with, and the GPU's guards on its matrix products. No GPU, no spend.

@@ -51,11 +51,11 @@
     "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
     "version": "0.16.0"
   },
-  "commit": "206c6c7, the last code change",
+  "commit": "bf3add1, the last code change",
   "kit_pins": {
     "schema_id": "hallmark.flashprove-tinyllama-kit/1",
     "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
-    "patches_json_sha256": "a95a1c89cc29d76a7c7ede9bf1d742aeafa0382b427ea95b8828291b2547b2e0",
+    "patches_json_sha256": "7a31bf32f9857de955e9164ea72531ebd274525ba9581f202b97b9f356289ddf",
     "scales_patch": {
       "name": "scales.patch",
       "sha256": "73c42a3c16a6b7440f378b4703d312eb5d7f82a697f2bd6a051cbca4b3501c2c",
@@ -134,9 +134,9 @@
       "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31",
       "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c"
     },
-    "base_policy_sha256": "6caab1eb423a755d64d0d493b305cf193bb25e5ed9bd4b48fc76d464d07ebe70",
+    "base_policy_sha256": "05f818d0baabcc848ad0529efa535ff0586cd5dfcaf6fa45f2cc333bb30887b4",
     "files": {
-      "policy.txt": "c708d034d652faf1ff45b3f5a01554a6db633006d048e92f3be7190207b79eff",
+      "policy.txt": "a2b23870f4cf8820d3b0575158ab584cb5235f69f41cdcce1c051155e69e2f94",
       "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
       "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
       "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c",
@@ -144,8 +144,8 @@
       "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
       "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31"
     },
-    "h_par": "15a9f9d62c98757d18b927775ce5a8aecd0c6d24c40ea02e8941babc3ebdd983",
-    "configuration": "d6f9a9157d75982c7727b918aea8e55c246d0ccd2ea00ec4bcba418983d9bd3e",
+    "h_par": "439d758a7576acccb25d64605f3865dfef518a56817f089d3409379107425165",
+    "configuration": "8a759d43ccac767560645db2df65385f568a51ef9d087f819137093465514207",
     "request": {
       "T": 64,
       "filler": 0,
@@ -218,7 +218,7 @@
     "command": "make verify-flashprove-tinyllama-answer",
     "host": "macOS 15.7.1 (Darwin 24.6.0), Apple M4 Pro, arm64",
     "how": "FLASHPROVE_TINYLLAMA_INPUTS set to a folder of the pinned files (each checked against its pin), so no model download",
-    "result_json_sha256": "3cb08c9c5f51d0e218abea4b4eb28ebf1d82a3b342c167bcc46b957956e05eb6",
+    "result_json_sha256": "6a7df482a4966e489e27e4c8e3cde90cde5e4fb178ba1a2d07d3165e8501c81b",
     "result": {
       "answer": {
         "T": 64,
@@ -412,7 +412,7 @@
         "r": 24,
         "range_failure": null,
         "s": 17,
-        "seconds": 4.179029957973398,
+        "seconds": 4.616527832986321,
         "window": [
           529,
           29989,
@@ -484,14 +484,14 @@
         "patched": {
           "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
           "recipe": "apple-clang",
-          "seconds": 22.15679012495093,
+          "seconds": 34.0505645419471,
           "sha256": "c5d95ec0d68a7779204fdd3fa694e8dec7a20a2f6d22e8cd1db0ee9bd0a5de5c",
           "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
         },
         "upstream": {
           "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
           "recipe": "apple-clang",
-          "seconds": 22.970762499957345,
+          "seconds": 32.71350050001638,
           "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
           "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
         }
@@ -522,7 +522,7 @@
           ],
           "lock_file": "integer_model-macos-arm64.txt",
           "numpy": "2.4.6",
-          "python": "3.13.2",
+          "python": "3.13.15",
           "torch": "2.13.0"
         },
         "scales": {
@@ -575,7 +575,7 @@
           "lock_file": "scales-macos-arm64.txt",
           "numpy": "2.3.5",
           "pyarrow": "23.0.1",
-          "python": "3.13.2",
+          "python": "3.13.15",
           "safetensors": "0.8.0",
           "tokenizers": "0.22.2",
           "torch": "2.9.1",
@@ -608,7 +608,7 @@
         "float_greedy_is_the_answer": true,
         "moe_layers": [],
         "rope_layers": 22,
-        "seconds": 11.724831084022298,
+        "seconds": 9.284217957989313,
         "shape": {
           "G": 4,
           "H": 32,
@@ -630,7 +630,7 @@
         "system": "Darwin"
       },
       "kit": {
-        "calibrate_seconds": 71.83191425004043,
+        "calibrate_seconds": 80.4880176250008,
         "calibration_set": {
           "bytes": 131200,
           "drawn_rows_match_upstream": true,
@@ -646,7 +646,7 @@
         "maxima_equal_to_committed": true
       },
       "kit_pins": {
-        "base_policy_sha256": "6caab1eb423a755d64d0d493b305cf193bb25e5ed9bd4b48fc76d464d07ebe70",
+        "base_policy_sha256": "05f818d0baabcc848ad0529efa535ff0586cd5dfcaf6fa45f2cc333bb30887b4",
         "bounds": {
           "final_norm_relative_l2": 0.0001,
           "logit_correlation": 0.998,
@@ -668,7 +668,7 @@
           "url": "https://huggingface.co/datasets/Salesforce/wikitext/resolve/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-2-raw-v1/train-00000-of-00001.parquet",
           "what": "WikiText-2 (raw), training split, as upstream's make_calibration_set.py pins it"
         },
-        "configuration": "d6f9a9157d75982c7727b918aea8e55c246d0ccd2ea00ec4bcba418983d9bd3e",
+        "configuration": "8a759d43ccac767560645db2df65385f568a51ef9d087f819137093465514207",
         "e_res": 11,
         "eg": 7,
         "environments": {
@@ -720,7 +720,7 @@
           "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
           "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
           "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
-          "policy.txt": "c708d034d652faf1ff45b3f5a01554a6db633006d048e92f3be7190207b79eff",
+          "policy.txt": "a2b23870f4cf8820d3b0575158ab584cb5235f69f41cdcce1c051155e69e2f94",
           "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
           "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
         },
@@ -729,7 +729,7 @@
           "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
           "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
         },
-        "h_par": "15a9f9d62c98757d18b927775ce5a8aecd0c6d24c40ea02e8941babc3ebdd983",
+        "h_par": "439d758a7576acccb25d64605f3865dfef518a56817f089d3409379107425165",
         "model": {
           "case": "research/probes/sash/response-case.json",
           "files": [
@@ -743,7 +743,7 @@
           "final-norm-MF-plus-1",
           "layer-10-kv-plus-1"
         ],
-        "patches_json_sha256": "a95a1c89cc29d76a7c7ede9bf1d742aeafa0382b427ea95b8828291b2547b2e0",
+        "patches_json_sha256": "7a31bf32f9857de955e9164ea72531ebd274525ba9581f202b97b9f356289ddf",
         "request": {
           "T": 64,
           "e": 32,
@@ -766,10 +766,15 @@
       "passed": true,
       "planning": {
         "bits_compiled_bound": 126.21,
-        "configuration": "d6f9a9157d75982c7727b918aea8e55c246d0ccd2ea00ec4bcba418983d9bd3e",
-        "h_par": "15a9f9d62c98757d18b927775ce5a8aecd0c6d24c40ea02e8941babc3ebdd983",
+        "configuration": "8a759d43ccac767560645db2df65385f568a51ef9d087f819137093465514207",
+        "h_par": "439d758a7576acccb25d64605f3865dfef518a56817f089d3409379107425165",
         "patched": "standard parameter form, three tables, PLAN ONLY (accounting and request)",
         "proof_bytes_at_most": 14061196,
+        "prover_setup": {
+          "control_kFM_plus_1": "attention: the shift sh = 7 is not supported: sh must be from 4 to 12, u0 * 2^sh + 65536 at most 2^24, and both 0 <= 2^kFM - u0 - nHM <= nHM and 0 <= 2^kFD - u0 - nHD <= nHD must hold; kFM = 15, kFD = 15",
+          "hiding": "hiding conditions that follow from the file alone: met",
+          "kit": "prover set-up: admitted (11 layer groups, 1 attention plans, kFM 14, kFD 15)"
+        },
         "provers_parameter_file_reader": "admitted",
         "unpatched_accounting": "NO: policy-tables",
         "unpatched_request": "NO: policy-tables"
@@ -794,7 +799,7 @@
         }
       },
       "schema_id": "hallmark.flashprove-tinyllama-answer/1",
-      "seconds": 270.2354930000147,
+      "seconds": 376.9984215000295,
       "source": {
         "bytes": 157799758,
         "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
@@ -941,7 +946,7 @@
           0,
           0
         ],
-        "port_sha256": "e5f35899c52864b674dc8c6e51105b5aab77557f50b5aca5560197473742fc08",
+        "port_sha256": "13a9a30acc34b2a81c783b1b7d481ba416630d6043720fb556f4c9b234e79c1f",
         "public_sites_fit": true,
         "row_sites_fit": true,
         "rows_recomputed_exactly": {
@@ -1196,8 +1201,8 @@
   "linux_run": {
     "command": "make verify-flashprove-tinyllama-answer",
     "host": "Ubuntu 24.04.4 LTS, kernel 6.8.0, x86_64; 6 vCPU Intel Broadwell (AVX2, no SHA-NI); 11 GiB RAM; no GPU",
-    "how": "a clone at 206c6c7; every input downloaded and checked",
-    "result_json_sha256": "4a7f1831d3e5743a64a42669392fa0b9ca9c18b18dbee5018e6d73f689e214f2",
+    "how": "a clone at bf3add1; every input downloaded and checked",
+    "result_json_sha256": "787641f36f7b4ca28790aaab1da7c7043b2991b73c7c7cc89541ebf588f0c57b",
     "result": {
       "answer": {
         "T": 64,
@@ -1391,7 +1396,7 @@
         "r": 24,
         "range_failure": null,
         "s": 17,
-        "seconds": 34.7524434980005,
+        "seconds": 39.53037461685017,
         "window": [
           529,
           29989,
@@ -1463,14 +1468,14 @@
         "patched": {
           "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
           "recipe": "upstream verifier/build.sh",
-          "seconds": 208.73140492197126,
+          "seconds": 216.18982417089865,
           "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
           "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
         },
         "upstream": {
           "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
           "recipe": "upstream verifier/build.sh",
-          "seconds": 229.29121395712718,
+          "seconds": 214.1791201219894,
           "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
           "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
         }
@@ -1587,7 +1592,7 @@
         "float_greedy_is_the_answer": true,
         "moe_layers": [],
         "rope_layers": 22,
-        "seconds": 17.844530815258622,
+        "seconds": 17.00919140316546,
         "shape": {
           "G": 4,
           "H": 32,
@@ -1609,7 +1614,7 @@
         "system": "Linux"
       },
       "kit": {
-        "calibrate_seconds": 570.0141007737257,
+        "calibrate_seconds": 623.28723780578,
         "calibration_set": {
           "bytes": 131200,
           "drawn_rows_match_upstream": true,
@@ -1625,7 +1630,7 @@
         "maxima_equal_to_committed": false
       },
       "kit_pins": {
-        "base_policy_sha256": "6caab1eb423a755d64d0d493b305cf193bb25e5ed9bd4b48fc76d464d07ebe70",
+        "base_policy_sha256": "05f818d0baabcc848ad0529efa535ff0586cd5dfcaf6fa45f2cc333bb30887b4",
         "bounds": {
           "final_norm_relative_l2": 0.0001,
           "logit_correlation": 0.998,
@@ -1647,7 +1652,7 @@
           "url": "https://huggingface.co/datasets/Salesforce/wikitext/resolve/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-2-raw-v1/train-00000-of-00001.parquet",
           "what": "WikiText-2 (raw), training split, as upstream's make_calibration_set.py pins it"
         },
-        "configuration": "d6f9a9157d75982c7727b918aea8e55c246d0ccd2ea00ec4bcba418983d9bd3e",
+        "configuration": "8a759d43ccac767560645db2df65385f568a51ef9d087f819137093465514207",
         "e_res": 11,
         "eg": 7,
         "environments": {
@@ -1699,7 +1704,7 @@
           "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
           "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
           "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
-          "policy.txt": "c708d034d652faf1ff45b3f5a01554a6db633006d048e92f3be7190207b79eff",
+          "policy.txt": "a2b23870f4cf8820d3b0575158ab584cb5235f69f41cdcce1c051155e69e2f94",
           "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
           "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
         },
@@ -1708,7 +1713,7 @@
           "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
           "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
         },
-        "h_par": "15a9f9d62c98757d18b927775ce5a8aecd0c6d24c40ea02e8941babc3ebdd983",
+        "h_par": "439d758a7576acccb25d64605f3865dfef518a56817f089d3409379107425165",
         "model": {
           "case": "research/probes/sash/response-case.json",
           "files": [
@@ -1722,7 +1727,7 @@
           "final-norm-MF-plus-1",
           "layer-10-kv-plus-1"
         ],
-        "patches_json_sha256": "a95a1c89cc29d76a7c7ede9bf1d742aeafa0382b427ea95b8828291b2547b2e0",
+        "patches_json_sha256": "7a31bf32f9857de955e9164ea72531ebd274525ba9581f202b97b9f356289ddf",
         "request": {
           "T": 64,
           "e": 32,
@@ -1745,10 +1750,15 @@
       "passed": true,
       "planning": {
         "bits_compiled_bound": 126.21,
-        "configuration": "d6f9a9157d75982c7727b918aea8e55c246d0ccd2ea00ec4bcba418983d9bd3e",
-        "h_par": "15a9f9d62c98757d18b927775ce5a8aecd0c6d24c40ea02e8941babc3ebdd983",
+        "configuration": "8a759d43ccac767560645db2df65385f568a51ef9d087f819137093465514207",
+        "h_par": "439d758a7576acccb25d64605f3865dfef518a56817f089d3409379107425165",
         "patched": "standard parameter form, three tables, PLAN ONLY (accounting and request)",
         "proof_bytes_at_most": 14061196,
+        "prover_setup": {
+          "control_kFM_plus_1": "attention: the shift sh = 7 is not supported: sh must be from 4 to 12, u0 * 2^sh + 65536 at most 2^24, and both 0 <= 2^kFM - u0 - nHM <= nHM and 0 <= 2^kFD - u0 - nHD <= nHD must hold; kFM = 15, kFD = 15",
+          "hiding": "hiding conditions that follow from the file alone: met",
+          "kit": "prover set-up: admitted (11 layer groups, 1 attention plans, kFM 14, kFD 15)"
+        },
         "provers_parameter_file_reader": "admitted",
         "unpatched_accounting": "NO: policy-tables",
         "unpatched_request": "NO: policy-tables"
@@ -1773,7 +1783,7 @@
         }
       },
       "schema_id": "hallmark.flashprove-tinyllama-answer/1",
-      "seconds": 1756.420841819141,
+      "seconds": 1870.2606736831367,
       "source": {
         "bytes": 157799758,
         "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
@@ -1920,7 +1930,7 @@
           0,
           0
         ],
-        "port_sha256": "f8d821996f8a70e75f56e6e556c57c71430ceef37a20f01c0c5bd54019b1c6ff",
+        "port_sha256": "e302b5c743fb4250a27cc47e390758283a10cef519f5c0914e809e9c4aa8b8b9",
         "public_sites_fit": true,
         "row_sites_fit": true,
         "rows_recomputed_exactly": {
@@ -2184,10 +2194,10 @@
   "shift_sweep": {
     "how": "one-off, on the Mac, not a make target: research/probes/flashprove/tinyllama/shift_sweep.py on the output folder of the Mac run above (that run's result.json: run_result_sha256 in the output); for each layer and each of kv, ko and kd, the kit with that KL.bin word + 1, through answer_check.py (every file pinned, verify_sums on) and the target's failures()",
     "script_sha256": "08f3eff32c032acc731386c4e854b5fa426a843e770485e5f4a50f872e222a0c",
-    "output_sha256": "38dedc2f6f320ec3ce8939f2cdff796f519a55c27e89e2795af8c0a22b90e2dd",
+    "output_sha256": "b2d95a54bd58e66dd29803d4e9167091b164200527d044146ba9d6f0a2bcc384",
     "output": {
       "program": "research/probes/flashprove/tinyllama/shift_sweep.py",
-      "run_result_sha256": "3cb08c9c5f51d0e218abea4b4eb28ebf1d82a3b342c167bcc46b957956e05eb6",
+      "run_result_sha256": "6a7df482a4966e489e27e4c8e3cde90cde5e4fb178ba1a2d07d3165e8501c81b",
       "kits": 66,
       "caught": 66,
       "tokens_changed": 4,
@@ -3631,222 +3641,238 @@
       ]
     }
   },
-  "retained_failure": {
-    "what": "cp_commit's worst-case check computed on a CPU (step 7 of the target: worst_case_cpu.py and gate_float_bound.py) at upstream's default eg 8, on the kit as first fitted. It failed at one site, the gate of layer 21, so the kit was refitted at eg 7 (the runs above)",
-    "recorded_at": "2026-11-23",
-    "commit": "7004750",
-    "command": "make verify-flashprove-tinyllama-answer",
-    "hosts": "the two hosts of the runs above",
-    "result_json_sha256": {
-      "mac": "b155d15579d9e751c0cbf6cb475d89af8da7a097bbcf949c8d7fdbda9a316af4",
-      "linux": "7e32ce5c0ff95560b085ee0670ab962c78a535b3c7a50072f870e02b6c779269"
-    },
-    "kit_files_unlike_the_eg_7_kit_sha256": {
-      "KL.bin": "1658bb72676fd6b774c83ff163b3c24211a603a281f5df0644a9c966684d7282",
-      "policy.txt": "2af02e144eaa03ba3e23587f305d9bebdf8f56bad4f5b97a512f055e5c5ed602",
-      "words.json": "3465d8977ab6c3d0dcc40a2ce27b35e6b4962c8e14bef2f8bc9bd9e94119bf81"
-    },
-    "identical_on_the_two_hosts": "every field of worst_case below; only the hashes of the two programs' output files differ",
-    "worst_case": {
-      "short": [
-        [
-          "gate",
-          21
-        ]
-      ],
-      "row_sites_fit": false,
-      "public_sites_fit": true,
-      "stream_sites_fit_by_frobenius": true,
-      "gate_key_bounds": [
-        4377,
-        4142,
-        14631,
-        4413,
-        6482,
-        5435,
-        5537,
-        10730,
-        6511,
-        7782,
-        7076,
-        7752,
-        11920,
-        11124,
-        11285,
-        10742,
-        12097,
-        13720,
-        14195,
-        14267,
-        13155,
-        47481
-      ],
-      "float_gate_keys": [
-        4185.8,
-        3961.4,
-        13991.6,
-        4220.3,
-        6198.5,
-        5197.1,
-        5294.7,
-        10261.1,
-        6226.2,
-        7441.8,
-        6766.3,
-        7413.0,
-        11399.0,
-        10637.7,
-        10791.9,
-        10272.7,
-        11568.0,
-        13119.9,
-        13574.0,
-        13643.9,
-        12579.2,
-        45405.7
-      ],
-      "worst_by_site": {
-        "gate": {
-          "bound": 48620674.00000001,
-          "headroom_bits": -0.5407352635385507,
-          "layer": 21,
-          "limit": 33422847.0,
-          "shortfall": 1,
-          "site": "gate",
-          "value": 10,
-          "word": "kg"
-        },
-        "head margin": {
-          "bound": 176068497409.0,
-          "headroom_bits": 0.6426761679869486,
-          "layer": 22,
-          "limit": 274882101247.0,
-          "shortfall": 0,
-          "site": "head margin",
-          "value": 0,
-          "word": "-"
-        },
-        "k": {
-          "bound": 47560735091.00001,
-          "headroom_bits": 1.5252793743813555,
-          "layer": 0,
-          "limit": 136899985407.0,
-          "shortfall": 0,
-          "site": "k",
-          "value": 22,
-          "word": "kk"
-        },
-        "last norm quotient": {
-          "bound": 2119.4897611264946,
-          "headroom_bits": 3.9448079542941574,
-          "layer": 22,
-          "limit": 32639,
-          "shortfall": 0,
-          "site": "last norm quotient",
-          "value": 32,
-          "word": "KF"
-        },
-        "last stream, a cell": {
-          "bound": 40734453968.09972,
-          "headroom_bits": 3.7488007315686858,
-          "layer": 22,
-          "limit": 547599908735.0,
-          "shortfall": 0,
-          "site": "last stream, a cell",
-          "value": 0,
-          "word": "e_res"
-        },
-        "norm 1 quotient": {
-          "bound": 4174.479522218647,
-          "headroom_bits": 2.9669286189922293,
-          "layer": 0,
-          "limit": 32639,
-          "shortfall": 0,
-          "site": "norm 1 quotient",
-          "value": 32,
-          "word": "K1"
-        },
-        "norm 2 quotient": {
-          "bound": 2119.4897611264946,
-          "headroom_bits": 3.9448079542941574,
-          "layer": 0,
-          "limit": 32639,
-          "shortfall": 0,
-          "site": "norm 2 quotient",
-          "value": 32,
-          "word": "K2"
-        },
-        "q": {
-          "bound": 69856035559.00002,
-          "headroom_bits": 2.9706656178851247,
-          "layer": 20,
-          "limit": 547599941631.0,
-          "shortfall": 0,
-          "site": "q",
-          "value": 24,
-          "word": "kq"
-        },
-        "stream at norm 1": {
-          "bound": 34446019086.25057,
-          "headroom_bits": 3.9907130402099398,
-          "layer": 21,
-          "limit": 547599908735.0,
-          "shortfall": 0,
-          "site": "stream at norm 1",
-          "value": 0,
-          "word": "e_res"
-        },
-        "stream at norm 2": {
-          "bound": 34474998768.4718,
-          "headroom_bits": 3.9894998008355813,
-          "layer": 21,
-          "limit": 547599908735.0,
-          "shortfall": 0,
-          "site": "stream at norm 2",
-          "value": 0,
-          "word": "e_res"
-        },
-        "stream at the last norm": {
-          "bound": 40734453968.09972,
-          "headroom_bits": 3.7488007315686858,
-          "layer": 22,
-          "limit": 547599908735.0,
-          "shortfall": 0,
-          "site": "stream at the last norm",
-          "value": 0,
-          "word": "e_res"
-        },
-        "up": {
-          "bound": 55019209.00000001,
-          "headroom_bits": 1.2808992631095037,
-          "layer": 21,
-          "limit": 133691391.0,
-          "shortfall": 0,
-          "site": "up",
-          "value": 12,
-          "word": "ku"
-        },
-        "v": {
-          "bound": 58183074.00000001,
-          "headroom_bits": 1.2002351408815422,
-          "layer": 3,
-          "limit": 133691391.0,
-          "shortfall": 0,
-          "site": "v",
-          "value": 12,
-          "word": "kv"
-        }
-      }
-    },
-    "fix": "verifier.patch admits eg 7 at NE 0, and fit_eg.py refits the kit at eg 7, which raises each layer's kg by one (decision 0094)"
-  },
   "not_run": [
     "any commitment or proof; no GPU was used",
     "cp_commit's worst-case check on a GPU: step 7 computes it on a CPU with Hallmark's port (worst_case_cpu.py), which finds every site of the eg 7 kit within its limit; the port has not been compared with a GPU run",
-    "cp_prove's rules beyond its parameter-file reader",
+    "cp_prove's rules beyond its parameter-file reader and the set-up that needs only the kit (prover_setup.cpp, in the planning step), among them the forward kernels' layer_words_fit()",
     "any prompt other than SASH's, and any T other than 64",
     "the make_model cases of upstream's scale tests: the target builds no make_model and sets no SMALL_MODEL, so they skip on every host (status 77, passed in part)",
     "any proof through the verifier's NE 0 branches: the 108 equal calls are all on upstream's MoE proofs"
+  ],
+  "retained_failures": [
+    {
+      "what": "cp_commit's worst-case check computed on a CPU (step 7 of the target: worst_case_cpu.py and gate_float_bound.py) at upstream's default eg 8, on the kit as first fitted. It failed at one site, the gate of layer 21, so the kit was refitted at eg 7 (the runs above)",
+      "recorded_at": "2026-11-23",
+      "commit": "7004750",
+      "command": "make verify-flashprove-tinyllama-answer",
+      "hosts": "the two hosts of the runs above",
+      "result_json_sha256": {
+        "mac": "b155d15579d9e751c0cbf6cb475d89af8da7a097bbcf949c8d7fdbda9a316af4",
+        "linux": "7e32ce5c0ff95560b085ee0670ab962c78a535b3c7a50072f870e02b6c779269"
+      },
+      "kit_files_unlike_the_eg_7_kit_sha256": {
+        "KL.bin": "1658bb72676fd6b774c83ff163b3c24211a603a281f5df0644a9c966684d7282",
+        "policy.txt": "2af02e144eaa03ba3e23587f305d9bebdf8f56bad4f5b97a512f055e5c5ed602",
+        "words.json": "3465d8977ab6c3d0dcc40a2ce27b35e6b4962c8e14bef2f8bc9bd9e94119bf81"
+      },
+      "identical_on_the_two_hosts": "every field of worst_case below; only the hashes of the two programs' output files differ",
+      "worst_case": {
+        "short": [
+          [
+            "gate",
+            21
+          ]
+        ],
+        "row_sites_fit": false,
+        "public_sites_fit": true,
+        "stream_sites_fit_by_frobenius": true,
+        "gate_key_bounds": [
+          4377,
+          4142,
+          14631,
+          4413,
+          6482,
+          5435,
+          5537,
+          10730,
+          6511,
+          7782,
+          7076,
+          7752,
+          11920,
+          11124,
+          11285,
+          10742,
+          12097,
+          13720,
+          14195,
+          14267,
+          13155,
+          47481
+        ],
+        "float_gate_keys": [
+          4185.8,
+          3961.4,
+          13991.6,
+          4220.3,
+          6198.5,
+          5197.1,
+          5294.7,
+          10261.1,
+          6226.2,
+          7441.8,
+          6766.3,
+          7413.0,
+          11399.0,
+          10637.7,
+          10791.9,
+          10272.7,
+          11568.0,
+          13119.9,
+          13574.0,
+          13643.9,
+          12579.2,
+          45405.7
+        ],
+        "worst_by_site": {
+          "gate": {
+            "bound": 48620674.00000001,
+            "headroom_bits": -0.5407352635385507,
+            "layer": 21,
+            "limit": 33422847.0,
+            "shortfall": 1,
+            "site": "gate",
+            "value": 10,
+            "word": "kg"
+          },
+          "head margin": {
+            "bound": 176068497409.0,
+            "headroom_bits": 0.6426761679869486,
+            "layer": 22,
+            "limit": 274882101247.0,
+            "shortfall": 0,
+            "site": "head margin",
+            "value": 0,
+            "word": "-"
+          },
+          "k": {
+            "bound": 47560735091.00001,
+            "headroom_bits": 1.5252793743813555,
+            "layer": 0,
+            "limit": 136899985407.0,
+            "shortfall": 0,
+            "site": "k",
+            "value": 22,
+            "word": "kk"
+          },
+          "last norm quotient": {
+            "bound": 2119.4897611264946,
+            "headroom_bits": 3.9448079542941574,
+            "layer": 22,
+            "limit": 32639,
+            "shortfall": 0,
+            "site": "last norm quotient",
+            "value": 32,
+            "word": "KF"
+          },
+          "last stream, a cell": {
+            "bound": 40734453968.09972,
+            "headroom_bits": 3.7488007315686858,
+            "layer": 22,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "last stream, a cell",
+            "value": 0,
+            "word": "e_res"
+          },
+          "norm 1 quotient": {
+            "bound": 4174.479522218647,
+            "headroom_bits": 2.9669286189922293,
+            "layer": 0,
+            "limit": 32639,
+            "shortfall": 0,
+            "site": "norm 1 quotient",
+            "value": 32,
+            "word": "K1"
+          },
+          "norm 2 quotient": {
+            "bound": 2119.4897611264946,
+            "headroom_bits": 3.9448079542941574,
+            "layer": 0,
+            "limit": 32639,
+            "shortfall": 0,
+            "site": "norm 2 quotient",
+            "value": 32,
+            "word": "K2"
+          },
+          "q": {
+            "bound": 69856035559.00002,
+            "headroom_bits": 2.9706656178851247,
+            "layer": 20,
+            "limit": 547599941631.0,
+            "shortfall": 0,
+            "site": "q",
+            "value": 24,
+            "word": "kq"
+          },
+          "stream at norm 1": {
+            "bound": 34446019086.25057,
+            "headroom_bits": 3.9907130402099398,
+            "layer": 21,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "stream at norm 1",
+            "value": 0,
+            "word": "e_res"
+          },
+          "stream at norm 2": {
+            "bound": 34474998768.4718,
+            "headroom_bits": 3.9894998008355813,
+            "layer": 21,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "stream at norm 2",
+            "value": 0,
+            "word": "e_res"
+          },
+          "stream at the last norm": {
+            "bound": 40734453968.09972,
+            "headroom_bits": 3.7488007315686858,
+            "layer": 22,
+            "limit": 547599908735.0,
+            "shortfall": 0,
+            "site": "stream at the last norm",
+            "value": 0,
+            "word": "e_res"
+          },
+          "up": {
+            "bound": 55019209.00000001,
+            "headroom_bits": 1.2808992631095037,
+            "layer": 21,
+            "limit": 133691391.0,
+            "shortfall": 0,
+            "site": "up",
+            "value": 12,
+            "word": "ku"
+          },
+          "v": {
+            "bound": 58183074.00000001,
+            "headroom_bits": 1.2002351408815422,
+            "layer": 3,
+            "limit": 133691391.0,
+            "shortfall": 0,
+            "site": "v",
+            "value": 12,
+            "word": "kv"
+          }
+        }
+      },
+      "fix": "verifier.patch admits eg 7 at NE 0, and fit_eg.py refits the kit at eg 7, which raises each layer's kg by one (decision 0094)"
+    },
+    {
+      "what": "the kit's line kFM 15, upstream's full-kit value, which tinyllama_plan.py kept until bf3add1 and with which every earlier run of this target passed: cp_verify does not read kFM, and cp_prove's plan of attention (APlan::build(), prover/attn/plan.cuh) refuses it at head width 64, so the first prove job would have stopped at its set-up",
+      "found": "2026-11-24, by compiling upstream's plan.cuh on a CPU against the kit, not by this target; the same refusal is fixed in marcellobardus/FlashProve-TinyLlama1.1B at 1c5c2aa",
+      "rule": "0 <= 2^kFM - u0 - nHM <= nHM at every layer's attention shift",
+      "numbers": {
+        "shift": 7,
+        "u0": 2307,
+        "nHM": 8201,
+        "at_kFM_15": 22260,
+        "at_kFM_14": 5876
+      },
+      "record": "each run's planning.prover_setup.control_kFM_plus_1 above: the kit with kFM 15, refused",
+      "fix": "tinyllama_plan.py sets kFM and kFD by that rule (14 and 15), the kit is refitted, and the target's planning step runs cp_prove's set-up for the kit on a CPU"
+    }
   ],
   "tinyllama_proof": false,
   "gpu_used": false,
