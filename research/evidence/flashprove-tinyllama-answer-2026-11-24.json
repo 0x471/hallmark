@@ -1,4 +1,5 @@
 {
+  "amended": "2026-11-25: worst_case.port_sha256 was removed from both runs; the hashed file holds the run's seconds, so the hash cannot be recomputed",
   "schema_id": "hallmark.flashprove-tinyllama-answer-evidence/2",
   "recorded_at": "2026-11-24",
   "decision": "docs/decisions/0094-flashprove-tinyllama.md",
@@ -946,7 +947,6 @@
           0,
           0
         ],
-        "port_sha256": "13a9a30acc34b2a81c783b1b7d481ba416630d6043720fb556f4c9b234e79c1f",
         "public_sites_fit": true,
         "row_sites_fit": true,
         "rows_recomputed_exactly": {
@@ -1930,7 +1930,6 @@
           0,
           0
         ],
-        "port_sha256": "e302b5c743fb4250a27cc47e390758283a10cef519f5c0914e809e9c4aa8b8b9",
         "public_sites_fit": true,
         "row_sites_fit": true,
         "rows_recomputed_exactly": {

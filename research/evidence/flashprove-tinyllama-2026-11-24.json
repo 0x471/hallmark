@@ -330,13 +330,12 @@
       ]
     },
     "dual_jsonl": {
-      "sha256": "8c36b0c751a5016035c4f9e5af3f4bdb009628dadc1f41f56a30f4fc53787282",
       "exit_codes_of_both_builds": {
         "0 0": 7,
         "1 1": 99,
         "4 4": 2
       },
-      "note": "the target's per-call record; the 2 calls with exit 4 are planning calls inside check_proof.py"
+      "note": "the target's per-call record; the 2 calls with exit 4 are planning calls inside check_proof.py. Its SHA-256, recorded here at first, was removed on 2026-11-25: the file holds each call's times, so the hash cannot be recomputed"
     }
   },
   "linux_target_run": {
@@ -639,13 +638,12 @@
       ]
     },
     "dual_jsonl": {
-      "sha256": "7b08f0cada68d2154af3b90e22d8d2b03d918465785a05a123dcda763fec0fff",
       "exit_codes_of_both_builds": {
         "0 0": 7,
         "1 1": 99,
         "4 4": 2
       },
-      "note": "the target's per-call record; the 2 calls with exit 4 are planning calls inside check_proof.py"
+      "note": "the target's per-call record; the 2 calls with exit 4 are planning calls inside check_proof.py. Its SHA-256, recorded here at first, was removed on 2026-11-25: the file holds each call's times, so the hash cannot be recomputed"
     }
   },
   "prover_compile": {
