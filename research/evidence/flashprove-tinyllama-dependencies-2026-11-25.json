@@ -381,7 +381,8 @@
     "Licence fields are the publishers' own short statements. No full licence text or bundled-library notice was read: torch and numpy bundle third-party libraries under further licences.",
     "No package metadata file is hashed here, unlike the earlier dependency reviews of this repository.",
     "The transitive packages are the resolver's choice at the time the lock files were made, not a record that each is needed.",
-    "certifi and tqdm carry MPL-2.0 terms; nothing here is redistributed, so only local use was considered."
+    "certifi and tqdm carry MPL-2.0 terms; nothing here is redistributed, so only local use was considered.",
+    "Not covered: what the GPU run's pods installed (pod/bootstrap.sh: python3, pip, time, rsync, ca-certificates and libstdc++6 by apt-get; pod/user_setup.sh: cuda-toolkit[cublas,cudart]==13.2.2 by pip, under NVIDIA's licence, with no hashes and with transitive versions unpinned)."
   ],
   "cost_usd": 0,
   "credentials_used": false

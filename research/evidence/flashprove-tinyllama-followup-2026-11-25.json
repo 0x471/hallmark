@@ -3,15 +3,15 @@
   "recorded_at": "2026-11-25",
   "decision": "docs/decisions/0094-flashprove-tinyllama.md",
   "decision_status": "proposed",
-  "purpose": "What three reviews of 2026-11-25 found missing from the records of the dense TinyLlama proposal, and the reruns after the fixes that followed them. No GPU and no paid service was used for anything recorded here. No earlier evidence file is changed by this one; the changes that earlier commits made in place are listed",
+  "purpose": "What three reviews of 2026-11-25 found missing from the records of the dense TinyLlama proposal, and the reruns after the fixes that followed them. No GPU and no paid service was used for anything recorded here. The changes that this and earlier commits made in place to earlier evidence files are listed, with the values they removed",
   "commit": {
     "code": "6ba957c",
-    "note": "the head that the reruns and the gates below ran at, unless a run names another; later commits change records only"
+    "note": "the head of all six reruns. Later commits change records, comments, tests, the sweep script and the worker (its check that expected.sha256 names five files compares whole names); the gates name their own commit"
   },
   "made_by": "the contributor's AI-assisted sessions, on the contributor's laptop (macOS arm64) and on a Linux x86_64 host of the contributor's; no independent reviewer",
   "authority": {
     "owner_approved": false,
-    "statement": "The GPU run of 2026-11-24 and 25 was paid by the contributor on the contributor's own RunPod account, with no owner-set cap. Issue #184 says that paid GPU runs need an owner-approved budget, issue #186 puts unbudgeted GPU runs out of scope, docs/OPERATIONS.md says to stop before a paid job or an upload for which no authority exists, and research/AUTHORITY.json lists Modal, Vast.ai and Hugging Face Jobs as compute providers, not RunPod. No authority record was made or changed for the run",
+    "statement": "The GPU run of 2026-11-24 and 25 was paid by the contributor on the contributor's own RunPod account, with no owner-set cap. Issue #184 says that paid GPU runs need an owner-approved budget, issue #186 puts unbudgeted GPU runs out of scope, docs/OPERATIONS.md says to stop before a paid job or an upload for which no authority exists, and research/AUTHORITY.json lists Modal, Vast.ai and Hugging Face Jobs as compute providers, not RunPod. AGENTS.md says no system-package installs: on the rented pods the set-up scripts installed packages with apt-get and pip. No authority record was made or changed for the run",
     "limit_of_the_run": "a watchdog on the controlling host, armed to terminate every pod of the account after 2,700 s (pod 1) and 3,600 s (pod 2); both were cancelled by hand after the pods were terminated"
   },
   "gpu_run_files": {
@@ -110,6 +110,15 @@
           "model name\t: Intel(R) Xeon(R) Platinum 8470",
           "208"
         ]
+      },
+      "pod2/work3": {
+        "gpu": [
+          "NVIDIA H100 80GB HBM3, 9.0, 595.112.07, 0 MiB, 81559 MiB"
+        ],
+        "cpu": [
+          "model name\t: Intel(R) Xeon(R) Platinum 8470",
+          "208"
+        ]
       }
     },
     "hosts_note": "two pods of one type, one after the other; whether they were one machine is not recorded",
@@ -120,6 +129,16 @@
       "pod 2: id yrtezvmeopwsqp, H100 SXM, machine 80ii72grlzm0, 29 vCPU, 287 GB, USD 4.39/h, created 2026-11-24T23:49:00Z, balance before 49.6692, watchdog 3600 s (pid 1983598)",
       "pod 2: terminated 2026-11-25T00:06:23Z (1043 s; 1043/3600*4.39 = USD 1.27); pods left 0; balance read right after 48.530572; work2: commit 34.97 s, prove 8.41 s, YES, proof 13,238,500 bytes; work3: commit 34.94 s, proofs 9.79/9.67/9.31 s (GPU sampler running), all YES; GPU memory most 74,799 MiB"
     ],
+    "controller_log_note": "notes that the controlling session wrote as it went, not a program's log",
+    "spend_readings": {
+      "before_pod_1_usd": 50.0,
+      "after_pod_1_usd": 49.6692342306,
+      "right_after_pod_2_usd": 48.530572,
+      "later_usd": 48.3944417583,
+      "later_read_again": "2026-11-25T02:44Z, unchanged (the session's notes)",
+      "note": "the reading right after pod 2 was terminated came before the provider's last charge; the spend, USD 1.6056, is by the later reading (0.3308 and 1.2748); by rate and seconds the two pods come to 0.3305 and 1.2719. When the later reading was first taken is not recorded"
+    },
+    "run_path_note": "the provers were built below a world-writable directory, so prover/build.sh set no run path. bootstrap.sh adds the folder of the driver's libcuda.so.1 to the loader's configuration. How the programs found the CUDA runtime that user_setup.sh installs is in no kept script: the session's notes say that its folder was added with ldconfig. user_setup.sh's comment on a run path is wrong for these programs",
     "watchdog_log": [
       "2026-11-24T22:57:59Z watchdog armed for 2700s, pid 1955309",
       "2026-11-24T23:02:46Z watchdog for pod 1 cancelled by hand after the terminate",
@@ -724,7 +743,15 @@
             },
             "macos": "not run since the line `table` changed; both targets passed there at bf3add1 (flashprove-tinyllama-2026-11-24.json, flashprove-tinyllama-answer-2026-11-24.json)"
           },
-          "caller_check_macos": null
+          "caller_check_macos": {
+            "note": "run by a reviewer on a laptop on the same public files, at bddda05; not made in the session that made the proof. Its result.json names the same files and the same eight last lines",
+            "host": "macOS arm64, Apple clang version 17.0.0 (clang-1700.0.13.5)",
+            "passed": true,
+            "seconds": 155.5,
+            "patched_verdict": "YES",
+            "unpatched_verdict": "NO: policy-tables",
+            "result_json_sha256": "8eca4f0fa32110ee46152f421594622558c988df10eaf0ac1e2e894d1fae919a"
+          }
         }
       },
       {
@@ -733,6 +760,254 @@
         "now": "no figure changed"
       }
     ]
+  },
+  "corrections_to_the_gpu_evidence": {
+    "note": "flashprove-tinyllama-gpu-2026-11-25.json is not edited again; what is wrong in it is said here",
+    "commit_note": "its commit.note says that commits after 40186c6 change records only. That held up to 6f90c02; the later commits change code, as this file records. It also does not say that 35c7dde changed compare_worst_case.py after the comparison was made; the comparison was not run again",
+    "amended_note": "its note amended says that no other figure changed. 83b2aaa also reworded the basis of the spend (from 'before the first pod and after the last' to 'before and after each pod'), renamed caller_check.macos_by_a_reviewer, dropped a line of its list of what is not shown and added the gates block",
+    "replaced_by_2b5bbe9": "the earlier versions of the two files of 2026-11-24 are not restored here; they are in the branch's history only (git show 2b5bbe9^:research/evidence/<file>), which a squash merge does not keep"
+  },
+  "second_proof": {
+    "why": "the refusals that the caller's check requires were read off the first proof; the first of the three later proofs (pod 2, work3) differs in size, so its altered bytes fall elsewhere",
+    "proof_sha256": "f2d50a1e491a8272754053b073aed2bbedb1163a1351b190bb5d107245ed6873",
+    "host": "Linux x86_64, at 6ba957c",
+    "result_json_sha256": "09c13df6380674bea61be8b54e5bdba394f801389257ede17ba90e73b8a63bb2",
+    "result": {
+      "altered_copies": [
+        {
+          "altered": "proof-middle-bit",
+          "exit_code": 1,
+          "expected": "NO: proof-refused",
+          "last_line": "NO: proof-refused"
+        },
+        {
+          "altered": "proof-last-bit",
+          "exit_code": 1,
+          "expected": "NO: proof-refused",
+          "last_line": "NO: proof-refused"
+        },
+        {
+          "altered": "token-file",
+          "exit_code": 1,
+          "expected": "NO: statement-range",
+          "last_line": "NO: statement-range"
+        },
+        {
+          "altered": "request-first-token",
+          "exit_code": 1,
+          "expected": "NO: proof-refused",
+          "last_line": "NO: proof-refused"
+        },
+        {
+          "altered": "request-answer-token",
+          "exit_code": 1,
+          "expected": "NO: proof-refused",
+          "last_line": "NO: proof-refused"
+        },
+        {
+          "altered": "key-bit",
+          "exit_code": 1,
+          "expected": "NO: key-refused",
+          "last_line": "NO: key-refused"
+        },
+        {
+          "altered": "leaf-bit",
+          "exit_code": 1,
+          "expected": "NO: entry-refused",
+          "last_line": "NO: entry-refused"
+        },
+        {
+          "altered": "commitment-id",
+          "exit_code": 1,
+          "expected": "NO: model-statement",
+          "last_line": "NO: model-statement"
+        }
+      ],
+      "altered_copies_refused_on_the_statement_s_form": 1,
+      "altered_copies_rejected": 8,
+      "builds": {
+        "patched": {
+          "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+          "recipe": "upstream verifier/build.sh",
+          "seconds": 187.12618192099035,
+          "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+          "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+        },
+        "upstream": {
+          "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+          "recipe": "upstream verifier/build.sh",
+          "seconds": 206.0518861268647,
+          "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+          "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+        }
+      },
+      "check_proof": {
+        "exit_code": 0,
+        "result": [
+          "result: outcome=verified commitment_id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd range=24:32 checked_tokens=8 end_token=2 claim=exact-match policy=exact next_token=none C=256 theta=256 cap=0 s=17 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=63 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+          "check_proof: verified: exact match: every checked token (tokens 25 to 32 of the request) is the model's greedy choice; the last checked token is the end token 2; commitment: 63 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 69 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+        ],
+        "seconds": 38.174827637150884
+      },
+      "checked_tokens": [
+        1576,
+        7483,
+        310,
+        3444,
+        338,
+        3681,
+        29889,
+        2
+      ],
+      "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+      "commitment_id_source": "stated by the caller; not recomputed here",
+      "files": {
+        "config/KL.bin": {
+          "bytes": 1144,
+          "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+        },
+        "config/layout.txt": {
+          "bytes": 126322,
+          "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+        },
+        "config/policy.txt": {
+          "bytes": 2422,
+          "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+        },
+        "example.proof": {
+          "bytes": 13238540,
+          "sha256": "f2d50a1e491a8272754053b073aed2bbedb1163a1351b190bb5d107245ed6873"
+        },
+        "example.req": {
+          "bytes": 264,
+          "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+        },
+        "example.y": {
+          "bytes": 4,
+          "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+        },
+        "ivk/key.bin": {
+          "bytes": 2148512,
+          "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+        },
+        "ivk/leaf/0.bin": {
+          "bytes": 2181432,
+          "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+        }
+      },
+      "gpu_used_here": false,
+      "hiding_claim": false,
+      "host": {
+        "machine": "x86_64",
+        "system": "Linux"
+      },
+      "kit": {
+        "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+        "files": {
+          "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+          "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+          "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+          "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+          "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+          "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+          "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+        },
+        "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652"
+      },
+      "passed": true,
+      "patched_verdict": "YES",
+      "patches": {
+        "prover.patch": {
+          "bytes": 13205,
+          "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+        },
+        "tools.patch": {
+          "bytes": 37858,
+          "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+        },
+        "verifier.patch": {
+          "bytes": 16739,
+          "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+        }
+      },
+      "proof_made_here": false,
+      "qualified_backend": false,
+      "range": "24:32",
+      "result_line": {
+        "C": "256",
+        "build": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+        "cap": "0",
+        "checked_tokens": "8",
+        "claim": "exact-match",
+        "commitment_assumed_rounds": "63",
+        "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+        "end_token": "2",
+        "leaf": "0",
+        "least_round": "128.00",
+        "least_round_without_work": "96.23",
+        "limits": "exact",
+        "next_token": "none",
+        "outcome": "verified",
+        "policy": "exact",
+        "range": "24:32",
+        "record": "1",
+        "request_tokens": "64",
+        "s": "17",
+        "theta": "256",
+        "work": "32"
+      },
+      "schema_id": "hallmark.flashprove-tinyllama-proof/1",
+      "seconds": 672.9042826942168,
+      "source": {
+        "bytes": 157799758,
+        "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+        "examples": {
+          "accepted-proof": {
+            "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+            "next_token": 199,
+            "range": "60:64"
+          },
+          "full-size": {
+            "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+            "next_token": 52599,
+            "range": "23:1024"
+          }
+        },
+        "gpu_kit": {
+          "name": "target_small_f2_roomy",
+          "range": "15:64"
+        },
+        "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+        "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+        "licence": "Apache-2.0",
+        "nvcc_release": "V13.2.86",
+        "rejection_tables": [
+          [
+            "accepted-proof",
+            "altered_copies.tsv",
+            10
+          ],
+          [
+            "accepted-proof",
+            "every_kind_of_item.tsv",
+            79
+          ],
+          [
+            "accepted-proof-clipped-gap",
+            "altered_copies_clipped_gap.tsv",
+            10
+          ]
+        ],
+        "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "schema_id": "hallmark.flashprove-source/1",
+        "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+        "upstream": "https://github.com/anthropics/FlashProve",
+        "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+        "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+        "version": "0.16.0"
+      },
+      "unpatched_verdict": "NO: policy-tables"
+    }
   },
   "reruns": {
     "why": "the reviews led to changes of prover_setup.cpp, of both scripts that use it or check a proof, and of the worker; the patches, the kit's files and the GPU run's files are unchanged",
@@ -3787,7 +4062,7 @@
         }
       }
     },
-    "heads": "all six at 6ba957c, on 2026-11-25",
+    "heads": "all six at 6ba957c, on 2026-11-25; no result.json records its own head",
     "inputs": "the answer target took the pinned model files and parquet file from a local folder on both hosts (FLASHPROVE_TINYLLAMA_INPUTS), each checked against its pin; the proof check read the first proof's public files, the same on both hosts"
   },
   "retained_failures": [
@@ -3802,7 +4077,7 @@
     }
   ],
   "gpu_worker_against_stand_in_programs": {
-    "how": "gpu_job.sh as at 8e9246f on a Linux x86_64 host with GNU tools and no GPU, with /proc/cpuinfo and /proc/meminfo replaced by stand-in files and nvidia-smi, cp_commit, cp_prove and cp_verify by stand-in programs",
+    "how": "a copy of gpu_job.sh in which the two paths /proc/cpuinfo and /proc/meminfo were replaced by stand-in files, on a Linux x86_64 host with GNU tools and no GPU, with nvidia-smi, cp_commit, cp_prove and cp_verify as stand-in programs. The harness is not in the repository and no test runs the worker",
     "cases": [
       {
         "case": "PROOFS 1",
@@ -3825,11 +4100,6 @@
         "result": "refused before WORK is made"
       },
       {
-        "case": "expected.sha256 naming the five files, all right",
-        "exit_status": 0,
-        "result": "8 public files"
-      },
-      {
         "case": "expected.sha256 naming the seed alone",
         "exit_status": 3,
         "result": "'does not name config/policy.txt'; WORK not made"
@@ -3848,9 +4118,35 @@
         "case": "the first GPU is not sm_90",
         "exit_status": 3,
         "result": "WORK not made"
+      },
+      {
+        "case": "expected.sha256 naming the five files, all right",
+        "exit_status": 0,
+        "result": "8 public files"
+      },
+      {
+        "case": "expected.sha256 naming policy.txt.old and the .gguf file's .bak copy in place of the two files",
+        "exit_status": 3,
+        "result": "'does not name config/policy.txt'; WORK not made"
+      },
+      {
+        "case": "a marker beside the model file with the file's SHA-256",
+        "exit_status": 0,
+        "result": "8 public files"
+      },
+      {
+        "case": "a marker with another SHA-256",
+        "exit_status": 3,
+        "result": "'names another file', after WORK is made"
+      },
+      {
+        "case": "no nvidia-smi; a CPU without sha_ni",
+        "exit_status": 3,
+        "result": "WORK not made"
       }
     ],
-    "shows": "the script's own control flow, nothing about the real programs or a GPU"
+    "shows": "the script's own control flow, nothing about the real programs or a GPU",
+    "as_at": "the worker of the commit that holds this record"
   },
   "gates": {
     "commit": "0b5b46e, the commit that first holds this file; this section and the ledger entry were added one commit later",

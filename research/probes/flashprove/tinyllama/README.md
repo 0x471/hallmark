@@ -134,8 +134,8 @@ at the pinned commit, byte for byte.
 
 ## Checks
 
-`make verify-flashprove-tinyllama` (CPU, synthetic test files only, no model weights, no paid compute; 333 s and
-513 s in the two recorded runs on an M-series Mac, and about 1 GB of disk while it runs) does this, in order:
+`make verify-flashprove-tinyllama` (CPU, synthetic test files only, no model weights, no paid compute; 333 s to
+513 s in the recorded runs on an M-series Mac, and about 1 GB of disk while it runs) does this, in order:
 
 1. checks the manifest's upstream revision, and each patch's size and SHA-256, copying the checked
    bytes into the run folder;
@@ -420,14 +420,21 @@ contributor, with no owner-set cap. #184 says that paid GPU runs need an owner-a
 puts unbudgeted GPU runs out of scope, `docs/OPERATIONS.md` says to stop before a paid job or an
 upload for which no authority exists, and `research/AUTHORITY.json` lists Modal, Vast.ai and Hugging
 Face Jobs as compute providers, not RunPod. No authority record was made or changed for it. It
-spent USD 1.6056 (0.3308 and 1.2748 for the two pods, by the fall of the account's balance). It is
+spent USD 1.6056 (0.3308 and 1.2748 for the two pods), by the fall of the account's balance
+from 50.00 to 48.3944417583, read again unchanged at 02:44 UTC on 25 Nov. A reading right after
+pod 2 ended gave 48.530572, before the provider's last charge; by rate and seconds the pods come
+to 0.3305 and 1.2719. `AGENTS.md` says no system-package installs: the pod, a rented machine,
+had `apt-get` and `pip` installs. It is
 evidence for the proposal, not an approved Hallmark run.
 
 - **Programs.** `prover/build.sh serving_cp_commit` and `serving_cp_prove` built the two provers
   from the pinned archive with the three patches (sources' digest `7f304c42…`, nvcc 13.2.86) on a
   CPU host; `cp_verify` is the patched build (`a163a90a…`). They were built below a world-writable
-  directory, so `build.sh` set no run path, and on the pod the CUDA library folder was added to
-  the loader's configuration. Nothing but public files went to the pods: the programs, the kit,
+  directory, so `build.sh` set no run path. On the pod, `pod/bootstrap.sh` adds the folder of the
+  driver's `libcuda.so.1` to the loader's configuration; how the programs found the CUDA runtime
+  that `pod/user_setup.sh` installs is in no kept script (the session's notes say that its folder
+  was added with `ldconfig`), and that script's own comment, which speaks of a run path, is wrong
+  for these programs. Nothing but public files went to the pods: the programs, the kit,
   the GGUF file, the request and upstream's published seed file
   (`examples/maverick/public-seed.bin` of the pinned archive, 32 bytes, SHA-256
   `630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd`).
@@ -496,14 +503,15 @@ evidence for the proposal, not an approved Hallmark run.
 
   The script as it then was took any `NO:` as a refusal and compared the caller's folder before
   copying it. It now requires each copy's own refusal (the table above) and compares the copy that
-  the verifiers read; it passed again on both hosts on the same files
+  the verifiers read; it passed again on both hosts on the same files, and on Linux on the first of the three later
+  proofs, which differs in size and got the same eight refusals
   ([follow-up evidence](../../../evidence/flashprove-tinyllama-followup-2026-11-25.json), which also holds both
   earlier `result.json` files and the pods' `inputs.sha256` and `binaries.sha256`). The commitment
   ID that the check is given is `cp_commit`'s own print on the pod: the check does not recompute it,
   so a pass does not tie the proof to TinyLlama's weights. The proof, key and leaf files are held by
   the contributor and are not published, so nobody else can repeat the check yet.
 
-What a pass shows is in decision 0094, "What a patched `YES` means". These times are one machine's
+What a pass shows is in decision 0094, "What a patched `YES` means". These times are those of two pods of one type,
 on lines of which only `table` is sized for this model: not a benchmark.
 
 **Retained failures of the run** (none after a proof existed): the target's verifier build
@@ -515,7 +523,7 @@ and held the pod for about ten minutes (about USD 0.75 of the spend).
 
 ## Not checked
 
-- **The prover patch has run on one request, one kit and one machine.** `cp_commit` and `cp_prove`
+- **The prover patch has run on one request, one kit and two pods of one type.** `cp_commit` and `cp_prove`
   made a commitment and four proofs at NE 0 (above). Another prompt, window length or model can
   reach code that this run did not: the pinned repository holds no NE 0 kit, and nothing here
   tests the patched CUDA code beyond that run.
@@ -538,7 +546,7 @@ and held the pod for about ten minutes (about USD 0.75 of the spend).
   (`tinyllama_plan.py`, `softmax_rows()`; `cp_verify` does not read `kFM`). The fit changes only
   the scales and the six lines that depend on them. They are placeholders that `cp_prove` has
   now judged on one request (above). Only the line `table` is sized for this model, by criteria read off upstream's kits and
-  not for speed; the times above are one machine's on these lines, not a benchmark, and #187 may
+  not for speed; the times above are two like pods' on these lines, not a benchmark, and #187 may
   want smaller lines.
 - **One request.** The answer check covers SASH's one prompt in one window of T = 64. On it one value
   cell clamps (`v` in layer 2, 2,241 to 2,047, at position 32, the final EOS, after the checked
@@ -554,7 +562,11 @@ and held the pod for about ten minutes (about USD 0.75 of the spend).
   from it is committed, but numbers computed from it are: `kit/maxima.json`, `words.json`, `KL.bin`,
   six lines of `policy.txt`, and the calibration set's SHA-256 in `kit.json`. The owner has not
   cleared this source: the card's tags and its text name different versions, and
-  `research/AUTHORITY.json` excludes ambiguous licences. Until the owner decides, the kit and the
+  `research/AUTHORITY.json` excludes ambiguous licences. TinyLlama's `tokenizer.json`, which the calibration set is made with, is byte for byte the Llama 2
+  tokenizer that upstream's rule pins; upstream's `THIRD_PARTY.md` calls that file Meta's, from a
+  gated repository, and `research/AUTHORITY.json` has `gated_terms: false`. Here it comes from
+  TinyLlama's own ungated repository, at the revision of Hallmark's SASH path; whether that settles
+  it is the owner's call too. Until the owner decides, the kit and the
   answer check are a proposal; a no means refitting on another text. The three program patches do not depend on it;
   `scales.patch` pins the calibration set's SHA-256 (`TINYLLAMA_SET_SHA256`) and would change with
   the text, and so would its pin in `kit.json`.
@@ -597,8 +609,9 @@ and held the pod for about ten minutes (about USD 0.75 of the spend).
     test compares the two literals with themselves, and its dense fixture keeps call lines that
     `cp_verify` would refuse. Upstream's `table_ties.py` says it covers every table of the standard
     form and does not look at `eg 7` (each `eg 7` entry is an `eg 8` entry: T7[c] = T8[2c], clamped).
-  - Hallmark's own tests leave most failure branches of the three scripts unguarded: in a review's
-    run, 60 of 93 one-line breakages passed the four test files as they then were. A few tests
+  - Hallmark's own tests leave most failure branches of the three scripts unguarded: a review
+    reported that 60 of 93 one-line breakages passed the four test files as they then were (its
+    run is not in the repository). A few tests
     were added since; `export_gguf.py`, `fit_eg.py`, `float_reference.py`, `answer_check.py`,
     `gate_float_bound.py`, `gpu_job.sh` and `prover_setup.cpp` still have none of their own and
     are exercised only by the targets.

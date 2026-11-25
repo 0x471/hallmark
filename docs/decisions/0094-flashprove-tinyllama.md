@@ -167,7 +167,7 @@ proof), and padded option 2.
 The GPU's own table, from that run, agrees with the port (below). The port does not
 cover the GPU's guards on its matrix products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commits-worst-case-check-on-a-cpu)).
 
-**The first dense proof (the contributor's own run, 2026-11-24 and 25 UTC).** On one RunPod H100 SXM (driver
+**The first dense proof (the contributor's own run, 2026-11-24 and 25 UTC).** On two RunPod pods of one type, each an H100 SXM (driver
 595.112.07, Xeon Platinum 8470), with the patched programs built on a CPU host and only public
 files sent: `cp_commit` passed its worst-case check and committed in about 35 s (three times, the
 same commitment ID `5ffd1aa3…06bd` each time: with `-public-weights` and upstream's published seed
@@ -189,7 +189,7 @@ for which no authority exists, and `research/AUTHORITY.json` lists other compute
 RunPod: this run had no budget, and no authority record was made or changed for it. Figures and retained failures:
 [evidence](../../research/evidence/flashprove-tinyllama-gpu-2026-11-25.json),
 [README](../../research/probes/flashprove/tinyllama/README.md#the-first-dense-proof). The times are
-one machine's on lines of which only `table` is sized for this model: not a benchmark.
+two like pods' on lines of which only `table` is sized for this model: not a benchmark.
 
 **Not done; each needs its own step.**
 

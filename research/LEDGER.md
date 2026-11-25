@@ -3437,7 +3437,7 @@ tests that the branch does not touch and that fail on that host on `main` too
 (`test_stream_copy_retains_rejected_output[modified]`, `test_file_changed_during_read[abd]`).
 
 Retained failure: at `0aaf5e2` the answer target stopped on both hosts at the first environment. A
-check added one commit earlier read uv's own first line of `uv pip freeze` as a distribution, and
+check added at `f1e647c` read uv's own first line of `uv pip freeze` as a distribution, and
 had no test; `30b2b3d` and `1f42684` fix it with one.
 
 Not shown: anything on a GPU since the first run; that `cp_prove` refuses what the port now
