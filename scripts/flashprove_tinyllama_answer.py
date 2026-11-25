@@ -161,22 +161,27 @@ def environment(output, name):
         )
     code, frozen = run(["uv", "pip", "freeze", "-p", python], output / f"venv-{name}-freeze.log")
     require(code == 0, f"uv pip freeze failed ({name})")
-    # uv's own notice of the environment comes with the output; every other line is a distribution.
-    lines = [y.strip() for y in frozen.splitlines() if y.strip()]
-    lines = [y for y in lines if not y.startswith("Using Python ")]
-    # A distribution installed from a file or a URL is printed as `name @ ...`: no such line may
-    # be skipped, or the comparison below would not see it.
-    require(
-        all(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*==[^=@\s]+", x) for x in lines),
-        f"the {name} environment holds a distribution that is not name==version",
-    )
-    installed = sorted(
-        re.sub(r"[-_.]+", "-", x.split("==")[0]).lower() + "==" + x.split("==")[1] for x in lines
-    )
+    installed = frozen_pins(frozen, name)
     require(installed == locked(path), f"the {name} environment is not exactly its lock file")
     versions["lock_file"] = lock["file"]
     versions["installed"] = installed
     return python, versions
+
+
+def frozen_pins(text, name):
+    """The name==version lines of `uv pip freeze`, normalised as locked() does. uv's own notice
+    of the environment comes with the output; every other line must be a distribution. One that
+    was installed from a file or a URL is printed as `name @ ...`: it fails here, so that the
+    comparison with the lock file cannot miss it."""
+    lines = [y.strip() for y in text.splitlines() if y.strip()]
+    lines = [y for y in lines if not y.startswith("Using Python ")]
+    require(
+        all(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*==[^=@\s]+", x) for x in lines),
+        f"the {name} environment holds a distribution that is not name==version",
+    )
+    return sorted(
+        re.sub(r"[-_.]+", "-", x.split("==")[0]).lower() + "==" + x.split("==")[1] for x in lines
+    )
 
 
 def locked(path):

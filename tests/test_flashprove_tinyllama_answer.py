@@ -275,6 +275,17 @@ def test_same_refuses_a_changed_file(tmp_path):
         answer.same(path, b"abd", "f")
 
 
+def test_the_frozen_environment_is_read_whole():
+    # uv 0.9.18 prints its notice of the environment with the pins (a run's retained log).
+    text = (
+        "Using Python 3.13.15 environment at: runs/x/venv-scales\nPyYAML==6.0.4\ntorch==2.9.1+cpu\n"
+    )
+    assert answer.frozen_pins(text, "scales") == ["pyyaml==6.0.4", "torch==2.9.1+cpu"]
+    for line in ("extra-demo @ file:///tmp/extra_demo-9.9-py3-none-any.whl", "-e /tmp/x", "x"):
+        with pytest.raises(ValueError, match="not name==version"):
+            answer.frozen_pins(text + line + "\n", "scales")
+
+
 def test_the_lock_files_are_pinned_and_hold_the_pinned_versions():
     folder = PROBE / "requirements"
     named = set()
