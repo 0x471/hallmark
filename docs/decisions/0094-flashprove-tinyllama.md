@@ -1,8 +1,10 @@
 # 0094: Dense TinyLlama on pinned FlashProve through Hallmark's own patches
 
-Date: 2026-11-21. Status: **proposed**; needs owner approval
+Date: 2026-11-21, revised 2026-11-25. Status: **proposed**; needs owner approval
 ([#186](https://github.com/AbdelStark/hallmark/issues/186): option 3 "needs owner approval"). No
-proof, GPU run or paid compute so far.
+owner-approved GPU run or spend. On 2026-11-25 the contributor made one dense commitment and four
+proofs on a rented H100, on the contributor's own account and at the contributor's cost
+(USD 1.61), before any approval and with no owner-set cap ("The first dense proof" below).
 
 **Context.** #186 asks how Hallmark's LLM case, dense TinyLlama-1.1B, can be proved with FlashProve,
 which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama 4 Maverick's widths. #187 asks for
@@ -64,7 +66,11 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
 
 With these, `kit/` holds a TinyLlama-1.1B kit (T = 64, e_res 11, `eg 7`) fitted by upstream's own
 route, with `fit_eg.py` for the fit at `eg 7`, from a GGUF file that `export_gguf.py` writes from the
-published safetensors (BF16 bits unchanged).
+published safetensors (BF16 bits unchanged). Its committed table is sized for this model's 10,240
+weight rows (`table 11 24 1376256 65535 0 18`, 2^35 entries; the full kit's line has 2^43), by
+criteria read off upstream's three example kits and `HfTableParams::table_derive()`; upstream
+records no rule for that line
+([README](../../research/probes/flashprove/tinyllama/README.md#the-tinyllama-kit-and-the-answer-check)).
 
 Decision 0093 and `make verify-flashprove` stay as they are. The patched verifier is a second build
 with its own source digest, `33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1`.
@@ -96,7 +102,7 @@ builds both verifiers and requires:
 - **`weight_sums`.** It matches upstream's exact oracle at both widths.
 - **nvcc.** Outside the target, upstream's `prover/build.sh` built `serving_cp_commit` and
   `serving_cp_prove`, and the test builds of both, from the patched source with nvcc 13.2.86 on
-  Linux, without a GPU. No program has run.
+  Linux, without a GPU. The two production programs, built again, ran on 2026-11-25 (below).
 - **TinyLlama's shape, planning only.** A dense parameter file at TinyLlama-1.1B's shape with
   `eg 7`, with placeholder scales, passes the patched planner in the standard parameter form; the
   unpatched build refuses it for its three table digests. Without those digests, the unpatched
@@ -107,8 +113,9 @@ builds both verifiers and requires:
 `make verify-flashprove-tinyllama-answer` (CPU, downloads the pinned model) rebuilds the GGUF file
 and the kit from pinned inputs (every file byte for byte but `maxima.json`, which is device-dependent
 and recorded only), in environments from hash-locked requirement files, checks the kit with both planners and the provers'
-reader, runs the part of `cp_prove`'s set-up that needs only the kit on a CPU with upstream's code
-(the plan of attention of each layer group and the layer layouts), runs upstream's scale-tool tests on the patched tree and a float reference against
+reader, runs the part of `cp_commit`'s and `cp_prove`'s set-up that needs only the kit on a CPU with
+upstream's code (the weight table's parameters for W's rows, the plan of attention of each layer
+group and the layer layouts), runs upstream's scale-tool tests on the patched tree and a float reference against
 transformers, and then requires **the decisive check**: upstream's integer model, with the kit and
 every file pinned, gives SASH's eight answer tokens after SASH's 25 prompt tokens, over a whole
 64-token window with no failed range condition and the gate's key at most 32,639, with its logits
@@ -116,16 +123,19 @@ following the float logits; two one-bit mutations of the kit must each fail that
 `cp_commit`'s worst-case check, computed on a CPU, must find every site within its limit. It
 passed on 2026-11-24 on Linux (x86_64, every input downloaded) and on macOS (arm64), with the
 integer model's results identical on the two
-([evidence](../../research/evidence/flashprove-tinyllama-answer-2026-11-24.json)).
+([evidence](../../research/evidence/flashprove-tinyllama-answer-2026-11-24.json)), and again on
+Linux on 2026-11-25 with the sized table
+([evidence](../../research/evidence/flashprove-tinyllama-gpu-2026-11-25.json)); macOS has not run it
+since the line `table` changed, which the integer model does not read.
 
 The current revision of the patches passed `make verify-flashprove-tinyllama` on 2026-11-24 on
 Linux (upstream `verifier/build.sh`, g++ 13.3) and on macOS (Apple clang 17, built as
 `make verify-flashprove` builds it), and upstream's `integer_model` CPU suite passed on the patched
 tree on Linux (947 passed, 0 failed)
-([evidence](../../research/evidence/flashprove-tinyllama-2026-11-24.json)). Apart from upstream's
-stored proofs and their altered copies, which both builds check, these are planning, parsing and
-table checks: no TinyLlama proof exists or is checked. The answer check runs the integer model, not a
-prover, on one request. Further one-off checks and their limits:
+([evidence](../../research/evidence/flashprove-tinyllama-2026-11-24.json)); with the sized table it
+passed again on Linux on 2026-11-25. Apart from upstream's stored proofs and their altered copies,
+which both builds check, these two targets are planning, parsing and table checks: neither makes
+or checks a TinyLlama proof. The answer check runs the integer model, not a prover, on one request. Further one-off checks and their limits:
 [README](../../research/probes/flashprove/tinyllama/README.md#checks).
 
 **`cp_commit`'s worst-case check, on a CPU.** Upstream computes it on a GPU only. Step 7 of the
@@ -148,8 +158,25 @@ and the decisive check still gives SASH's tokens. The cost is the SiLU table's i
 out, `gcl` at NE 0 (the sigmoid table for a dense model, a change of what the verifier checks in a
 proof), and padded option 2.
 
-The port has not been compared with a GPU run, and it does not cover the GPU's guards on its matrix
-products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commits-worst-case-check-on-a-cpu)).
+The GPU's own table, from the run of 2026-11-25, agrees with the port (below). The port does not
+cover the GPU's guards on its matrix products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commits-worst-case-check-on-a-cpu)).
+
+**The first dense proof (the contributor's own run, 2026-11-25).** On one RunPod H100 SXM (driver
+595.112.07, Xeon Platinum 8470), with the patched programs built on a CPU host and only public
+files sent: `cp_commit` passed its worst-case check and committed in about 35 s (three times, the
+same commitment ID `5ffd1aa3…06bd` each time: with `-public-weights` and a public seed anyone with
+such a GPU can recompute it from the public weights and the kit); `cp_prove` made four proofs of
+SASH's request in 8.4 to 9.8 s each, of 13.2 MB; `cp_verify` answered `YES` to each. On a CPU,
+`scripts/flashprove_tinyllama_proof.py` then held every expected value itself (commitment ID,
+range `24:32`, end token, exact-match claim, build digest): accepted by the patched verifier,
+`NO: policy-tables` from the unpatched one, and eight altered copies each `NO:` with status 1. The
+GPU's worst-case table agrees with the CPU port at every site that the port computes as the GPU
+does (within 0.001 bits; the gate of layer 21 keeps 0.458 bits). Spend: USD 1.61 on the
+contributor's account; #184 asks for an owner-approved budget for paid GPU runs, and this run had
+none. Figures and retained failures:
+[evidence](../../research/evidence/flashprove-tinyllama-gpu-2026-11-25.json),
+[README](../../research/probes/flashprove/tinyllama/README.md#the-first-dense-proof). The times are
+one machine's on lines of which only `table` is sized for this model: not a benchmark.
 
 **Not done; each needs its own step.**
 
@@ -158,28 +185,30 @@ products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commi
    kit's scales are computed from it. The card's tags and its text name different versions, and
    `research/AUTHORITY.json` excludes ambiguous licences, so the owner decides; a no means refitting
    on another text. The patches do not depend on it.
-2. **GPU jobs, only with owner approval and a ceiling**: commit and prove (`cp_prove` x3, as #187
-   asks), with a controller like `make e2e-flashprove`'s, not yet written. One attempt is one cpu-xl
-   build of at most 3,600 s and one H200 job of at most 3,600 s for the commit and the three proofs.
-   By 0093's cost formula (`planned_cost`, which counts HF's 600 s startup window per phase) at the
-   HF rates recorded on 2026-10-20, cpu-xl USD 0.016667 and H200 USD 0.083333 a minute
-   ([evidence](../../research/evidence/w13-compute-options-2026-10-20.json); they give 0093's
-   USD 3.27), an attempt costs at most USD 7.02, and a second H200 job that reuses the build, as
-   0093's did after its first prove job failed, at most USD 5.85. 0093's controller recomputes the
-   bound at live prices before it starts. The times are ceilings, not estimates, since no prover
-   program has run on this model. The ceiling, and with it the number of attempts, is the owner's.
-   The prover patch compiles with nvcc 13.2.86 on a host without a GPU. `cp_commit`'s own verdict
-   on the worst-case check (on a CPU, every site fits at `eg 7`) and `cp_prove`'s rules beyond its
-   parameter-file reader and the set-up above run only there.
-3. **A dense proof's altered copies.** The 108 equal calls are all on MoE proofs, and no proof has
-   gone through the verifier's NE 0 branches. Before a dense `YES` is relied on, run an
-   altered-copies table (as upstream's `examples/rejected-proofs`) against the first dense proof.
-4. **#187's proof-system lines.** The kit keeps check 6's lines: placeholders set from the verifier's
-   rules (`kFM` and `kFD` by `cp_prove`'s plan of attention), not sized for speed, which `cp_prove`
-   has judged only at set-up; a kit for each number of checked tokens in #187's sweep.
+2. **GPU jobs for #187, only with owner approval and a ceiling.** The run above was the
+   contributor's, outside any approval. What it measured, for sizing a ceiling: one pod of 17
+   minutes (upload of 2.2 GB, a commitment, four proofs, with about ten idle minutes of the
+   controller's own mistake) cost USD 1.27 at USD 4.39 an hour; the commitment takes about 35 s and
+   a proof under 10 s. A controller like `make e2e-flashprove`'s, with a cap in code, is not
+   written: `gpu_job.sh` is the worker alone.
+3. **More altered copies.** Eight altered copies of one dense proof are refused; upstream's tables
+   have 99 altered sets for its MoE proofs, and no table of altered items exists for a dense one.
+4. **#187's proof-system lines.** Only `table` is sized for this model. The other lines are the
+   full kit's, or set from the verifier's rules (`kFM` and `kFD` by `cp_prove`'s plan of
+   attention): admitted by every consumer and proved with once, not sized for speed; and #187's
+   sweep needs a kit for each number of checked tokens.
+5. **Who answers `YES`.** Only Hallmark's patched verifier does: upstream's refuses the same files
+   (`NO: policy-tables`), and Lean covers neither the dense form nor a padded one. Whether Hallmark
+   wants a verdict that upstream does not give is the owner's call (option 2 keeps upstream's).
+6. **How a verifier gets the commitment ID.** Upstream says to take it "from a party your user
+   trusts"; SASH's caller derives its roots from the public weights on a CPU. Here the ID can be
+   recomputed from the public weights, the kit and the published seed, but only with an sm_90
+   GPU, and only in the mode that hides nothing. How a Hallmark verifier ties the ID to the
+   public TinyLlama checkpoint is undecided.
 
-**Not claimed.** No dense proof exists. There is no claim of soundness of the patched C++ or CUDA code,
-no Lean coverage, no hiding, and no like-for-like numbers yet. Equal tokens are a smoke test, not a
+**Not claimed.** One request's proofs exist, made outside any owner approval. There is no claim of
+soundness of the patched C++ or CUDA code, no Lean coverage, no hiding (the seed is public), no
+benchmark and no like-for-like numbers yet. Equal tokens are a smoke test, not a
 proof that the two integer functions are equal; #187's like-for-like section must name each
 backend's model, conversion, request, window, range and statement.
 

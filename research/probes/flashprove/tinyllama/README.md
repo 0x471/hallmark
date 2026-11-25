@@ -1,17 +1,19 @@
 # TinyLlama-1.1B on pinned FlashProve: dense-model patches
 
 Status: **proposed, not owner-approved** ([#186](https://github.com/AbdelStark/hallmark/issues/186),
-option 3; decision draft [0094](../../../../docs/decisions/0094-flashprove-tinyllama.md)). No proof has
-been made with these patches. The prover patch compiles with upstream's nvcc 13.2.86 (building needs
-no GPU), but neither prover program has run: that needs an H100-class GPU. Nothing here changes
-`make verify-flashprove` or decision 0093's pins.
+option 3; decision draft [0094](../../../../docs/decisions/0094-flashprove-tinyllama.md)). One dense
+commitment and four proofs of SASH's request have been made with these patches on a rented H100, on
+the contributor's own account and at the contributor's cost, before any owner approval
+("[The first dense proof](#the-first-dense-proof)"). Nothing here changes `make verify-flashprove`
+or decision 0093's pins.
 
 Upstream FlashProve at the pinned commit `9e2bdd8` ([`source.json`](../source.json)) reads real model
 weights only at Llama 4 Maverick's widths, 5,120 and head width 128. Its own test kits are smaller
 synthetic models (the pinned kit: width 512, head width 128). Hallmark's LLM case is dense
 TinyLlama-1.1B (width 2,048, head width 64, no experts). These three patches are meant to let the same
 pinned source prove and verify a dense model of TinyLlama's shape natively, so that #187 can compare
-provers on the same model. That has not been shown end to end: see "Not checked". They are applied
+provers on the same model. One request has gone through commit, prove and verify; what that does
+not show is in "Not checked". They are applied
 with `git apply`, in the order of [`patches.json`](patches.json); each file's SHA-256 and size are
 pinned there. That is the mechanism of Hallmark's SASH patches and no more: SASH's Linux prover and
 verifier are built from unchanged upstream source and its Mac verifier patch strengthens checks,
@@ -155,9 +157,17 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
 | the provers' parameter-file reader, built from the patched source | admits the upstream kit, the dense kit and the dense kit with three digests; refuses four digests at NE 0, `tsig` for `trope`, and no `tsig` with experts (`policy-tables`) |
 | fold constants in the 4 patched implementations | equal to each other, to the pins and to an exact derivation |
 | `weight_sums` (patched) against upstream's exact oracle | the same sums at 5,120/128 (seed 1) and 2,048/64 (seeds 1 and 100) |
-| a dense parameter file and `KL.bin` at TinyLlama-1.1B's shape, from [`tinyllama_plan.py`](tinyllama_plan.py) (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22 layers, vocabulary 32,000, rotary base 10,000, T = 64) | the patched build's planner (`-plan arrays`, `request`, `accounting`) admits it in the standard parameter form, with its three tables matching their digests. Both calls must print the planner's whole ending in upstream's order (the standard-form line can only be missing after it) and name the same files (`h_par`, `configuration`). The unpatched build refuses it with `policy-tables` alone, as its last line. The file has `eg 7`, `kFM 14` and `kFD 15`, as the kit has. Without its digest lines, the unpatched build finds exactly `routed-experts`, `both-clamps`, `table-digests` and `no-range-words` unmet, and the patched build only `table-digests`. The shape, `h_par` and `configuration` must equal the pins in `patches.json` |
+| a dense parameter file and `KL.bin` at TinyLlama-1.1B's shape, from [`tinyllama_plan.py`](tinyllama_plan.py) (width 2,048, 32 heads and 4 KV heads of 64, 5,632, 22 layers, vocabulary 32,000, rotary base 10,000, T = 64) | the patched build's planner (`-plan arrays`, `request`, `accounting`) admits it in the standard parameter form, with its three tables matching their digests. Both calls must print the planner's whole ending in upstream's order (the standard-form line can only be missing after it) and name the same files (`h_par`, `configuration`). The unpatched build refuses it with `policy-tables` alone, as its last line. The file has `eg 7`, `kFM 14`, `kFD 15` and the sized line `table` (pinned in `patches.json`), as the kit has. Without its digest lines, the unpatched build finds exactly `routed-experts`, `both-clamps`, `table-digests` and `no-range-words` unmet, and the patched build only `table-digests`. The shape, `h_par` and `configuration` must equal the pins in `patches.json` |
 
-**Current revision** (patched verifier digest `33e9d53e…`, the patch hashes in `patches.json`):
+**With the sized table** (the three patches unchanged; check 6's file has the new line `table`,
+so its pinned `h_par` and `configuration` changed): **passed on Linux** on 2026-11-25 at `2c39db5`,
+every row above as required, on a clean clone under uv 0.9.18: 108 of 108 calls compared equal,
+1,669 s; check 6's file plans to a proof of at most 13,685,772 bytes and 126.21 bits
+([evidence](../../../evidence/flashprove-tinyllama-gpu-2026-11-25.json)). macOS has not run it since.
+Upstream's `verifier/build.sh` refuses to build below a directory that its group can write in: a
+clone made under umask 002 fails this target at once (`chmod go-w` the clone).
+
+**Before that** (patched verifier digest `33e9d53e…`, the patch hashes in `patches.json`):
 **passed on Linux and on macOS** on 2026-11-24 at `bf3add1`, every row above as required
 ([evidence](../../../evidence/flashprove-tinyllama-2026-11-24.json)):
 
@@ -176,7 +186,8 @@ Also at this revision, on the same Linux host
 - **nvcc 13.2.86** (no GPU): upstream's `verifier/build.sh`, then `prover/build.sh serving_cp_commit`,
   `serving_cp_prove`, `cp_commit` and `cp_prove`, built both production programs and both test
   builds from the patched source (exit 0; 24, 67, 21 and 51 minutes). Every compiler warning is in a
-  file that no patch changes. No program has run. Without a GPU, `build.sh` built its compiler
+  file that no patch changes. No program ran then (the production programs, built again, ran on
+  2026-11-25: "The first dense proof"). Without a GPU, `build.sh` built its compiler
   sample but could not run it (status 77), so it checked the compiler by its version only. The build
   records name the sources' digest `7f304c42…`, which upstream's `build.sh` computes from the
   sources and anyone can recompute from the pinned archive with the three patches applied, and as
@@ -241,6 +252,32 @@ e_res 11 (the tools' default), `eg 7` and T = 64: the configuration (`policy.txt
 the setup files beside the weights (`wsums.txt`, `fold.txt`) and the fit (`words.json`,
 `maxima.json`). Its base parameter file is check 6's, from `tinyllama_plan.py`, `eg 7` included.
 
+**The committed table is sized for this model.** The base file's line `table` is not the full
+kit's (`table 11 32 402653184 44040191 0 18`, Maverick's): with it `cp_commit` would encode 2^11
+codewords of length 2^32 for a model whose data fill a 307th of a row's entries. W, the matrix of
+weight digits, has 10,240 rows of 2^18 columns here (upstream's `layoutW()`; Maverick has
+3,076,096). `tinyllama_plan.py` writes `table 11 24 1376256 65535 0 18`, 2^35 table entries in place
+of 2^43:
+
+- the first and last numbers, 2^11 long rows and 2^18 columns, are the full kit's (18 is also the
+  provers' most at this vocabulary, log2 V rounded up + 3);
+- the masks of a row, 65,535, are upstream's small example kits'. This is a choice: they bound the
+  columns that may ever be opened on one stored copy, and the planner counts 1,128 batches with
+  them (688,127 with the full kit's 44,040,191, which would force a row of at least 2^26 entries);
+- the message entries of a row are the least that `HfTableParams::table_derive()` admits: at least
+  the row's 1,310,720 data entries and three pads, and a multiple of 2^16;
+- the code's length is 2^(b + 3), b the bits of the row's last coefficient index, as in each of
+  upstream's example kits.
+
+These are criteria read off upstream's three kits and its code, not a rule of upstream's: it
+records none for these lines (`prover/examples/TARGET-KITS.md`, "How the small configurations'
+lines were chosen"). With upstream's own rows and masks, `table_numbers()` gives the line of each
+of its example kits, and `weight_rows()` the 59,392 and 3,076,096 rows that upstream's code names
+(tested). The full kit's line was never run on this model, so nothing is known of what it would
+have cost; the sized line's cost is measured below. The other proof-system lines
+(`group`, `stages`, the matrices' sizes) stay the full kit's: every consumer admits them, and they
+are larger than this model needs.
+
 `make verify-flashprove-tinyllama-answer` (CPU only, no GPU, no spend; it downloads the pinned
 model, about 2.2 GB, and needs about 8 GB of disk and `uv`) rebuilds all of it and requires, in order
 (with `FLASHPROVE_TINYLLAMA_INPUTS` set to a folder of the pinned files it skips the downloads; each file
@@ -255,14 +292,25 @@ change):
 | calibration set | `--tinyllama` gives the pinned set, and its drawn rows have upstream's own `DRAWS_SHA256` (steps 1 to 3 of upstream's rule run on byte-identical inputs) |
 | fit | `calibrate.py` runs (its fit is at `eg 8`); [`fit_eg.py`](fit_eg.py), the same call of `fit_scales.fit()`, gives `calibrate.py`'s `words.json` byte for byte at `eg 8` and `kit/words.json` byte for byte at `kit.json`'s `eg 7`; `maxima.json` is compared and recorded |
 | configuration | `words_to_policy.py` ends `w2p end 0`; it and `pack_layout.py` give `kit/policy.txt`, `KL.bin` and `layout.txt` byte for byte |
-| planning | on the kit and on SASH's request (66 words: 25 prompt ids, 8 answer ids, 31 filler 0, r = 24, e = 32), the patched planner prints its whole ending in the standard parameter form with three tables and the pinned `h_par` and `configuration`; the unpatched build ends `NO: policy-tables`; the provers' parameter-file reader admits the kit; the part of `cp_prove`'s set-up that needs only the kit, run on a CPU with upstream's code ([`prover_setup.cpp`](prover_setup.cpp): the plan of attention of each layer group and each group's layer layout), admits it, and refuses the same kit with `kFM` one higher |
+| planning | on the kit and on SASH's request (66 words: 25 prompt ids, 8 answer ids, 31 filler 0, r = 24, e = 32), the patched planner prints its whole ending in the standard parameter form with three tables and the pinned `h_par` and `configuration`; the unpatched build ends `NO: policy-tables`; the provers' parameter-file reader admits the kit; the part of `cp_commit`'s and `cp_prove`'s set-up that needs only the kit, run on a CPU with upstream's code ([`prover_setup.cpp`](prover_setup.cpp): the weight table's parameters for W's rows, the plan of attention of each layer group and each group's layer layout), admits it, and refuses the same kit with `kFM` one higher (the plan of attention) and with one step less of the table's message entries (`policy-pad-place`); the kit's line `table` is the one that `tinyllama_plan.table_numbers()` gives for the rows that upstream's `layoutW()` counts |
 | upstream's scale tests | `test_policy_tables.py`, `table_ties.py`, `test_calibrate.py` and `test_gguf_weights.py` pass on the patched tree, the first two with `SUITE.md`'s commands (the other two have no row). Status 77, passed in part, is accepted with an "in part" last line: the target builds no `make_model` and sets no `SMALL_MODEL`, so those cases skip on every host |
 | float reference | upstream's float pass on the GGUF agrees with Hugging Face transformers on the safetensors at the final norm (relative L2 at most 1e-4), and transformers' greedy decoding gives SASH's answer |
 | **the answer** | upstream's integer model (patched, torch 2.13.0), with every file pinned and the weights' integers checked against `wsums.txt`, run over the whole 64-token window: no range condition fails at any position; the greedy choices at positions 24 to 31 are SASH's `[1576, 7483, 310, 3444, 338, 3681, 29889, 2]`; the gate's key stays at most 32,639 (the integer model's condition for a key without the clamp `gcl`; it is meant to match the provers' refusal, but upstream has not compared its range tests with the released `cp_prove`); and at each checked position the integer logits over 2^s have a slope of 0.75 to 1.33 and a correlation of at least 0.998 against the float logits. The slope bound catches an error in the logits' overall scale (`MF` off by one bit doubles every logit). The correlation floor, 0.998, was set by hand after samples showed one-bit shift errors passing the earlier 0.99: between the kit's 0.9991 (then at `eg 8`) and the layer-10 control's 0.9972. A one-off sweep on macOS ([`shift_sweep.py`](shift_sweep.py)), which changes every layer's `kv`, `ko` and `kd` by one bit, 66 kits, caught all 66 on the `eg 7` kit (4 changed the tokens; the other 62 kept SASH's tokens and slopes within the bound, and fell below the floor, the closest at 0.9963). With the earlier floor of 0.99, 28 of the 66 would have passed. The margin is thin, and other errors may still pass |
 | mutation controls | the same check on two one-bit changes of the kit must fail at least one condition: `MF` + 1 in `policy.txt`, and layer 10's `kv` + 1 in `KL.bin` (not the line `s`: the forward pass reads it only to add seeded noise, and this check gives no seed, so changing it would test only this target's divisor); each control's slopes and least correlation are recorded |
 | `cp_commit`'s worst-case check, on a CPU | `worst_case_cpu.py` and `gate_float_bound.py` (next section) on the kit: every site must fit (`kit.json`'s `worst_case.short` is empty), and the two must agree on the gate: the same layers over the limit (none), and in each layer the integer key bound must be the float one times the norm's ball radius over 2,048, within 0.1 % |
 
-**Current kit** (`scales.patch`, the lock files and `kit/` as pinned in `kit.json`, at `eg 7`):
+**The sized kit** (`kit/policy.txt` with the line `table 11 24 1376256 65535 0 18`; `KL.bin`,
+`layout.txt` and every other kit file unchanged): **passed on Linux** on 2026-11-25 at `2c39db5`,
+every row as required, on a clean clone with every input downloaded, 2,001 s
+([evidence](../../../evidence/flashprove-tinyllama-gpu-2026-11-25.json)). The kit rebuilt byte for
+byte; the integer model's figures are those below (SASH's eight tokens, the gate's key at most
+3,970, correlations of at least 0.99908, both controls failing as before); upstream's `layoutW()`
+counts 10,240 rows and `HfParams::from_policy()` admits the line; the planner's bounds are a proof
+of at most 13,685,772 bytes and 126.21 bits, with 58 columns a batch. macOS has not run it since
+the line changed.
+
+**The kit before the table was sized** (`scales.patch`, the lock files and `kit/` as then pinned in
+`kit.json`, at `eg 7`):
 **passed on Linux and on macOS** on 2026-11-24 at `bf3add1`, every row as required
 ([evidence](../../../evidence/flashprove-tinyllama-answer-2026-11-24.json), with both runs'
 `result.json`): Ubuntu 24.04 x86_64 (a clone, every input downloaded, 1,870 s) and macOS arm64
@@ -285,8 +333,8 @@ change):
   1.99 to 2.01 at every checked position; with layer 10's `kv` + 1 the tokens stay, the slopes
   move to 0.982 to 1.008 (within the bound), and the correlation falls to 0.9939, below the floor;
 - the worst-case check, identical on the two hosts: every site fits (next section);
-- the planner's bounds for the kit: a proof of at most 14,061,196 bytes, 126.21 bits, the same as
-  check 6, whose proof-system lines the kit keeps.
+- the planner's bounds for that kit, with the full kit's line `table`: a proof of at most
+  14,061,196 bytes, 126.21 bits, the same as check 6 then.
 
 ## cp_commit's worst-case check, on a CPU
 
@@ -357,13 +405,89 @@ the float logits stays at least 0.99908 (0.99911 at `eg 8`), and the smallest to
 
 - Not covered: the GPU's guards on its matrix products, which can only make a site fail; and that
   `cp_commit`'s own conversion gives the integers read here (it is compared with `wsums.txt` only
-  through that file). The port has not been compared with a GPU run.
+  through that file). The GPU's own table, from one run, agrees with the port ("The first dense
+  proof").
+
+## The first dense proof
+
+On 2026-11-24 and 2026-11-25 (UTC) the sized kit went through `cp_commit`, `cp_prove` and
+`cp_verify` on a rented H100 ([evidence](../../../evidence/flashprove-tinyllama-gpu-2026-11-25.json)).
+**This was the contributor's own run**: on the contributor's own RunPod account, paid by the
+contributor, before the owner approved option 3 and with no owner-set cap, although #184 asks for
+an owner-approved budget for paid GPU runs. It spent USD 1.61 (the account's balance before and
+after: 50.00 and 48.39). It is evidence for the proposal, not an approved Hallmark run.
+
+- **Programs.** `prover/build.sh` built `cp_commit` and `cp_prove` from the pinned archive with the
+  three patches (sources' digest `7f304c42…`, nvcc 13.2.86) on a CPU host; `cp_verify` is the
+  patched build (`a163a90a…`). Nothing but public files went to the pods: the programs, the kit,
+  the GGUF file, the request and upstream's published seed file.
+- **Worker.** [`gpu_job.sh`](gpu_job.sh), run as an ordinary account, with upstream's commands:
+  `cp_commit -weights … -config … -M 1 -ivk … -isk … -public-weights <seed>
+  -worst-case-table …`, `cp_prove -isk … -public-weights <seed> -in … -out …` and the client's
+  `cp_verify <config> <ivk> <request> <y> <proof> -id <ID>`.
+- **Host.** One H100 SXM 80 GB (sm_90), driver 595.112.07, Xeon Platinum 8470 (SHA instructions),
+  Ubuntu 24.04, 29 vCPU and 287 GB for the container; CUDA runtime 13.2.86 and cuBLAS 13.4.1.3 from
+  upstream's documented pip install.
+- **`cp_commit`** ran three times (once alone, twice before proofs) and each time ended with status
+  0, "the worst-case check: every bounded site fits", in 34.3 to 35.0 s of wall time at a peak of at
+  most 4,252,728 KiB (4.4 GB) of host memory. All three gave the same commitment ID,
+  `5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd`, and the same `key.bin`
+  (2,148,512 bytes) and leaf file (2,181,432 bytes): with `-public-weights` and a public seed the
+  commitment can be recomputed by anyone with such a GPU, the public weights and the kit.
+- **The GPU's worst-case table against the CPU port** ([`compare_worst_case.py`](compare_worst_case.py)):
+  the same 202 sites, none short. At the 156 sites that the port computes as the GPU does (q, k, v,
+  gate, up, the norms' quotients, the head's margin) the bounds agree within 0.001 bits, the table's
+  resolution; at the stream's 46 sites the port's Frobenius bound is at or above the GPU's (by up to
+  7.93 bits), as it is meant to be. The GPU's tightest sites: the gate of layer 21 (0.458 bits to spare),
+  the head's margin (0.642), v of layer 3 (1.199), up of layer 21 (1.280).
+- **`cp_prove`** made four proofs of SASH's request (25 prompt ids, 8 answer ids, window 64;
+  r = 24, e = 32), each a call of its own after a commitment: 8.41 s, and 9.79, 9.67 and 9.31 s
+  with `nvidia-smi` sampling the GPU twice a second beside it; at most 3,650,064 KiB (3.8 GB) of host
+  memory; proofs
+  of 13,238,500 to 13,253,292 bytes (the planner's bound: 13,685,772). The largest GPU memory
+  sampled over a commitment and three proofs was 74,799 MiB; which program held it was not
+  separated.
+- **`cp_verify`** on the pod answered `YES` to each of the four under the commitment ID
+  (`claim=exact-match`, `tokens=25..32`, `y=no`, the patched build's digest), in about 12 s each.
+- **The caller's check, on a CPU.** [`scripts/flashprove_tinyllama_proof.py`](../../../../scripts/flashprove_tinyllama_proof.py)
+  rebuilds both verifiers from the pinned archive and requires: the configuration is the committed
+  kit and the request SASH's, byte for byte; upstream's `check_proof.py` with the patched
+  `cp_verify` accepts under the caller's commitment ID, range `24:32`, end token 2, exact-match
+  claim and build digest; a plain call ends `YES`; the unpatched `cp_verify` ends
+  `NO: policy-tables`; and eight altered copies each end `NO:` with status 1. It passed on Linux
+  x86_64 (g++ 13.3, 724 s):
+
+  | altered | the patched verifier's last line |
+  |---|---|
+  | a bit in the middle of the proof | `NO: proof-refused` |
+  | the proof's last bit | `NO: proof-refused` |
+  | the token file (y, which this request does not cover) | `NO: statement-range` |
+  | the first prompt token | `NO: proof-refused` |
+  | the first answer token | `NO: proof-refused` |
+  | a bit of `key.bin` | `NO: key-refused` |
+  | a bit of the leaf file | `NO: entry-refused` |
+  | another commitment ID | `NO: model-statement` |
+
+  A reviewer ran the same script on the same files on macOS arm64 (Apple clang 17) at `bddda05`:
+  passed in 155 s with the same eight last lines; its `result.json` names the same file hashes as
+  the Linux one. That run was not made in the session that made the proof.
+
+What a pass shows is in decision 0094, "What a patched `YES` means". These times are one machine's
+on lines of which only `table` is sized for this model: not a benchmark.
+
+**Retained failures of the run** (none after a proof existed): the target's verifier build
+refused a clone below a group-writable directory twice (upstream's `verifier/build.sh` asks for
+directories that only the caller can change; `chmod go-w`); the first pod's first bootstrap
+stopped silently at the package step and passed when run again (cause not established); a command
+line of the controller's own for the three timed proofs ended with status 127 before anything ran
+and held the pod for about ten minutes (about USD 0.75 of the spend).
 
 ## Not checked
 
-- **The prover patch has never run.** It compiles with nvcc (above), but no `cp_commit` or `cp_prove`
-  has run at NE 0 here, and the pinned repository holds no NE 0 kit. More gaps of this kind can
-  surface only in the GPU commit and proving jobs.
+- **The prover patch has run on one request, one kit and one machine.** `cp_commit` and `cp_prove`
+  made a commitment and four proofs at NE 0 (above). Another prompt, window length or model can
+  reach code that this run did not: the pinned repository holds no NE 0 kit, and nothing here
+  tests the patched CUDA code beyond that run.
 - **The patched tree's own documents still state upstream's rules.** No patch touches
   `verifier/docs/parameter-file.md`, `docs/format/FORMAT.md` 13.7 or `docs/model.md` 11.3, so in a
   patched tree they still say that NE 0 never ends in acceptance and that c_0 = RN32(sqrt(d) / 64).
@@ -372,22 +496,19 @@ the float logits stays at least 0.99908 (0.99911 at `eg 8`), and the smallest to
   - Upstream's `weight_sums/tests/run_tests.sh`;
   - `integer_model`'s `tests/test_gguf_files.py` (it builds `make_model`);
   - the prover rows `parameter_file_one_bits_test` and `parameter_file_one_place_test`.
-- **No TinyLlama commitment or proof.** The kit is fitted and the integer model gives SASH's answer
-  on a CPU, but `cp_commit` and `cp_prove` have not run on it.
-  - `cp_commit`'s worst-case check, mandatory as upstream's, has not run on a GPU. Hallmark's CPU
-    port of it finds every site of the `eg 7` kit within its limit (above), the gate of layer 21
-    by 0.45 bits. The GPU's own verdict is not known: the port has not been compared with it.
-  - Of the provers' rules, their parameter-file reader and the part of `cp_prove`'s set-up that
-    needs only the kit (above) admit it. `cp_prove`'s other checks, among them the forward
-    kernels' `layer_words_fit()`, run only on a GPU.
+- **The commitment is a test commitment.** It was made with `-public-weights` and upstream's
+  published seed file, so it hides nothing, and its ID (`5ffd1aa3…`) is the caller's own: nothing
+  enrols it, and how a verifier would tie an ID to the public checkpoint is not designed (decision
+  0094). The kit's `fe` (below) and its proof-system lines enter that ID and may still change.
 - **The kit's proof-system lines are check 6's**, not sized for speed: the full kit's values, with
   the lines that TinyLlama's shape forces (`ll`, which 22 layers force from 2 to 1; `la`, `lB`,
   `lmS`, `iotaA_0`, `iotaH_0` to `iotaH_2`, `ranges-part`) set from the verifier's own rules
   and refusals, and `kFM` and `kFD` (14 and 15) by the rule of `cp_prove`'s plan of attention
   (`tinyllama_plan.py`, `softmax_rows()`; `cp_verify` does not read `kFM`). The fit changes only
   the scales and the six lines that depend on them. They are placeholders that `cp_prove` has
-  judged only at set-up (above); it has further checks at run time. The planner's sizes
-  and bits for the kit are bounds of these lines, not measurements, and #187 may want smaller ones.
+  now judged on one request (above). Only the line `table` is sized for this model, by rule and
+  not for speed; the times above are one machine's on these lines, not a benchmark, and #187 may
+  want smaller lines.
 - **One request.** The answer check covers SASH's one prompt in one window of T = 64. On it one value
   cell clamps (`v` in layer 2, 2,241 to 2,047, at position 32, the final EOS, after the checked
   positions); another prompt
@@ -408,11 +529,16 @@ the float logits stays at least 0.99908 (0.99911 at `eg 8`), and the smallest to
   of 3.13, which uv may download if the host has none; the runs had 3.13.2 and 3.13.15) nor uv's own
   version, and only for macOS arm64 and Linux x86_64. They are installed from PyPI and, for torch on
   Linux, from PyTorch's CPU index.
-- **No dense proof has been checked.** The 108 equal calls of `make verify-flashprove-tinyllama` are
-  all on upstream's MoE proofs: they show that the patch changes nothing there. Every check at NE 0
-  is a planning, parsing or table check, and the pinned repository has no NE 0 proof, so the
-  verifier's NE 0 branches have checked no proof here. Before a dense `YES` is relied on, an
-  altered-copies table must be run against a dense proof.
+- **The dense proofs' checks are few.** The 108 equal calls of `make verify-flashprove-tinyllama`
+  are all on upstream's MoE proofs. The verifier's NE 0 branches have checked four proofs of one
+  request and refused eight altered copies of one of them (above). That is far from upstream's 99
+  altered sets, and no table of altered items has been made for a dense proof.
+- **Only the patched verifier answers `YES`.** Upstream's `cp_verify` refuses the same files
+  (`NO: policy-tables`), and Lean covers neither form. Whoever relies on a dense `YES` relies on
+  Hallmark's patch.
+- **macOS has not run the targets on the sized kit.** Both targets passed on macOS at `bf3add1`,
+  before the line `table` changed; since then they have run on Linux only. The integer model does
+  not read that line.
 - **The float reference is Hugging Face transformers 5.15.1**, run as a check of the export. It is
   not part of any statement.
 - **The kit's `fe` is the base file's 8,192, Maverick's expert width.** At NE 0 the verifier reads
