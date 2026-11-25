@@ -22,12 +22,12 @@ one bit coarser, which `verifier.patch` admits at NE 0. It passed on Linux and m
 ([evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)). The kit's committed table is
 now sized for TinyLlama's 10,240 weight rows (`table 11 24 1376256 65535 0 18`; the full kit's line
 would encode Maverick's table), by criteria read off upstream's kits, and both targets passed again
-on Linux with it. On 2026-11-25 the contributor ran the patched programs on a rented H100, on the
+on Linux with it. On 2026-11-24 and 25 (UTC) the contributor ran the patched programs on a rented H100, on the
 contributor's own RunPod account and at the contributor's cost (USD 1.61), before owner approval
 and with no owner-set cap: `cp_commit` passed its worst-case check and committed in about 35 s,
-`cp_prove` made four proofs of SASH's request in under 10 s each, the patched `cp_verify` accepted
-them under caller-held values, upstream's verifier refused them, and eight altered copies were
-refused ([evidence](evidence/flashprove-tinyllama-gpu-2026-11-25.json)). One request, one machine,
+`cp_prove` made four proofs of SASH's request in under 10 s each, and the patched `cp_verify`
+answered `YES` to each on the pod; for the first of them, on a CPU, it accepted under caller-held
+values, upstream's verifier refused, and eight altered copies were refused ([evidence](evidence/flashprove-tinyllama-gpu-2026-11-25.json)). One request, one machine,
 public seed: no benchmark, no hiding, no owner-approved run. Next, for the owner: option 3, the
 calibration text's licence, a GPU ceiling for #187, and how a verifier gets the commitment ID.
 

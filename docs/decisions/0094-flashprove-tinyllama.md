@@ -2,7 +2,7 @@
 
 Date: 2026-11-21, revised 2026-11-25. Status: **proposed**; needs owner approval
 ([#186](https://github.com/AbdelStark/hallmark/issues/186): option 3 "needs owner approval"). No
-owner-approved GPU run or spend. On 2026-11-25 the contributor made one dense commitment and four
+owner-approved GPU run or spend. On 2026-11-24 and 25 (UTC) the contributor made a dense commitment and four
 proofs on a rented H100, on the contributor's own account and at the contributor's cost
 (USD 1.61), before any approval and with no owner-set cap ("The first dense proof" below).
 
@@ -102,7 +102,7 @@ builds both verifiers and requires:
 - **`weight_sums`.** It matches upstream's exact oracle at both widths.
 - **nvcc.** Outside the target, upstream's `prover/build.sh` built `serving_cp_commit` and
   `serving_cp_prove`, and the test builds of both, from the patched source with nvcc 13.2.86 on
-  Linux, without a GPU. The two production programs, built again, ran on 2026-11-25 (below).
+  Linux, without a GPU. The two production programs, built again, have since run (below).
 - **TinyLlama's shape, planning only.** A dense parameter file at TinyLlama-1.1B's shape with
   `eg 7`, with placeholder scales, passes the patched planner in the standard parameter form; the
   unpatched build refuses it for its three table digests. Without those digests, the unpatched
@@ -158,17 +158,18 @@ and the decisive check still gives SASH's tokens. The cost is the SiLU table's i
 out, `gcl` at NE 0 (the sigmoid table for a dense model, a change of what the verifier checks in a
 proof), and padded option 2.
 
-The GPU's own table, from the run of 2026-11-25, agrees with the port (below). The port does not
+The GPU's own table, from that run, agrees with the port (below). The port does not
 cover the GPU's guards on its matrix products ([README](../../research/probes/flashprove/tinyllama/README.md#cp_commits-worst-case-check-on-a-cpu)).
 
-**The first dense proof (the contributor's own run, 2026-11-25).** On one RunPod H100 SXM (driver
+**The first dense proof (the contributor's own run, 2026-11-24 and 25 UTC).** On one RunPod H100 SXM (driver
 595.112.07, Xeon Platinum 8470), with the patched programs built on a CPU host and only public
 files sent: `cp_commit` passed its worst-case check and committed in about 35 s (three times, the
 same commitment ID `5ffd1aa3…06bd` each time: with `-public-weights` and a public seed anyone with
 such a GPU can recompute it from the public weights and the kit); `cp_prove` made four proofs of
 SASH's request in 8.4 to 9.8 s each, of 13.2 MB; `cp_verify` answered `YES` to each. On a CPU,
-`scripts/flashprove_tinyllama_proof.py` then held every expected value itself (commitment ID,
-range `24:32`, end token, exact-match claim, build digest): accepted by the patched verifier,
+`scripts/flashprove_tinyllama_proof.py` then took the first of the four and held every expected
+value itself (commitment ID, range `24:32`, end token, exact-match claim, build digest): accepted
+by the patched verifier,
 `NO: policy-tables` from the unpatched one, and eight altered copies each `NO:` with status 1. The
 GPU's worst-case table agrees with the CPU port at every site that the port computes as the GPU
 does (within 0.001 bits; the gate of layer 21 keeps 0.458 bits). Spend: USD 1.61 on the
@@ -187,7 +188,7 @@ one machine's on lines of which only `table` is sized for this model: not a benc
    on another text. The patches do not depend on it.
 2. **GPU jobs for #187, only with owner approval and a ceiling.** The run above was the
    contributor's, outside any approval. What it measured, for sizing a ceiling: one pod of 17
-   minutes (upload of 2.2 GB, a commitment, four proofs, with about ten idle minutes of the
+   minutes (upload of 2.2 GB, two commitments, four proofs, with about ten idle minutes of the
    controller's own mistake) cost USD 1.27 at USD 4.39 an hour; the commitment takes about 35 s and
    a proof under 10 s. A controller like `make e2e-flashprove`'s, with a cap in code, is not
    written: `gpu_job.sh` is the worker alone.

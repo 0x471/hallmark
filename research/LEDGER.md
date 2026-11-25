@@ -3344,6 +3344,8 @@ the port has not been compared with, and the GPU's guards on its matrix products
 
 ## 2026-11-25: a table sized for TinyLlama and the first dense proof on an H100 (proposed; contributor's own run)
 
+The pods ran from 2026-11-24 22:58 to 2026-11-25 00:06 UTC.
+
 Hypothesis: with a committed table sized for TinyLlama's weight rows, the patched `cp_commit` and
 `cp_prove` make a commitment and a proof of SASH's request on an sm_90 GPU, and the patched
 `cp_verify` accepts it under caller-held values. Pass criterion: `cp_commit` ends with status 0
@@ -3374,10 +3376,11 @@ Result: passed ([evidence](evidence/flashprove-tinyllama-gpu-2026-11-25.json)). 
 34.3 to 35.0 s, the same commitment ID `5ffd1aa3…06bd`, key and leaf file each time. Its
 worst-case table agrees with the CPU port at all 156 sites that the port computes as the GPU does
 (within 0.001 bits; tightest: the gate of layer 21 with 0.458 bits, the head's margin with 0.642),
-and the port's Frobenius bound is at or above the GPU's at the stream's 46 sites. `cp_prove`: four
+and the port's Frobenius bound is at or above the GPU's at the stream's 46 sites, within that
+resolution. `cp_prove`: four
 proofs of r = 24, e = 32 in a window of 64, 8.41 s and (with a GPU-memory sampler beside it) 9.31
 to 9.79 s, 13,238,500 to 13,253,292 bytes. `cp_verify` on the pod: `YES` four times. On Linux
-x86_64, `scripts/flashprove_tinyllama_proof.py`: accepted under caller-held values; unpatched
+x86_64, `scripts/flashprove_tinyllama_proof.py` on the first proof: accepted under caller-held values; unpatched
 verifier `NO: policy-tables`; eight altered copies refused (`proof-refused` four times,
 `statement-range`, `key-refused`, `entry-refused`, `model-statement`). A reviewer's run of the
 same script on macOS arm64 gave the same result. Both CPU targets passed again on Linux with the

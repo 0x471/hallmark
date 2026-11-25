@@ -162,7 +162,8 @@ It runs upstream's pinned scripts and builds with the caller's own permissions, 
 **With the sized table** (the three patches unchanged; check 6's file has the new line `table`,
 so its pinned `h_par` and `configuration` changed): **passed on Linux** on 2026-11-25 at `2c39db5`,
 every row above as required, on a clean clone under uv 0.9.18: 108 of 108 calls compared equal,
-1,669 s; check 6's file plans to a proof of at most 13,685,772 bytes and 126.21 bits
+1,669 s; check 6's file plans to a proof of at most 13,685,772 bytes and 126.21 bits (the planner's
+own accounting, not a security level)
 ([evidence](../../../evidence/flashprove-tinyllama-gpu-2026-11-25.json)). macOS has not run it since.
 Upstream's `verifier/build.sh` refuses to build below a directory that its group can write in: a
 clone made under umask 002 fails this target at once (`chmod go-w` the clone).
@@ -306,7 +307,8 @@ every row as required, on a clean clone with every input downloaded, 2,001 s
 byte; the integer model's figures are those below (SASH's eight tokens, the gate's key at most
 3,970, correlations of at least 0.99908, both controls failing as before); upstream's `layoutW()`
 counts 10,240 rows and `HfParams::from_policy()` admits the line; the planner's bounds are a proof
-of at most 13,685,772 bytes and 126.21 bits, with 58 columns a batch. macOS has not run it since
+of at most 13,685,772 bytes and 126.21 bits (its own accounting, not a security level), with 58
+columns a batch. macOS has not run it since
 the line changed.
 
 **The kit before the table was sized** (`scales.patch`, the lock files and `kit/` as then pinned in
@@ -437,8 +439,8 @@ after: 50.00 and 48.39). It is evidence for the proposal, not an approved Hallma
 - **The GPU's worst-case table against the CPU port** ([`compare_worst_case.py`](compare_worst_case.py)):
   the same 202 sites, none short. At the 156 sites that the port computes as the GPU does (q, k, v,
   gate, up, the norms' quotients, the head's margin) the bounds agree within 0.001 bits, the table's
-  resolution; at the stream's 46 sites the port's Frobenius bound is at or above the GPU's (by up to
-  7.93 bits), as it is meant to be. The GPU's tightest sites: the gate of layer 21 (0.458 bits to spare),
+  resolution; at the stream's 46 sites the port's Frobenius bound is at or above the GPU's within that
+  resolution (by up to 7.93 bits above), as it is meant to be. The GPU's tightest sites: the gate of layer 21 (0.458 bits to spare),
   the head's margin (0.642), v of layer 3 (1.199), up of layer 21 (1.280).
 - **`cp_prove`** made four proofs of SASH's request (25 prompt ids, 8 answer ids, window 64;
   r = 24, e = 32), each a call of its own after a commitment: 8.41 s, and 9.79, 9.67 and 9.31 s
@@ -449,7 +451,7 @@ after: 50.00 and 48.39). It is evidence for the proposal, not an approved Hallma
   separated.
 - **`cp_verify`** on the pod answered `YES` to each of the four under the commitment ID
   (`claim=exact-match`, `tokens=25..32`, `y=no`, the patched build's digest), in about 12 s each.
-- **The caller's check, on a CPU.** [`scripts/flashprove_tinyllama_proof.py`](../../../../scripts/flashprove_tinyllama_proof.py)
+- **The caller's check of the first proof, on a CPU.** [`scripts/flashprove_tinyllama_proof.py`](../../../../scripts/flashprove_tinyllama_proof.py)
   rebuilds both verifiers from the pinned archive and requires: the configuration is the committed
   kit and the request SASH's, byte for byte; upstream's `check_proof.py` with the patched
   `cp_verify` accepts under the caller's commitment ID, range `24:32`, end token 2, exact-match

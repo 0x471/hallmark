@@ -20,9 +20,10 @@ verifiers and requires, in order:
    file, a prompt token, an answer token, a bit of the key, a bit of the leaf file, and another
    commitment ID.
 
-A pass says that these files fit the patched verifier's checks for the enrolled integer commitment
-and this request. It says nothing of hiding (the seed is public), of the checkpoint the weights
-were converted from, or of SASH's integer function (decision 0094).
+A pass says that these files fit the patched verifier's checks for the caller's own integer
+commitment and this request; nothing enrols that commitment. It says nothing of hiding (the seed
+is public), of the checkpoint the weights were converted from, or of SASH's integer function
+(decision 0094).
 """
 
 import argparse
