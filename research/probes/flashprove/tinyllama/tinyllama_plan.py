@@ -142,8 +142,9 @@ def table_numbers(rows, row_bits, masks, column_bits, answers=1):
       of upstream's example kits (table_derive() asks for at least one more).
 
     With upstream's own rows, row_bits and masks this gives the line of each of upstream's example
-    kits (target_small_f2, target_small_file_f2, target_full_f2; tested). The rule is read off
-    those kits and that function; upstream states none."""
+    kits (target_small_f2, target_small_file_f2, target_full_f2; tested). These are criteria read
+    off those kits and that function, not a rule of upstream's: it records none for these lines
+    (prover/examples/TARGET-KITS.md, "How the small configurations' lines were chosen")."""
     low = column_bits - row_bits
     # table_lines_first() and table_derive(): lkW from 4 to 18, fb from 3 to 13 and below lkW, fb
     # at most the bits of a row number of W, fnm odd.
