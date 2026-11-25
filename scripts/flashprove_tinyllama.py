@@ -475,8 +475,8 @@ def check_tinyllama_plan(tree, output, verifiers):
     require(
         ids == (pin["h_par"], pin["configuration"]), "the generated files are not the pinned ones"
     )
-    # The same file without its digest lines: the unpatched build must miss exactly the four
-    # conditions that the patch meets at NE 0 (patches.json), the patched build only the digests.
+    # The same file without its digest lines: each build must miss exactly the conditions that
+    # patches.json lists for it (four for the unpatched build, the digests alone for the patched).
     bare = output / "tinyllama-plan-no-digests"
     bare.mkdir()
     for name in ("KL.bin", "layout.txt"):

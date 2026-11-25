@@ -524,8 +524,8 @@ def check_planning(tree, output, verifiers):
         lambda x: "table " + short if x.startswith("table ") else x,
         "policy-pad-place",
     )
-    # Two rules that cp_verify and the provers' reader do not have: a committed matrix of
-    # attention has whole columns of D = 2,048, and a shift fits its digit form.
+    # A rule that neither cp_verify nor the provers' reader has (a committed matrix of attention
+    # has whole columns of D = 2,048), and one refusal of the copied layer_words_fit().
     short_columns = control(
         "lmh-10",
         lambda x: "lmh 10" if x.startswith("lmh ") else x,

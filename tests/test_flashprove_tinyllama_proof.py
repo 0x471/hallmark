@@ -71,18 +71,44 @@ def test_checked_case_refuses_a_link_in_place_of_a_file(case, tmp_path):
         proof.checked_case(case, tmp_path)
 
 
-def test_checked_case_compares_the_copy_that_the_verifiers_read(case, tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    ("name", "why"),
+    [
+        ("config/policy.txt", "policy.txt"),
+        ("config/KL.bin", "KL.bin"),
+        ("config/layout.txt", "layout.txt"),
+        ("example.req", "request"),
+    ],
+)
+def test_checked_case_compares_the_copy_that_the_verifiers_read(
+    case, tmp_path, monkeypatch, name, why
+):
     # A folder that changes after it is read: the copy's bytes decide, not the folder's.
     real = proof.shutil.copyfile
 
     def swapping(src, dst, **kwargs):
         made = real(src, dst, **kwargs)
-        if str(dst).endswith("config/policy.txt"):
-            (tmp_path / "case/config/policy.txt").write_bytes(b"version H821\n")
+        if str(dst).endswith(name):
+            Path(dst).write_bytes(b"version H821\n")
         return made
 
     monkeypatch.setattr(proof.shutil, "copyfile", swapping)
-    with pytest.raises(ValueError, match="policy.txt"):
+    with pytest.raises(ValueError, match=why):
+        proof.checked_case(case, tmp_path)
+
+
+def test_checked_case_refuses_a_link_that_appears_in_the_copy(case, tmp_path, monkeypatch):
+    real = proof.shutil.copyfile
+
+    def linking(src, dst, **kwargs):
+        made = real(src, dst, **kwargs)
+        if str(dst).endswith("example.proof"):
+            Path(dst).unlink()
+            Path(dst).symlink_to(src)
+        return made
+
+    monkeypatch.setattr(proof.shutil, "copyfile", linking)
+    with pytest.raises(ValueError, match="missing"):
         proof.checked_case(case, tmp_path)
 
 
@@ -132,61 +158,91 @@ def test_each_altered_copy_changes_one_bit_of_one_file(case, tmp_path):
     )
 
 
-def fake_verifier(path, verdicts=None):
-    """A stand-in for cp_verify. It answers each altered copy with that copy's own refusal
-    (REFUSALS) and status 1, any other folder with YES and status 0; `verdicts` overrides copies.
-    The commitment ID's copy is told by the ID that it is called with, not by its folder."""
-    answers = {name: (1, line) for name, line in proof.REFUSALS.items()} | (verdicts or {})
-    lines = [
-        "#!/bin/sh",
-        f'[ "$7" = "{ID}" ] || {{ echo "NO: model-statement"; exit 1; }}',
-        'case "$1" in',
-    ]
-    for key, (status, last) in answers.items():
-        if key != "commitment-id":
-            lines += [f'  */altered/{key}/config) echo "{last}"; exit {status} ;;']
-    lines += ['  *) echo "YES"; exit 0 ;;', "esac"]
-    path.write_text("\n".join(lines) + "\n")
+# What cp_verify answered for each altered copy of the first dense proof (the GPU evidence),
+# written out here and not taken from the script's own table.
+RECORDED = {
+    "proof-middle-bit": "NO: proof-refused",
+    "proof-last-bit": "NO: proof-refused",
+    "token-file": "NO: statement-range",
+    "request-first-token": "NO: proof-refused",
+    "request-answer-token": "NO: proof-refused",
+    "key-bit": "NO: key-refused",
+    "leaf-bit": "NO: entry-refused",
+    "commitment-id": "NO: model-statement",
+}
+BY_FILE = {
+    "example.y": "NO: statement-range",
+    "example.proof": "NO: proof-refused",
+    "example.req": "NO: proof-refused",
+    "ivk/key.bin": "NO: key-refused",
+    "ivk/leaf/0.bin": "NO: entry-refused",
+}
+
+
+def fake_verifier(path, case, overrides=None):
+    """A stand-in for cp_verify that looks at the files it is given: another ID than ID is
+    model-statement; the first file that differs from the unaltered case decides the refusal
+    (BY_FILE), or `overrides` for that file; unchanged files under ID end YES with status 0."""
+    path.write_text(
+        f"#!{sys.executable}\n"
+        "import sys\nfrom pathlib import Path\n"
+        f"case, by_file, overrides = Path({str(case)!r}), {BY_FILE!r}, {overrides or {}!r}\n"
+        "root = Path(sys.argv[1]).parent\n"
+        f"if sys.argv[7] != {ID!r}:\n"
+        "    status, line = overrides.get('id', (1, 'NO: model-statement'))\n"
+        "    print(line); sys.exit(status)\n"
+        "for name, line in by_file.items():\n"
+        "    if (root / name).read_bytes() != (case / name).read_bytes():\n"
+        "        status, line = overrides.get(name, (1, line))\n"
+        "        print(line); sys.exit(status)\n"
+        "print('YES')\n"
+    )
     path.chmod(0o700)
     return path
+
+
+def test_the_pinned_refusals_are_the_recorded_ones():
+    assert proof.REFUSALS == RECORDED
 
 
 def test_rejections_require_each_copy_s_own_refusal(case, tmp_path):
     out = tmp_path / "out"
     out.mkdir()
-    rows = proof.rejections(fake_verifier(tmp_path / "v"), case, ID, out)
-    assert [r["altered"] for r in rows] == list(proof.altered_copies(ID))
-    assert all(r["exit_code"] == 1 and r["last_line"] == r["expected"] for r in rows)
-    assert [r["last_line"] for r in rows] == list(proof.REFUSALS.values())
+    rows = proof.rejections(fake_verifier(tmp_path / "v", case), case, ID, out)
+    assert [(r["altered"], r["exit_code"], r["last_line"]) for r in rows] == [
+        (name, 1, line) for name, line in RECORDED.items()
+    ]
 
 
-def test_the_commitment_id_copy_is_run_under_another_id(case, tmp_path):
-    # A verifier that takes every ID answers YES to that copy, whose files are unchanged.
-    verifier = tmp_path / "v"
-    verifier.write_text(
-        fake_verifier(tmp_path / "w").read_text().replace(f'[ "$7" = "{ID}" ]', "true")
-    )
-    verifier.chmod(0o700)
+FILE_OF = {
+    "proof-middle-bit": "example.proof",
+    "proof-last-bit": "example.proof",
+    "token-file": "example.y",
+    "request-first-token": "example.req",
+    "request-answer-token": "example.req",
+    "key-bit": "ivk/key.bin",
+    "leaf-bit": "ivk/leaf/0.bin",
+    "commitment-id": "id",
+}
+
+
+@pytest.mark.parametrize("name", list(RECORDED))
+@pytest.mark.parametrize(
+    "verdict",
+    [(0, "YES"), (14, "NOT-A-VERIFICATION"), (1, "YES"), (2, "NO: usage"), (1, "NO: another-name")],
+)
+def test_rejections_fail_if_a_copy_is_not_refused_for_its_reason(case, tmp_path, name, verdict):
     out = tmp_path / "out"
     out.mkdir()
-    with pytest.raises(ValueError, match="commitment-id"):
+    verifier = fake_verifier(tmp_path / "v", case, {FILE_OF[name]: verdict})
+    with pytest.raises(ValueError, match="the altered copy"):
         proof.rejections(verifier, case, ID, out)
 
 
-@pytest.mark.parametrize(
-    "verdict",
-    [
-        (0, "YES"),
-        (14, "NOT-A-VERIFICATION"),
-        (1, "YES"),
-        (2, "NO: usage"),
-        (1, "NO: statement-range"),  # a refusal, but not the one that a changed key must get
-        (1, "NO: proof-refused"),
-    ],
-)
-def test_rejections_fail_if_an_altered_copy_is_not_refused_for_its_reason(case, tmp_path, verdict):
+@pytest.mark.parametrize("name", list(RECORDED))
+def test_rejections_fail_on_the_right_refusal_with_another_status(case, tmp_path, name):
     out = tmp_path / "out"
     out.mkdir()
-    verifier = fake_verifier(tmp_path / "v", {"key-bit": verdict})
-    with pytest.raises(ValueError, match="key-bit"):
+    verifier = fake_verifier(tmp_path / "v", case, {FILE_OF[name]: (0, RECORDED[name])})
+    with pytest.raises(ValueError, match="the altered copy"):
         proof.rejections(verifier, case, ID, out)

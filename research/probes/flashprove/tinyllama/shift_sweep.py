@@ -33,7 +33,12 @@ def main(run_dir, out_json):
     work = out.parent / (out.stem + "-kits")
     work.mkdir(parents=True, exist_ok=False)
     passed = json.loads((run / "result.json").read_text())
-    if not passed.get("passed") or passed["kit_pins"] != target.KIT:
+
+    # The pins, not the notes: kit.json's prose on the calibration text's licence may change.
+    def pins(kit):
+        return {k: v for k, v in kit.items() if k != "calibration_text"}
+
+    if not passed.get("passed") or pins(passed["kit_pins"]) != pins(target.KIT):
         raise SystemExit("RUN_DIR is not a passing run of this kit")
     kit = target.committed_kit()
     policy, kl = kit["policy.txt"], kit["KL.bin"]
@@ -93,7 +98,8 @@ def main(run_dir, out_json):
         run_result_sha256=sha(run / "result.json"),
         kits=len(rows),
         caught=sum(r["caught"] for r in rows),
-        tokens_changed=len(rows) - len(kept),
+        tokens_changed=sum(r["range_failure"] is None and not r["tokens_same"] for r in rows),
+        range_failures=sum(r["range_failure"] is not None for r in rows),
         highest_min_correlation_with_tokens_kept=max(r["min_correlation"] for r in kept)
         if kept
         else None,

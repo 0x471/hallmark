@@ -275,6 +275,12 @@ def test_same_refuses_a_changed_file(tmp_path):
         answer.same(path, b"abd", "f")
 
 
+def test_sha_reads_the_whole_file(tmp_path):
+    data = bytes(range(256)) * 9000  # more than two of sha()'s blocks
+    (tmp_path / "f").write_bytes(data)
+    assert answer.sha(tmp_path / "f") == hashlib.sha256(data).hexdigest()
+
+
 def test_the_frozen_environment_is_read_whole():
     # uv 0.9.18 prints its notice of the environment with the pins (a run's retained log).
     text = (

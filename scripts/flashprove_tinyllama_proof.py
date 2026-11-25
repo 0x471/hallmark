@@ -20,7 +20,8 @@ verifiers and requires, in order:
    build. Seven are refused by the checks of the proof, the key, the leaf file or the ID: two proof
    bits, a prompt token, an answer token, a bit of the key, a bit of the leaf file, and another
    commitment ID. The eighth, a bit of the token file, is refused on the statement's form
-   (statement-range: y must be 0 while e is below T) before any proof is read.
+   (statement-range: y must be 0 while e is below T), by a rule that does not depend on the
+   proof's content.
 
 A pass says that these files fit the patched verifier's checks for this request under the
 commitment ID that the caller states. The ID is not recomputed here: it is cp_commit's own print
@@ -138,8 +139,8 @@ def altered_copies(commitment_id):
 
 
 # The last line that cp_verify must give for each altered copy. statement-range is a refusal on the
-# statement's form, made before a proof is read: the copy of the token file shows that the caller's
-# y is checked, and nothing about the proof.
+# statement's form, by a rule that does not depend on the proof's content: the copy of the token
+# file shows that the caller's y is checked, and nothing about the proof.
 REFUSALS = {
     "proof-middle-bit": "NO: proof-refused",
     "proof-last-bit": "NO: proof-refused",
@@ -214,7 +215,7 @@ def verify(case, commitment_id, output):
         unpatched_verdict=refused,
         altered_copies=rows,
         altered_copies_rejected=len(rows),
-        altered_copies_refused_before_a_proof_is_read=sum(
+        altered_copies_refused_on_the_statement_s_form=sum(
             r["last_line"] == "NO: statement-range" for r in rows
         ),
         seconds=time.monotonic() - started,

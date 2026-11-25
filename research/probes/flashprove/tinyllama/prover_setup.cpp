@@ -8,13 +8,17 @@
 // (prover/prover/inputs.cuh), other_setup.cuh and layer_setup.cuh fill them. A few checks that live
 // in CUDA files are copied here, each marked with its source. A refusal prints upstream's message
 // and ends with status 2; an admitted kit ends with the line "prover set-up: admitted ..." and
-// status 0.
+// status 0. Some refusals are this program's own wording of upstream's rule. A kit with two faults
+// may get another of its two refusals than cp_prove gives: the order of the steps is not cp_prove's.
 // The layers' scale words are held to layer_words_fit() (prover/prover/forward.cuh), which
 // read_inputs() calls on the host for every layer, and attention to two rules of AForkHid
-// (prover/attn/fork.cuh): the column lengths of its five committed matrices, and lt and lg.
+// (prover/attn/fork.cuh): the column lengths of its five committed matrices, and lt and lg (which
+// the provers' reader already refuses).
 // Not run here, although each needs only the kit: the rest of AForkHid::setup() (5 <= lmbA <= kT + 5,
-// the pad tree's size), AFront::plan()'s limit on a lookup call's pieces of one segment kind
-// (prover/attn/front.cuh) and the output head's set-up (prover/head/). A kit that one of these
+// the pad tree's size), AFront::plan()'s forest plan and its limit on a lookup call's pieces of one
+// segment kind (prover/attn/front.cuh), the layers' forest plan (prover/prover/layer_setup.cuh:
+// forest-depth-G, forest-planes, shape-call on the lines iota), the table digests
+// (prover/prover/header.cuh) and the output head's set-up (prover/head/). A kit that one of these
 // refuses is admitted here and stops at cp_prove's start.
 // Not run here either: anything on a GPU or a commitment, the memory that a table of this size
 // takes, and the hiding conditions, which are only printed (a commitment made with -test-seed is not
