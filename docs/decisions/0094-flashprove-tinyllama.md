@@ -125,8 +125,8 @@ passed on 2026-11-24 on Linux (x86_64, every input downloaded) and on macOS (arm
 integer model's results identical on the two
 ([evidence](../../research/evidence/flashprove-tinyllama-answer-2026-11-24.json)), and again on
 Linux on 2026-11-25 with the sized table
-([evidence](../../research/evidence/flashprove-tinyllama-gpu-2026-11-25.json)); macOS has not run it
-since the line `table` changed, which the integer model does not read.
+([evidence](../../research/evidence/flashprove-tinyllama-gpu-2026-11-25.json)); with that table it also
+passed on macOS, run by an AI-assisted review session on the contributor's laptop (not an independent human reviewer).
 
 The current revision of the patches passed `make verify-flashprove-tinyllama` on 2026-11-24 on
 Linux (upstream `verifier/build.sh`, g++ 13.3) and on macOS (Apple clang 17, built as

@@ -8,8 +8,8 @@
     "statement": "The GPU run was made by the contributor on the contributor's own RunPod account, at the contributor's cost, before owner approval of option 3 and with no owner-set cap. Issue #184 asks for an owner-approved budget for paid GPU runs; this run had none. Only public files went to the pods: the patched programs, the kit, the exported public weights, the request and upstream's published seed file."
   },
   "commit": {
-    "code": "2c39db5",
-    "note": "the last change of code or kit before this record"
+    "code": "40186c6",
+    "note": "the head that the CPU targets and gates below ran at; later commits change records only. The worker that ran on the pods was gpu_job.sh as at bddda05 (unchanged to 2c39db5); 35c7dde then added two guards to it (the first GPU must be sm_90; cp_verify's last line must be YES), and 268a2f3 changed the answer target's download retry and passed the kit's answer count to its table check. Neither has run on a GPU"
   },
   "source": {
     "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
@@ -111,8 +111,7 @@
       "terminated": "2026-11-24T23:02:32Z",
       "seconds": 271,
       "ran": "cp_commit alone",
-      "balance_before_usd": 50.0,
-      "balance_after_usd": 49.6692342306
+      "cost_usd": 0.3308
     },
     {
       "id": "yrtezvmeopwsqp",
@@ -122,15 +121,12 @@
       "terminated": "2026-11-25T00:06:23Z",
       "seconds": 1043,
       "ran": "cp_commit, one proof, cp_verify; then cp_commit, three proofs, cp_verify",
-      "balance_before_usd": 49.6692342306,
-      "balance_after_usd": 48.3944417583
+      "cost_usd": 1.2748
     }
   ],
   "spend": {
     "usd": 1.6056,
-    "balance_before_usd": 50.0,
-    "balance_after_usd": 48.3944417583,
-    "basis": "the account's balance read through the API before the first pod and after the last",
+    "basis": "the fall of the account's balance, read through the API before and after each pod; by rate and seconds the two pods come to USD 0.3305 and 1.2719",
     "pods_left": 0,
     "network_volumes_left": 0
   },
@@ -489,22 +485,22 @@
         }
       }
     },
-    "macos_by_a_reviewer": {
-      "note": "run by a reviewer on a laptop on the same public files, at bddda05; not made in the session that made the proof. Its result.json names the same files and the same eight last lines",
+    "macos_by_a_review_session": {
+      "note": "run by an AI-assisted review session on the contributor's laptop (not an independent human reviewer) on the same public files, at bddda05; not made in the session that made the proof. Its result.json names the same files and the same eight last lines",
       "host": "macOS arm64, Apple clang version 17.0.0 (clang-1700.0.13.5)",
       "passed": true,
       "seconds": 155.5,
       "patched_verdict": "YES",
       "unpatched_verdict": "NO: policy-tables",
-      "result_json_sha256": "8eca4f0fa32110ee46152f421594622558c988df10eaf0ac1e2e894d1fae919a"
+      "result_json": "held by the contributor, not in the repository"
     }
   },
   "cpu_targets_with_the_sized_kit": {
     "host": "Ubuntu 24.04 x86_64, a clean clone, uv 0.9.18, every input downloaded",
-    "commit": "2c39db5",
+    "commit": "40186c6",
     "verify_flashprove_tinyllama": {
       "passed": true,
-      "seconds": 1668.6,
+      "seconds": 1629.6,
       "calls_compared": 108,
       "tinyllama_plan": {
         "h_par": "0f6cc99a523961a164d05ce3b7ccc58778dbf7595f84be39348d521c735527f8",
@@ -515,7 +511,7 @@
     },
     "verify_flashprove_tinyllama_answer": {
       "passed": true,
-      "seconds": 2000.6,
+      "seconds": 1958.8,
       "kit_reproduced": true,
       "maxima_equal_to_committed": false,
       "choices": [
@@ -587,7 +583,43 @@
         "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9"
       }
     },
-    "macos": "not run since the line `table` changed; both targets passed there at bf3add1 (flashprove-tinyllama-2026-11-24.json, flashprove-tinyllama-answer-2026-11-24.json)"
+    "macos_by_a_review_session": {
+      "note": "both targets and the gates, run at 40186c6 on a clean clone by an AI-assisted review session on the contributor's laptop (not an independent human reviewer; not made in the session that made the proof); the answer target took its model files from a checked local folder",
+      "host": "macOS arm64, Apple clang version 17.0.0 (clang-1700.0.13.5), uv 0.9.18",
+      "verify_flashprove_tinyllama": {
+        "passed": true,
+        "seconds": 333.4,
+        "calls_compared": 108,
+        "calls_differing": 0,
+        "tinyllama_plan": {
+          "h_par": "0f6cc99a523961a164d05ce3b7ccc58778dbf7595f84be39348d521c735527f8",
+          "configuration": "9ac96c0fa1613952e35cd06487c5ccb759f7db7839be845f1c528d34f8275573",
+          "proof_bytes_at_most": 13685772,
+          "bits_compiled_bound": 126.21
+        }
+      },
+      "verify_flashprove_tinyllama_answer": {
+        "passed": true,
+        "seconds": 234.0,
+        "kit_reproduced": true,
+        "choices": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "matches": true,
+        "worst_case_short": [],
+        "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+        "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9"
+      },
+      "gates_as_reported": "make check: 2,316 passed, 102 skipped on Python 3.12.12, 3.13.15 and 3.14.7; make package-check passed on all three; make docs passed (176 pages). Reported in the session's note; no log of them is retained here",
+      "result_json": "the two targets' result.json files are held by the contributor, not in the repository"
+    }
   },
   "retained_failures": [
     {
@@ -618,11 +650,23 @@
     "soundness of the patched C++ or CUDA code; Lean coverage of a dense model",
     "an enrolled commitment ID: the ID is the caller's own, recomputable only with an sm_90 GPU",
     "that upstream's verifier accepts a dense proof: it answers NO: policy-tables",
-    "that FlashProve's integer function equals SASH's: equal tokens on one request are a smoke test",
-    "macOS runs of the two targets on the sized kit"
+    "that FlashProve's integer function equals SASH's: equal tokens on one request are a smoke test"
   ],
   "tinyllama_proof": true,
   "gpu_used": true,
   "hiding_claim": false,
-  "qualified_backend": false
+  "qualified_backend": false,
+  "gates": {
+    "commit": "40186c6",
+    "host": "Ubuntu 24.04 x86_64, a clean clone, uv 0.9.18 with uv's own Python (UV_MANAGED_PYTHON=1)",
+    "make_check": {
+      "3.12.12": "ruff, format and mypy passed; pytest 2,303 passed, 1 failed, 114 skipped: tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]",
+      "3.13.15": "passed: pytest 2,304 passed, 114 skipped",
+      "3.14.2": "ruff, format and mypy passed; pytest 2,302 passed, 2 failed, 114 skipped: tests/test_worker.py::test_stream_copy_retains_rejected_output[modified], tests/test_manifests.py::test_file_changed_during_read[abd]",
+      "note": "the two failing tests fail intermittently on this host on main too and are not touched by the branch; no FlashProve test failed"
+    },
+    "make_package_check": "passed on all three",
+    "make_docs": "passed: 176 pages, 14,746 local links and assets",
+    "targets": "both passed: cpu_targets_with_the_sized_kit"
+  }
 }

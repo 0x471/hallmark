@@ -3356,8 +3356,8 @@ altered copies of decision 0093 each end `NO:` with status 1.
 
 Authority: none from the owner. The contributor ran it on the contributor's own RunPod account, at
 the contributor's cost, before approval of option 3 and with no owner-set cap (#184 asks for an
-owner-approved budget). Spend USD 1.61 (balance 50.00 before, 48.39 after), on two pods of one H100
-SXM at USD 4.39 an hour (271 s and 1,043 s). Only public files went to the pods.
+owner-approved budget). Spend USD 1.61, by the fall of the account's balance, on two pods of one H100
+SXM at USD 4.39 an hour (271 s, USD 0.33; 1,043 s, USD 1.27). Only public files went to the pods.
 
 Before the run: the last review found the kit's line `table` to be the full kit's
 (`11 32 402653184 44040191 0 18`), which would have `cp_commit` encode 2^43 table entries for a
@@ -3382,9 +3382,10 @@ proofs of r = 24, e = 32 in a window of 64, 8.41 s and (with a GPU-memory sample
 to 9.79 s, 13,238,500 to 13,253,292 bytes. `cp_verify` on the pod: `YES` four times. On Linux
 x86_64, `scripts/flashprove_tinyllama_proof.py` on the first proof: accepted under caller-held values; unpatched
 verifier `NO: policy-tables`; eight altered copies refused (`proof-refused` four times,
-`statement-range`, `key-refused`, `entry-refused`, `model-statement`). A reviewer's run of the
-same script on macOS arm64 gave the same result. Both CPU targets passed again on Linux with the
-sized kit.
+`statement-range`, `key-refused`, `entry-refused`, `model-statement`). The same script on macOS arm64 gave the same result, and both CPU targets passed again with the
+sized kit at `40186c6` on Linux and on macOS; the macOS runs were made by an AI-assisted review
+session on the contributor's laptop, not by an independent human reviewer. The pods ran the
+worker as at `bddda05`; its two later guards (`35c7dde`) have not run on a GPU.
 
 Retained failures: the verifier build refused a clone below a group-writable directory (twice;
 `chmod go-w`); pod 1's first bootstrap stopped at the package step and passed on a second run
@@ -3392,6 +3393,5 @@ Retained failures: the verifier build refused a clone below a group-writable dir
 anything ran and held pod 2 for about ten minutes (about USD 0.75).
 
 Not shown: anything beyond one request, one kit and one machine; a benchmark (only `table` is
-sized for the model); hiding (public seed); soundness of the patched code; that macOS passes the
-two targets on the sized kit; an enrolled commitment ID. Only Hallmark's patched verifier answers
+sized for the model); hiding (public seed); soundness of the patched code; an enrolled commitment ID. Only Hallmark's patched verifier answers
 `YES`.
