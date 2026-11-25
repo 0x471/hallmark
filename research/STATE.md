@@ -2,7 +2,7 @@
 
 Updated: 2026-11-25. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
 
-## TinyLlama on FlashProve (dense-model patches) — proposed; one dense proof, at the contributor's cost
+## TinyLlama on FlashProve (dense-model patches) — proposed; four dense proofs of one request, at the contributor's cost
 
 2026-11-25. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed) adds four
 pinned patches on FlashProve `9e2bdd8`
@@ -28,7 +28,12 @@ and no owner-set cap: `cp_commit` passed its worst-case check and committed in a
 `cp_prove` made four proofs of SASH's request in under 10 s each, and the patched `cp_verify`
 answered `YES` to each on the pod; for the first of them, on a CPU, it accepted under caller-held
 values, upstream's verifier refused, and eight altered copies were refused ([evidence](evidence/flashprove-tinyllama-gpu-2026-11-25.json)). One request, one machine,
-public seed: no benchmark, no hiding, no owner-approved run. Next, for the owner: option 3, the
+public seed: no benchmark, no hiding, no owner-approved run. After three reviews on 2026-11-25 the
+CPU set-up check also holds the kit to the ranges of the layers' scale words and to the column rule
+of attention's committed matrices, the caller's check requires each altered copy's own refusal
+(seven read the proof, the key or the ID; the token file's is refused on the statement's form),
+and three evidence files that an earlier commit had removed are back; both targets and the caller's
+check passed again on Linux and macOS ([follow-up evidence](evidence/flashprove-tinyllama-followup-2026-11-25.json)). Next, for the owner: option 3, the
 calibration text's licence, a GPU ceiling for #187, and how a verifier gets the commitment ID.
 
 ## SASH and FlashProve comparison — recorded

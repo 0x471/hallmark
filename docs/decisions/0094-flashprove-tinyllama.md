@@ -1,8 +1,7 @@
 # 0094: Dense TinyLlama on pinned FlashProve through Hallmark's own patches
 
-Date: 2026-11-21, revised 2026-11-25. Status: **proposed**: by
-[#186](https://github.com/AbdelStark/hallmark/issues/186) option 3 "needs owner approval", and this record asks for it. No
-owner-approved GPU run or spend. On 2026-11-24 and 25 (UTC) the contributor made a dense commitment and four
+Date: 2026-11-21, revised 2026-11-25. Status: **proposed**
+([#186](https://github.com/AbdelStark/hallmark/issues/186), option 3). On 2026-11-24 and 25 (UTC) the contributor made a dense commitment and four
 proofs on a rented H100, on the contributor's own account and at the contributor's cost
 (USD 1.61), with no owner-approved budget and no owner-set cap ("The first dense proof" below).
 
@@ -33,10 +32,9 @@ which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama
   route (`lean/GAPS.md`: one model size).
 - **Option 3, a patched FlashProve: proposed**, as Hallmark's own small patches on the pinned source.
   They are applied with `git apply` and each is SHA-256-pinned: the mechanism of Hallmark's SASH
-  patches, and the likeness ends there. SASH's Linux prover and verifier are built from unchanged
-  upstream source and its Mac verifier patch strengthens checks
-  ([ARCHITECTURE](../ARCHITECTURE.md#how-sash-is-integrated)), while `verifier.patch` here widens
-  what the verifier admits. It is not a dependency on a fork. At the SiLU key's default exponent (eg 8) `cp_commit`'s mandatory
+  patches, and the likeness ends there
+  ([ARCHITECTURE](../ARCHITECTURE.md#how-sash-is-integrated) says what each of those does):
+  `verifier.patch` here widens what the verifier admits. It is not a dependency on a fork. At the SiLU key's default exponent (eg 8) `cp_commit`'s mandatory
   worst-case check would refuse the TinyLlama kit at one gate row; the kit therefore has the line
   `eg 7`, which `verifier.patch` admits at NE 0, and with it every site fits (below).
 
@@ -85,6 +83,13 @@ key above 32,639. At NE 0 the key may be one bit coarser (`eg 7`) than upstream'
 allows. With a public seed nothing is hidden. The dense form
 is chosen by NE alone: as upstream's, a `YES` is about the enrolled integer commitment and the caller's
 request and range, not about which checkpoint was converted, the tokenizer, or SASH's integer function.
+Upstream's own account of its limits counts a model without routed experts among the forms that
+cannot pass and marks that as read, not tested (`lean/OnBytes/LIMITS.md` in the pinned source): the
+branches that only a dense proof takes (the gate's two-limb tensor, its key and its quotient bound)
+have been read by reviews of this proposal and run on one request, no more. A `YES` line does not say
+that the model is dense or that the key is `eg 7`; the commitment ID covers both. For a file with
+experts the patched verifier accepts and refuses what upstream's does; for a malformed file with two
+faults the name after `NO:` can differ.
 
 **Checks so far.** `make verify-flashprove-tinyllama` (CPU) checks the pinned patches and archive,
 builds both verifiers and requires:
@@ -113,9 +118,10 @@ builds both verifiers and requires:
 `make verify-flashprove-tinyllama-answer` (CPU, downloads the pinned model) rebuilds the GGUF file
 and the kit from pinned inputs (every file byte for byte but `maxima.json`, which is device-dependent
 and recorded only), in environments from hash-locked requirement files, checks the kit with both planners and the provers'
-reader, runs the part of `cp_commit`'s and `cp_prove`'s set-up that needs only the kit on a CPU with
-upstream's code (the weight table's parameters for W's rows, the plan of attention of each layer
-group and the layer layouts), runs upstream's scale-tool tests on the patched tree and a float reference against
+reader, runs a part of `cp_commit`'s and `cp_prove`'s set-up that needs only the kit on a CPU with
+upstream's code (the weight table's parameters for W's rows, the ranges of each layer's scale words,
+the plan of attention of each layer group and the layer layouts; the README lists the set-up rules
+that it leaves out), runs upstream's scale-tool tests on the patched tree and a float reference against
 transformers, and then requires **the decisive check**: upstream's integer model, with the kit and
 every file pinned, gives SASH's eight answer tokens after SASH's 25 prompt tokens, over a whole
 64-token window with no failed range condition and the gate's key at most 32,639, with its logits
@@ -164,17 +170,23 @@ cover the GPU's guards on its matrix products ([README](../../research/probes/fl
 **The first dense proof (the contributor's own run, 2026-11-24 and 25 UTC).** On one RunPod H100 SXM (driver
 595.112.07, Xeon Platinum 8470), with the patched programs built on a CPU host and only public
 files sent: `cp_commit` passed its worst-case check and committed in about 35 s (three times, the
-same commitment ID `5ffd1aa3…06bd` each time: with `-public-weights` and a public seed anyone with
-such a GPU can recompute it from the public weights and the kit); `cp_prove` made four proofs of
+same commitment ID `5ffd1aa3…06bd` each time: with `-public-weights` and upstream's published seed
+(`examples/maverick/public-seed.bin`, SHA-256 `630dcd29…10dd`) anyone with such a GPU can recompute
+it from the public weights and the kit); `cp_prove` made four proofs of
 SASH's request in 8.4 to 9.8 s each, of 13.2 MB; `cp_verify` answered `YES` to each. On a CPU,
 `scripts/flashprove_tinyllama_proof.py` then took the first of the four and held every expected
 value itself (commitment ID, range `24:32`, end token, exact-match claim, build digest): accepted
 by the patched verifier,
-`NO: policy-tables` from the unpatched one, and eight altered copies each `NO:` with status 1. The
+`NO: policy-tables` from the unpatched one, and eight altered copies each `NO:` with status 1 (seven
+by the checks of the proof, the key, the leaf file or the ID; the token file's on the statement's
+form, by a rule that does not depend on the proof's content). The ID is the pod's own print and is not recomputed by the check,
+and the proof's files are held by the contributor, not published. The
 GPU's worst-case table agrees with the CPU port at every site that the port computes as the GPU
 does (within 0.001 bits; the gate of layer 21 keeps 0.458 bits). Spend: USD 1.61 on the
-contributor's account; #184 asks for an owner-approved budget for paid GPU runs and #186 puts
-unbudgeted GPU runs out of scope, and this run had no budget. Figures and retained failures:
+contributor's account. #184 says that paid GPU runs need an owner-approved budget, #186 puts
+unbudgeted GPU runs out of scope, `docs/OPERATIONS.md` says to stop before a paid job or an upload
+for which no authority exists, and `research/AUTHORITY.json` lists other compute providers than
+RunPod: this run had no budget, and no authority record was made or changed for it. Figures and retained failures:
 [evidence](../../research/evidence/flashprove-tinyllama-gpu-2026-11-25.json),
 [README](../../research/probes/flashprove/tinyllama/README.md#the-first-dense-proof). The times are
 one machine's on lines of which only `table` is sized for this model: not a benchmark.
@@ -185,14 +197,17 @@ one machine's on lines of which only `table` is sized for this model: not a benc
    GFDL, its text 4.0), as in upstream's rule. No text or token id from it is committed, but the
    kit's scales are computed from it. The card's tags and its text name different versions, and
    `research/AUTHORITY.json` excludes ambiguous licences, so the owner decides; a no means refitting
-   on another text. The patches do not depend on it.
+   on another text. The three program patches do not depend on it; `scales.patch` pins the
+   calibration set's SHA-256 and would change with the text.
 2. **GPU jobs for #187, only with owner approval and a ceiling.** The run above was the
    contributor's, with no owner-approved budget. What it measured, for sizing a ceiling: one pod of 17
    minutes (upload of 2.2 GB, two commitments, four proofs, with about ten idle minutes of the
    controller's own mistake) cost USD 1.27 at USD 4.39 an hour; the commitment takes about 35 s and
    a proof under 10 s. A controller like `make e2e-flashprove`'s, with a cap in code, is not
-   written: `gpu_job.sh` is the worker alone.
-3. **More altered copies.** Eight altered copies of one dense proof are refused; upstream's tables
+   written: `gpu_job.sh` is the worker alone. The run's only limit was a watchdog on the controlling
+   host, set to terminate the pods after 2,700 s and 3,600 s.
+3. **More altered copies.** Eight altered copies of one dense proof are refused, seven of them by
+   checks that read the proof, the key or the ID; upstream's tables
    have 99 altered sets for its MoE proofs, and no table of altered items exists for a dense one.
 4. **#187's proof-system lines.** Only `table` is sized for this model. The other lines are the
    full kit's, or set from the verifier's rules (`kFM` and `kFD` by `cp_prove`'s plan of

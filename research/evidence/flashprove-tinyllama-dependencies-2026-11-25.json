@@ -1,0 +1,388 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-dependency-review/1",
+  "recorded_at": "2026-11-25",
+  "decision": "docs/decisions/0094-flashprove-tinyllama.md",
+  "rule": "CONTRIBUTING.md: new dependencies need a concrete need and licence/supply-chain review",
+  "scope": "the two virtual environments that make verify-flashprove-tinyllama-answer builds; they are not dependencies of the hallmark package, and uv.lock and pyproject.toml are unchanged",
+  "reviewed_by": "the proposal's contributor, AI-assisted; not the owner and not an independent reviewer",
+  "outcome": "for the owner to accept or refuse; the target installs these packages on the host that runs it",
+  "environments": {
+    "scales": {
+      "python": "3.13",
+      "direct": {
+        "torch": "2.9.1",
+        "numpy": "2.3.5",
+        "gguf": "0.19.0",
+        "pyarrow": "23.0.1",
+        "tokenizers": "0.22.2",
+        "safetensors": "0.8.0",
+        "transformers": "5.15.1"
+      },
+      "need": "upstream's scale tools (scales/, weight_sums/) at the versions of upstream's requirements.in, and transformers with safetensors for the float reference and the export",
+      "locks": {
+        "macos-arm64": {
+          "file": "scales-macos-arm64.txt",
+          "sha256": "a90ecc08252b4d47abd4f5287f5c37fff10faaeadab68a9860b8d1ef1988f40d"
+        },
+        "linux-x86_64": {
+          "file": "scales-linux-x86_64.txt",
+          "sha256": "141cc59c3a21f196a6753bda102d725f2d0865de4e0f0c5655fd9b10c5077c8b"
+        }
+      },
+      "distributions": 43,
+      "packages": [
+        {
+          "name": "annotated-doc",
+          "version": "0.0.7",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "annotated-types",
+          "version": "0.8.0",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "anyio",
+          "version": "4.16.0",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "certifi",
+          "version": "2026.11.20",
+          "licence_as_published": "Mozilla Public License 2.0 (MPL 2.0)"
+        },
+        {
+          "name": "charset-normalizer",
+          "version": "3.5.3",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "click",
+          "version": "8.5.1",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "filelock",
+          "version": "4.3.0",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "fsspec",
+          "version": "2026.9.0",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "gguf",
+          "version": "0.19.0",
+          "licence_as_published": "MIT License"
+        },
+        {
+          "name": "h11",
+          "version": "0.16.0",
+          "licence_as_published": "MIT License"
+        },
+        {
+          "name": "hf-xet",
+          "version": "1.8.0",
+          "licence_as_published": "Apache-2.0"
+        },
+        {
+          "name": "httpcore",
+          "version": "1.0.9",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "httpx",
+          "version": "0.28.1",
+          "licence_as_published": "BSD License"
+        },
+        {
+          "name": "huggingface_hub",
+          "version": "1.33.0",
+          "licence_as_published": "Apache Software License"
+        },
+        {
+          "name": "idna",
+          "version": "3.20",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "Jinja2",
+          "version": "3.1.6",
+          "licence_as_published": "BSD License"
+        },
+        {
+          "name": "markdown-it-py",
+          "version": "4.3.0",
+          "licence_as_published": "MIT License"
+        },
+        {
+          "name": "MarkupSafe",
+          "version": "3.0.4",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "mdurl",
+          "version": "0.1.2",
+          "licence_as_published": "MIT License"
+        },
+        {
+          "name": "mpmath",
+          "version": "1.3.0",
+          "licence_as_published": "BSD License"
+        },
+        {
+          "name": "networkx",
+          "version": "3.7",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "numpy",
+          "version": "2.3.5",
+          "licence_as_published": "BSD License"
+        },
+        {
+          "name": "packaging",
+          "version": "26.3",
+          "licence_as_published": "Apache-2.0 OR BSD-2-Clause"
+        },
+        {
+          "name": "pyarrow",
+          "version": "23.0.1",
+          "licence_as_published": "Apache-2.0"
+        },
+        {
+          "name": "pydantic",
+          "version": "2.14.4",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "pydantic_core",
+          "version": "2.50.5",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "Pygments",
+          "version": "2.21.0",
+          "licence_as_published": "BSD-2-Clause"
+        },
+        {
+          "name": "PyYAML",
+          "version": "6.0.4",
+          "licence_as_published": "MIT License"
+        },
+        {
+          "name": "regex",
+          "version": "2026.11.19",
+          "licence_as_published": "Apache-2.0 AND CNRI-Python"
+        },
+        {
+          "name": "requests",
+          "version": "2.34.2",
+          "licence_as_published": "Apache Software License"
+        },
+        {
+          "name": "rich",
+          "version": "15.0.0",
+          "licence_as_published": "MIT License"
+        },
+        {
+          "name": "safetensors",
+          "version": "0.8.0",
+          "licence_as_published": "Apache Software License"
+        },
+        {
+          "name": "setuptools",
+          "version": "84.2.1",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "shellingham",
+          "version": "1.5.4",
+          "licence_as_published": "ISC License (ISCL)"
+        },
+        {
+          "name": "sympy",
+          "version": "1.14.0",
+          "licence_as_published": "BSD License"
+        },
+        {
+          "name": "tokenizers",
+          "version": "0.22.2",
+          "licence_as_published": "Apache Software License"
+        },
+        {
+          "name": "torch",
+          "version": "2.9.1+cpu",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "tqdm",
+          "version": "4.70.1",
+          "licence_as_published": "MPL-2.0 AND MIT"
+        },
+        {
+          "name": "transformers",
+          "version": "5.15.1",
+          "licence_as_published": "Apache 2.0 License"
+        },
+        {
+          "name": "typer",
+          "version": "0.29.2",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "typing-inspection",
+          "version": "0.4.5",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "typing_extensions",
+          "version": "4.16.0",
+          "licence_as_published": "PSF-2.0"
+        },
+        {
+          "name": "urllib3",
+          "version": "2.8.0",
+          "licence_as_published": "MIT"
+        }
+      ]
+    },
+    "integer_model": {
+      "python": "3.13",
+      "direct": {
+        "torch": "2.13.0",
+        "numpy": "2.4.6",
+        "gguf": "0.19.0"
+      },
+      "need": "upstream's CPU integer model, whose pyproject.toml requires torch==2.13.0; numpy at the version of upstream's own lock",
+      "locks": {
+        "macos-arm64": {
+          "file": "integer_model-macos-arm64.txt",
+          "sha256": "b9d89b9e3571659760261c5c14441c99c331da76b6526f17b15edd94215df78c"
+        },
+        "linux-x86_64": {
+          "file": "integer_model-linux-x86_64.txt",
+          "sha256": "bba3b40f517585fa71af22286ddc71a6ef892143ea416c91625fe8dbd5a249a2"
+        }
+      },
+      "distributions": 19,
+      "packages": [
+        {
+          "name": "certifi",
+          "version": "2026.11.20",
+          "licence_as_published": "Mozilla Public License 2.0 (MPL 2.0)"
+        },
+        {
+          "name": "charset-normalizer",
+          "version": "3.5.3",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "filelock",
+          "version": "4.3.0",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "fsspec",
+          "version": "2026.9.0",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "gguf",
+          "version": "0.19.0",
+          "licence_as_published": "MIT License"
+        },
+        {
+          "name": "idna",
+          "version": "3.20",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "Jinja2",
+          "version": "3.1.6",
+          "licence_as_published": "BSD License"
+        },
+        {
+          "name": "MarkupSafe",
+          "version": "3.0.4",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "mpmath",
+          "version": "1.3.0",
+          "licence_as_published": "BSD License"
+        },
+        {
+          "name": "networkx",
+          "version": "3.7",
+          "licence_as_published": "BSD-3-Clause"
+        },
+        {
+          "name": "numpy",
+          "version": "2.4.6",
+          "licence_as_published": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0"
+        },
+        {
+          "name": "PyYAML",
+          "version": "6.0.4",
+          "licence_as_published": "MIT License"
+        },
+        {
+          "name": "requests",
+          "version": "2.34.2",
+          "licence_as_published": "Apache Software License"
+        },
+        {
+          "name": "setuptools",
+          "version": "84.2.1",
+          "licence_as_published": "MIT"
+        },
+        {
+          "name": "sympy",
+          "version": "1.14.0",
+          "licence_as_published": "BSD License"
+        },
+        {
+          "name": "torch",
+          "version": "2.13.0+cpu",
+          "licence_as_published": "Apache-2.0 AND Apache-2.0 WITH LLVM-exception AND BSD-2-Clause AND BSD-3-Clause AND BSL-1.0 AND MIT"
+        },
+        {
+          "name": "tqdm",
+          "version": "4.70.1",
+          "licence_as_published": "MPL-2.0 AND MIT"
+        },
+        {
+          "name": "typing_extensions",
+          "version": "4.16.0",
+          "licence_as_published": "PSF-2.0"
+        },
+        {
+          "name": "urllib3",
+          "version": "2.8.0",
+          "licence_as_published": "MIT"
+        }
+      ]
+    }
+  },
+  "how_read": "name, version and licence as each installed distribution's own metadata gives them (importlib.metadata: License-Expression, else the licence classifiers, else the first line of License), read in the two environments of the Linux x86_64 run of 2026-11-24. The macOS arm64 lock files pin the same names and versions, with torch's PyPI build in place of the +cpu build",
+  "supply_chain": {
+    "sources": "PyPI; on Linux x86_64 torch's CPU build from https://download.pytorch.org/whl/cpu, with uv's --index-strategy unsafe-best-match",
+    "pinned": "every distribution by name, version and SHA-256 in the lock file; kit.json pins each lock file's SHA-256; installed with uv pip install --require-hashes --no-deps",
+    "checked_after_install": "uv pip freeze must give exactly the lock file's pins; a line that is not name==version fails the target",
+    "not_pinned": [
+      "uv itself",
+      "the Python patch release (uv's choice of 3.13)",
+      "the build of pip-installed wheels is the publisher's"
+    ]
+  },
+  "limitations": [
+    "Licence fields are the publishers' own short statements. No full licence text or bundled-library notice was read: torch and numpy bundle third-party libraries under further licences.",
+    "No package metadata file is hashed here, unlike the earlier dependency reviews of this repository.",
+    "The transitive packages are the resolver's choice at the time the lock files were made, not a record that each is needed.",
+    "certifi and tqdm carry MPL-2.0 terms; nothing here is redistributed, so only local use was considered."
+  ],
+  "cost_usd": 0,
+  "credentials_used": false
+}

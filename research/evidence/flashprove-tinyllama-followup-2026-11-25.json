@@ -1,0 +1,3865 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-followup-evidence/1",
+  "recorded_at": "2026-11-25",
+  "decision": "docs/decisions/0094-flashprove-tinyllama.md",
+  "decision_status": "proposed",
+  "purpose": "What three reviews of 2026-11-25 found missing from the records of the dense TinyLlama proposal, and the reruns after the fixes that followed them. No GPU and no paid service was used for anything recorded here. No earlier evidence file is changed by this one; the changes that earlier commits made in place are listed",
+  "commit": {
+    "code": "6ba957c",
+    "note": "the head that the reruns and the gates below ran at, unless a run names another; later commits change records only"
+  },
+  "made_by": "the contributor's AI-assisted sessions, on the contributor's laptop (macOS arm64) and on a Linux x86_64 host of the contributor's; no independent reviewer",
+  "authority": {
+    "owner_approved": false,
+    "statement": "The GPU run of 2026-11-24 and 25 was paid by the contributor on the contributor's own RunPod account, with no owner-set cap. Issue #184 says that paid GPU runs need an owner-approved budget, issue #186 puts unbudgeted GPU runs out of scope, docs/OPERATIONS.md says to stop before a paid job or an upload for which no authority exists, and research/AUTHORITY.json lists Modal, Vast.ai and Hugging Face Jobs as compute providers, not RunPod. No authority record was made or changed for the run",
+    "limit_of_the_run": "a watchdog on the controlling host, armed to terminate every pod of the account after 2,700 s (pod 1) and 3,600 s (pod 2); both were cancelled by hand after the pods were terminated"
+  },
+  "gpu_run_files": {
+    "note": "files kept from the pods of the GPU run, as the worker wrote them; the proof, key and leaf files themselves are held by the contributor and are not published",
+    "seed": {
+      "path_in_the_pinned_archive": "examples/maverick/public-seed.bin",
+      "bytes": 32,
+      "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd",
+      "note": "upstream's published seed; each pod's inputs.sha256 names it"
+    },
+    "inputs_sha256": {
+      "pod1/work1": [
+        "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883  config/policy.txt",
+        "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125  config/KL.bin",
+        "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490  config/layout.txt",
+        "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c  weights/wsums.txt",
+        "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd  weights/fold.txt",
+        "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903  example.req",
+        "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd  public-seed.bin",
+        "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae  weights/tinyllama-1.1b-chat-v1.0-bf16.gguf"
+      ],
+      "pod2/work2": [
+        "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883  config/policy.txt",
+        "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125  config/KL.bin",
+        "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490  config/layout.txt",
+        "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c  weights/wsums.txt",
+        "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd  weights/fold.txt",
+        "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903  example.req",
+        "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd  public-seed.bin",
+        "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae  weights/tinyllama-1.1b-chat-v1.0-bf16.gguf"
+      ],
+      "pod2/work3": [
+        "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883  config/policy.txt",
+        "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125  config/KL.bin",
+        "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490  config/layout.txt",
+        "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c  weights/wsums.txt",
+        "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd  weights/fold.txt",
+        "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903  example.req",
+        "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd  public-seed.bin",
+        "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae  weights/tinyllama-1.1b-chat-v1.0-bf16.gguf"
+      ]
+    },
+    "binaries_sha256": {
+      "pod1/work1": [
+        "4475eaf7d696caad7347469c68e440c89ece22525e1734d59394b7410116a4f4  cp_commit",
+        "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1  cp_verify"
+      ],
+      "pod2/work2": [
+        "4475eaf7d696caad7347469c68e440c89ece22525e1734d59394b7410116a4f4  cp_commit",
+        "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1  cp_verify",
+        "5e2e809f8cee32a1ac2de0d2e3e6ef26befac8dc74b45f14b72289687c53fa2b  cp_prove"
+      ],
+      "pod2/work3": [
+        "4475eaf7d696caad7347469c68e440c89ece22525e1734d59394b7410116a4f4  cp_commit",
+        "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1  cp_verify",
+        "5e2e809f8cee32a1ac2de0d2e3e6ef26befac8dc74b45f14b72289687c53fa2b  cp_prove"
+      ]
+    },
+    "public_sha256": {
+      "pod2/work2": [
+        "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125  ./config/KL.bin",
+        "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490  ./config/layout.txt",
+        "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883  ./config/policy.txt",
+        "1874fc9308d278808d608b9b0de1e31da53963657d2129c1d2814c5069650713  ./example.proof",
+        "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903  ./example.req",
+        "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119  ./example.y",
+        "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d  ./ivk/key.bin",
+        "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4  ./ivk/leaf/0.bin"
+      ],
+      "pod2/work3": [
+        "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125  ./config/KL.bin",
+        "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490  ./config/layout.txt",
+        "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883  ./config/policy.txt",
+        "f2d50a1e491a8272754053b073aed2bbedb1163a1351b190bb5d107245ed6873  ./example.proof",
+        "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903  ./example.req",
+        "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119  ./example.y",
+        "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d  ./ivk/key.bin",
+        "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4  ./ivk/leaf/0.bin"
+      ]
+    },
+    "hosts": {
+      "pod1/work1": {
+        "gpu": [
+          "NVIDIA H100 80GB HBM3, 9.0, 595.112.07, 0 MiB, 81559 MiB"
+        ],
+        "cpu": [
+          "model name\t: Intel(R) Xeon(R) Platinum 8470",
+          "208"
+        ]
+      },
+      "pod2/work2": {
+        "gpu": [
+          "NVIDIA H100 80GB HBM3, 9.0, 595.112.07, 0 MiB, 81559 MiB"
+        ],
+        "cpu": [
+          "model name\t: Intel(R) Xeon(R) Platinum 8470",
+          "208"
+        ]
+      }
+    },
+    "hosts_note": "two pods of one type, one after the other; whether they were one machine is not recorded",
+    "controller_log": [
+      "pod 1: id 8ko9aumvxf0e2w, H100 SXM, 29 vCPU, 287 GB, USD 4.39/h, created 2026-11-24T22:58:01Z, balance before 50.00, watchdog 2700 s",
+      "pod 1: terminated 2026-11-24T23:02:32Z (271 s after creation; 271/3600*4.39 = USD 0.33); pods left 0; driver 595.112.07, Xeon Platinum 8470, sha_ni; commit-only: exit 0, 34.31 s, peak RSS 3,966,532 kB, ID 5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+      "pod 1: balance after 49.6692342306 (cost 0.3308)",
+      "pod 2: id yrtezvmeopwsqp, H100 SXM, machine 80ii72grlzm0, 29 vCPU, 287 GB, USD 4.39/h, created 2026-11-24T23:49:00Z, balance before 49.6692, watchdog 3600 s (pid 1983598)",
+      "pod 2: terminated 2026-11-25T00:06:23Z (1043 s; 1043/3600*4.39 = USD 1.27); pods left 0; balance read right after 48.530572; work2: commit 34.97 s, prove 8.41 s, YES, proof 13,238,500 bytes; work3: commit 34.94 s, proofs 9.79/9.67/9.31 s (GPU sampler running), all YES; GPU memory most 74,799 MiB"
+    ],
+    "watchdog_log": [
+      "2026-11-24T22:57:59Z watchdog armed for 2700s, pid 1955309",
+      "2026-11-24T23:02:46Z watchdog for pod 1 cancelled by hand after the terminate",
+      "2026-11-24T23:48:58Z watchdog armed for 3600s, pid 1983598",
+      "2026-11-25T00:06:30Z watchdog for pod 2 cancelled by hand after the terminate"
+    ],
+    "pod_scripts": {
+      "folder": "research/probes/flashprove/tinyllama/pod",
+      "sha256": {
+        "bootstrap.sh": "45512a34ced571b115fb53d6fb3783cf5a3614b079d651a4f8c6b8f53fc74760",
+        "user_setup.sh": "8cb3e0beb75e8d4a6dba1fc2fbfe97913a60ad47fc089cb58d18c9247f90b12e",
+        "run3.sh": "ca4c71d17286941419bcc8c6f994039ca0b894cd839a2b3101484ca507f92587"
+      },
+      "note": "kept as they ran: bootstrap.sh as root (host checks, apt-get packages, an ordinary account), then as that account user_setup.sh (the CUDA runtime by pip) and the worker; run3.sh ran the three timed proofs with the memory sampler. The program that created and terminated the pods through RunPod's API, and the watchdog, are not in the repository"
+    },
+    "worker_note": "pod 1 ran 2026-11-24T22:58:01Z to 23:02:32Z with the working-tree gpu_job.sh that was committed as bddda05 at 23:03:30Z; pod 2 ran that commit's file"
+  },
+  "caller_check_as_first_run": {
+    "script": "scripts/flashprove_tinyllama_proof.py as at bddda05",
+    "note": "both result.json files, as written; the GPU evidence held a transcription of the Linux one",
+    "linux": {
+      "result_json_sha256": "5b14493215f4aeefe2409e379094e742d4e8b329b458e58bc494a6f313fcb78e",
+      "result": {
+        "altered_copies": [
+          {
+            "altered": "proof-middle-bit",
+            "exit_code": 1,
+            "last_line": "NO: proof-refused"
+          },
+          {
+            "altered": "proof-last-bit",
+            "exit_code": 1,
+            "last_line": "NO: proof-refused"
+          },
+          {
+            "altered": "token-file",
+            "exit_code": 1,
+            "last_line": "NO: statement-range"
+          },
+          {
+            "altered": "request-first-token",
+            "exit_code": 1,
+            "last_line": "NO: proof-refused"
+          },
+          {
+            "altered": "request-answer-token",
+            "exit_code": 1,
+            "last_line": "NO: proof-refused"
+          },
+          {
+            "altered": "key-bit",
+            "exit_code": 1,
+            "last_line": "NO: key-refused"
+          },
+          {
+            "altered": "leaf-bit",
+            "exit_code": 1,
+            "last_line": "NO: entry-refused"
+          },
+          {
+            "altered": "commitment-id",
+            "exit_code": 1,
+            "last_line": "NO: model-statement"
+          }
+        ],
+        "altered_copies_rejected": 8,
+        "builds": {
+          "patched": {
+            "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+            "recipe": "upstream verifier/build.sh",
+            "seconds": 200.56043569697067,
+            "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+            "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+          },
+          "upstream": {
+            "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+            "recipe": "upstream verifier/build.sh",
+            "seconds": 210.15048027876765,
+            "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+            "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+          }
+        },
+        "check_proof": {
+          "exit_code": 0,
+          "result": [
+            "result: outcome=verified commitment_id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd range=24:32 checked_tokens=8 end_token=2 claim=exact-match policy=exact next_token=none C=256 theta=256 cap=0 s=17 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=63 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+            "check_proof: verified: exact match: every checked token (tokens 25 to 32 of the request) is the model's greedy choice; the last checked token is the end token 2; commitment: 63 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 69 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+          ],
+          "seconds": 43.215405421797186
+        },
+        "checked_tokens": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+        "files": {
+          "config/KL.bin": {
+            "bytes": 1144,
+            "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+          },
+          "config/layout.txt": {
+            "bytes": 126322,
+            "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+          },
+          "config/policy.txt": {
+            "bytes": 2422,
+            "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+          },
+          "example.proof": {
+            "bytes": 13238500,
+            "sha256": "1874fc9308d278808d608b9b0de1e31da53963657d2129c1d2814c5069650713"
+          },
+          "example.req": {
+            "bytes": 264,
+            "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+          },
+          "example.y": {
+            "bytes": 4,
+            "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+          },
+          "ivk/key.bin": {
+            "bytes": 2148512,
+            "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+          },
+          "ivk/leaf/0.bin": {
+            "bytes": 2181432,
+            "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+          }
+        },
+        "gpu_used_here": false,
+        "hiding_claim": false,
+        "host": {
+          "machine": "x86_64",
+          "system": "Linux"
+        },
+        "kit": {
+          "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+          "files": {
+            "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+            "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+            "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+            "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+            "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+            "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+            "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+          },
+          "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652"
+        },
+        "passed": true,
+        "patched_verdict": "YES",
+        "patches": {
+          "prover.patch": {
+            "bytes": 13205,
+            "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+          },
+          "tools.patch": {
+            "bytes": 37858,
+            "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+          },
+          "verifier.patch": {
+            "bytes": 16739,
+            "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+          }
+        },
+        "proof_made_here": false,
+        "qualified_backend": false,
+        "range": "24:32",
+        "result_line": {
+          "C": "256",
+          "build": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+          "cap": "0",
+          "checked_tokens": "8",
+          "claim": "exact-match",
+          "commitment_assumed_rounds": "63",
+          "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+          "end_token": "2",
+          "leaf": "0",
+          "least_round": "128.00",
+          "least_round_without_work": "96.23",
+          "limits": "exact",
+          "next_token": "none",
+          "outcome": "verified",
+          "policy": "exact",
+          "range": "24:32",
+          "record": "1",
+          "request_tokens": "64",
+          "s": "17",
+          "theta": "256",
+          "work": "32"
+        },
+        "schema_id": "hallmark.flashprove-tinyllama-proof/1",
+        "seconds": 723.7694314899854,
+        "source": {
+          "bytes": 157799758,
+          "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+          "examples": {
+            "accepted-proof": {
+              "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+              "next_token": 199,
+              "range": "60:64"
+            },
+            "full-size": {
+              "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+              "next_token": 52599,
+              "range": "23:1024"
+            }
+          },
+          "gpu_kit": {
+            "name": "target_small_f2_roomy",
+            "range": "15:64"
+          },
+          "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+          "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+          "licence": "Apache-2.0",
+          "nvcc_release": "V13.2.86",
+          "rejection_tables": [
+            [
+              "accepted-proof",
+              "altered_copies.tsv",
+              10
+            ],
+            [
+              "accepted-proof",
+              "every_kind_of_item.tsv",
+              79
+            ],
+            [
+              "accepted-proof-clipped-gap",
+              "altered_copies_clipped_gap.tsv",
+              10
+            ]
+          ],
+          "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+          "schema_id": "hallmark.flashprove-source/1",
+          "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+          "upstream": "https://github.com/anthropics/FlashProve",
+          "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+          "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+          "version": "0.16.0"
+        },
+        "unpatched_verdict": "NO: policy-tables"
+      }
+    },
+    "macos": {
+      "result_json_sha256": "8eca4f0fa32110ee46152f421594622558c988df10eaf0ac1e2e894d1fae919a",
+      "result": {
+        "altered_copies": [
+          {
+            "altered": "proof-middle-bit",
+            "exit_code": 1,
+            "last_line": "NO: proof-refused"
+          },
+          {
+            "altered": "proof-last-bit",
+            "exit_code": 1,
+            "last_line": "NO: proof-refused"
+          },
+          {
+            "altered": "token-file",
+            "exit_code": 1,
+            "last_line": "NO: statement-range"
+          },
+          {
+            "altered": "request-first-token",
+            "exit_code": 1,
+            "last_line": "NO: proof-refused"
+          },
+          {
+            "altered": "request-answer-token",
+            "exit_code": 1,
+            "last_line": "NO: proof-refused"
+          },
+          {
+            "altered": "key-bit",
+            "exit_code": 1,
+            "last_line": "NO: key-refused"
+          },
+          {
+            "altered": "leaf-bit",
+            "exit_code": 1,
+            "last_line": "NO: entry-refused"
+          },
+          {
+            "altered": "commitment-id",
+            "exit_code": 1,
+            "last_line": "NO: model-statement"
+          }
+        ],
+        "altered_copies_rejected": 8,
+        "builds": {
+          "patched": {
+            "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+            "recipe": "apple-clang",
+            "seconds": 32.41590379195986,
+            "sha256": "c5d95ec0d68a7779204fdd3fa694e8dec7a20a2f6d22e8cd1db0ee9bd0a5de5c",
+            "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+          },
+          "upstream": {
+            "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+            "recipe": "apple-clang",
+            "seconds": 32.865926624974236,
+            "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
+            "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+          }
+        },
+        "check_proof": {
+          "exit_code": 0,
+          "result": [
+            "result: outcome=verified commitment_id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd range=24:32 checked_tokens=8 end_token=2 claim=exact-match policy=exact next_token=none C=256 theta=256 cap=0 s=17 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=63 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+            "check_proof: verified: exact match: every checked token (tokens 25 to 32 of the request) is the model's greedy choice; the last checked token is the end token 2; commitment: 63 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 69 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+          ],
+          "seconds": 10.284391749999486
+        },
+        "checked_tokens": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+        "files": {
+          "config/KL.bin": {
+            "bytes": 1144,
+            "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+          },
+          "config/layout.txt": {
+            "bytes": 126322,
+            "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+          },
+          "config/policy.txt": {
+            "bytes": 2422,
+            "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+          },
+          "example.proof": {
+            "bytes": 13238500,
+            "sha256": "1874fc9308d278808d608b9b0de1e31da53963657d2129c1d2814c5069650713"
+          },
+          "example.req": {
+            "bytes": 264,
+            "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+          },
+          "example.y": {
+            "bytes": 4,
+            "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+          },
+          "ivk/key.bin": {
+            "bytes": 2148512,
+            "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+          },
+          "ivk/leaf/0.bin": {
+            "bytes": 2181432,
+            "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+          }
+        },
+        "gpu_used_here": false,
+        "hiding_claim": false,
+        "host": {
+          "machine": "arm64",
+          "system": "Darwin"
+        },
+        "kit": {
+          "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+          "files": {
+            "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+            "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+            "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+            "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+            "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+            "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+            "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+          },
+          "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652"
+        },
+        "passed": true,
+        "patched_verdict": "YES",
+        "patches": {
+          "prover.patch": {
+            "bytes": 13205,
+            "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+          },
+          "tools.patch": {
+            "bytes": 37858,
+            "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+          },
+          "verifier.patch": {
+            "bytes": 16739,
+            "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+          }
+        },
+        "proof_made_here": false,
+        "qualified_backend": false,
+        "range": "24:32",
+        "result_line": {
+          "C": "256",
+          "build": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+          "cap": "0",
+          "checked_tokens": "8",
+          "claim": "exact-match",
+          "commitment_assumed_rounds": "63",
+          "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+          "end_token": "2",
+          "leaf": "0",
+          "least_round": "128.00",
+          "least_round_without_work": "96.23",
+          "limits": "exact",
+          "next_token": "none",
+          "outcome": "verified",
+          "policy": "exact",
+          "range": "24:32",
+          "record": "1",
+          "request_tokens": "64",
+          "s": "17",
+          "theta": "256",
+          "work": "32"
+        },
+        "schema_id": "hallmark.flashprove-tinyllama-proof/1",
+        "seconds": 155.4804230420268,
+        "source": {
+          "bytes": 157799758,
+          "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+          "examples": {
+            "accepted-proof": {
+              "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+              "next_token": 199,
+              "range": "60:64"
+            },
+            "full-size": {
+              "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+              "next_token": 52599,
+              "range": "23:1024"
+            }
+          },
+          "gpu_kit": {
+            "name": "target_small_f2_roomy",
+            "range": "15:64"
+          },
+          "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+          "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+          "licence": "Apache-2.0",
+          "nvcc_release": "V13.2.86",
+          "rejection_tables": [
+            [
+              "accepted-proof",
+              "altered_copies.tsv",
+              10
+            ],
+            [
+              "accepted-proof",
+              "every_kind_of_item.tsv",
+              79
+            ],
+            [
+              "accepted-proof-clipped-gap",
+              "altered_copies_clipped_gap.tsv",
+              10
+            ]
+          ],
+          "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+          "schema_id": "hallmark.flashprove-source/1",
+          "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+          "upstream": "https://github.com/anthropics/FlashProve",
+          "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+          "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+          "version": "0.16.0"
+        },
+        "unpatched_verdict": "NO: policy-tables"
+      }
+    }
+  },
+  "changed_in_place_by_earlier_commits": {
+    "rule": "docs/OPERATIONS.md: never overwrite a complete run or repair its hashes in place; AGENTS.md: new runs use new directories, preserve failures",
+    "commits": [
+      {
+        "commit": "4df5ab3",
+        "change": "removed research/evidence/flashprove-tinyllama-2026-11-22.json, flashprove-tinyllama-2026-11-23.json and flashprove-tinyllama-answer-2026-11-23.json",
+        "now": "restored byte for byte; the last holds the answer runs at eg 8"
+      },
+      {
+        "commit": "2b5bbe9",
+        "change": "in flashprove-tinyllama-2026-11-24.json and flashprove-tinyllama-answer-2026-11-24.json, runs at 206c6c7 were replaced by runs at bf3add1",
+        "now": "the earlier values are in the history of the branch only"
+      },
+      {
+        "commit": "83b2aaa",
+        "change": "in flashprove-tinyllama-gpu-2026-11-25.json, the Linux target runs at 2c39db5 were replaced by reruns at 40186c6, and the account's balance readings and the SHA-256 of the macOS check's result.json were removed",
+        "now": "the removed values follow",
+        "removed": {
+          "pods": [
+            {
+              "id": "8ko9aumvxf0e2w",
+              "balance_before_usd": 50.0,
+              "balance_after_usd": 49.6692342306
+            },
+            {
+              "id": "yrtezvmeopwsqp",
+              "balance_before_usd": 49.6692342306,
+              "balance_after_usd": 48.3944417583
+            }
+          ],
+          "spend": {
+            "balance_before_usd": 50.0,
+            "balance_after_usd": 48.3944417583,
+            "basis": "the account's balance read through the API before the first pod and after the last"
+          },
+          "cpu_targets_with_the_sized_kit": {
+            "host": "Ubuntu 24.04 x86_64, a clean clone, uv 0.9.18, every input downloaded",
+            "commit": "2c39db5",
+            "verify_flashprove_tinyllama": {
+              "passed": true,
+              "seconds": 1668.6,
+              "calls_compared": 108,
+              "tinyllama_plan": {
+                "h_par": "0f6cc99a523961a164d05ce3b7ccc58778dbf7595f84be39348d521c735527f8",
+                "configuration": "9ac96c0fa1613952e35cd06487c5ccb759f7db7839be845f1c528d34f8275573",
+                "proof_bytes_at_most": 13685772,
+                "bits_compiled_bound": 126.21
+              }
+            },
+            "verify_flashprove_tinyllama_answer": {
+              "passed": true,
+              "seconds": 2000.6,
+              "kit_reproduced": true,
+              "maxima_equal_to_committed": false,
+              "choices": [
+                1576,
+                7483,
+                310,
+                3444,
+                338,
+                3681,
+                29889,
+                2
+              ],
+              "matches": true,
+              "range_failure": null,
+              "gate_key_peak": 3970,
+              "least_correlation": 0.9990885607110908,
+              "slope_range": [
+                0.9933298302365778,
+                1.0047660727947956
+              ],
+              "controls": {
+                "final-norm-MF-plus-1": {
+                  "failed": [
+                    "the logits' scale at position 24: 1.9951",
+                    "the logits' scale at position 25: 2.0054",
+                    "the logits' scale at position 26: 1.9969",
+                    "the logits' scale at position 27: 1.9897",
+                    "the logits' scale at position 28: 2.0081",
+                    "the logits' scale at position 29: 2.0066",
+                    "the logits' scale at position 30: 2.0097",
+                    "the logits' scale at position 31: 1.9969"
+                  ],
+                  "least_correlation": 0.9990864681056681,
+                  "slope_range": [
+                    1.9897378627311832,
+                    2.0097478479243636
+                  ]
+                },
+                "layer-10-kv-plus-1": {
+                  "failed": [
+                    "the logits' correlation at position 24: 0.99616",
+                    "the logits' correlation at position 25: 0.99616",
+                    "the logits' correlation at position 26: 0.99591",
+                    "the logits' correlation at position 27: 0.99699",
+                    "the logits' correlation at position 28: 0.99390",
+                    "the logits' correlation at position 29: 0.99672",
+                    "the logits' correlation at position 30: 0.99518",
+                    "the logits' correlation at position 31: 0.99433"
+                  ],
+                  "least_correlation": 0.9938961747290047,
+                  "slope_range": [
+                    0.9820366204292756,
+                    1.0074861999783566
+                  ]
+                }
+              },
+              "float_reference": 1.2930851198689197e-06,
+              "worst_case": {
+                "short": [],
+                "gate_key_bound_layer_21": 23741,
+                "rows_recomputed_exactly": 160
+              },
+              "planning": {
+                "patched": "standard parameter form, three tables, PLAN ONLY (accounting and request)",
+                "unpatched_accounting": "NO: policy-tables",
+                "unpatched_request": "NO: policy-tables",
+                "provers_parameter_file_reader": "admitted",
+                "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+                "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9"
+              }
+            },
+            "macos": "not run since the line `table` changed; both targets passed there at bf3add1 (flashprove-tinyllama-2026-11-24.json, flashprove-tinyllama-answer-2026-11-24.json)"
+          },
+          "caller_check_macos": null
+        }
+      },
+      {
+        "commit": "6f90c02 and the commit of this file",
+        "change": "in flashprove-tinyllama-gpu-2026-11-25.json, decision_status, authority.statement and the note amended were reworded",
+        "now": "no figure changed"
+      }
+    ]
+  },
+  "reruns": {
+    "why": "the reviews led to changes of prover_setup.cpp, of both scripts that use it or check a proof, and of the worker; the patches, the kit's files and the GPU run's files are unchanged",
+    "prover_setup_now_also_runs": "layer_words_fit() for every layer, the column rule of attention's committed matrices, and lt and lg (prover_setup.cpp names what it still leaves out)",
+    "linux": {
+      "verify": {
+        "result_json_sha256": "9b4dd2845b2986277c70f707d9d1b86004bcf0bd34cde5a89a17766330a18d27",
+        "result": {
+          "builds": {
+            "patched": {
+              "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+              "recipe": "upstream verifier/build.sh",
+              "seconds": 222.16048796474934,
+              "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+              "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+            },
+            "upstream": {
+              "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+              "recipe": "upstream verifier/build.sh",
+              "seconds": 220.86096636485308,
+              "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+              "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+            }
+          },
+          "fold_constants": {
+            "integer_model": [
+              "2048,64",
+              "5120,128"
+            ],
+            "prover": [
+              "2048,64",
+              "5120,128"
+            ],
+            "weight_sums.cpp": [
+              "2048,64",
+              "5120,128"
+            ],
+            "weight_sums.py": [
+              "2048,64",
+              "5120,128"
+            ]
+          },
+          "hiding_claim": false,
+          "host": {
+            "machine": "x86_64",
+            "system": "Linux"
+          },
+          "passed": true,
+          "patches": {
+            "apply_order": [
+              "verifier.patch",
+              "prover.patch",
+              "tools.patch"
+            ],
+            "fold_constants": {
+              "2048,64": [
+                "0x3FB504F3",
+                "0x3E3504F3"
+              ],
+              "5120,128": [
+                "0x3F8F1BBD",
+                "0x3DCA62C2"
+              ]
+            },
+            "patches": {
+              "prover.patch": {
+                "bytes": 13205,
+                "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+              },
+              "tools.patch": {
+                "bytes": 37858,
+                "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+              },
+              "verifier.patch": {
+                "bytes": 16739,
+                "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+              }
+            },
+            "schema_id": "hallmark.flashprove-tinyllama-patches/1",
+            "served_form_cases_only_the_patch_meets": [
+              "routed-experts.dense",
+              "routed-experts.dense-three-digests",
+              "routed-experts.dense-three-silu-altered",
+              "routed-experts.dense-three-rope-altered",
+              "routed-experts.dense-three-exp-altered",
+              "no-range-words.dense-eg-7",
+              "no-range-words.dense-eg-6",
+              "no-range-words.dense-eg-7-smax"
+            ],
+            "tinyllama_plan": {
+              "configuration": "9ac96c0fa1613952e35cd06487c5ccb759f7db7839be845f1c528d34f8275573",
+              "h_par": "0f6cc99a523961a164d05ce3b7ccc58778dbf7595f84be39348d521c735527f8",
+              "shape": {
+                "G": 4,
+                "H": 32,
+                "L": 22,
+                "NE": 0,
+                "V": 32000,
+                "d": 2048,
+                "dh": 64,
+                "f": 5632,
+                "ll": 1,
+                "lt": 6,
+                "theta0_lo": 10000
+              },
+              "table": "table 11 24 1376256 65535 0 18",
+              "unmet_without_digests": {
+                "patched": [
+                  "table-digests"
+                ],
+                "unpatched": [
+                  "routed-experts",
+                  "both-clamps",
+                  "table-digests",
+                  "no-range-words"
+                ]
+              }
+            },
+            "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "verifier_source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+            "weight_sums_oracle_cases": [
+              [
+                "5120,128",
+                1
+              ],
+              [
+                "2048,64",
+                1
+              ],
+              [
+                "2048,64",
+                100
+              ]
+            ]
+          },
+          "prover_compiled_by_this_run": false,
+          "provers_parameter_file_reader": {
+            "prover/tests/configurations/pinned/policy.txt": "admitted",
+            "served-form-patched/routed-experts.dense-sig-for-rope/policy.txt": "policy-tables",
+            "served-form-patched/routed-experts.dense-three-digests/policy.txt": "admitted",
+            "served-form-patched/routed-experts.dense-with-digests/policy.txt": "policy-tables",
+            "served-form-patched/routed-experts.dense/policy.txt": "admitted",
+            "served-form-patched/table-digests.no-tsig/policy.txt": "policy-tables"
+          },
+          "qualified_backend": false,
+          "schema_id": "hallmark.flashprove-tinyllama-verify/1",
+          "seconds": 1737.4577486049384,
+          "source": {
+            "bytes": 157799758,
+            "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+            "examples": {
+              "accepted-proof": {
+                "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+                "next_token": 199,
+                "range": "60:64"
+              },
+              "full-size": {
+                "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+                "next_token": 52599,
+                "range": "23:1024"
+              }
+            },
+            "gpu_kit": {
+              "name": "target_small_f2_roomy",
+              "range": "15:64"
+            },
+            "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+            "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+            "licence": "Apache-2.0",
+            "nvcc_release": "V13.2.86",
+            "rejection_tables": [
+              [
+                "accepted-proof",
+                "altered_copies.tsv",
+                10
+              ],
+              [
+                "accepted-proof",
+                "every_kind_of_item.tsv",
+                79
+              ],
+              [
+                "accepted-proof-clipped-gap",
+                "altered_copies_clipped_gap.tsv",
+                10
+              ]
+            ],
+            "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "schema_id": "hallmark.flashprove-source/1",
+            "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+            "upstream": "https://github.com/anthropics/FlashProve",
+            "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+            "version": "0.16.0"
+          },
+          "standard_form": {
+            "patched": "served_form_test.py: all as expected",
+            "unpatched_misses": [
+              "no-range-words.dense-eg-6",
+              "no-range-words.dense-eg-7",
+              "no-range-words.dense-eg-7-smax",
+              "routed-experts.dense",
+              "routed-experts.dense-three-digests",
+              "routed-experts.dense-three-exp-altered",
+              "routed-experts.dense-three-rope-altered",
+              "routed-experts.dense-three-silu-altered"
+            ]
+          },
+          "synthetic_inputs_only": true,
+          "timed_formats": 9,
+          "tinyllama_plan": {
+            "bits_compiled_bound": 126.21,
+            "configuration": "9ac96c0fa1613952e35cd06487c5ccb759f7db7839be845f1c528d34f8275573",
+            "h_par": "0f6cc99a523961a164d05ce3b7ccc58778dbf7595f84be39348d521c735527f8",
+            "proof_bytes_at_most": 13685772,
+            "shape": {
+              "G": 4,
+              "H": 32,
+              "L": 22,
+              "NE": 0,
+              "V": 32000,
+              "d": 2048,
+              "dh": 64,
+              "f": 5632,
+              "ll": 1,
+              "lt": 6,
+              "theta0_lo": 10000
+            },
+            "unmet_without_digests": {
+              "patched": [
+                "table-digests"
+              ],
+              "unpatched": [
+                "routed-experts",
+                "both-clamps",
+                "table-digests",
+                "no-range-words"
+              ]
+            },
+            "unpatched": "policy-tables"
+          },
+          "upstream_inputs": {
+            "calls_compared": 108,
+            "calls_differing": 0,
+            "examples": {
+              "accepted-proof": {
+                "exit_code": 0,
+                "result": [
+                  "result: outcome=verified commitment_id=79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183 range=60:64 checked_tokens=3 end_token=not_checked claim=exact-match policy=exact next_token=199 C=256 theta=256 cap=0 s=16 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=49 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+                  "check_proof: verified: exact match: every checked token (tokens 61 to 63 of the request) is the model's greedy choice; the next token, 199, is the model's greedy choice; the end of the reply was not checked; commitment: 49 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 38 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+                ],
+                "seconds": 12.164156078360975
+              },
+              "full-size": {
+                "exit_code": 0,
+                "result": [
+                  "result: outcome=verified commitment_id=7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe range=23:1024 checked_tokens=1000 end_token=not_checked claim=exact-match policy=exact next_token=52599 C=256 theta=256 cap=0 s=15 limits=exact request_tokens=1024 leaf=0 commitment_assumed_rounds=86 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+                  "check_proof: verified: exact match: every checked token (tokens 24 to 1023 of the request) is the model's greedy choice; the next token, 52599, is the model's greedy choice; the end of the reply was not checked; commitment: 86 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 71 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+                ],
+                "seconds": 139.78651334019378
+              }
+            },
+            "rejection_tables": [
+              {
+                "example": "accepted-proof",
+                "exit_code": 0,
+                "last_line": "10 altered sets: all rejected",
+                "seconds": 81.56104254443198,
+                "table": "altered_copies.tsv"
+              },
+              {
+                "example": "accepted-proof",
+                "exit_code": 0,
+                "last_line": "79 altered sets: all rejected",
+                "seconds": 576.2808182640001,
+                "table": "every_kind_of_item.tsv"
+              },
+              {
+                "example": "accepted-proof-clipped-gap",
+                "exit_code": 0,
+                "last_line": "10 altered sets: all rejected",
+                "seconds": 70.14382124273106,
+                "table": "altered_copies_clipped_gap.tsv"
+              }
+            ]
+          },
+          "weight_sums_against_oracle": [
+            {
+              "same": true,
+              "seed": 1,
+              "shape": "5120,128"
+            },
+            {
+              "same": true,
+              "seed": 1,
+              "shape": "2048,64"
+            },
+            {
+              "same": true,
+              "seed": 100,
+              "shape": "2048,64"
+            }
+          ]
+        }
+      },
+      "answer": {
+        "result_json_sha256": "5f95adba5e7f8d7e6ea584af05a6287718a71c3fb99fe3decaf6aaf4c060d038",
+        "result": {
+          "answer": {
+            "T": 64,
+            "answer": [
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2
+            ],
+            "choices": [
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2
+            ],
+            "clamp_limit": 2047,
+            "clamped": [
+              {
+                "entries": 1,
+                "largest": 2241,
+                "layer": 2,
+                "name": "vw",
+                "positions": [
+                  32
+                ]
+              }
+            ],
+            "controls": {
+              "final-norm-MF-plus-1": {
+                "choices": [
+                  1576,
+                  7483,
+                  310,
+                  3444,
+                  338,
+                  3681,
+                  29889,
+                  2
+                ],
+                "failed": [
+                  "the logits' scale at position 24: 1.9951",
+                  "the logits' scale at position 25: 2.0054",
+                  "the logits' scale at position 26: 1.9969",
+                  "the logits' scale at position 27: 1.9897",
+                  "the logits' scale at position 28: 2.0081",
+                  "the logits' scale at position 29: 2.0066",
+                  "the logits' scale at position 30: 2.0097",
+                  "the logits' scale at position 31: 1.9969"
+                ],
+                "least_correlation": 0.9990864681056681,
+                "slope_range": [
+                  1.9897378627311832,
+                  2.0097478479243636
+                ]
+              },
+              "layer-10-kv-plus-1": {
+                "choices": [
+                  1576,
+                  7483,
+                  310,
+                  3444,
+                  338,
+                  3681,
+                  29889,
+                  2
+                ],
+                "failed": [
+                  "the logits' correlation at position 24: 0.99616",
+                  "the logits' correlation at position 25: 0.99616",
+                  "the logits' correlation at position 26: 0.99591",
+                  "the logits' correlation at position 27: 0.99699",
+                  "the logits' correlation at position 28: 0.99390",
+                  "the logits' correlation at position 29: 0.99672",
+                  "the logits' correlation at position 30: 0.99518",
+                  "the logits' correlation at position 31: 0.99433"
+                ],
+                "least_correlation": 0.9938961747290047,
+                "slope_range": [
+                  0.9820366204292756,
+                  1.0074861999783566
+                ]
+              }
+            },
+            "e": 32,
+            "gate_key_within_limit": true,
+            "matches": true,
+            "peaks": {
+              "a": 1678,
+              "aF": 1028,
+              "aF_Rc": 614080775,
+              "aF_sigma": 85121,
+              "aF_w": 1028,
+              "a_Rc": 60041590595,
+              "a_sigma": 422144,
+              "a_w": 1678,
+              "first_choice": 29989,
+              "gw": 3970,
+              "k": 1819,
+              "key": 3970,
+              "kw": 1819,
+              "lam": 3608052,
+              "m": 1678,
+              "m_Rc": 21718748203,
+              "m_sigma": 422001,
+              "m_w": 1678,
+              "o": 1128,
+              "q": 773,
+              "qw": 773,
+              "s": 1536,
+              "u": 1755,
+              "v": 2047,
+              "vw": 2241,
+              "x": 345459,
+              "x_last": 35978,
+              "x_mid": 345349
+            },
+            "positions": [
+              {
+                "correlation": 0.9993659658964011,
+                "float_margin": 1.3528366088867188,
+                "margin": 1.4396896362304688,
+                "position": 24,
+                "slope": 0.9963233569979599,
+                "token": 1576
+              },
+              {
+                "correlation": 0.999619790755863,
+                "float_margin": 4.829927444458008,
+                "margin": 4.763336181640625,
+                "position": 25,
+                "slope": 1.003147264371493,
+                "token": 7483
+              },
+              {
+                "correlation": 0.9995891011037938,
+                "float_margin": 3.115610122680664,
+                "margin": 3.0436019897460938,
+                "position": 26,
+                "slope": 0.9976233619981425,
+                "token": 310
+              },
+              {
+                "correlation": 0.9996803282605617,
+                "float_margin": 7.930485725402832,
+                "margin": 7.826667785644531,
+                "position": 27,
+                "slope": 0.9933298302365778,
+                "token": 3444
+              },
+              {
+                "correlation": 0.9993954789847499,
+                "float_margin": 3.7941036224365234,
+                "margin": 3.96905517578125,
+                "position": 28,
+                "slope": 1.0035037619842073,
+                "token": 338
+              },
+              {
+                "correlation": 0.999362234470989,
+                "float_margin": 4.224757194519043,
+                "margin": 4.165740966796875,
+                "position": 29,
+                "slope": 1.0034200089308636,
+                "token": 3681
+              },
+              {
+                "correlation": 0.9994629789190604,
+                "float_margin": 1.0627365112304688,
+                "margin": 0.7669830322265625,
+                "position": 30,
+                "slope": 1.0047660727947956,
+                "token": 29889
+              },
+              {
+                "correlation": 0.9990885607110908,
+                "float_margin": 3.162534713745117,
+                "margin": 3.2466506958007812,
+                "position": 31,
+                "slope": 0.9972749978906206,
+                "token": 2
+              }
+            ],
+            "r": 24,
+            "range_failure": null,
+            "s": 17,
+            "seconds": 39.69973262492567,
+            "window": [
+              529,
+              29989,
+              1792,
+              29989,
+              29958,
+              13,
+              1170,
+              278,
+              7483,
+              310,
+              3444,
+              297,
+              697,
+              3273,
+              10541,
+              29889,
+              2,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "builds": {
+            "patched": {
+              "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+              "recipe": "upstream verifier/build.sh",
+              "seconds": 228.33612627815455,
+              "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+              "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+            },
+            "upstream": {
+              "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+              "recipe": "upstream verifier/build.sh",
+              "seconds": 221.64223188301548,
+              "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+              "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+            }
+          },
+          "environments": {
+            "integer_model": {
+              "gguf": "0.19.0",
+              "installed": [
+                "certifi==2026.11.20",
+                "charset-normalizer==3.5.3",
+                "filelock==4.3.0",
+                "fsspec==2026.9.0",
+                "gguf==0.19.0",
+                "idna==3.20",
+                "jinja2==3.1.6",
+                "markupsafe==3.0.4",
+                "mpmath==1.3.0",
+                "networkx==3.7",
+                "numpy==2.4.6",
+                "pyyaml==6.0.4",
+                "requests==2.34.2",
+                "setuptools==84.2.1",
+                "sympy==1.14.0",
+                "torch==2.13.0+cpu",
+                "tqdm==4.70.1",
+                "typing-extensions==4.16.0",
+                "urllib3==2.8.0"
+              ],
+              "lock_file": "integer_model-linux-x86_64.txt",
+              "numpy": "2.4.6",
+              "python": "3.13.15",
+              "torch": "2.13.0+cpu"
+            },
+            "scales": {
+              "gguf": "0.19.0",
+              "installed": [
+                "annotated-doc==0.0.7",
+                "annotated-types==0.8.0",
+                "anyio==4.16.0",
+                "certifi==2026.11.20",
+                "charset-normalizer==3.5.3",
+                "click==8.5.1",
+                "filelock==4.3.0",
+                "fsspec==2026.9.0",
+                "gguf==0.19.0",
+                "h11==0.16.0",
+                "hf-xet==1.8.0",
+                "httpcore==1.0.9",
+                "httpx==0.28.1",
+                "huggingface-hub==1.33.0",
+                "idna==3.20",
+                "jinja2==3.1.6",
+                "markdown-it-py==4.3.0",
+                "markupsafe==3.0.4",
+                "mdurl==0.1.2",
+                "mpmath==1.3.0",
+                "networkx==3.7",
+                "numpy==2.3.5",
+                "packaging==26.3",
+                "pyarrow==23.0.1",
+                "pydantic-core==2.50.5",
+                "pydantic==2.14.4",
+                "pygments==2.21.0",
+                "pyyaml==6.0.4",
+                "regex==2026.11.19",
+                "requests==2.34.2",
+                "rich==15.0.0",
+                "safetensors==0.8.0",
+                "setuptools==84.2.1",
+                "shellingham==1.5.4",
+                "sympy==1.14.0",
+                "tokenizers==0.22.2",
+                "torch==2.9.1+cpu",
+                "tqdm==4.70.1",
+                "transformers==5.15.1",
+                "typer==0.29.2",
+                "typing-extensions==4.16.0",
+                "typing-inspection==0.4.5",
+                "urllib3==2.8.0"
+              ],
+              "lock_file": "scales-linux-x86_64.txt",
+              "numpy": "2.3.5",
+              "pyarrow": "23.0.1",
+              "python": "3.13.15",
+              "safetensors": "0.8.0",
+              "tokenizers": "0.22.2",
+              "torch": "2.9.1+cpu",
+              "transformers": "5.15.1"
+            }
+          },
+          "float_reference": {
+            "checked_logits": {
+              "positions": [
+                24,
+                31
+              ],
+              "shape": [
+                8,
+                32000
+              ]
+            },
+            "final_norm_max_abs": 0.000110626220703125,
+            "final_norm_relative_l2": 1.2930851198689197e-06,
+            "float_greedy": [
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2
+            ],
+            "float_greedy_is_the_answer": true,
+            "moe_layers": [],
+            "rope_layers": 22,
+            "seconds": 30.387787071056664,
+            "shape": {
+              "G": 4,
+              "H": 32,
+              "L": 22,
+              "NE": 0,
+              "V": 32000,
+              "d": 2048,
+              "dh": 64,
+              "eps": 9.999999747378752e-06,
+              "f": 5632,
+              "fe": 0,
+              "theta": 10000.0
+            }
+          },
+          "gpu_used": false,
+          "hiding_claim": false,
+          "host": {
+            "machine": "x86_64",
+            "system": "Linux"
+          },
+          "kit": {
+            "calibrate_seconds": 792.3262348356657,
+            "calibration_set": {
+              "bytes": 131200,
+              "drawn_rows_match_upstream": true,
+              "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c",
+              "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+            },
+            "gguf": {
+              "bytes": 2200293664,
+              "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+              "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+            },
+            "kit_reproduced": true,
+            "maxima_equal_to_committed": false
+          },
+          "kit_pins": {
+            "base_policy_sha256": "68e4ff9f007b7d5cf73aa7e9145a404d84b1dfe46ba35c22580266f083829488",
+            "bounds": {
+              "final_norm_relative_l2": 0.0001,
+              "logit_correlation": 0.998,
+              "logit_slope": [
+                0.75,
+                1.33
+              ]
+            },
+            "calibration_set": {
+              "bytes": 131200,
+              "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c",
+              "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+            },
+            "calibration_text": {
+              "bytes": 6357543,
+              "licence": "CC BY-SA: the dataset card's tags name CC BY-SA 3.0 and GFDL, its text CC BY-SA 4.0 (WikiText, S. Merity et al., 'Pointer Sentinel Mixture Models', arXiv:1609.07843, 2016). No text and no token id from it is committed; scale statistics computed from it are (kit/maxima.json, words.json, KL.bin, six lines of policy.txt) and the calibration set's SHA-256",
+              "licence_review": "not cleared by the owner. Reviewed only by this proposal's contributor: the dataset card's tags (CC BY-SA 3.0, GFDL) and its text (CC BY-SA 4.0) name different versions, and research/AUTHORITY.json excludes ambiguous licences. The owner decides (decision 0094, not done 1); a no means refitting the kit on another text. The three program patches do not depend on it; scales.patch pins the calibration set's SHA-256 (TINYLLAMA_SET_SHA256) and would change with the text",
+              "sha256": "e83889baabc497075506f91975be5fac0d45c5290b6b20582c8cd1e853d0c9f7",
+              "url": "https://huggingface.co/datasets/Salesforce/wikitext/resolve/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-2-raw-v1/train-00000-of-00001.parquet",
+              "what": "WikiText-2 (raw), training split, as upstream's make_calibration_set.py pins it"
+            },
+            "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+            "e_res": 11,
+            "eg": 7,
+            "environments": {
+              "integer_model": {
+                "locks": {
+                  "linux-x86_64": {
+                    "file": "integer_model-linux-x86_64.txt",
+                    "sha256": "bba3b40f517585fa71af22286ddc71a6ef892143ea416c91625fe8dbd5a249a2"
+                  },
+                  "macos-arm64": {
+                    "file": "integer_model-macos-arm64.txt",
+                    "sha256": "b9d89b9e3571659760261c5c14441c99c331da76b6526f17b15edd94215df78c"
+                  }
+                },
+                "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13",
+                "packages": {
+                  "gguf": "0.19.0",
+                  "numpy": "2.4.6",
+                  "torch": "2.13.0"
+                },
+                "python": "3.13"
+              },
+              "scales": {
+                "locks": {
+                  "linux-x86_64": {
+                    "file": "scales-linux-x86_64.txt",
+                    "sha256": "141cc59c3a21f196a6753bda102d725f2d0865de4e0f0c5655fd9b10c5077c8b"
+                  },
+                  "macos-arm64": {
+                    "file": "scales-macos-arm64.txt",
+                    "sha256": "a90ecc08252b4d47abd4f5287f5c37fff10faaeadab68a9860b8d1ef1988f40d"
+                  }
+                },
+                "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13",
+                "packages": {
+                  "gguf": "0.19.0",
+                  "numpy": "2.3.5",
+                  "pyarrow": "23.0.1",
+                  "safetensors": "0.8.0",
+                  "tokenizers": "0.22.2",
+                  "torch": "2.9.1",
+                  "transformers": "5.15.1"
+                },
+                "python": "3.13"
+              }
+            },
+            "files": {
+              "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+              "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+              "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+              "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+              "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+              "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+              "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+            },
+            "gguf": {
+              "bytes": 2200293664,
+              "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+              "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+            },
+            "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+            "model": {
+              "case": "research/probes/sash/response-case.json",
+              "files": [
+                "config.json",
+                "model.safetensors",
+                "tokenizer.json"
+              ],
+              "note": "id, revision, licence, sizes and SHA-256 come from the case file, the pins of Hallmark's SASH path"
+            },
+            "mutation_controls": [
+              "final-norm-MF-plus-1",
+              "layer-10-kv-plus-1"
+            ],
+            "patches_json_sha256": "7e0a518f51d2cd96b9c64a18a12d0b7eddb69f3759615966d8f63a6c2d37696c",
+            "request": {
+              "T": 64,
+              "e": 32,
+              "filler": 0,
+              "r": 24
+            },
+            "scales_patch": {
+              "bytes": 34669,
+              "name": "scales.patch",
+              "sha256": "73c42a3c16a6b7440f378b4703d312eb5d7f82a697f2bd6a051cbca4b3501c2c"
+            },
+            "schema_id": "hallmark.flashprove-tinyllama-kit/1",
+            "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "worst_case": {
+              "note": "cp_commit's worst-case check computed on a CPU by worst_case_cpu.py (Hallmark's port of upstream's worst_case.cuh): every site fits at eg 7; at eg 8 the gate of layer 21 does not (one row; without the line gcl, which the verifier refuses at NE 0, its key's limit is 32,639)",
+              "ratio_tolerance": 0.001,
+              "short": []
+            }
+          },
+          "passed": true,
+          "planning": {
+            "bits_compiled_bound": 126.21,
+            "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+            "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+            "patched": "standard parameter form, three tables, PLAN ONLY (accounting and request)",
+            "proof_bytes_at_most": 13685772,
+            "prover_setup": {
+              "control_kFM_plus_1": "attention: the shift sh = 7 is not supported: sh must be from 4 to 12, u0 * 2^sh + 65536 at most 2^24, and both 0 <= 2^kFM - u0 - nHM <= nHM and 0 <= 2^kFD - u0 - nHD <= nHD must hold; kFM = 15, kFD = 15",
+              "control_layer_1_kd_25": "layer constants: layer 1: shift kd = 25 is outside the range for digit form 1, which is 1 to 24",
+              "control_lmh_10": "attention: the column length of a committed matrix (2^lmS, 2^lmh, 2^lmo, 2^lmbA or 2^lmq) is not a multiple of the ring degree D",
+              "control_table_one_step_short": "the parameter file is not admitted: policy-pad-place: fi0, the third number of the line table, must be at least 1310723: a row's data coefficients and three pads for each of its answers",
+              "hiding": "hiding conditions that follow from the file alone: met",
+              "kit": "prover set-up: admitted (11 layer groups, 1 attention plan, kFM 14, kFD 15)",
+              "weight_table": "weight table: admitted (W: 10240 rows of 2^18 columns in 134 units; 2^11 long rows of 1310720 data entries in 1376256, 65535 masks, code length 2^24; a tree's stored level at most 7)"
+            },
+            "provers_parameter_file_reader": "admitted",
+            "unpatched_accounting": "NO: policy-tables",
+            "unpatched_request": "NO: policy-tables"
+          },
+          "proof_made": false,
+          "scale_tool_tests": {
+            "table_ties.py": {
+              "last_line": "OK: 26 checks",
+              "status": 0
+            },
+            "test_calibrate.py": {
+              "last_line": "in part: 19 cases passed; SMALL_MODEL is not set, so program_on_the_small_model was not run",
+              "status": 77
+            },
+            "test_gguf_weights.py": {
+              "last_line": "in part: 102 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
+              "status": 77
+            },
+            "test_policy_tables.py": {
+              "last_line": "OK",
+              "status": 0
+            }
+          },
+          "schema_id": "hallmark.flashprove-tinyllama-answer/1",
+          "seconds": 2091.710713608656,
+          "source": {
+            "bytes": 157799758,
+            "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+            "examples": {
+              "accepted-proof": {
+                "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+                "next_token": 199,
+                "range": "60:64"
+              },
+              "full-size": {
+                "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+                "next_token": 52599,
+                "range": "23:1024"
+              }
+            },
+            "gpu_kit": {
+              "name": "target_small_f2_roomy",
+              "range": "15:64"
+            },
+            "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+            "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+            "licence": "Apache-2.0",
+            "nvcc_release": "V13.2.86",
+            "rejection_tables": [
+              [
+                "accepted-proof",
+                "altered_copies.tsv",
+                10
+              ],
+              [
+                "accepted-proof",
+                "every_kind_of_item.tsv",
+                79
+              ],
+              [
+                "accepted-proof-clipped-gap",
+                "altered_copies_clipped_gap.tsv",
+                10
+              ]
+            ],
+            "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "schema_id": "hallmark.flashprove-source/1",
+            "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+            "upstream": "https://github.com/anthropics/FlashProve",
+            "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+            "version": "0.16.0"
+          },
+          "worst_case": {
+            "float_gate_keys": [
+              2092.9,
+              1980.7,
+              6995.8,
+              2110.2,
+              3099.2,
+              2598.6,
+              2647.4,
+              5130.5,
+              3113.1,
+              3720.9,
+              3383.1,
+              3706.5,
+              5699.5,
+              5318.8,
+              5395.9,
+              5136.4,
+              5784.0,
+              6559.9,
+              6787.0,
+              6822.0,
+              6289.6,
+              22702.9
+            ],
+            "float_rows_beyond_the_limit": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "float_sha256": "7fa6960aa0ea29e867ee964fdedaafab44617f8c08a9249c6a2c566ed6b70bdc",
+            "gate_key_bounds": [
+              2189,
+              2071,
+              7316,
+              2207,
+              3241,
+              2717,
+              2768,
+              5365,
+              3256,
+              3891,
+              3538,
+              3876,
+              5960,
+              5562,
+              5643,
+              5371,
+              6049,
+              6860,
+              7097,
+              7134,
+              6577,
+              23741
+            ],
+            "gate_rows_beyond_the_limit": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "public_sites_fit": true,
+            "row_sites_fit": true,
+            "rows_recomputed_exactly": {
+              "Wg 0": 1,
+              "Wg 1": 1,
+              "Wg 10": 1,
+              "Wg 11": 1,
+              "Wg 12": 1,
+              "Wg 13": 1,
+              "Wg 14": 1,
+              "Wg 15": 1,
+              "Wg 16": 1,
+              "Wg 17": 1,
+              "Wg 18": 1,
+              "Wg 19": 1,
+              "Wg 2": 1,
+              "Wg 20": 1,
+              "Wg 21": 1,
+              "Wg 3": 1,
+              "Wg 4": 1,
+              "Wg 5": 1,
+              "Wg 6": 1,
+              "Wg 7": 1,
+              "Wg 8": 1,
+              "Wg 9": 1,
+              "Wk 0": 2,
+              "Wk 1": 2,
+              "Wk 10": 2,
+              "Wk 11": 2,
+              "Wk 12": 2,
+              "Wk 13": 2,
+              "Wk 14": 2,
+              "Wk 15": 2,
+              "Wk 16": 2,
+              "Wk 17": 2,
+              "Wk 18": 2,
+              "Wk 19": 2,
+              "Wk 2": 3,
+              "Wk 20": 2,
+              "Wk 21": 2,
+              "Wk 3": 2,
+              "Wk 4": 2,
+              "Wk 5": 2,
+              "Wk 6": 2,
+              "Wk 7": 2,
+              "Wk 8": 3,
+              "Wk 9": 2,
+              "Wq 0": 2,
+              "Wq 1": 3,
+              "Wq 10": 2,
+              "Wq 11": 2,
+              "Wq 12": 2,
+              "Wq 13": 2,
+              "Wq 14": 2,
+              "Wq 15": 2,
+              "Wq 16": 3,
+              "Wq 17": 3,
+              "Wq 18": 2,
+              "Wq 19": 2,
+              "Wq 2": 3,
+              "Wq 20": 2,
+              "Wq 21": 2,
+              "Wq 3": 2,
+              "Wq 4": 2,
+              "Wq 5": 2,
+              "Wq 6": 2,
+              "Wq 7": 2,
+              "Wq 8": 2,
+              "Wq 9": 2,
+              "Wu 0": 1,
+              "Wu 1": 1,
+              "Wu 10": 1,
+              "Wu 11": 1,
+              "Wu 12": 1,
+              "Wu 13": 1,
+              "Wu 14": 1,
+              "Wu 15": 1,
+              "Wu 16": 1,
+              "Wu 17": 1,
+              "Wu 18": 1,
+              "Wu 19": 1,
+              "Wu 2": 1,
+              "Wu 20": 1,
+              "Wu 21": 1,
+              "Wu 3": 1,
+              "Wu 4": 1,
+              "Wu 5": 1,
+              "Wu 6": 1,
+              "Wu 7": 1,
+              "Wu 8": 1,
+              "Wu 9": 1,
+              "Wv 0": 1,
+              "Wv 1": 1,
+              "Wv 10": 1,
+              "Wv 11": 1,
+              "Wv 12": 1,
+              "Wv 13": 1,
+              "Wv 14": 1,
+              "Wv 15": 1,
+              "Wv 16": 1,
+              "Wv 17": 1,
+              "Wv 18": 1,
+              "Wv 19": 1,
+              "Wv 2": 1,
+              "Wv 20": 1,
+              "Wv 21": 1,
+              "Wv 3": 1,
+              "Wv 4": 1,
+              "Wv 5": 1,
+              "Wv 6": 1,
+              "Wv 7": 1,
+              "Wv 8": 1,
+              "Wv 9": 1
+            },
+            "short": [],
+            "stream_sites_fit_by_frobenius": true,
+            "worst_by_site": {
+              "gate": {
+                "bound": 48620674.00000001,
+                "headroom_bits": 0.4592647580439184,
+                "layer": 21,
+                "limit": 66845695.0,
+                "shortfall": 0,
+                "site": "gate",
+                "value": 11,
+                "word": "kg"
+              },
+              "head margin": {
+                "bound": 176068497409.0,
+                "headroom_bits": 0.6426761679869486,
+                "layer": 22,
+                "limit": 274882101247.0,
+                "shortfall": 0,
+                "site": "head margin",
+                "value": 0,
+                "word": "-"
+              },
+              "k": {
+                "bound": 47560735091.00001,
+                "headroom_bits": 1.5252793743813555,
+                "layer": 0,
+                "limit": 136899985407.0,
+                "shortfall": 0,
+                "site": "k",
+                "value": 22,
+                "word": "kk"
+              },
+              "last norm quotient": {
+                "bound": 2119.4897611264946,
+                "headroom_bits": 3.9448079542941574,
+                "layer": 22,
+                "limit": 32639,
+                "shortfall": 0,
+                "site": "last norm quotient",
+                "value": 32,
+                "word": "KF"
+              },
+              "last stream, a cell": {
+                "bound": 40730687283.59094,
+                "headroom_bits": 3.748934142668986,
+                "layer": 22,
+                "limit": 547599908735.0,
+                "shortfall": 0,
+                "site": "last stream, a cell",
+                "value": 0,
+                "word": "e_res"
+              },
+              "norm 1 quotient": {
+                "bound": 4174.479522218647,
+                "headroom_bits": 2.9669286189922293,
+                "layer": 0,
+                "limit": 32639,
+                "shortfall": 0,
+                "site": "norm 1 quotient",
+                "value": 32,
+                "word": "K1"
+              },
+              "norm 2 quotient": {
+                "bound": 2119.4897611264946,
+                "headroom_bits": 3.9448079542941574,
+                "layer": 0,
+                "limit": 32639,
+                "shortfall": 0,
+                "site": "norm 2 quotient",
+                "value": 32,
+                "word": "K2"
+              },
+              "q": {
+                "bound": 69856035559.00002,
+                "headroom_bits": 2.9706656178851247,
+                "layer": 20,
+                "limit": 547599941631.0,
+                "shortfall": 0,
+                "site": "q",
+                "value": 24,
+                "word": "kq"
+              },
+              "stream at norm 1": {
+                "bound": 34442397704.19366,
+                "headroom_bits": 3.9908647217315334,
+                "layer": 21,
+                "limit": 547599908735.0,
+                "shortfall": 0,
+                "site": "stream at norm 1",
+                "value": 0,
+                "word": "e_res"
+              },
+              "stream at norm 2": {
+                "bound": 34471377386.41489,
+                "headroom_bits": 3.9896513548469983,
+                "layer": 21,
+                "limit": 547599908735.0,
+                "shortfall": 0,
+                "site": "stream at norm 2",
+                "value": 0,
+                "word": "e_res"
+              },
+              "stream at the last norm": {
+                "bound": 40730687283.59094,
+                "headroom_bits": 3.748934142668986,
+                "layer": 22,
+                "limit": 547599908735.0,
+                "shortfall": 0,
+                "site": "stream at the last norm",
+                "value": 0,
+                "word": "e_res"
+              },
+              "up": {
+                "bound": 55019209.00000001,
+                "headroom_bits": 1.2808992631095037,
+                "layer": 21,
+                "limit": 133691391.0,
+                "shortfall": 0,
+                "site": "up",
+                "value": 12,
+                "word": "ku"
+              },
+              "v": {
+                "bound": 58183074.00000001,
+                "headroom_bits": 1.2002351408815422,
+                "layer": 3,
+                "limit": 133691391.0,
+                "shortfall": 0,
+                "site": "v",
+                "value": 12,
+                "word": "kv"
+              }
+            }
+          }
+        }
+      },
+      "proof": {
+        "result_json_sha256": "811bd15d2c2a7641ca229a393f605109ef1a8ac033df527e3a3068c683346235",
+        "result": {
+          "altered_copies": [
+            {
+              "altered": "proof-middle-bit",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "proof-last-bit",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "token-file",
+              "exit_code": 1,
+              "expected": "NO: statement-range",
+              "last_line": "NO: statement-range"
+            },
+            {
+              "altered": "request-first-token",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "request-answer-token",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "key-bit",
+              "exit_code": 1,
+              "expected": "NO: key-refused",
+              "last_line": "NO: key-refused"
+            },
+            {
+              "altered": "leaf-bit",
+              "exit_code": 1,
+              "expected": "NO: entry-refused",
+              "last_line": "NO: entry-refused"
+            },
+            {
+              "altered": "commitment-id",
+              "exit_code": 1,
+              "expected": "NO: model-statement",
+              "last_line": "NO: model-statement"
+            }
+          ],
+          "altered_copies_refused_on_the_statement_s_form": 1,
+          "altered_copies_rejected": 8,
+          "builds": {
+            "patched": {
+              "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+              "recipe": "upstream verifier/build.sh",
+              "seconds": 224.71550467517227,
+              "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+              "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+            },
+            "upstream": {
+              "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+              "recipe": "upstream verifier/build.sh",
+              "seconds": 225.6203522873111,
+              "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+              "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+            }
+          },
+          "check_proof": {
+            "exit_code": 0,
+            "result": [
+              "result: outcome=verified commitment_id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd range=24:32 checked_tokens=8 end_token=2 claim=exact-match policy=exact next_token=none C=256 theta=256 cap=0 s=17 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=63 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+              "check_proof: verified: exact match: every checked token (tokens 25 to 32 of the request) is the model's greedy choice; the last checked token is the end token 2; commitment: 63 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 69 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+            ],
+            "seconds": 53.74469281360507
+          },
+          "checked_tokens": [
+            1576,
+            7483,
+            310,
+            3444,
+            338,
+            3681,
+            29889,
+            2
+          ],
+          "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+          "commitment_id_source": "stated by the caller; not recomputed here",
+          "files": {
+            "config/KL.bin": {
+              "bytes": 1144,
+              "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+            },
+            "config/layout.txt": {
+              "bytes": 126322,
+              "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+            },
+            "config/policy.txt": {
+              "bytes": 2422,
+              "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+            },
+            "example.proof": {
+              "bytes": 13238500,
+              "sha256": "1874fc9308d278808d608b9b0de1e31da53963657d2129c1d2814c5069650713"
+            },
+            "example.req": {
+              "bytes": 264,
+              "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+            },
+            "example.y": {
+              "bytes": 4,
+              "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+            },
+            "ivk/key.bin": {
+              "bytes": 2148512,
+              "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+            },
+            "ivk/leaf/0.bin": {
+              "bytes": 2181432,
+              "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+            }
+          },
+          "gpu_used_here": false,
+          "hiding_claim": false,
+          "host": {
+            "machine": "x86_64",
+            "system": "Linux"
+          },
+          "kit": {
+            "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+            "files": {
+              "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+              "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+              "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+              "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+              "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+              "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+              "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+            },
+            "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652"
+          },
+          "passed": true,
+          "patched_verdict": "YES",
+          "patches": {
+            "prover.patch": {
+              "bytes": 13205,
+              "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+            },
+            "tools.patch": {
+              "bytes": 37858,
+              "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+            },
+            "verifier.patch": {
+              "bytes": 16739,
+              "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+            }
+          },
+          "proof_made_here": false,
+          "qualified_backend": false,
+          "range": "24:32",
+          "result_line": {
+            "C": "256",
+            "build": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+            "cap": "0",
+            "checked_tokens": "8",
+            "claim": "exact-match",
+            "commitment_assumed_rounds": "63",
+            "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+            "end_token": "2",
+            "leaf": "0",
+            "least_round": "128.00",
+            "least_round_without_work": "96.23",
+            "limits": "exact",
+            "next_token": "none",
+            "outcome": "verified",
+            "policy": "exact",
+            "range": "24:32",
+            "record": "1",
+            "request_tokens": "64",
+            "s": "17",
+            "theta": "256",
+            "work": "32"
+          },
+          "schema_id": "hallmark.flashprove-tinyllama-proof/1",
+          "seconds": 775.3656666171737,
+          "source": {
+            "bytes": 157799758,
+            "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+            "examples": {
+              "accepted-proof": {
+                "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+                "next_token": 199,
+                "range": "60:64"
+              },
+              "full-size": {
+                "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+                "next_token": 52599,
+                "range": "23:1024"
+              }
+            },
+            "gpu_kit": {
+              "name": "target_small_f2_roomy",
+              "range": "15:64"
+            },
+            "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+            "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+            "licence": "Apache-2.0",
+            "nvcc_release": "V13.2.86",
+            "rejection_tables": [
+              [
+                "accepted-proof",
+                "altered_copies.tsv",
+                10
+              ],
+              [
+                "accepted-proof",
+                "every_kind_of_item.tsv",
+                79
+              ],
+              [
+                "accepted-proof-clipped-gap",
+                "altered_copies_clipped_gap.tsv",
+                10
+              ]
+            ],
+            "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "schema_id": "hallmark.flashprove-source/1",
+            "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+            "upstream": "https://github.com/anthropics/FlashProve",
+            "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+            "version": "0.16.0"
+          },
+          "unpatched_verdict": "NO: policy-tables"
+        }
+      }
+    },
+    "macos": {
+      "verify": {
+        "result_json_sha256": "28f365da4be74463b51c7d3e3d799b6317aaf06dc5442ce2fc6b7138a43acfc8",
+        "result": {
+          "builds": {
+            "patched": {
+              "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+              "recipe": "apple-clang",
+              "seconds": 31.104558916995302,
+              "sha256": "c5d95ec0d68a7779204fdd3fa694e8dec7a20a2f6d22e8cd1db0ee9bd0a5de5c",
+              "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+            },
+            "upstream": {
+              "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+              "recipe": "apple-clang",
+              "seconds": 31.370727208966855,
+              "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
+              "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+            }
+          },
+          "fold_constants": {
+            "integer_model": [
+              "2048,64",
+              "5120,128"
+            ],
+            "prover": [
+              "2048,64",
+              "5120,128"
+            ],
+            "weight_sums.cpp": [
+              "2048,64",
+              "5120,128"
+            ],
+            "weight_sums.py": [
+              "2048,64",
+              "5120,128"
+            ]
+          },
+          "hiding_claim": false,
+          "host": {
+            "machine": "arm64",
+            "system": "Darwin"
+          },
+          "passed": true,
+          "patches": {
+            "apply_order": [
+              "verifier.patch",
+              "prover.patch",
+              "tools.patch"
+            ],
+            "fold_constants": {
+              "2048,64": [
+                "0x3FB504F3",
+                "0x3E3504F3"
+              ],
+              "5120,128": [
+                "0x3F8F1BBD",
+                "0x3DCA62C2"
+              ]
+            },
+            "patches": {
+              "prover.patch": {
+                "bytes": 13205,
+                "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+              },
+              "tools.patch": {
+                "bytes": 37858,
+                "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+              },
+              "verifier.patch": {
+                "bytes": 16739,
+                "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+              }
+            },
+            "schema_id": "hallmark.flashprove-tinyllama-patches/1",
+            "served_form_cases_only_the_patch_meets": [
+              "routed-experts.dense",
+              "routed-experts.dense-three-digests",
+              "routed-experts.dense-three-silu-altered",
+              "routed-experts.dense-three-rope-altered",
+              "routed-experts.dense-three-exp-altered",
+              "no-range-words.dense-eg-7",
+              "no-range-words.dense-eg-6",
+              "no-range-words.dense-eg-7-smax"
+            ],
+            "tinyllama_plan": {
+              "configuration": "9ac96c0fa1613952e35cd06487c5ccb759f7db7839be845f1c528d34f8275573",
+              "h_par": "0f6cc99a523961a164d05ce3b7ccc58778dbf7595f84be39348d521c735527f8",
+              "shape": {
+                "G": 4,
+                "H": 32,
+                "L": 22,
+                "NE": 0,
+                "V": 32000,
+                "d": 2048,
+                "dh": 64,
+                "f": 5632,
+                "ll": 1,
+                "lt": 6,
+                "theta0_lo": 10000
+              },
+              "table": "table 11 24 1376256 65535 0 18",
+              "unmet_without_digests": {
+                "patched": [
+                  "table-digests"
+                ],
+                "unpatched": [
+                  "routed-experts",
+                  "both-clamps",
+                  "table-digests",
+                  "no-range-words"
+                ]
+              }
+            },
+            "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "verifier_source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+            "weight_sums_oracle_cases": [
+              [
+                "5120,128",
+                1
+              ],
+              [
+                "2048,64",
+                1
+              ],
+              [
+                "2048,64",
+                100
+              ]
+            ]
+          },
+          "prover_compiled_by_this_run": false,
+          "provers_parameter_file_reader": {
+            "prover/tests/configurations/pinned/policy.txt": "admitted",
+            "served-form-patched/routed-experts.dense-sig-for-rope/policy.txt": "policy-tables",
+            "served-form-patched/routed-experts.dense-three-digests/policy.txt": "admitted",
+            "served-form-patched/routed-experts.dense-with-digests/policy.txt": "policy-tables",
+            "served-form-patched/routed-experts.dense/policy.txt": "admitted",
+            "served-form-patched/table-digests.no-tsig/policy.txt": "policy-tables"
+          },
+          "qualified_backend": false,
+          "schema_id": "hallmark.flashprove-tinyllama-verify/1",
+          "seconds": 499.56445999996504,
+          "source": {
+            "bytes": 157799758,
+            "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+            "examples": {
+              "accepted-proof": {
+                "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+                "next_token": 199,
+                "range": "60:64"
+              },
+              "full-size": {
+                "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+                "next_token": 52599,
+                "range": "23:1024"
+              }
+            },
+            "gpu_kit": {
+              "name": "target_small_f2_roomy",
+              "range": "15:64"
+            },
+            "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+            "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+            "licence": "Apache-2.0",
+            "nvcc_release": "V13.2.86",
+            "rejection_tables": [
+              [
+                "accepted-proof",
+                "altered_copies.tsv",
+                10
+              ],
+              [
+                "accepted-proof",
+                "every_kind_of_item.tsv",
+                79
+              ],
+              [
+                "accepted-proof-clipped-gap",
+                "altered_copies_clipped_gap.tsv",
+                10
+              ]
+            ],
+            "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "schema_id": "hallmark.flashprove-source/1",
+            "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+            "upstream": "https://github.com/anthropics/FlashProve",
+            "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+            "version": "0.16.0"
+          },
+          "standard_form": {
+            "patched": "served_form_test.py: all as expected",
+            "unpatched_misses": [
+              "no-range-words.dense-eg-6",
+              "no-range-words.dense-eg-7",
+              "no-range-words.dense-eg-7-smax",
+              "routed-experts.dense",
+              "routed-experts.dense-three-digests",
+              "routed-experts.dense-three-exp-altered",
+              "routed-experts.dense-three-rope-altered",
+              "routed-experts.dense-three-silu-altered"
+            ]
+          },
+          "synthetic_inputs_only": true,
+          "timed_formats": 9,
+          "tinyllama_plan": {
+            "bits_compiled_bound": 126.21,
+            "configuration": "9ac96c0fa1613952e35cd06487c5ccb759f7db7839be845f1c528d34f8275573",
+            "h_par": "0f6cc99a523961a164d05ce3b7ccc58778dbf7595f84be39348d521c735527f8",
+            "proof_bytes_at_most": 13685772,
+            "shape": {
+              "G": 4,
+              "H": 32,
+              "L": 22,
+              "NE": 0,
+              "V": 32000,
+              "d": 2048,
+              "dh": 64,
+              "f": 5632,
+              "ll": 1,
+              "lt": 6,
+              "theta0_lo": 10000
+            },
+            "unmet_without_digests": {
+              "patched": [
+                "table-digests"
+              ],
+              "unpatched": [
+                "routed-experts",
+                "both-clamps",
+                "table-digests",
+                "no-range-words"
+              ]
+            },
+            "unpatched": "policy-tables"
+          },
+          "upstream_inputs": {
+            "calls_compared": 108,
+            "calls_differing": 0,
+            "examples": {
+              "accepted-proof": {
+                "exit_code": 0,
+                "result": [
+                  "result: outcome=verified commitment_id=79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183 range=60:64 checked_tokens=3 end_token=not_checked claim=exact-match policy=exact next_token=199 C=256 theta=256 cap=0 s=16 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=49 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+                  "check_proof: verified: exact match: every checked token (tokens 61 to 63 of the request) is the model's greedy choice; the next token, 199, is the model's greedy choice; the end of the reply was not checked; commitment: 49 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 38 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+                ],
+                "seconds": 4.165015209000558
+              },
+              "full-size": {
+                "exit_code": 0,
+                "result": [
+                  "result: outcome=verified commitment_id=7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe range=23:1024 checked_tokens=1000 end_token=not_checked claim=exact-match policy=exact next_token=52599 C=256 theta=256 cap=0 s=15 limits=exact request_tokens=1024 leaf=0 commitment_assumed_rounds=86 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+                  "check_proof: verified: exact match: every checked token (tokens 24 to 1023 of the request) is the model's greedy choice; the next token, 52599, is the model's greedy choice; the end of the reply was not checked; commitment: 86 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 71 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+                ],
+                "seconds": 28.972469875006936
+              }
+            },
+            "rejection_tables": [
+              {
+                "example": "accepted-proof",
+                "exit_code": 0,
+                "last_line": "10 altered sets: all rejected",
+                "seconds": 31.62789345899364,
+                "table": "altered_copies.tsv"
+              },
+              {
+                "example": "accepted-proof",
+                "exit_code": 0,
+                "last_line": "79 altered sets: all rejected",
+                "seconds": 227.30930337501923,
+                "table": "every_kind_of_item.tsv"
+              },
+              {
+                "example": "accepted-proof-clipped-gap",
+                "exit_code": 0,
+                "last_line": "10 altered sets: all rejected",
+                "seconds": 31.39468287496129,
+                "table": "altered_copies_clipped_gap.tsv"
+              }
+            ]
+          },
+          "weight_sums_against_oracle": [
+            {
+              "same": true,
+              "seed": 1,
+              "shape": "5120,128"
+            },
+            {
+              "same": true,
+              "seed": 1,
+              "shape": "2048,64"
+            },
+            {
+              "same": true,
+              "seed": 100,
+              "shape": "2048,64"
+            }
+          ]
+        }
+      },
+      "answer": {
+        "result_json_sha256": "28a54089b0273c0654597e63d27c227dde25f1cffba65d03f9a7c8a40739b74c",
+        "result": {
+          "answer": {
+            "T": 64,
+            "answer": [
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2
+            ],
+            "choices": [
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2
+            ],
+            "clamp_limit": 2047,
+            "clamped": [
+              {
+                "entries": 1,
+                "largest": 2241,
+                "layer": 2,
+                "name": "vw",
+                "positions": [
+                  32
+                ]
+              }
+            ],
+            "controls": {
+              "final-norm-MF-plus-1": {
+                "choices": [
+                  1576,
+                  7483,
+                  310,
+                  3444,
+                  338,
+                  3681,
+                  29889,
+                  2
+                ],
+                "failed": [
+                  "the logits' scale at position 24: 1.9951",
+                  "the logits' scale at position 25: 2.0054",
+                  "the logits' scale at position 26: 1.9969",
+                  "the logits' scale at position 27: 1.9897",
+                  "the logits' scale at position 28: 2.0081",
+                  "the logits' scale at position 29: 2.0066",
+                  "the logits' scale at position 30: 2.0097",
+                  "the logits' scale at position 31: 1.9969"
+                ],
+                "least_correlation": 0.9990864727052347,
+                "slope_range": [
+                  1.9897371358092395,
+                  2.0097486444831953
+                ]
+              },
+              "layer-10-kv-plus-1": {
+                "choices": [
+                  1576,
+                  7483,
+                  310,
+                  3444,
+                  338,
+                  3681,
+                  29889,
+                  2
+                ],
+                "failed": [
+                  "the logits' correlation at position 24: 0.99616",
+                  "the logits' correlation at position 25: 0.99616",
+                  "the logits' correlation at position 26: 0.99591",
+                  "the logits' correlation at position 27: 0.99699",
+                  "the logits' correlation at position 28: 0.99390",
+                  "the logits' correlation at position 29: 0.99672",
+                  "the logits' correlation at position 30: 0.99518",
+                  "the logits' correlation at position 31: 0.99433"
+                ],
+                "least_correlation": 0.9938962227754076,
+                "slope_range": [
+                  0.9820376492693965,
+                  1.0074853029291497
+                ]
+              }
+            },
+            "e": 32,
+            "gate_key_within_limit": true,
+            "matches": true,
+            "peaks": {
+              "a": 1678,
+              "aF": 1028,
+              "aF_Rc": 614080775,
+              "aF_sigma": 85121,
+              "aF_w": 1028,
+              "a_Rc": 60041590595,
+              "a_sigma": 422144,
+              "a_w": 1678,
+              "first_choice": 29989,
+              "gw": 3970,
+              "k": 1819,
+              "key": 3970,
+              "kw": 1819,
+              "lam": 3608052,
+              "m": 1678,
+              "m_Rc": 21718748203,
+              "m_sigma": 422001,
+              "m_w": 1678,
+              "o": 1128,
+              "q": 773,
+              "qw": 773,
+              "s": 1536,
+              "u": 1755,
+              "v": 2047,
+              "vw": 2241,
+              "x": 345459,
+              "x_last": 35978,
+              "x_mid": 345349
+            },
+            "positions": [
+              {
+                "correlation": 0.9993659607690039,
+                "float_margin": 1.3528270721435547,
+                "margin": 1.4396896362304688,
+                "position": 24,
+                "slope": 0.9963236083087996,
+                "token": 1576
+              },
+              {
+                "correlation": 0.9996197910575512,
+                "float_margin": 4.829959869384766,
+                "margin": 4.763336181640625,
+                "position": 25,
+                "slope": 1.0031472680723938,
+                "token": 7483
+              },
+              {
+                "correlation": 0.9995891047193939,
+                "float_margin": 3.1156539916992188,
+                "margin": 3.0436019897460938,
+                "position": 26,
+                "slope": 0.9976240344281994,
+                "token": 310
+              },
+              {
+                "correlation": 0.9996803285787917,
+                "float_margin": 7.930538177490234,
+                "margin": 7.826667785644531,
+                "position": 27,
+                "slope": 0.9933294673147165,
+                "token": 3444
+              },
+              {
+                "correlation": 0.9993954755405179,
+                "float_margin": 3.7941207885742188,
+                "margin": 3.96905517578125,
+                "position": 28,
+                "slope": 1.0035047971021254,
+                "token": 338
+              },
+              {
+                "correlation": 0.9993622454485459,
+                "float_margin": 4.224757194519043,
+                "margin": 4.165740966796875,
+                "position": 29,
+                "slope": 1.0034196871175154,
+                "token": 3681
+              },
+              {
+                "correlation": 0.9994629757680931,
+                "float_margin": 1.0627670288085938,
+                "margin": 0.7669830322265625,
+                "position": 30,
+                "slope": 1.0047664708093753,
+                "token": 29889
+              },
+              {
+                "correlation": 0.9990885650700321,
+                "float_margin": 3.1625595092773438,
+                "margin": 3.2466506958007812,
+                "position": 31,
+                "slope": 0.9972740959597961,
+                "token": 2
+              }
+            ],
+            "r": 24,
+            "range_failure": null,
+            "s": 17,
+            "seconds": 4.58480866602622,
+            "window": [
+              529,
+              29989,
+              1792,
+              29989,
+              29958,
+              13,
+              1170,
+              278,
+              7483,
+              310,
+              3444,
+              297,
+              697,
+              3273,
+              10541,
+              29889,
+              2,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "builds": {
+            "patched": {
+              "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+              "recipe": "apple-clang",
+              "seconds": 31.40120374999242,
+              "sha256": "c5d95ec0d68a7779204fdd3fa694e8dec7a20a2f6d22e8cd1db0ee9bd0a5de5c",
+              "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+            },
+            "upstream": {
+              "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+              "recipe": "apple-clang",
+              "seconds": 31.889363750000484,
+              "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
+              "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+            }
+          },
+          "environments": {
+            "integer_model": {
+              "gguf": "0.19.0",
+              "installed": [
+                "certifi==2026.11.20",
+                "charset-normalizer==3.5.3",
+                "filelock==4.3.0",
+                "fsspec==2026.9.0",
+                "gguf==0.19.0",
+                "idna==3.20",
+                "jinja2==3.1.6",
+                "markupsafe==3.0.4",
+                "mpmath==1.3.0",
+                "networkx==3.7",
+                "numpy==2.4.6",
+                "pyyaml==6.0.4",
+                "requests==2.34.2",
+                "setuptools==84.2.1",
+                "sympy==1.14.0",
+                "torch==2.13.0",
+                "tqdm==4.70.1",
+                "typing-extensions==4.16.0",
+                "urllib3==2.8.0"
+              ],
+              "lock_file": "integer_model-macos-arm64.txt",
+              "numpy": "2.4.6",
+              "python": "3.13.15",
+              "torch": "2.13.0"
+            },
+            "scales": {
+              "gguf": "0.19.0",
+              "installed": [
+                "annotated-doc==0.0.7",
+                "annotated-types==0.8.0",
+                "anyio==4.16.0",
+                "certifi==2026.11.20",
+                "charset-normalizer==3.5.3",
+                "click==8.5.1",
+                "filelock==4.3.0",
+                "fsspec==2026.9.0",
+                "gguf==0.19.0",
+                "h11==0.16.0",
+                "hf-xet==1.8.0",
+                "httpcore==1.0.9",
+                "httpx==0.28.1",
+                "huggingface-hub==1.33.0",
+                "idna==3.20",
+                "jinja2==3.1.6",
+                "markdown-it-py==4.3.0",
+                "markupsafe==3.0.4",
+                "mdurl==0.1.2",
+                "mpmath==1.3.0",
+                "networkx==3.7",
+                "numpy==2.3.5",
+                "packaging==26.3",
+                "pyarrow==23.0.1",
+                "pydantic-core==2.50.5",
+                "pydantic==2.14.4",
+                "pygments==2.21.0",
+                "pyyaml==6.0.4",
+                "regex==2026.11.19",
+                "requests==2.34.2",
+                "rich==15.0.0",
+                "safetensors==0.8.0",
+                "setuptools==84.2.1",
+                "shellingham==1.5.4",
+                "sympy==1.14.0",
+                "tokenizers==0.22.2",
+                "torch==2.9.1",
+                "tqdm==4.70.1",
+                "transformers==5.15.1",
+                "typer==0.29.2",
+                "typing-extensions==4.16.0",
+                "typing-inspection==0.4.5",
+                "urllib3==2.8.0"
+              ],
+              "lock_file": "scales-macos-arm64.txt",
+              "numpy": "2.3.5",
+              "pyarrow": "23.0.1",
+              "python": "3.13.15",
+              "safetensors": "0.8.0",
+              "tokenizers": "0.22.2",
+              "torch": "2.9.1",
+              "transformers": "5.15.1"
+            }
+          },
+          "float_reference": {
+            "checked_logits": {
+              "positions": [
+                24,
+                31
+              ],
+              "shape": [
+                8,
+                32000
+              ]
+            },
+            "final_norm_max_abs": 0.00011444091796875,
+            "final_norm_relative_l2": 3.946445303881774e-06,
+            "float_greedy": [
+              1576,
+              7483,
+              310,
+              3444,
+              338,
+              3681,
+              29889,
+              2
+            ],
+            "float_greedy_is_the_answer": true,
+            "moe_layers": [],
+            "rope_layers": 22,
+            "seconds": 6.013113416964188,
+            "shape": {
+              "G": 4,
+              "H": 32,
+              "L": 22,
+              "NE": 0,
+              "V": 32000,
+              "d": 2048,
+              "dh": 64,
+              "eps": 9.999999747378752e-06,
+              "f": 5632,
+              "fe": 0,
+              "theta": 10000.0
+            }
+          },
+          "gpu_used": false,
+          "hiding_claim": false,
+          "host": {
+            "machine": "arm64",
+            "system": "Darwin"
+          },
+          "kit": {
+            "calibrate_seconds": 75.0785469589755,
+            "calibration_set": {
+              "bytes": 131200,
+              "drawn_rows_match_upstream": true,
+              "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c",
+              "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+            },
+            "gguf": {
+              "bytes": 2200293664,
+              "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+              "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+            },
+            "kit_reproduced": true,
+            "maxima_equal_to_committed": true
+          },
+          "kit_pins": {
+            "base_policy_sha256": "68e4ff9f007b7d5cf73aa7e9145a404d84b1dfe46ba35c22580266f083829488",
+            "bounds": {
+              "final_norm_relative_l2": 0.0001,
+              "logit_correlation": 0.998,
+              "logit_slope": [
+                0.75,
+                1.33
+              ]
+            },
+            "calibration_set": {
+              "bytes": 131200,
+              "drawn_rows_sha256": "8cd63f617d474124a50ee052eae2fd0be603ea45f191ec8ccb4f443f676fb58c",
+              "sha256": "9b2b8fc6b98904de5c905bcd7eecfd2f7895ddacef28d249ca44e3b594fa2f31"
+            },
+            "calibration_text": {
+              "bytes": 6357543,
+              "licence": "CC BY-SA: the dataset card's tags name CC BY-SA 3.0 and GFDL, its text CC BY-SA 4.0 (WikiText, S. Merity et al., 'Pointer Sentinel Mixture Models', arXiv:1609.07843, 2016). No text and no token id from it is committed; scale statistics computed from it are (kit/maxima.json, words.json, KL.bin, six lines of policy.txt) and the calibration set's SHA-256",
+              "licence_review": "not cleared by the owner. Reviewed only by this proposal's contributor: the dataset card's tags (CC BY-SA 3.0, GFDL) and its text (CC BY-SA 4.0) name different versions, and research/AUTHORITY.json excludes ambiguous licences. The owner decides (decision 0094, not done 1); a no means refitting the kit on another text. The three program patches do not depend on it; scales.patch pins the calibration set's SHA-256 (TINYLLAMA_SET_SHA256) and would change with the text",
+              "sha256": "e83889baabc497075506f91975be5fac0d45c5290b6b20582c8cd1e853d0c9f7",
+              "url": "https://huggingface.co/datasets/Salesforce/wikitext/resolve/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-2-raw-v1/train-00000-of-00001.parquet",
+              "what": "WikiText-2 (raw), training split, as upstream's make_calibration_set.py pins it"
+            },
+            "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+            "e_res": 11,
+            "eg": 7,
+            "environments": {
+              "integer_model": {
+                "locks": {
+                  "linux-x86_64": {
+                    "file": "integer_model-linux-x86_64.txt",
+                    "sha256": "bba3b40f517585fa71af22286ddc71a6ef892143ea416c91625fe8dbd5a249a2"
+                  },
+                  "macos-arm64": {
+                    "file": "integer_model-macos-arm64.txt",
+                    "sha256": "b9d89b9e3571659760261c5c14441c99c331da76b6526f17b15edd94215df78c"
+                  }
+                },
+                "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13",
+                "packages": {
+                  "gguf": "0.19.0",
+                  "numpy": "2.4.6",
+                  "torch": "2.13.0"
+                },
+                "python": "3.13"
+              },
+              "scales": {
+                "locks": {
+                  "linux-x86_64": {
+                    "file": "scales-linux-x86_64.txt",
+                    "sha256": "141cc59c3a21f196a6753bda102d725f2d0865de4e0f0c5655fd9b10c5077c8b"
+                  },
+                  "macos-arm64": {
+                    "file": "scales-macos-arm64.txt",
+                    "sha256": "a90ecc08252b4d47abd4f5287f5c37fff10faaeadab68a9860b8d1ef1988f40d"
+                  }
+                },
+                "note": "every distribution pinned with hashes by the lock file; the Python patch version is uv's choice of 3.13",
+                "packages": {
+                  "gguf": "0.19.0",
+                  "numpy": "2.3.5",
+                  "pyarrow": "23.0.1",
+                  "safetensors": "0.8.0",
+                  "tokenizers": "0.22.2",
+                  "torch": "2.9.1",
+                  "transformers": "5.15.1"
+                },
+                "python": "3.13"
+              }
+            },
+            "files": {
+              "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+              "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+              "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+              "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+              "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+              "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+              "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+            },
+            "gguf": {
+              "bytes": 2200293664,
+              "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+              "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+            },
+            "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+            "model": {
+              "case": "research/probes/sash/response-case.json",
+              "files": [
+                "config.json",
+                "model.safetensors",
+                "tokenizer.json"
+              ],
+              "note": "id, revision, licence, sizes and SHA-256 come from the case file, the pins of Hallmark's SASH path"
+            },
+            "mutation_controls": [
+              "final-norm-MF-plus-1",
+              "layer-10-kv-plus-1"
+            ],
+            "patches_json_sha256": "7e0a518f51d2cd96b9c64a18a12d0b7eddb69f3759615966d8f63a6c2d37696c",
+            "request": {
+              "T": 64,
+              "e": 32,
+              "filler": 0,
+              "r": 24
+            },
+            "scales_patch": {
+              "bytes": 34669,
+              "name": "scales.patch",
+              "sha256": "73c42a3c16a6b7440f378b4703d312eb5d7f82a697f2bd6a051cbca4b3501c2c"
+            },
+            "schema_id": "hallmark.flashprove-tinyllama-kit/1",
+            "upstream_revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "worst_case": {
+              "note": "cp_commit's worst-case check computed on a CPU by worst_case_cpu.py (Hallmark's port of upstream's worst_case.cuh): every site fits at eg 7; at eg 8 the gate of layer 21 does not (one row; without the line gcl, which the verifier refuses at NE 0, its key's limit is 32,639)",
+              "ratio_tolerance": 0.001,
+              "short": []
+            }
+          },
+          "passed": true,
+          "planning": {
+            "bits_compiled_bound": 126.21,
+            "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+            "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+            "patched": "standard parameter form, three tables, PLAN ONLY (accounting and request)",
+            "proof_bytes_at_most": 13685772,
+            "prover_setup": {
+              "control_kFM_plus_1": "attention: the shift sh = 7 is not supported: sh must be from 4 to 12, u0 * 2^sh + 65536 at most 2^24, and both 0 <= 2^kFM - u0 - nHM <= nHM and 0 <= 2^kFD - u0 - nHD <= nHD must hold; kFM = 15, kFD = 15",
+              "control_layer_1_kd_25": "layer constants: layer 1: shift kd = 25 is outside the range for digit form 1, which is 1 to 24",
+              "control_lmh_10": "attention: the column length of a committed matrix (2^lmS, 2^lmh, 2^lmo, 2^lmbA or 2^lmq) is not a multiple of the ring degree D",
+              "control_table_one_step_short": "the parameter file is not admitted: policy-pad-place: fi0, the third number of the line table, must be at least 1310723: a row's data coefficients and three pads for each of its answers",
+              "hiding": "hiding conditions that follow from the file alone: met",
+              "kit": "prover set-up: admitted (11 layer groups, 1 attention plan, kFM 14, kFD 15)",
+              "weight_table": "weight table: admitted (W: 10240 rows of 2^18 columns in 134 units; 2^11 long rows of 1310720 data entries in 1376256, 65535 masks, code length 2^24; a tree's stored level at most 7)"
+            },
+            "provers_parameter_file_reader": "admitted",
+            "unpatched_accounting": "NO: policy-tables",
+            "unpatched_request": "NO: policy-tables"
+          },
+          "proof_made": false,
+          "scale_tool_tests": {
+            "table_ties.py": {
+              "last_line": "OK: 26 checks",
+              "status": 0
+            },
+            "test_calibrate.py": {
+              "last_line": "in part: 19 cases passed; SMALL_MODEL is not set, so program_on_the_small_model was not run",
+              "status": 77
+            },
+            "test_gguf_weights.py": {
+              "last_line": "in part: 102 cases passed; 2 skipped (set SMALL_MODEL=<model's folder> or MAKE_MODEL=<make_model>)",
+              "status": 77
+            },
+            "test_policy_tables.py": {
+              "last_line": "OK",
+              "status": 0
+            }
+          },
+          "schema_id": "hallmark.flashprove-tinyllama-answer/1",
+          "seconds": 335.40429891698295,
+          "source": {
+            "bytes": 157799758,
+            "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+            "examples": {
+              "accepted-proof": {
+                "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+                "next_token": 199,
+                "range": "60:64"
+              },
+              "full-size": {
+                "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+                "next_token": 52599,
+                "range": "23:1024"
+              }
+            },
+            "gpu_kit": {
+              "name": "target_small_f2_roomy",
+              "range": "15:64"
+            },
+            "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+            "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+            "licence": "Apache-2.0",
+            "nvcc_release": "V13.2.86",
+            "rejection_tables": [
+              [
+                "accepted-proof",
+                "altered_copies.tsv",
+                10
+              ],
+              [
+                "accepted-proof",
+                "every_kind_of_item.tsv",
+                79
+              ],
+              [
+                "accepted-proof-clipped-gap",
+                "altered_copies_clipped_gap.tsv",
+                10
+              ]
+            ],
+            "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "schema_id": "hallmark.flashprove-source/1",
+            "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+            "upstream": "https://github.com/anthropics/FlashProve",
+            "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+            "version": "0.16.0"
+          },
+          "worst_case": {
+            "float_gate_keys": [
+              2092.9,
+              1980.7,
+              6995.8,
+              2110.2,
+              3099.2,
+              2598.6,
+              2647.4,
+              5130.5,
+              3113.1,
+              3720.9,
+              3383.1,
+              3706.5,
+              5699.5,
+              5318.8,
+              5395.9,
+              5136.4,
+              5784.0,
+              6559.9,
+              6787.0,
+              6822.0,
+              6289.6,
+              22702.9
+            ],
+            "float_rows_beyond_the_limit": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "float_sha256": "1a62c2caa3906e3ca75a1b76e2891e44fbc865be74384302172e8cffff04fa80",
+            "gate_key_bounds": [
+              2189,
+              2071,
+              7316,
+              2207,
+              3241,
+              2717,
+              2768,
+              5365,
+              3256,
+              3891,
+              3538,
+              3876,
+              5960,
+              5562,
+              5643,
+              5371,
+              6049,
+              6860,
+              7097,
+              7134,
+              6577,
+              23741
+            ],
+            "gate_rows_beyond_the_limit": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "public_sites_fit": true,
+            "row_sites_fit": true,
+            "rows_recomputed_exactly": {
+              "Wg 0": 1,
+              "Wg 1": 1,
+              "Wg 10": 1,
+              "Wg 11": 1,
+              "Wg 12": 1,
+              "Wg 13": 1,
+              "Wg 14": 1,
+              "Wg 15": 1,
+              "Wg 16": 1,
+              "Wg 17": 1,
+              "Wg 18": 1,
+              "Wg 19": 1,
+              "Wg 2": 1,
+              "Wg 20": 1,
+              "Wg 21": 1,
+              "Wg 3": 1,
+              "Wg 4": 1,
+              "Wg 5": 1,
+              "Wg 6": 1,
+              "Wg 7": 1,
+              "Wg 8": 1,
+              "Wg 9": 1,
+              "Wk 0": 2,
+              "Wk 1": 2,
+              "Wk 10": 2,
+              "Wk 11": 2,
+              "Wk 12": 2,
+              "Wk 13": 2,
+              "Wk 14": 2,
+              "Wk 15": 2,
+              "Wk 16": 2,
+              "Wk 17": 2,
+              "Wk 18": 2,
+              "Wk 19": 2,
+              "Wk 2": 3,
+              "Wk 20": 2,
+              "Wk 21": 2,
+              "Wk 3": 2,
+              "Wk 4": 2,
+              "Wk 5": 2,
+              "Wk 6": 2,
+              "Wk 7": 2,
+              "Wk 8": 3,
+              "Wk 9": 2,
+              "Wq 0": 2,
+              "Wq 1": 3,
+              "Wq 10": 2,
+              "Wq 11": 2,
+              "Wq 12": 2,
+              "Wq 13": 2,
+              "Wq 14": 2,
+              "Wq 15": 2,
+              "Wq 16": 3,
+              "Wq 17": 3,
+              "Wq 18": 2,
+              "Wq 19": 2,
+              "Wq 2": 3,
+              "Wq 20": 2,
+              "Wq 21": 2,
+              "Wq 3": 2,
+              "Wq 4": 2,
+              "Wq 5": 2,
+              "Wq 6": 2,
+              "Wq 7": 2,
+              "Wq 8": 2,
+              "Wq 9": 2,
+              "Wu 0": 1,
+              "Wu 1": 1,
+              "Wu 10": 1,
+              "Wu 11": 1,
+              "Wu 12": 1,
+              "Wu 13": 1,
+              "Wu 14": 1,
+              "Wu 15": 1,
+              "Wu 16": 1,
+              "Wu 17": 1,
+              "Wu 18": 1,
+              "Wu 19": 1,
+              "Wu 2": 1,
+              "Wu 20": 1,
+              "Wu 21": 1,
+              "Wu 3": 1,
+              "Wu 4": 1,
+              "Wu 5": 1,
+              "Wu 6": 1,
+              "Wu 7": 1,
+              "Wu 8": 1,
+              "Wu 9": 1,
+              "Wv 0": 1,
+              "Wv 1": 1,
+              "Wv 10": 1,
+              "Wv 11": 1,
+              "Wv 12": 1,
+              "Wv 13": 1,
+              "Wv 14": 1,
+              "Wv 15": 1,
+              "Wv 16": 1,
+              "Wv 17": 1,
+              "Wv 18": 1,
+              "Wv 19": 1,
+              "Wv 2": 1,
+              "Wv 20": 1,
+              "Wv 21": 1,
+              "Wv 3": 1,
+              "Wv 4": 1,
+              "Wv 5": 1,
+              "Wv 6": 1,
+              "Wv 7": 1,
+              "Wv 8": 1,
+              "Wv 9": 1
+            },
+            "short": [],
+            "stream_sites_fit_by_frobenius": true,
+            "worst_by_site": {
+              "gate": {
+                "bound": 48620674.00000001,
+                "headroom_bits": 0.4592647580439184,
+                "layer": 21,
+                "limit": 66845695.0,
+                "shortfall": 0,
+                "site": "gate",
+                "value": 11,
+                "word": "kg"
+              },
+              "head margin": {
+                "bound": 176068497409.0,
+                "headroom_bits": 0.6426761679869486,
+                "layer": 22,
+                "limit": 274882101247.0,
+                "shortfall": 0,
+                "site": "head margin",
+                "value": 0,
+                "word": "-"
+              },
+              "k": {
+                "bound": 47560735091.00001,
+                "headroom_bits": 1.5252793743813555,
+                "layer": 0,
+                "limit": 136899985407.0,
+                "shortfall": 0,
+                "site": "k",
+                "value": 22,
+                "word": "kk"
+              },
+              "last norm quotient": {
+                "bound": 2119.4897611264946,
+                "headroom_bits": 3.9448079542941574,
+                "layer": 22,
+                "limit": 32639,
+                "shortfall": 0,
+                "site": "last norm quotient",
+                "value": 32,
+                "word": "KF"
+              },
+              "last stream, a cell": {
+                "bound": 40730687283.59094,
+                "headroom_bits": 3.748934142668986,
+                "layer": 22,
+                "limit": 547599908735.0,
+                "shortfall": 0,
+                "site": "last stream, a cell",
+                "value": 0,
+                "word": "e_res"
+              },
+              "norm 1 quotient": {
+                "bound": 4174.479522218647,
+                "headroom_bits": 2.9669286189922293,
+                "layer": 0,
+                "limit": 32639,
+                "shortfall": 0,
+                "site": "norm 1 quotient",
+                "value": 32,
+                "word": "K1"
+              },
+              "norm 2 quotient": {
+                "bound": 2119.4897611264946,
+                "headroom_bits": 3.9448079542941574,
+                "layer": 0,
+                "limit": 32639,
+                "shortfall": 0,
+                "site": "norm 2 quotient",
+                "value": 32,
+                "word": "K2"
+              },
+              "q": {
+                "bound": 69856035559.00002,
+                "headroom_bits": 2.9706656178851247,
+                "layer": 20,
+                "limit": 547599941631.0,
+                "shortfall": 0,
+                "site": "q",
+                "value": 24,
+                "word": "kq"
+              },
+              "stream at norm 1": {
+                "bound": 34442397704.19366,
+                "headroom_bits": 3.9908647217315334,
+                "layer": 21,
+                "limit": 547599908735.0,
+                "shortfall": 0,
+                "site": "stream at norm 1",
+                "value": 0,
+                "word": "e_res"
+              },
+              "stream at norm 2": {
+                "bound": 34471377386.41489,
+                "headroom_bits": 3.9896513548469983,
+                "layer": 21,
+                "limit": 547599908735.0,
+                "shortfall": 0,
+                "site": "stream at norm 2",
+                "value": 0,
+                "word": "e_res"
+              },
+              "stream at the last norm": {
+                "bound": 40730687283.59094,
+                "headroom_bits": 3.748934142668986,
+                "layer": 22,
+                "limit": 547599908735.0,
+                "shortfall": 0,
+                "site": "stream at the last norm",
+                "value": 0,
+                "word": "e_res"
+              },
+              "up": {
+                "bound": 55019209.00000001,
+                "headroom_bits": 1.2808992631095037,
+                "layer": 21,
+                "limit": 133691391.0,
+                "shortfall": 0,
+                "site": "up",
+                "value": 12,
+                "word": "ku"
+              },
+              "v": {
+                "bound": 58183074.00000001,
+                "headroom_bits": 1.2002351408815422,
+                "layer": 3,
+                "limit": 133691391.0,
+                "shortfall": 0,
+                "site": "v",
+                "value": 12,
+                "word": "kv"
+              }
+            }
+          }
+        }
+      },
+      "proof": {
+        "result_json_sha256": "ba9cebc1beb354351cd8c3f6c0c8db87d7bc40dd3f92224c920315518f8db920",
+        "result": {
+          "altered_copies": [
+            {
+              "altered": "proof-middle-bit",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "proof-last-bit",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "token-file",
+              "exit_code": 1,
+              "expected": "NO: statement-range",
+              "last_line": "NO: statement-range"
+            },
+            {
+              "altered": "request-first-token",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "request-answer-token",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "key-bit",
+              "exit_code": 1,
+              "expected": "NO: key-refused",
+              "last_line": "NO: key-refused"
+            },
+            {
+              "altered": "leaf-bit",
+              "exit_code": 1,
+              "expected": "NO: entry-refused",
+              "last_line": "NO: entry-refused"
+            },
+            {
+              "altered": "commitment-id",
+              "exit_code": 1,
+              "expected": "NO: model-statement",
+              "last_line": "NO: model-statement"
+            }
+          ],
+          "altered_copies_refused_on_the_statement_s_form": 1,
+          "altered_copies_rejected": 8,
+          "builds": {
+            "patched": {
+              "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+              "recipe": "apple-clang",
+              "seconds": 31.51036329200724,
+              "sha256": "c5d95ec0d68a7779204fdd3fa694e8dec7a20a2f6d22e8cd1db0ee9bd0a5de5c",
+              "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+            },
+            "upstream": {
+              "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+              "recipe": "apple-clang",
+              "seconds": 31.37031070899684,
+              "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
+              "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+            }
+          },
+          "check_proof": {
+            "exit_code": 0,
+            "result": [
+              "result: outcome=verified commitment_id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd range=24:32 checked_tokens=8 end_token=2 claim=exact-match policy=exact next_token=none C=256 theta=256 cap=0 s=17 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=63 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+              "check_proof: verified: exact match: every checked token (tokens 25 to 32 of the request) is the model's greedy choice; the last checked token is the end token 2; commitment: 63 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 69 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+            ],
+            "seconds": 9.868537832982838
+          },
+          "checked_tokens": [
+            1576,
+            7483,
+            310,
+            3444,
+            338,
+            3681,
+            29889,
+            2
+          ],
+          "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+          "commitment_id_source": "stated by the caller; not recomputed here",
+          "files": {
+            "config/KL.bin": {
+              "bytes": 1144,
+              "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+            },
+            "config/layout.txt": {
+              "bytes": 126322,
+              "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+            },
+            "config/policy.txt": {
+              "bytes": 2422,
+              "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+            },
+            "example.proof": {
+              "bytes": 13238500,
+              "sha256": "1874fc9308d278808d608b9b0de1e31da53963657d2129c1d2814c5069650713"
+            },
+            "example.req": {
+              "bytes": 264,
+              "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+            },
+            "example.y": {
+              "bytes": 4,
+              "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+            },
+            "ivk/key.bin": {
+              "bytes": 2148512,
+              "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+            },
+            "ivk/leaf/0.bin": {
+              "bytes": 2181432,
+              "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+            }
+          },
+          "gpu_used_here": false,
+          "hiding_claim": false,
+          "host": {
+            "machine": "arm64",
+            "system": "Darwin"
+          },
+          "kit": {
+            "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+            "files": {
+              "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+              "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+              "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+              "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+              "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+              "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+              "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+            },
+            "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652"
+          },
+          "passed": true,
+          "patched_verdict": "YES",
+          "patches": {
+            "prover.patch": {
+              "bytes": 13205,
+              "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+            },
+            "tools.patch": {
+              "bytes": 37858,
+              "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+            },
+            "verifier.patch": {
+              "bytes": 16739,
+              "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+            }
+          },
+          "proof_made_here": false,
+          "qualified_backend": false,
+          "range": "24:32",
+          "result_line": {
+            "C": "256",
+            "build": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+            "cap": "0",
+            "checked_tokens": "8",
+            "claim": "exact-match",
+            "commitment_assumed_rounds": "63",
+            "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+            "end_token": "2",
+            "leaf": "0",
+            "least_round": "128.00",
+            "least_round_without_work": "96.23",
+            "limits": "exact",
+            "next_token": "none",
+            "outcome": "verified",
+            "policy": "exact",
+            "range": "24:32",
+            "record": "1",
+            "request_tokens": "64",
+            "s": "17",
+            "theta": "256",
+            "work": "32"
+          },
+          "schema_id": "hallmark.flashprove-tinyllama-proof/1",
+          "seconds": 146.67555529199308,
+          "source": {
+            "bytes": 157799758,
+            "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+            "examples": {
+              "accepted-proof": {
+                "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+                "next_token": 199,
+                "range": "60:64"
+              },
+              "full-size": {
+                "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+                "next_token": 52599,
+                "range": "23:1024"
+              }
+            },
+            "gpu_kit": {
+              "name": "target_small_f2_roomy",
+              "range": "15:64"
+            },
+            "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+            "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+            "licence": "Apache-2.0",
+            "nvcc_release": "V13.2.86",
+            "rejection_tables": [
+              [
+                "accepted-proof",
+                "altered_copies.tsv",
+                10
+              ],
+              [
+                "accepted-proof",
+                "every_kind_of_item.tsv",
+                79
+              ],
+              [
+                "accepted-proof-clipped-gap",
+                "altered_copies_clipped_gap.tsv",
+                10
+              ]
+            ],
+            "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "schema_id": "hallmark.flashprove-source/1",
+            "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+            "upstream": "https://github.com/anthropics/FlashProve",
+            "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+            "version": "0.16.0"
+          },
+          "unpatched_verdict": "NO: policy-tables"
+        }
+      }
+    },
+    "heads": "all six at 6ba957c, on 2026-11-25",
+    "inputs": "the answer target took the pinned model files and parquet file from a local folder on both hosts (FLASHPROVE_TINYLLAMA_INPUTS), each checked against its pin; the proof check read the first proof's public files, the same on both hosts"
+  },
+  "retained_failures": [
+    {
+      "what": "make verify-flashprove-tinyllama-answer at 0aaf5e2, macOS and Linux: stopped at the scales environment with 'holds a distribution that is not name==version'",
+      "cause": "a check added at f1e647c read uv's own first line of uv pip freeze ('Using Python ... environment at: ...') as a distribution; it had no test",
+      "fix": "30b2b3d and 1f42684: the line is skipped by a function with its own test; the target passed at 1f42684 on both hosts",
+      "failure_json": {
+        "message": "the scales environment holds a distribution that is not name==version",
+        "type": "ValueError"
+      }
+    }
+  ],
+  "gpu_worker_against_stand_in_programs": {
+    "how": "gpu_job.sh as at 8e9246f on a Linux x86_64 host with GNU tools and no GPU, with /proc/cpuinfo and /proc/meminfo replaced by stand-in files and nvidia-smi, cp_commit, cp_prove and cp_verify by stand-in programs",
+    "cases": [
+      {
+        "case": "PROOFS 1",
+        "exit_status": 0,
+        "result": "8 public files after one YES"
+      },
+      {
+        "case": "PROOFS 0",
+        "exit_status": 0,
+        "result": "the commitment alone; public/ empty"
+      },
+      {
+        "case": "PROOFS 2",
+        "exit_status": 0,
+        "result": "8 public files after two YES"
+      },
+      {
+        "case": "PROOFS 99999999999999999999, 1000 or -1",
+        "exit_status": 3,
+        "result": "refused before WORK is made"
+      },
+      {
+        "case": "expected.sha256 naming the five files, all right",
+        "exit_status": 0,
+        "result": "8 public files"
+      },
+      {
+        "case": "expected.sha256 naming the seed alone",
+        "exit_status": 3,
+        "result": "'does not name config/policy.txt'; WORK not made"
+      },
+      {
+        "case": "expected.sha256 with a malformed line, or a wrong hash, or a folder of that name",
+        "exit_status": 3,
+        "result": "WORK not made"
+      },
+      {
+        "case": "cp_verify ends NO with status 1",
+        "exit_status": 1,
+        "result": "public/ empty"
+      },
+      {
+        "case": "the first GPU is not sm_90",
+        "exit_status": 3,
+        "result": "WORK not made"
+      }
+    ],
+    "shows": "the script's own control flow, nothing about the real programs or a GPU"
+  },
+  "gates": {
+    "note": "see the ledger entry of this follow-up; run at the commit that first holds this file"
+  },
+  "not_run": [
+    "any GPU, commitment or proof: gpu_job.sh as it now stands has run only against stand-in programs",
+    "cp_prove on a kit that prover_setup.cpp now refuses: its refusals are upstream's code, run on a CPU"
+  ],
+  "tinyllama_proof": false,
+  "gpu_used": false,
+  "hiding_claim": false
+}

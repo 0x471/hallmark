@@ -1,12 +1,12 @@
 {
-  "amended": "2026-11-25: decision_status and authority.statement state the run's budget authority (none) and no longer state the approval of option 3, which decision 0094 holds; no figure changed",
+  "amended": "2026-11-25, three changes of this file in place, against docs/OPERATIONS.md's rule for a run's record: (1) 83b2aaa replaced the Linux target runs recorded at 2c39db5 (1,668.6 s and 2,000.6 s) by reruns at 40186c6, and removed the account's balance readings and the SHA-256 of the macOS check's result.json; (2) 6f90c02 reworded decision_status and authority.statement; (3) this commit completes authority.statement and corrects this note. No other figure changed. The removed values, both result.json files of the caller's check, the pods' inputs.sha256 and binaries.sha256 and the seed's SHA-256 are in research/evidence/flashprove-tinyllama-followup-2026-11-25.json",
   "schema_id": "hallmark.flashprove-tinyllama-gpu-evidence/1",
   "recorded_at": "2026-11-25",
   "decision": "docs/decisions/0094-flashprove-tinyllama.md",
   "decision_status": "proposed",
   "authority": {
     "owner_approved": false,
-    "statement": "The GPU run was made by the contributor on the contributor's own RunPod account, at the contributor's cost and with no owner-set cap. Issue #184 asks for an owner-approved budget for paid GPU runs; this run had none. Only public files went to the pods: the patched programs, the kit, the exported public weights, the request and upstream's published seed file."
+    "statement": "The GPU run was made by the contributor on the contributor's own RunPod account, at the contributor's cost and with no owner-set cap. Issue #184 says that paid GPU runs need an owner-approved budget, issue #186 puts unbudgeted GPU runs out of scope, docs/OPERATIONS.md says to stop before a paid job or an upload for which no authority exists, and research/AUTHORITY.json lists Modal, Vast.ai and Hugging Face Jobs as compute providers, not RunPod; this run had no budget, and no authority record was made or changed for it. Only public files went to the pods: the patched programs, the kit, the exported public weights, the request and upstream's published seed file."
   },
   "commit": {
     "code": "40186c6",
