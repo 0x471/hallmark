@@ -11,8 +11,13 @@ parameter file with the patched planner. `make verify-flashprove-tinyllama-answe
 export and the kit on a CPU from pinned inputs and requires that upstream's integer model gives
 SASH's eight answer tokens on SASH's prompt, that the part of `cp_prove`'s set-up that needs only
 the kit admits it on a CPU, and that `cp_commit`'s mandatory worst-case check,
-computed on a CPU, finds every site within its limit. The prover patch compiles with nvcc 13.2.86
-but has not run; no commitment or proof is made. `make verify-flashprove` (decision 0093) is
+computed on a CPU, finds every site within its limit. The kit's committed table is sized for
+TinyLlama's weight rows, and the answer target runs upstream's weight-table set-up on a CPU.
+`research/probes/flashprove/tinyllama/gpu_job.sh` is the worker for one commitment and its proofs
+on an sm_90 GPU, and `scripts/flashprove_tinyllama_proof.py` checks such a proof on a CPU with
+caller-held values and altered copies. One dense proof of SASH's request was made and checked this
+way on a rented H100, at the contributor's own cost and before owner approval (decision 0094); the
+targets themselves make no commitment or proof. `make verify-flashprove` (decision 0093) is
 unchanged.
 
 Add FlashProve as a pinned external proof backend for Mixture-of-Experts models:

@@ -1,10 +1,10 @@
 # Research state
 
-Updated: 2026-11-24. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
+Updated: 2026-11-25. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
 
-## TinyLlama on FlashProve (dense-model patches) — proposed, CPU-checked
+## TinyLlama on FlashProve (dense-model patches) — proposed; one dense proof, not owner-approved
 
-2026-11-24. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed) adds four
+2026-11-25. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed) adds four
 pinned patches on FlashProve `9e2bdd8`
 ([`research/probes/flashprove/tinyllama/`](probes/flashprove/tinyllama/README.md)). Three let a dense
 model such as TinyLlama-1.1B reach the verifier's standard form and give the provers and CPU tools
@@ -19,9 +19,17 @@ integer model with the kit gives SASH's eight answer tokens on SASH's prompt; th
 mandatory worst-case check, computed on a CPU by a port of upstream's code, finds every site within
 its limit. At the default `eg 8` one gate row of layer 21 is over it, so the kit uses `eg 7`, a key
 one bit coarser, which `verifier.patch` admits at NE 0. It passed on Linux and macOS
-([evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)). The integer model is not a
-prover: no commitment, proof or GPU run. Next, with owner approval and a ceiling: commit and prove on a
-GPU.
+([evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)). The kit's committed table is
+now sized for TinyLlama's 10,240 weight rows (`table 11 24 1376256 65535 0 18`; the full kit's line
+would encode Maverick's table), by criteria read off upstream's kits, and both targets passed again
+on Linux with it. On 2026-11-25 the contributor ran the patched programs on a rented H100, on the
+contributor's own RunPod account and at the contributor's cost (USD 1.61), before owner approval
+and with no owner-set cap: `cp_commit` passed its worst-case check and committed in about 35 s,
+`cp_prove` made four proofs of SASH's request in under 10 s each, the patched `cp_verify` accepted
+them under caller-held values, upstream's verifier refused them, and eight altered copies were
+refused ([evidence](evidence/flashprove-tinyllama-gpu-2026-11-25.json)). One request, one machine,
+public seed: no benchmark, no hiding, no owner-approved run. Next, for the owner: option 3, the
+calibration text's licence, a GPU ceiling for #187, and how a verifier gets the commitment ID.
 
 ## SASH and FlashProve comparison — recorded
 
