@@ -16,12 +16,16 @@ verifiers and requires, in order:
 3. a plain call of the patched cp_verify ends YES with status 0;
 4. the unpatched cp_verify refuses the same files (NO: policy-tables): only the patched build
    answers YES to a dense proof;
-5. each altered copy ends NO: with status 1 under the patched build: two proof bits, the token
-   file, a prompt token, an answer token, a bit of the key, a bit of the leaf file, and another
-   commitment ID.
+5. each altered copy ends with status 1 and the refusal named for it (REFUSALS) under the patched
+   build. Seven are refused by the checks of the proof, the key, the leaf file or the ID: two proof
+   bits, a prompt token, an answer token, a bit of the key, a bit of the leaf file, and another
+   commitment ID. The eighth, a bit of the token file, is refused on the statement's form
+   (statement-range: y must be 0 while e is below T) before any proof is read.
 
-A pass says that these files fit the patched verifier's checks for the caller's own integer
-commitment and this request; nothing enrols that commitment. It says nothing of hiding (the seed
+A pass says that these files fit the patched verifier's checks for this request under the
+commitment ID that the caller states. The ID is not recomputed here: it is cp_commit's own print
+on the GPU host, so a pass does not tie the proof to TinyLlama's weights, and nothing enrols that
+commitment. It says nothing of hiding (the seed
 is public), of the checkpoint the weights were converted from, or of SASH's integer function
 (decision 0094).
 """
@@ -67,22 +71,25 @@ def request_bytes():
 
 
 def checked_case(case, output):
-    """A private copy of the case's public files, after comparing what the caller holds itself."""
+    """A private copy of the case's public files. What the caller holds itself (the kit's three
+    configuration files and the request) is compared on the copy, which the verifiers then read,
+    not on the case's folder, which may change after it is read."""
     for name in PUBLIC:
         path = case / name
         require(path.is_file() and not path.is_symlink(), f"{name} is missing from the case")
-    for name in CONFIG:
-        require(
-            sha(case / "config" / name) == KIT["files"][name],
-            f"the case's {name} is not the committed kit's",
-        )
-    require(
-        (case / "example.req").read_bytes() == request_bytes(), "the case's request is not SASH's"
-    )
     copy = output / "case"
     for name in PUBLIC:
         (copy / name).parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(case / name, copy / name)
+        shutil.copyfile(case / name, copy / name, follow_symlinks=False)
+        require(not (copy / name).is_symlink(), f"{name} is missing from the case")
+    for name in CONFIG:
+        require(
+            sha(copy / "config" / name) == KIT["files"][name],
+            f"the case's {name} is not the committed kit's",
+        )
+    require(
+        (copy / "example.req").read_bytes() == request_bytes(), "the case's request is not SASH's"
+    )
     return copy
 
 
@@ -130,8 +137,23 @@ def altered_copies(commitment_id):
     }
 
 
+# The last line that cp_verify must give for each altered copy. statement-range is a refusal on the
+# statement's form, made before a proof is read: the copy of the token file shows that the caller's
+# y is checked, and nothing about the proof.
+REFUSALS = {
+    "proof-middle-bit": "NO: proof-refused",
+    "proof-last-bit": "NO: proof-refused",
+    "token-file": "NO: statement-range",
+    "request-first-token": "NO: proof-refused",
+    "request-answer-token": "NO: proof-refused",
+    "key-bit": "NO: key-refused",
+    "leaf-bit": "NO: entry-refused",
+    "commitment-id": "NO: model-statement",
+}
+
+
 def rejections(verifier, case, commitment_id, output):
-    """Each altered copy must end `NO: ...` with status 1; returns the rows."""
+    """Each altered copy must end with status 1 and its own refusal (REFUSALS); returns the rows."""
     rows = []
     for name, (file, change, cid) in altered_copies(commitment_id).items():
         copy = output / "altered" / name
@@ -139,8 +161,8 @@ def rejections(verifier, case, commitment_id, output):
         if file:
             change(copy / file)
         code, last = fp.direct(verifier, copy, cid or commitment_id, output / f"altered-{name}.log")
-        rows.append(dict(altered=name, exit_code=code, last_line=last))
-        require(code == 1 and last.startswith("NO:"), f"the altered copy {name}: {code} {last}")
+        rows.append(dict(altered=name, exit_code=code, last_line=last, expected=REFUSALS[name]))
+        require(code == 1 and last == REFUSALS[name], f"the altered copy {name}: {code} {last}")
     return rows
 
 
@@ -177,6 +199,7 @@ def verify(case, commitment_id, output):
     return dict(
         builds=builds,
         commitment_id=commitment_id,
+        commitment_id_source="stated by the caller; not recomputed here",
         range=f"{req['r']}:{req['e']}",
         checked_tokens=CASE["answer_ids"],
         files={
@@ -191,6 +214,9 @@ def verify(case, commitment_id, output):
         unpatched_verdict=refused,
         altered_copies=rows,
         altered_copies_rejected=len(rows),
+        altered_copies_refused_before_a_proof_is_read=sum(
+            r["last_line"] == "NO: statement-range" for r in rows
+        ),
         seconds=time.monotonic() - started,
     )
 
