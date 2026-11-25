@@ -95,7 +95,8 @@ def checked_case(case, output):
 
 
 def check_proof(tree, verifier, case, commitment_id, log):
-    """Upstream's check_proof.py with every expected value held by the caller."""
+    """Upstream's check_proof.py with the caller's own range, end token and claim, under the
+    commitment ID that the caller states."""
     req = KIT["request"]
     checked = f"{req['r']}:{req['e']}"
     args = [sys.executable, "-I", tree / "integrations/check_proof.py"]

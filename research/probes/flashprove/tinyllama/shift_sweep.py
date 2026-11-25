@@ -36,7 +36,9 @@ def main(run_dir, out_json):
 
     # The pins, not the notes: kit.json's prose on the calibration text's licence may change.
     def pins(kit):
-        return {k: v for k, v in kit.items() if k != "calibration_text"}
+        notes = ("licence", "licence_review")
+        text = {k: v for k, v in kit["calibration_text"].items() if k not in notes}
+        return kit | {"calibration_text": text}
 
     if not passed.get("passed") or pins(passed["kit_pins"]) != pins(target.KIT):
         raise SystemExit("RUN_DIR is not a passing run of this kit")

@@ -128,7 +128,7 @@ def test_the_altered_copies_cover_the_six_of_decision_0093_and_two_more():
     assert other != ID and len(other) == 64 and other[1:] == ID[1:]
     assert proof.altered_copies("0" * 64)["commitment-id"][2][0] == "1"
     # Each copy has its own expected refusal; only the token file's is a refusal on the
-    # statement's form, made before a proof is read.
+    # statement's form, made by a rule that does not depend on the proof.
     assert list(proof.REFUSALS) == list(altered)
     assert [n for n, line in proof.REFUSALS.items() if line == "NO: statement-range"] == [
         "token-file"
@@ -188,6 +188,9 @@ def fake_verifier(path, case, overrides=None):
         "import sys\nfrom pathlib import Path\n"
         f"case, by_file, overrides = Path({str(case)!r}), {BY_FILE!r}, {overrides or {}!r}\n"
         "root = Path(sys.argv[1]).parent\n"
+        "if root.name in overrides:\n"
+        "    status, line = overrides[root.name]\n"
+        "    print(line); sys.exit(status)\n"
         f"if sys.argv[7] != {ID!r}:\n"
         "    status, line = overrides.get('id', (1, 'NO: model-statement'))\n"
         "    print(line); sys.exit(status)\n"
@@ -214,18 +217,6 @@ def test_rejections_require_each_copy_s_own_refusal(case, tmp_path):
     ]
 
 
-FILE_OF = {
-    "proof-middle-bit": "example.proof",
-    "proof-last-bit": "example.proof",
-    "token-file": "example.y",
-    "request-first-token": "example.req",
-    "request-answer-token": "example.req",
-    "key-bit": "ivk/key.bin",
-    "leaf-bit": "ivk/leaf/0.bin",
-    "commitment-id": "id",
-}
-
-
 @pytest.mark.parametrize("name", list(RECORDED))
 @pytest.mark.parametrize(
     "verdict",
@@ -234,8 +225,8 @@ FILE_OF = {
 def test_rejections_fail_if_a_copy_is_not_refused_for_its_reason(case, tmp_path, name, verdict):
     out = tmp_path / "out"
     out.mkdir()
-    verifier = fake_verifier(tmp_path / "v", case, {FILE_OF[name]: verdict})
-    with pytest.raises(ValueError, match="the altered copy"):
+    verifier = fake_verifier(tmp_path / "v", case, {name: verdict})
+    with pytest.raises(ValueError, match=f"the altered copy {name}:"):
         proof.rejections(verifier, case, ID, out)
 
 
@@ -243,6 +234,6 @@ def test_rejections_fail_if_a_copy_is_not_refused_for_its_reason(case, tmp_path,
 def test_rejections_fail_on_the_right_refusal_with_another_status(case, tmp_path, name):
     out = tmp_path / "out"
     out.mkdir()
-    verifier = fake_verifier(tmp_path / "v", case, {FILE_OF[name]: (0, RECORDED[name])})
-    with pytest.raises(ValueError, match="the altered copy"):
+    verifier = fake_verifier(tmp_path / "v", case, {name: (0, RECORDED[name])})
+    with pytest.raises(ValueError, match=f"the altered copy {name}:"):
         proof.rejections(verifier, case, ID, out)

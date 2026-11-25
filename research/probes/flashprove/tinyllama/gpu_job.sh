@@ -44,7 +44,7 @@ if [ -e "$stage/expected.sha256" ]; then
   (cd "$stage" && sha256sum -c --strict --quiet expected.sha256) ||
     { echo "gpu_job.sh: a file of STAGE is not the one that expected.sha256 names" >&2; exit 3; }
   for file in config/policy.txt config/KL.bin config/layout.txt public-seed.bin "weights/$(basename "${gguf[0]}")"; do
-    grep -qF -- "  $file" "$stage/expected.sha256" ||
+    awk -v f="$file" '$2 == f && length($1) == 64 { found = 1 } END { exit !found }' "$stage/expected.sha256" ||
       { echo "gpu_job.sh: expected.sha256 does not name $file" >&2; exit 3; }
   done
 fi
