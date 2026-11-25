@@ -1,0 +1,628 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-gpu-evidence/1",
+  "recorded_at": "2026-11-25",
+  "decision": "docs/decisions/0094-flashprove-tinyllama.md",
+  "decision_status": "proposed; option 3 is not owner-approved",
+  "authority": {
+    "owner_approved": false,
+    "statement": "The GPU run was made by the contributor on the contributor's own RunPod account, at the contributor's cost, before owner approval of option 3 and with no owner-set cap. Issue #184 asks for an owner-approved budget for paid GPU runs; this run had none. Only public files went to the pods: the patched programs, the kit, the exported public weights, the request and upstream's published seed file."
+  },
+  "commit": {
+    "code": "2c39db5",
+    "note": "the last change of code or kit before this record"
+  },
+  "source": {
+    "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+    "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+    "bytes": 157799758
+  },
+  "patches": {
+    "verifier.patch": {
+      "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0",
+      "bytes": 16739
+    },
+    "prover.patch": {
+      "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1",
+      "bytes": 13205
+    },
+    "tools.patch": {
+      "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040",
+      "bytes": 37858
+    }
+  },
+  "kit": {
+    "files": {
+      "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+      "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+      "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+      "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c",
+      "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+      "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+      "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31"
+    },
+    "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+    "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+    "gguf": {
+      "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+      "bytes": 2200293664,
+      "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+    },
+    "request": {
+      "T": 64,
+      "filler": 0,
+      "r": 24,
+      "e": 32
+    },
+    "table": {
+      "line": "table 11 24 1376256 65535 0 18",
+      "before": "table 11 32 402653184 44040191 0 18 (the full kit's; never run on this model)",
+      "weight_rows": 10240,
+      "columns_log2": 18,
+      "data_entries_of_a_long_row": 1310720,
+      "message_entries_of_a_long_row": 1376256,
+      "table_entries_log2": 35,
+      "criteria": "fb and lkW: the full kit's; fnm: upstream's small example kits'; fi0: the least that HfTableParams::table_derive() admits; fln: three more than the bits of fi0 + fnm - 1, as in each upstream example kit. Read off upstream's three kits; upstream records no rule (prover/examples/TARGET-KITS.md)",
+      "prover_setup_on_a_cpu": {
+        "control_kFM_plus_1": "attention: the shift sh = 7 is not supported: sh must be from 4 to 12, u0 * 2^sh + 65536 at most 2^24, and both 0 <= 2^kFM - u0 - nHM <= nHM and 0 <= 2^kFD - u0 - nHD <= nHD must hold; kFM = 15, kFD = 15",
+        "control_table_one_step_short": "the parameter file is not admitted: policy-pad-place: fi0, the third number of the line table, must be at least 1310723: a row's data coefficients and three pads for each of its answers",
+        "hiding": "hiding conditions that follow from the file alone: met",
+        "kit": "prover set-up: admitted (11 layer groups, 1 attention plan, kFM 14, kFD 15)",
+        "weight_table": "weight table: admitted (W: 10240 rows of 2^18 columns in 134 units; 2^11 long rows of 1310720 data entries in 1376256, 65535 masks, code length 2^24; a tree's stored level at most 7)"
+      }
+    },
+    "planner": {
+      "proof_bytes_at_most": 13685772,
+      "bits_compiled_bound": 126.21,
+      "columns_a_batch": 58,
+      "batches_a_stored_copy_bears": 1128,
+      "note": "cp_verify's own accounting, not a security level; the two counts are from cp_commit.log's table lines"
+    }
+  },
+  "programs": {
+    "built": "on a CPU host (Ubuntu 24.04 x86_64, no GPU) with upstream's verifier/build.sh and prover/build.sh serving_cp_commit, serving_cp_prove, from the pinned archive with the three patches",
+    "nvcc": "13.2.86 (pip cuda-toolkit 13.2.2)",
+    "sources_digest": "7f304c426fcab1e63b2a543a7c5e183000c98116d9d11ec28a6c9eeedaae6a63",
+    "sha256": {
+      "cp_commit": "4475eaf7d696caad7347469c68e440c89ece22525e1734d59394b7410116a4f4",
+      "cp_verify": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+      "cp_prove": "5e2e809f8cee32a1ac2de0d2e3e6ef26befac8dc74b45f14b72289687c53fa2b"
+    },
+    "build_log_summary": [
+      "verifier exit=0 175s",
+      "serving_cp_prove exit=0 3766s (built beside serving_cp_commit, OUT=build/hc2)"
+    ],
+    "note": "built below a world-writable directory, so build.sh set no run path; on the pod the CUDA library folder was added to the loader's configuration. The compiler sample could not run without a GPU (status 77)"
+  },
+  "host": {
+    "provider": "RunPod, secure cloud, on demand",
+    "gpu": "NVIDIA H100 80GB HBM3, 9.0, 595.112.07, 0 MiB, 81559 MiB",
+    "cpu": "Intel(R) Xeon(R) Platinum 8470",
+    "sha_ni": true,
+    "container": "ubuntu:24.04, 29 vCPU, 287 GB",
+    "cuda_runtime": "nvidia-cuda-runtime 13.2.86, nvidia-cublas 13.4.1.3 (pip cuda-toolkit[cublas,cudart]==13.2.2)",
+    "worker": "research/probes/flashprove/tinyllama/gpu_job.sh, as an ordinary account"
+  },
+  "pods": [
+    {
+      "id": "8ko9aumvxf0e2w",
+      "gpu": "H100 SXM 80 GB",
+      "usd_per_hour": 4.39,
+      "created": "2026-11-24T22:58:01Z",
+      "terminated": "2026-11-24T23:02:32Z",
+      "seconds": 271,
+      "ran": "cp_commit alone",
+      "balance_before_usd": 50.0,
+      "balance_after_usd": 49.6692342306
+    },
+    {
+      "id": "yrtezvmeopwsqp",
+      "gpu": "H100 SXM 80 GB",
+      "usd_per_hour": 4.39,
+      "created": "2026-11-24T23:49:00Z",
+      "terminated": "2026-11-25T00:06:23Z",
+      "seconds": 1043,
+      "ran": "cp_commit, one proof, cp_verify; then cp_commit, three proofs, cp_verify",
+      "balance_before_usd": 49.6692342306,
+      "balance_after_usd": 48.3944417583
+    }
+  ],
+  "spend": {
+    "usd": 1.6056,
+    "balance_before_usd": 50.0,
+    "balance_after_usd": 48.3944417583,
+    "basis": "the account's balance read through the API before the first pod and after the last",
+    "pods_left": 0,
+    "network_volumes_left": 0
+  },
+  "cp_commit": {
+    "pod_1": {
+      "status": 0,
+      "wall_seconds": 34.31,
+      "max_rss_kib": 3966532,
+      "worst_case_check": "every bounded site fits",
+      "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+      "key_bin_sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d",
+      "leaf_0_sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4",
+      "worst_case_table_sha256": "032b64565c90006eb064298c1e9f374f38c55160c29ac21a663f78ce95a3aacb",
+      "phase_seconds": {
+        "weights": 2.0,
+        "check": 1.1,
+        "anchor-table": 3.6,
+        "key-file": 14.9,
+        "anchor-judge": 0.9,
+        "anchor-files": 0.0,
+        "leaf-0-table": 4.0,
+        "leaf-0-entry": 3.2,
+        "leaf-0-judge": 0.8,
+        "leaf-0-files": 0.0
+      }
+    },
+    "pod_2_first": {
+      "status": 0,
+      "wall_seconds": 34.97,
+      "max_rss_kib": 4252728,
+      "worst_case_check": "every bounded site fits",
+      "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+      "key_bin_sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d",
+      "leaf_0_sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4",
+      "worst_case_table_sha256": "032b64565c90006eb064298c1e9f374f38c55160c29ac21a663f78ce95a3aacb",
+      "phase_seconds": {
+        "weights": 1.9,
+        "check": 1.1,
+        "anchor-table": 4.4,
+        "key-file": 14.8,
+        "anchor-judge": 0.9,
+        "anchor-files": 0.0,
+        "leaf-0-table": 4.3,
+        "leaf-0-entry": 3.2,
+        "leaf-0-judge": 0.8,
+        "leaf-0-files": 0.0
+      }
+    },
+    "pod_2_second": {
+      "status": 0,
+      "wall_seconds": 34.94,
+      "max_rss_kib": 4002304,
+      "worst_case_check": "every bounded site fits",
+      "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+      "key_bin_sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d",
+      "leaf_0_sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4",
+      "worst_case_table_sha256": "032b64565c90006eb064298c1e9f374f38c55160c29ac21a663f78ce95a3aacb",
+      "phase_seconds": {
+        "weights": 2.0,
+        "check": 1.1,
+        "anchor-table": 4.1,
+        "key-file": 14.9,
+        "anchor-judge": 0.9,
+        "anchor-files": 0.0,
+        "leaf-0-table": 4.2,
+        "leaf-0-entry": 3.2,
+        "leaf-0-judge": 0.8,
+        "leaf-0-files": 0.0
+      }
+    }
+  },
+  "worst_case_gpu_against_cpu_port": {
+    "sites": 202,
+    "by_site": {
+      "stream at norm 1": {
+        "sites": 22,
+        "port_above_gpu_bits": [
+          -0.0001,
+          7.9265
+        ],
+        "least_gpu_headroom_bits": 11.917
+      },
+      "norm 1 quotient": {
+        "sites": 22,
+        "port_above_gpu_bits": [
+          -0.0006,
+          -0.0005
+        ],
+        "least_gpu_headroom_bits": 2.966
+      },
+      "q": {
+        "sites": 22,
+        "port_above_gpu_bits": [
+          -0.001,
+          -0.0
+        ],
+        "least_gpu_headroom_bits": 2.97
+      },
+      "k": {
+        "sites": 22,
+        "port_above_gpu_bits": [
+          -0.001,
+          -0.0
+        ],
+        "least_gpu_headroom_bits": 1.524
+      },
+      "v": {
+        "sites": 22,
+        "port_above_gpu_bits": [
+          -0.0009,
+          -0.0
+        ],
+        "least_gpu_headroom_bits": 1.199
+      },
+      "stream at norm 2": {
+        "sites": 22,
+        "port_above_gpu_bits": [
+          2.6866,
+          7.9177
+        ],
+        "least_gpu_headroom_bits": 11.907
+      },
+      "norm 2 quotient": {
+        "sites": 22,
+        "port_above_gpu_bits": [
+          -0.0005,
+          -0.0005
+        ],
+        "least_gpu_headroom_bits": 3.944
+      },
+      "gate": {
+        "sites": 22,
+        "port_above_gpu_bits": [
+          -0.001,
+          -0.0
+        ],
+        "least_gpu_headroom_bits": 0.458
+      },
+      "up": {
+        "sites": 22,
+        "port_above_gpu_bits": [
+          -0.001,
+          -0.0001
+        ],
+        "least_gpu_headroom_bits": 1.28
+      },
+      "stream at the last norm": {
+        "sites": 1,
+        "port_above_gpu_bits": [
+          7.3594,
+          7.3594
+        ],
+        "least_gpu_headroom_bits": 11.108
+      },
+      "last stream, a cell": {
+        "sites": 1,
+        "port_above_gpu_bits": [
+          7.3594,
+          7.3594
+        ],
+        "least_gpu_headroom_bits": 11.108
+      },
+      "last norm quotient": {
+        "sites": 1,
+        "port_above_gpu_bits": [
+          -0.0005,
+          -0.0005
+        ],
+        "least_gpu_headroom_bits": 3.944
+      },
+      "head margin": {
+        "sites": 1,
+        "port_above_gpu_bits": [
+          -0.0007,
+          -0.0007
+        ],
+        "least_gpu_headroom_bits": 0.642
+      }
+    },
+    "tightest_gpu_sites": [
+      [
+        0.458,
+        "gate",
+        21
+      ],
+      [
+        0.642,
+        "head margin",
+        22
+      ],
+      [
+        1.199,
+        "v",
+        3
+      ],
+      [
+        1.28,
+        "up",
+        21
+      ]
+    ]
+  },
+  "proofs": {
+    "request": "SASH's: 25 prompt ids, 8 answer ids, window 64, r 24, e 32",
+    "pod_2_first": [
+      {
+        "cp_prove_status": 0,
+        "cp_prove_wall_seconds": 8.41,
+        "cp_prove_max_rss_kib": 3640780,
+        "gpu_memory_sampler_running": false,
+        "proof_bytes": 13238500,
+        "proof_sha256": "1874fc9308d278808d608b9b0de1e31da53963657d2129c1d2814c5069650713",
+        "cp_verify_status": 0,
+        "cp_verify_last_line": "YES",
+        "cp_verify_wall_seconds": 11.74,
+        "cp_verify_max_rss_kib": 2570328
+      }
+    ],
+    "pod_2_second": [
+      {
+        "cp_prove_status": 0,
+        "cp_prove_wall_seconds": 9.79,
+        "cp_prove_max_rss_kib": 3650064,
+        "gpu_memory_sampler_running": true,
+        "proof_bytes": 13238540,
+        "proof_sha256": "f2d50a1e491a8272754053b073aed2bbedb1163a1351b190bb5d107245ed6873",
+        "cp_verify_status": 0,
+        "cp_verify_last_line": "YES",
+        "cp_verify_wall_seconds": 11.98,
+        "cp_verify_max_rss_kib": 2569780
+      },
+      {
+        "cp_prove_status": 0,
+        "cp_prove_wall_seconds": 9.67,
+        "cp_prove_max_rss_kib": 3645816,
+        "gpu_memory_sampler_running": true,
+        "proof_bytes": 13249612,
+        "proof_sha256": "11543d40d21a27b66a7817c22a056f272279fb6e12ee42e2d0ec604b875c2b01",
+        "cp_verify_status": 0,
+        "cp_verify_last_line": "YES",
+        "cp_verify_wall_seconds": 11.8,
+        "cp_verify_max_rss_kib": 2571208
+      },
+      {
+        "cp_prove_status": 0,
+        "cp_prove_wall_seconds": 9.31,
+        "cp_prove_max_rss_kib": 3641396,
+        "gpu_memory_sampler_running": true,
+        "proof_bytes": 13253292,
+        "proof_sha256": "2a1531a6d4a2066a0a81873234336bf2a48f98da4759ce7100daa019f40ed3ef",
+        "cp_verify_status": 0,
+        "cp_verify_last_line": "YES",
+        "cp_verify_wall_seconds": 11.94,
+        "cp_verify_max_rss_kib": 2569888
+      }
+    ],
+    "result_v1_of_the_first": "result-v1 status=0 claim=exact-match id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd bits=128 work=32 work-rounds=69 least-round=128.00 least-round-without-work=96.23 commitment-assumed-rounds=63 record=1 r=24 e=32 T=64 tokens=25..32 y=no policy=exact-match C=256 theta=256 cap=0 s=17 sh=8 sT=4 F=24 above-clip=0 leaf=0 stages=key,leaf,request dw=8 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+    "gpu_memory_mib": {
+      "most_sampled": 74799,
+      "samples": 192,
+      "over": "the second commitment and its three proofs, twice a second, by nvidia-smi"
+    },
+    "note": "one machine, lines of which only `table` is sized for the model: not a benchmark"
+  },
+  "caller_check": {
+    "script": "scripts/flashprove_tinyllama_proof.py",
+    "linux": {
+      "host": "Ubuntu 24.04 x86_64, g++ 13.3",
+      "passed": true,
+      "seconds": 723.8,
+      "patched_verifier_sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+      "check_proof": {
+        "exit_code": 0,
+        "result": [
+          "result: outcome=verified commitment_id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd range=24:32 checked_tokens=8 end_token=2 claim=exact-match policy=exact next_token=none C=256 theta=256 cap=0 s=17 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=63 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+          "check_proof: verified: exact match: every checked token (tokens 25 to 32 of the request) is the model's greedy choice; the last checked token is the end token 2; commitment: 63 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 69 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+        ],
+        "seconds": 43.215405421797186
+      },
+      "patched_verdict": "YES",
+      "unpatched_verdict": "NO: policy-tables",
+      "altered_copies": [
+        [
+          "proof-middle-bit",
+          1,
+          "NO: proof-refused"
+        ],
+        [
+          "proof-last-bit",
+          1,
+          "NO: proof-refused"
+        ],
+        [
+          "token-file",
+          1,
+          "NO: statement-range"
+        ],
+        [
+          "request-first-token",
+          1,
+          "NO: proof-refused"
+        ],
+        [
+          "request-answer-token",
+          1,
+          "NO: proof-refused"
+        ],
+        [
+          "key-bit",
+          1,
+          "NO: key-refused"
+        ],
+        [
+          "leaf-bit",
+          1,
+          "NO: entry-refused"
+        ],
+        [
+          "commitment-id",
+          1,
+          "NO: model-statement"
+        ]
+      ],
+      "public_files": {
+        "config/KL.bin": {
+          "bytes": 1144,
+          "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+        },
+        "config/layout.txt": {
+          "bytes": 126322,
+          "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+        },
+        "config/policy.txt": {
+          "bytes": 2422,
+          "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+        },
+        "example.proof": {
+          "bytes": 13238500,
+          "sha256": "1874fc9308d278808d608b9b0de1e31da53963657d2129c1d2814c5069650713"
+        },
+        "example.req": {
+          "bytes": 264,
+          "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+        },
+        "example.y": {
+          "bytes": 4,
+          "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+        },
+        "ivk/key.bin": {
+          "bytes": 2148512,
+          "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+        },
+        "ivk/leaf/0.bin": {
+          "bytes": 2181432,
+          "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+        }
+      }
+    },
+    "macos_by_a_reviewer": {
+      "note": "run by a reviewer on a laptop on the same public files, at bddda05; not made in the session that made the proof. Its result.json names the same files and the same eight last lines",
+      "host": "macOS arm64, Apple clang version 17.0.0 (clang-1700.0.13.5)",
+      "passed": true,
+      "seconds": 155.5,
+      "patched_verdict": "YES",
+      "unpatched_verdict": "NO: policy-tables",
+      "result_json_sha256": "8eca4f0fa32110ee46152f421594622558c988df10eaf0ac1e2e894d1fae919a"
+    }
+  },
+  "cpu_targets_with_the_sized_kit": {
+    "host": "Ubuntu 24.04 x86_64, a clean clone, uv 0.9.18, every input downloaded",
+    "commit": "2c39db5",
+    "verify_flashprove_tinyllama": {
+      "passed": true,
+      "seconds": 1668.6,
+      "calls_compared": 108,
+      "tinyllama_plan": {
+        "h_par": "0f6cc99a523961a164d05ce3b7ccc58778dbf7595f84be39348d521c735527f8",
+        "configuration": "9ac96c0fa1613952e35cd06487c5ccb759f7db7839be845f1c528d34f8275573",
+        "proof_bytes_at_most": 13685772,
+        "bits_compiled_bound": 126.21
+      }
+    },
+    "verify_flashprove_tinyllama_answer": {
+      "passed": true,
+      "seconds": 2000.6,
+      "kit_reproduced": true,
+      "maxima_equal_to_committed": false,
+      "choices": [
+        1576,
+        7483,
+        310,
+        3444,
+        338,
+        3681,
+        29889,
+        2
+      ],
+      "matches": true,
+      "range_failure": null,
+      "gate_key_peak": 3970,
+      "least_correlation": 0.9990885607110908,
+      "slope_range": [
+        0.9933298302365778,
+        1.0047660727947956
+      ],
+      "controls": {
+        "final-norm-MF-plus-1": {
+          "failed": [
+            "the logits' scale at position 24: 1.9951",
+            "the logits' scale at position 25: 2.0054",
+            "the logits' scale at position 26: 1.9969",
+            "the logits' scale at position 27: 1.9897",
+            "the logits' scale at position 28: 2.0081",
+            "the logits' scale at position 29: 2.0066",
+            "the logits' scale at position 30: 2.0097",
+            "the logits' scale at position 31: 1.9969"
+          ],
+          "least_correlation": 0.9990864681056681,
+          "slope_range": [
+            1.9897378627311832,
+            2.0097478479243636
+          ]
+        },
+        "layer-10-kv-plus-1": {
+          "failed": [
+            "the logits' correlation at position 24: 0.99616",
+            "the logits' correlation at position 25: 0.99616",
+            "the logits' correlation at position 26: 0.99591",
+            "the logits' correlation at position 27: 0.99699",
+            "the logits' correlation at position 28: 0.99390",
+            "the logits' correlation at position 29: 0.99672",
+            "the logits' correlation at position 30: 0.99518",
+            "the logits' correlation at position 31: 0.99433"
+          ],
+          "least_correlation": 0.9938961747290047,
+          "slope_range": [
+            0.9820366204292756,
+            1.0074861999783566
+          ]
+        }
+      },
+      "float_reference": 1.2930851198689197e-06,
+      "worst_case": {
+        "short": [],
+        "gate_key_bound_layer_21": 23741,
+        "rows_recomputed_exactly": 160
+      },
+      "planning": {
+        "patched": "standard parameter form, three tables, PLAN ONLY (accounting and request)",
+        "unpatched_accounting": "NO: policy-tables",
+        "unpatched_request": "NO: policy-tables",
+        "provers_parameter_file_reader": "admitted",
+        "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+        "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9"
+      }
+    },
+    "macos": "not run since the line `table` changed; both targets passed there at bf3add1 (flashprove-tinyllama-2026-11-24.json, flashprove-tinyllama-answer-2026-11-24.json)"
+  },
+  "retained_failures": [
+    {
+      "what": "make verify-flashprove-tinyllama, exit 2, twice (the work clone; a gate clone)",
+      "cause": "upstream verifier/build.sh refuses an output folder below a directory that its group can write in; the clones were made under umask 002",
+      "fix": "chmod go-w on the clone and its parent; gates under umask 022"
+    },
+    {
+      "what": "make check: tests/test_manifests.py::test_file_changed_during_read[abd] failed once on the working tree",
+      "cause": "intermittent on this host on main too (two back-to-back writes can leave st_mtime_ns unchanged); the branch does not touch it",
+      "fix": "none; rerun"
+    },
+    {
+      "what": "pod 1: the first run of the bootstrap script stopped silently at its package step",
+      "cause": "not established (possibly the package manager's lock, held by the pod's start command)",
+      "fix": "the same script passed when run again; no paid step had started"
+    },
+    {
+      "what": "pod 2: the controller's command line for the three timed proofs ended with status 127 and its connection hung",
+      "cause": "the controller's own shell mistake: a background sampler took the `cd` with it, so the worker script was not found; nothing ran",
+      "fix": "a small script on the pod; the pod stood idle for about ten minutes, about USD 0.75 of the spend"
+    }
+  ],
+  "not_claimed": [
+    "an owner-approved GPU run or budget",
+    "a benchmark: one machine, one request, proof-system lines of which only `table` is sized for the model",
+    "hiding: the commitment was made with -public-weights and a published seed",
+    "soundness of the patched C++ or CUDA code; Lean coverage of a dense model",
+    "an enrolled commitment ID: the ID is the caller's own, recomputable only with an sm_90 GPU",
+    "that upstream's verifier accepts a dense proof: it answers NO: policy-tables",
+    "that FlashProve's integer function equals SASH's: equal tokens on one request are a smoke test",
+    "macOS runs of the two targets on the sized kit"
+  ],
+  "tinyllama_proof": true,
+  "gpu_used": true,
+  "hiding_claim": false,
+  "qualified_backend": false
+}

@@ -3341,3 +3341,54 @@ at `bf3add1`, [evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)) 
 the gate of layer 21 at a key of 23,741 against 32,639 (0.45 bits to spare), no other layer above
 7,316, the float bound putting it at 22,703. Not shown: the GPU's own verdict on the check, which
 the port has not been compared with, and the GPU's guards on its matrix products. No GPU, no spend.
+
+## 2026-11-25: a table sized for TinyLlama and the first dense proof on an H100 (proposed; contributor's own run)
+
+Hypothesis: with a committed table sized for TinyLlama's weight rows, the patched `cp_commit` and
+`cp_prove` make a commitment and a proof of SASH's request on an sm_90 GPU, and the patched
+`cp_verify` accepts it under caller-held values. Pass criterion: `cp_commit` ends with status 0
+after its own worst-case check; `cp_prove` writes a proof; `cp_verify` answers `YES` on the GPU host
+and, through upstream's `check_proof.py` with the caller's commitment ID, range, end token, claim
+and build digest, on a CPU host; the unpatched verifier refuses the same files; at least the six
+altered copies of decision 0093 each end `NO:` with status 1.
+
+Authority: none from the owner. The contributor ran it on the contributor's own RunPod account, at
+the contributor's cost, before approval of option 3 and with no owner-set cap (#184 asks for an
+owner-approved budget). Spend USD 1.61 (balance 50.00 before, 48.39 after), on two pods of one H100
+SXM at USD 4.39 an hour (271 s and 1,043 s). Only public files went to the pods.
+
+Before the run: the last review found the kit's line `table` to be the full kit's
+(`11 32 402653184 44040191 0 18`), which would have `cp_commit` encode 2^43 table entries for a
+model whose data fill a 307th of a row. That line was never run. `tinyllama_plan.py` now writes
+`table 11 24 1376256 65535 0 18` (2^35 entries) for the 10,240 rows that upstream's `layoutW()`
+counts: the full kit's 2^11 long rows and 2^18 columns, the small kits' 65,535 masks (a stored copy
+bears 1,128 batches), the least message entries that `table_derive()` admits, and a code length of
+three bits above the last coefficient index's, as in each upstream kit. These are criteria read
+off upstream's three kits (the same function gives each kit its own line); upstream records no
+rule. The answer target now runs `layoutW()` and `HfParams::from_policy()` on a CPU and refuses
+one step less (`policy-pad-place`). Only `policy.txt` changed: `KL.bin` and `layout.txt` are byte
+for byte the same.
+
+Result: passed ([evidence](evidence/flashprove-tinyllama-gpu-2026-11-25.json)). H100 SXM, driver
+595.112.07, Xeon Platinum 8470. `cp_commit`: status 0 three times, "every bounded site fits",
+34.3 to 35.0 s, the same commitment ID `5ffd1aa3…06bd`, key and leaf file each time. Its
+worst-case table agrees with the CPU port at all 156 sites that the port computes as the GPU does
+(within 0.001 bits; tightest: the gate of layer 21 with 0.458 bits, the head's margin with 0.642),
+and the port's Frobenius bound is at or above the GPU's at the stream's 46 sites. `cp_prove`: four
+proofs of r = 24, e = 32 in a window of 64, 8.41 s and (with a GPU-memory sampler beside it) 9.31
+to 9.79 s, 13,238,500 to 13,253,292 bytes. `cp_verify` on the pod: `YES` four times. On Linux
+x86_64, `scripts/flashprove_tinyllama_proof.py`: accepted under caller-held values; unpatched
+verifier `NO: policy-tables`; eight altered copies refused (`proof-refused` four times,
+`statement-range`, `key-refused`, `entry-refused`, `model-statement`). A reviewer's run of the
+same script on macOS arm64 gave the same result. Both CPU targets passed again on Linux with the
+sized kit.
+
+Retained failures: the verifier build refused a clone below a group-writable directory (twice;
+`chmod go-w`); pod 1's first bootstrap stopped at the package step and passed on a second run
+(cause not established); a command line of the controller's own ended with status 127 before
+anything ran and held pod 2 for about ten minutes (about USD 0.75).
+
+Not shown: anything beyond one request, one kit and one machine; a benchmark (only `table` is
+sized for the model); hiding (public seed); soundness of the patched code; that macOS passes the
+two targets on the sized kit; an enrolled commitment ID. Only Hallmark's patched verifier answers
+`YES`.
