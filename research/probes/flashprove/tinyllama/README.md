@@ -420,10 +420,10 @@ contributor, with no owner-set cap. #184 says that paid GPU runs need an owner-a
 puts unbudgeted GPU runs out of scope, `docs/OPERATIONS.md` says to stop before a paid job or an
 upload for which no authority exists, and `research/AUTHORITY.json` lists Modal, Vast.ai and Hugging
 Face Jobs as compute providers, not RunPod. No authority record was made or changed for it. It
-spent USD 1.6056 (0.3308 and 1.2748 for the two pods), by the fall of the account's balance
-from 50.00 to 48.3944417583, read again unchanged at 02:44 UTC on 25 Nov. A reading right after
-pod 2 ended gave 48.530572, before the provider's last charge; by rate and seconds the pods come
-to 0.3305 and 1.2719. `AGENTS.md` says no system-package installs: the pod, a rented machine,
+spent USD 1.6056 (0.3308 and 1.2748 for the two pods), by the fall of the account's balance,
+read again unchanged at 02:44 UTC on 25 Nov. A reading right after pod 2 ended, before the
+provider's last charge, would give 1.1387 for that pod; by rate and seconds the pods come to
+0.3305 and 1.2719. `AGENTS.md` says no system-package installs: the pod, a rented machine,
 had `apt-get` and `pip` installs. It is
 evidence for the proposal, not an approved Hallmark run.
 

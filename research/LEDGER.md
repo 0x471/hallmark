@@ -3398,8 +3398,8 @@ sized for the model); hiding (public seed); soundness of the patched code; an en
 
 ## 2026-11-25: dense TinyLlama on FlashProve: three reviews, fixes and reruns (proposed; no GPU)
 
-Question: after three reviews of the branch at `6f90c02` (one by Claude Mythos, two rounds by
-Claude Fable reviewers; all AI, none independent of the contributor), what in the records and the
+Question: after reviews of the branch at `6f90c02` and of its fixes (Claude Mythos twice, Claude
+Fable reviewers in two rounds, one by the Codex CLI; all AI, none independent of the contributor), what in the records and the
 tooling was wrong, and do the targets still pass once it is fixed? Pass criterion: both CPU targets
 and the caller's check of the first dense proof pass on Linux and macOS at one code head, with the
 patches, the kit's files and the GPU run's files unchanged. No GPU, no paid service.
@@ -3427,8 +3427,11 @@ Found, and what was done ([evidence](evidence/flashprove-tinyllama-followup-2026
   `research/AUTHORITY.json`. A dependency review of the two environments is added
   ([record](evidence/flashprove-tinyllama-dependencies-2026-11-25.json)).
 
-Result: passed at `6ba957c`. Linux x86_64: the caller's check 775 s, the answer target 2,092 s, the
-patch target 1,737 s (108 calls equal). macOS arm64: 147 s, 335 s and 500 s. Both hosts give SASH's
+Result: passed. At `6ba957c`, Linux x86_64: the caller's check 775 s and the patch target 1,737 s
+(108 calls equal); macOS arm64: 147 s and 500 s. The answer target passed at `8eae8f9`, after its
+judges were made stricter (the last review found that they accepted an empty worst-case result and
+trusted the helper's own flags): 1,953 s on Linux, 356 s on macOS. The GPU's worst-case table was
+compared again with that run's port: 202 sites, none differing. Both hosts give SASH's
 eight tokens, the kit byte for byte, and the four changed kits each refused for its own reason.
 Gates at `2d22a74`: on macOS `make check` passed on Python 3.12.12, 3.13.15 and 3.14.7 (2,371 passed,
 102 skipped), with `make package-check` and `make docs` (176 pages). On Linux `make package-check`

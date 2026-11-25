@@ -5,7 +5,7 @@
   "decision_status": "proposed",
   "purpose": "What three reviews of 2026-11-25 found missing from the records of the dense TinyLlama proposal, and the reruns after the fixes that followed them. No GPU and no paid service was used for anything recorded here. The changes that this and earlier commits made in place to earlier evidence files are listed, with the values they removed",
   "commit": {
-    "code": "6ba957c",
+    "code": "8eae8f9",
     "note": "the head of all six reruns. Later commits change records, comments, tests, the sweep script and the worker (its check that expected.sha256 names five files compares whole names); the gates name their own commit"
   },
   "made_by": "the contributor's AI-assisted sessions, on the contributor's laptop (macOS arm64) and on a Linux x86_64 host of the contributor's; no independent reviewer",
@@ -123,26 +123,25 @@
     },
     "hosts_note": "two pods of one type, one after the other; whether they were one machine is not recorded",
     "controller_log": [
-      "pod 1: id 8ko9aumvxf0e2w, H100 SXM, 29 vCPU, 287 GB, USD 4.39/h, created 2026-11-24T22:58:01Z, balance before 50.00, watchdog 2700 s",
+      "pod 1: H100 SXM, 29 vCPU, 287 GB, USD 4.39/h, created 2026-11-24T22:58:01Z, watchdog 2700 s",
       "pod 1: terminated 2026-11-24T23:02:32Z (271 s after creation; 271/3600*4.39 = USD 0.33); pods left 0; driver 595.112.07, Xeon Platinum 8470, sha_ni; commit-only: exit 0, 34.31 s, peak RSS 3,966,532 kB, ID 5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
-      "pod 1: balance after 49.6692342306 (cost 0.3308)",
-      "pod 2: id yrtezvmeopwsqp, H100 SXM, machine 80ii72grlzm0, 29 vCPU, 287 GB, USD 4.39/h, created 2026-11-24T23:49:00Z, balance before 49.6692, watchdog 3600 s (pid 1983598)",
-      "pod 2: terminated 2026-11-25T00:06:23Z (1043 s; 1043/3600*4.39 = USD 1.27); pods left 0; balance read right after 48.530572; work2: commit 34.97 s, prove 8.41 s, YES, proof 13,238,500 bytes; work3: commit 34.94 s, proofs 9.79/9.67/9.31 s (GPU sampler running), all YES; GPU memory most 74,799 MiB"
+      "pod 1: cost 0.3308 by the fall of the balance",
+      "pod 2: H100 SXM, 29 vCPU, 287 GB, USD 4.39/h, created 2026-11-24T23:49:00Z, watchdog 3600 s",
+      "pod 2: terminated 2026-11-25T00:06:23Z (1043 s; 1043/3600*4.39 = USD 1.27); pods left 0; work2: commit 34.97 s, prove 8.41 s, YES, proof 13,238,500 bytes; work3: commit 34.94 s, proofs 9.79/9.67/9.31 s (GPU sampler running), all YES; GPU memory most 74,799 MiB"
     ],
-    "controller_log_note": "notes that the controlling session wrote as it went, not a program's log",
+    "controller_log_note": "notes that the controlling session wrote as it went, not a program's log; the pods' and the machine's identifiers, process numbers and the account's balances are left out",
     "spend_readings": {
-      "before_pod_1_usd": 50.0,
-      "after_pod_1_usd": 49.6692342306,
-      "right_after_pod_2_usd": 48.530572,
-      "later_usd": 48.3944417583,
-      "later_read_again": "2026-11-25T02:44Z, unchanged (the session's notes)",
-      "note": "the reading right after pod 2 was terminated came before the provider's last charge; the spend, USD 1.6056, is by the later reading (0.3308 and 1.2748); by rate and seconds the two pods come to 0.3305 and 1.2719. When the later reading was first taken is not recorded"
+      "pod_1_usd": 0.3308,
+      "pod_2_usd": 1.2748,
+      "total_usd": 1.6056,
+      "pod_2_by_the_reading_right_after_it_usd": 1.1387,
+      "note": "each figure is a fall of the account's balance, read through the provider's API. The reading right after pod 2 was terminated came before the provider's last charge and gives 1.1387 for it; a later reading, unchanged at 2026-11-25T02:44Z, gives 1.2748, which is recorded. By rate and seconds the two pods come to 0.3305 and 1.2719. The balances themselves are not published"
     },
     "run_path_note": "the provers were built below a world-writable directory, so prover/build.sh set no run path. bootstrap.sh adds the folder of the driver's libcuda.so.1 to the loader's configuration. How the programs found the CUDA runtime that user_setup.sh installs is in no kept script: the session's notes say that its folder was added with ldconfig. user_setup.sh's comment on a run path is wrong for these programs",
     "watchdog_log": [
-      "2026-11-24T22:57:59Z watchdog armed for 2700s, pid 1955309",
+      "2026-11-24T22:57:59Z watchdog armed for 2700s",
       "2026-11-24T23:02:46Z watchdog for pod 1 cancelled by hand after the terminate",
-      "2026-11-24T23:48:58Z watchdog armed for 3600s, pid 1983598",
+      "2026-11-24T23:48:58Z watchdog armed for 3600s",
       "2026-11-25T00:06:30Z watchdog for pod 2 cancelled by hand after the terminate"
     ],
     "pod_scripts": {
@@ -636,22 +635,9 @@
         "change": "in flashprove-tinyllama-gpu-2026-11-25.json, the Linux target runs at 2c39db5 were replaced by reruns at 40186c6, and the account's balance readings and the SHA-256 of the macOS check's result.json were removed",
         "now": "the removed values follow",
         "removed": {
-          "pods": [
-            {
-              "id": "8ko9aumvxf0e2w",
-              "balance_before_usd": 50.0,
-              "balance_after_usd": 49.6692342306
-            },
-            {
-              "id": "yrtezvmeopwsqp",
-              "balance_before_usd": 49.6692342306,
-              "balance_after_usd": 48.3944417583
-            }
-          ],
           "spend": {
-            "balance_before_usd": 50.0,
-            "balance_after_usd": 48.3944417583,
-            "basis": "the account's balance read through the API before the first pod and after the last"
+            "basis": "the account's balance read through the API before the first pod and after the last",
+            "note": "the balance readings themselves are held by the contributor"
           },
           "cpu_targets_with_the_sized_kit": {
             "host": "Ubuntu 24.04 x86_64, a clean clone, uv 0.9.18, every input downloaded",
@@ -1314,7 +1300,7 @@
         }
       },
       "answer": {
-        "result_json_sha256": "5f95adba5e7f8d7e6ea584af05a6287718a71c3fb99fe3decaf6aaf4c060d038",
+        "result_json_sha256": "ee0f96941f37f77bca5bd6b88eee36cd3f337bb3c4d98998aca716251892fe42",
         "result": {
           "answer": {
             "T": 64,
@@ -1508,7 +1494,7 @@
             "r": 24,
             "range_failure": null,
             "s": 17,
-            "seconds": 39.69973262492567,
+            "seconds": 39.133620243985206,
             "window": [
               529,
               29989,
@@ -1580,14 +1566,14 @@
             "patched": {
               "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
               "recipe": "upstream verifier/build.sh",
-              "seconds": 228.33612627815455,
+              "seconds": 215.93229915760458,
               "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
               "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
             },
             "upstream": {
               "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
               "recipe": "upstream verifier/build.sh",
-              "seconds": 221.64223188301548,
+              "seconds": 224.14855487411842,
               "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
               "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
             }
@@ -1704,7 +1690,7 @@
             "float_greedy_is_the_answer": true,
             "moe_layers": [],
             "rope_layers": 22,
-            "seconds": 30.387787071056664,
+            "seconds": 24.048421184998006,
             "shape": {
               "G": 4,
               "H": 32,
@@ -1726,7 +1712,7 @@
             "system": "Linux"
           },
           "kit": {
-            "calibrate_seconds": 792.3262348356657,
+            "calibrate_seconds": 703.5495488448068,
             "calibration_set": {
               "bytes": 131200,
               "drawn_rows_match_upstream": true,
@@ -1899,7 +1885,7 @@
             }
           },
           "schema_id": "hallmark.flashprove-tinyllama-answer/1",
-          "seconds": 2091.710713608656,
+          "seconds": 1952.7006603009067,
           "source": {
             "bytes": 157799758,
             "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
@@ -2839,7 +2825,7 @@
         }
       },
       "answer": {
-        "result_json_sha256": "28a54089b0273c0654597e63d27c227dde25f1cffba65d03f9a7c8a40739b74c",
+        "result_json_sha256": "f0d6c75df546a11a1df2082a4a6cd43610796ab8179544e492807dfb357da331",
         "result": {
           "answer": {
             "T": 64,
@@ -3033,7 +3019,7 @@
             "r": 24,
             "range_failure": null,
             "s": 17,
-            "seconds": 4.58480866602622,
+            "seconds": 4.8433731669792905,
             "window": [
               529,
               29989,
@@ -3105,14 +3091,14 @@
             "patched": {
               "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
               "recipe": "apple-clang",
-              "seconds": 31.40120374999242,
+              "seconds": 31.301083832979202,
               "sha256": "c5d95ec0d68a7779204fdd3fa694e8dec7a20a2f6d22e8cd1db0ee9bd0a5de5c",
               "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
             },
             "upstream": {
               "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
               "recipe": "apple-clang",
-              "seconds": 31.889363750000484,
+              "seconds": 31.949345332977828,
               "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
               "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
             }
@@ -3229,7 +3215,7 @@
             "float_greedy_is_the_answer": true,
             "moe_layers": [],
             "rope_layers": 22,
-            "seconds": 6.013113416964188,
+            "seconds": 8.342493166972417,
             "shape": {
               "G": 4,
               "H": 32,
@@ -3251,7 +3237,7 @@
             "system": "Darwin"
           },
           "kit": {
-            "calibrate_seconds": 75.0785469589755,
+            "calibrate_seconds": 85.4147812500014,
             "calibration_set": {
               "bytes": 131200,
               "drawn_rows_match_upstream": true,
@@ -3424,7 +3410,7 @@
             }
           },
           "schema_id": "hallmark.flashprove-tinyllama-answer/1",
-          "seconds": 335.40429891698295,
+          "seconds": 356.3216082910076,
           "source": {
             "bytes": 157799758,
             "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
@@ -4062,7 +4048,140 @@
         }
       }
     },
-    "heads": "all six at 6ba957c, on 2026-11-25; no result.json records its own head",
+    "heads": "the answer target at 8eae8f9, the other four and the second proof's check at 6ba957c, on 2026-11-25; no result.json records its own head",
+    "answer_target_note": "the answer target's two results are of 8eae8f9, which made its judges of the answer and of the worst-case results stricter; the other four are of 6ba957c. Its earlier passes at 6ba957c (2,092 s on Linux, 335 s on macOS) are not kept here",
+    "gpu_table_against_the_port_again": {
+      "sites": 202,
+      "by_site": {
+        "stream at norm 1": {
+          "sites": 22,
+          "port_above_gpu_bits": [
+            -0.0001,
+            7.9265
+          ],
+          "least_gpu_headroom_bits": 11.917
+        },
+        "norm 1 quotient": {
+          "sites": 22,
+          "port_above_gpu_bits": [
+            -0.0006,
+            -0.0005
+          ],
+          "least_gpu_headroom_bits": 2.966
+        },
+        "q": {
+          "sites": 22,
+          "port_above_gpu_bits": [
+            -0.001,
+            -0.0
+          ],
+          "least_gpu_headroom_bits": 2.97
+        },
+        "k": {
+          "sites": 22,
+          "port_above_gpu_bits": [
+            -0.001,
+            -0.0
+          ],
+          "least_gpu_headroom_bits": 1.524
+        },
+        "v": {
+          "sites": 22,
+          "port_above_gpu_bits": [
+            -0.0009,
+            -0.0
+          ],
+          "least_gpu_headroom_bits": 1.199
+        },
+        "stream at norm 2": {
+          "sites": 22,
+          "port_above_gpu_bits": [
+            2.6866,
+            7.9177
+          ],
+          "least_gpu_headroom_bits": 11.907
+        },
+        "norm 2 quotient": {
+          "sites": 22,
+          "port_above_gpu_bits": [
+            -0.0005,
+            -0.0005
+          ],
+          "least_gpu_headroom_bits": 3.944
+        },
+        "gate": {
+          "sites": 22,
+          "port_above_gpu_bits": [
+            -0.001,
+            -0.0
+          ],
+          "least_gpu_headroom_bits": 0.458
+        },
+        "up": {
+          "sites": 22,
+          "port_above_gpu_bits": [
+            -0.001,
+            -0.0001
+          ],
+          "least_gpu_headroom_bits": 1.28
+        },
+        "stream at the last norm": {
+          "sites": 1,
+          "port_above_gpu_bits": [
+            7.3594,
+            7.3594
+          ],
+          "least_gpu_headroom_bits": 11.108
+        },
+        "last stream, a cell": {
+          "sites": 1,
+          "port_above_gpu_bits": [
+            7.3594,
+            7.3594
+          ],
+          "least_gpu_headroom_bits": 11.108
+        },
+        "last norm quotient": {
+          "sites": 1,
+          "port_above_gpu_bits": [
+            -0.0005,
+            -0.0005
+          ],
+          "least_gpu_headroom_bits": 3.944
+        },
+        "head margin": {
+          "sites": 1,
+          "port_above_gpu_bits": [
+            -0.0007,
+            -0.0007
+          ],
+          "least_gpu_headroom_bits": 0.642
+        }
+      },
+      "tightest_gpu_sites": [
+        [
+          0.458,
+          "gate",
+          21
+        ],
+        [
+          0.642,
+          "head margin",
+          22
+        ],
+        [
+          1.199,
+          "v",
+          3
+        ],
+        [
+          1.28,
+          "up",
+          21
+        ]
+      ],
+      "missed": []
+    },
     "inputs": "the answer target took the pinned model files and parquet file from a local folder on both hosts (FLASHPROVE_TINYLLAMA_INPUTS), each checked against its pin; the proof check read the first proof's public files, the same on both hosts"
   },
   "retained_failures": [
