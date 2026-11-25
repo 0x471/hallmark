@@ -11,16 +11,17 @@
 #   weights/<one file>.gguf, wsums.txt, fold.txt   the exported model and the kit's two setup files
 #   example.req                               the request
 #   public-seed.bin                           32 bytes, the published seed
-#   expected.sha256                           optional: sha256sum lines for files of STAGE, which
-#                                             must then hold before any program runs (the kit's and
-#                                             the GGUF file's pins of kit.json, the seed's)
+#   expected.sha256                           optional: sha256sum lines, which must then hold before
+#                                             any program runs and must name the three files of
+#                                             config/, the .gguf file and public-seed.bin (the
+#                                             caller writes them from kit.json's pins)
 # WORK is created (mode 0700) and keeps everything: config/, ivk/ (public), isk/ (the provider's
 # directory, which stays on the host), in/, out.N/, the logs, cp_commit's worst-case table, and
 # public/ with the files a client needs, filled only after cp_verify's YES. PROOFS (default 1) is
 # the number of cp_prove calls on the same request, each timed apart from the commitment; 0 stops
 # after the commitment.
 # Exit status: 0 after every YES, or after the commitment alone if PROOFS is 0; 3 if the call or the
-# host does not fit (PROOFS is no whole number, a missing or unexpected file, no SHA instructions,
+# host does not fit (PROOFS is no whole number below 1,000, a missing or unexpected file, no SHA instructions,
 # no nvidia-smi, the first GPU is not sm_90), before WORK is made, or if a marker beside the model
 # file names another file; otherwise the failing step's.
 # No step has a time limit: the caller's controller must end a host that hangs.
@@ -28,7 +29,7 @@ set -euo pipefail
 stage=$(cd -- "${1:?usage: gpu_job.sh STAGE WORK [PROOFS]}" && pwd)
 work=${2:?usage: gpu_job.sh STAGE WORK [PROOFS]}
 proofs=${3:-1}
-[[ $proofs =~ ^[0-9]+$ ]] || { echo "gpu_job.sh: PROOFS must be a whole number" >&2; exit 3; }
+[[ $proofs =~ ^[0-9]{1,3}$ ]] || { echo "gpu_job.sh: PROOFS must be a whole number below 1,000" >&2; exit 3; }
 seed=$stage/public-seed.bin
 programs=(cp_commit cp_verify)
 [ "$proofs" -eq 0 ] || programs+=(cp_prove)
@@ -39,9 +40,13 @@ done
 gguf=("$stage"/weights/*.gguf)
 [ "${#gguf[@]}" -eq 1 ] && [ -f "${gguf[0]}" ] || { echo "gpu_job.sh: one .gguf file is needed" >&2; exit 3; }
 [ "$(stat -c %s "$seed")" -eq 32 ] || { echo "gpu_job.sh: the seed file is not 32 bytes" >&2; exit 3; }
-if [ -f "$stage/expected.sha256" ]; then
-  (cd "$stage" && sha256sum -c --quiet expected.sha256) ||
+if [ -e "$stage/expected.sha256" ]; then
+  (cd "$stage" && sha256sum -c --strict --quiet expected.sha256) ||
     { echo "gpu_job.sh: a file of STAGE is not the one that expected.sha256 names" >&2; exit 3; }
+  for file in config/policy.txt config/KL.bin config/layout.txt public-seed.bin "weights/$(basename "${gguf[0]}")"; do
+    grep -qF -- "  $file" "$stage/expected.sha256" ||
+      { echo "gpu_job.sh: expected.sha256 does not name $file" >&2; exit 3; }
+  done
 fi
 # The host must fit before WORK is made.
 grep -qw sha_ni /proc/cpuinfo || { echo "gpu_job.sh: this CPU has no SHA instructions" >&2; exit 3; }
