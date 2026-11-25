@@ -161,7 +161,9 @@ def environment(output, name):
         )
     code, frozen = run(["uv", "pip", "freeze", "-p", python], output / f"venv-{name}-freeze.log")
     require(code == 0, f"uv pip freeze failed ({name})")
+    # uv's own notice of the environment comes with the output; every other line is a distribution.
     lines = [y.strip() for y in frozen.splitlines() if y.strip()]
+    lines = [y for y in lines if not y.startswith("Using Python ")]
     # A distribution installed from a file or a URL is printed as `name @ ...`: no such line may
     # be skipped, or the comparison below would not see it.
     require(
