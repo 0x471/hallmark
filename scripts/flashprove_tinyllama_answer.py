@@ -214,13 +214,15 @@ def inputs(output):
 
 def fetch_retrying(url, path, pin, attempts=3, wait=5):
     """fetch(), tried again after a failed or short download: its one connection has a timeout of
-    120 s and no retry of its own. The file must still have the pinned size and SHA-256."""
+    120 s and no retry of its own. The file must still have the pinned size and SHA-256; a file of
+    the pinned size with another SHA-256 is not fetched again."""
     for attempt in range(1, attempts + 1):
         try:
             return fetch(url, path, pin["sha256"], pin["bytes"])
-        except (OSError, http.client.HTTPException, ValueError):
+        except (OSError, http.client.HTTPException, ValueError) as failure:
+            whole = path.is_file() and path.stat().st_size == pin["bytes"]
             path.unlink(missing_ok=True)
-            if attempt == attempts:
+            if attempt == attempts or (isinstance(failure, ValueError) and whole):
                 raise
             time.sleep(wait * attempt)
 
@@ -470,9 +472,10 @@ def check_planning(tree, output, verifiers):
         tables[0].startswith(f"weight table: admitted (W: {rows} rows of 2^{table[5]} columns "),
         f"layoutW() gives other rows than {rows}: {tables[0]}",
     )
+    answers = tinyllama_plan.frame_numbers(policy, "answers")[0]
     require(
-        tinyllama_plan.table_numbers(rows, table[0], table[3], table[5]) == table,
-        "the kit's line table is not the rule's",
+        tinyllama_plan.table_numbers(rows, table[0], table[3], table[5], answers) == table,
+        "the kit's line table is not the one its criteria give",
     )
 
     def control(name, change, wanted):

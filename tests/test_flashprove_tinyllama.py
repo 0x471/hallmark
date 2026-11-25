@@ -435,9 +435,9 @@ def test_the_table_is_sized_for_tinyllama_s_weight_rows():
 @pytest.mark.parametrize(
     ("rows", "fb", "fnm", "lkw"),
     [
-        (10240, 15, 65535, 18),  # more long rows than W has rows (policy-rows)
+        (10240, 15, 65535, 18),  # fb above 13 (policy-rows)
+        (1000, 11, 65535, 18),  # more long rows than W has rows (policy-rows)
         (10240, 18, 65535, 18),  # fb is not below lkW
-        (1 << 20, 14, 65535, 18),  # fb above 13 (policy-rows)
         (10240, 11, 65535, 19),  # lkW above 18 (w-shape-lk)
         (10240, 11, 65536, 18),  # an even number of masks (policy-mask-shape)
         (1 << 22, 4, 65535, 18),  # a code longer than 2^32

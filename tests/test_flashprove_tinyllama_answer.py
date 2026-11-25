@@ -114,15 +114,25 @@ def test_a_failed_download_is_tried_again(tmp_path, monkeypatch):
     answer.fetch_retrying("https://example.invalid/x", tmp_path / "x", pin, wait=0)
     assert len(calls) == 3 and (tmp_path / "x").exists()
 
-    def broken(url, path, digest, size):
+    def short(url, path, digest, size):
         calls.append(url)
-        path.write_bytes(b"part")
+        path.write_bytes(b"par")
         raise ValueError("download identity mismatch")
 
-    monkeypatch.setattr(answer, "fetch", broken)
+    monkeypatch.setattr(answer, "fetch", short)
     with pytest.raises(ValueError, match="identity"):
         answer.fetch_retrying("https://example.invalid/y", tmp_path / "y", pin, wait=0)
     assert len(calls) == 6 and not (tmp_path / "y").exists()
+
+    def another_file(url, path, digest, size):
+        calls.append(url)
+        path.write_bytes(b"part")  # the pinned size, another SHA-256: not fetched again
+        raise ValueError("download identity mismatch")
+
+    monkeypatch.setattr(answer, "fetch", another_file)
+    with pytest.raises(ValueError, match="identity"):
+        answer.fetch_retrying("https://example.invalid/z", tmp_path / "z", pin, wait=0)
+    assert len(calls) == 7 and not (tmp_path / "z").exists()
 
 
 def test_the_softmax_tables_fit_cp_prove_s_plan_of_attention_at_every_shift():
