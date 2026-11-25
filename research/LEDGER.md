@@ -3354,8 +3354,8 @@ and, through upstream's `check_proof.py` with the caller's commitment ID, range,
 and build digest, on a CPU host; the unpatched verifier refuses the same files; at least the six
 altered copies of decision 0093 each end `NO:` with status 1.
 
-Authority: none from the owner. The contributor ran it on the contributor's own RunPod account, at
-the contributor's cost, before approval of option 3 and with no owner-set cap (#184 asks for an
+Authority: no owner-approved budget. The contributor ran it on the contributor's own RunPod account, at
+the contributor's cost and with no owner-set cap (#184 asks for an
 owner-approved budget). Spend USD 1.61, by the fall of the account's balance, on two pods of one H100
 SXM at USD 4.39 an hour (271 s, USD 0.33; 1,043 s, USD 1.27). Only public files went to the pods.
 

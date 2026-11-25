@@ -1,11 +1,12 @@
 {
+  "amended": "2026-11-25: decision_status and authority.statement state the run's budget authority (none) and no longer state the approval of option 3, which decision 0094 holds; no figure changed",
   "schema_id": "hallmark.flashprove-tinyllama-gpu-evidence/1",
   "recorded_at": "2026-11-25",
   "decision": "docs/decisions/0094-flashprove-tinyllama.md",
-  "decision_status": "proposed; option 3 is not owner-approved",
+  "decision_status": "proposed",
   "authority": {
     "owner_approved": false,
-    "statement": "The GPU run was made by the contributor on the contributor's own RunPod account, at the contributor's cost, before owner approval of option 3 and with no owner-set cap. Issue #184 asks for an owner-approved budget for paid GPU runs; this run had none. Only public files went to the pods: the patched programs, the kit, the exported public weights, the request and upstream's published seed file."
+    "statement": "The GPU run was made by the contributor on the contributor's own RunPod account, at the contributor's cost and with no owner-set cap. Issue #184 asks for an owner-approved budget for paid GPU runs; this run had none. Only public files went to the pods: the patched programs, the kit, the exported public weights, the request and upstream's published seed file."
   },
   "commit": {
     "code": "40186c6",

@@ -16,7 +16,7 @@ the two side by side. Proposed, not adopted:
 [decision 0094](decisions/0094-flashprove-tinyllama.md) adds small pinned
 patches so that the same FlashProve can take dense TinyLlama-1.1B. Four dense proofs
 of one request, SASH's, have been made with them on a rented H100, at the contributor's
-own cost and before owner approval; only the patched verifier accepts them
+own cost and with no owner-approved budget; only the patched verifier accepts them
 ([details](../research/probes/flashprove/tinyllama/README.md#the-first-dense-proof)).
 
 | Command | What it does | Needs |

@@ -1,10 +1,10 @@
 # 0094: Dense TinyLlama on pinned FlashProve through Hallmark's own patches
 
-Date: 2026-11-21, revised 2026-11-25. Status: **proposed**; needs owner approval
-([#186](https://github.com/AbdelStark/hallmark/issues/186): option 3 "needs owner approval"). No
+Date: 2026-11-21, revised 2026-11-25. Status: **proposed**: by
+[#186](https://github.com/AbdelStark/hallmark/issues/186) option 3 "needs owner approval", and this record asks for it. No
 owner-approved GPU run or spend. On 2026-11-24 and 25 (UTC) the contributor made a dense commitment and four
 proofs on a rented H100, on the contributor's own account and at the contributor's cost
-(USD 1.61), before any approval and with no owner-set cap ("The first dense proof" below).
+(USD 1.61), with no owner-approved budget and no owner-set cap ("The first dense proof" below).
 
 **Context.** #186 asks how Hallmark's LLM case, dense TinyLlama-1.1B, can be proved with FlashProve,
 which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama 4 Maverick's widths. #187 asks for
@@ -173,8 +173,8 @@ by the patched verifier,
 `NO: policy-tables` from the unpatched one, and eight altered copies each `NO:` with status 1. The
 GPU's worst-case table agrees with the CPU port at every site that the port computes as the GPU
 does (within 0.001 bits; the gate of layer 21 keeps 0.458 bits). Spend: USD 1.61 on the
-contributor's account; #184 asks for an owner-approved budget for paid GPU runs, and this run had
-none. Figures and retained failures:
+contributor's account; #184 asks for an owner-approved budget for paid GPU runs and #186 puts
+unbudgeted GPU runs out of scope, and this run had no budget. Figures and retained failures:
 [evidence](../../research/evidence/flashprove-tinyllama-gpu-2026-11-25.json),
 [README](../../research/probes/flashprove/tinyllama/README.md#the-first-dense-proof). The times are
 one machine's on lines of which only `table` is sized for this model: not a benchmark.
@@ -187,7 +187,7 @@ one machine's on lines of which only `table` is sized for this model: not a benc
    `research/AUTHORITY.json` excludes ambiguous licences, so the owner decides; a no means refitting
    on another text. The patches do not depend on it.
 2. **GPU jobs for #187, only with owner approval and a ceiling.** The run above was the
-   contributor's, outside any approval. What it measured, for sizing a ceiling: one pod of 17
+   contributor's, with no owner-approved budget. What it measured, for sizing a ceiling: one pod of 17
    minutes (upload of 2.2 GB, two commitments, four proofs, with about ten idle minutes of the
    controller's own mistake) cost USD 1.27 at USD 4.39 an hour; the commitment takes about 35 s and
    a proof under 10 s. A controller like `make e2e-flashprove`'s, with a cap in code, is not
@@ -207,7 +207,7 @@ one machine's on lines of which only `table` is sized for this model: not a benc
    GPU, and only in the mode that hides nothing. How a Hallmark verifier ties the ID to the
    public TinyLlama checkpoint is undecided.
 
-**Not claimed.** One request's proofs exist, made outside any owner approval. There is no claim of
+**Not claimed.** One request's proofs exist, made with no owner-approved budget. There is no claim of
 soundness of the patched C++ or CUDA code, no Lean coverage, no hiding (the seed is public), no
 benchmark and no like-for-like numbers yet. Equal tokens are a smoke test, not a
 proof that the two integer functions are equal; #187's like-for-like section must name each

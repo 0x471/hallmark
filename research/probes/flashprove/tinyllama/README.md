@@ -1,9 +1,9 @@
 # TinyLlama-1.1B on pinned FlashProve: dense-model patches
 
-Status: **proposed, not owner-approved** ([#186](https://github.com/AbdelStark/hallmark/issues/186),
+Status: **proposed** ([#186](https://github.com/AbdelStark/hallmark/issues/186),
 option 3; decision draft [0094](../../../../docs/decisions/0094-flashprove-tinyllama.md)). One dense
 commitment and four proofs of SASH's request have been made with these patches on a rented H100, on
-the contributor's own account and at the contributor's cost, before any owner approval
+the contributor's own account and at the contributor's cost, with no owner-approved budget
 ("[The first dense proof](#the-first-dense-proof)"). Nothing here changes `make verify-flashprove`
 or decision 0093's pins.
 
@@ -416,8 +416,8 @@ the float logits stays at least 0.99908 (0.99911 at `eg 8`), and the smallest to
 On 2026-11-24 and 2026-11-25 (UTC) the sized kit went through `cp_commit`, `cp_prove` and
 `cp_verify` on a rented H100 ([evidence](../../../evidence/flashprove-tinyllama-gpu-2026-11-25.json)).
 **This was the contributor's own run**: on the contributor's own RunPod account, paid by the
-contributor, before the owner approved option 3 and with no owner-set cap, although #184 asks for
-an owner-approved budget for paid GPU runs. It spent USD 1.61 (USD 0.33 and USD 1.27 for the two pods, by the fall of the account's balance). It is evidence for the proposal, not an approved Hallmark run.
+contributor, with no owner-set cap, although #184 asks for
+an owner-approved budget for paid GPU runs and #186 puts unbudgeted GPU runs out of scope. It spent USD 1.61 (USD 0.33 and USD 1.27 for the two pods, by the fall of the account's balance). It is evidence for the proposal, not an approved Hallmark run.
 
 - **Programs.** `prover/build.sh` built `cp_commit` and `cp_prove` from the pinned archive with the
   three patches (sources' digest `7f304c42…`, nvcc 13.2.86) on a CPU host; `cp_verify` is the

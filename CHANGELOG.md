@@ -16,7 +16,7 @@ TinyLlama's weight rows, and the answer target runs upstream's weight-table set-
 `research/probes/flashprove/tinyllama/gpu_job.sh` is the worker for one commitment and its proofs
 on an sm_90 GPU, and `scripts/flashprove_tinyllama_proof.py` checks such a proof on a CPU with
 caller-held values and altered copies. Four dense proofs of one request, SASH's, were made on a
-rented H100 and the first checked this way, at the contributor's own cost and before owner approval (decision 0094); the
+rented H100 and the first checked this way, at the contributor's own cost and with no owner-approved budget (decision 0094); the
 targets themselves make no commitment or proof. `make verify-flashprove` (decision 0093) is
 unchanged.
 
