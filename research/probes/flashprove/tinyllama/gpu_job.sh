@@ -11,17 +11,24 @@
 #   weights/<one file>.gguf, wsums.txt, fold.txt   the exported model and the kit's two setup files
 #   example.req                               the request
 #   public-seed.bin                           32 bytes, the published seed
+#   expected.sha256                           optional: sha256sum lines for files of STAGE, which
+#                                             must then hold before any program runs (the kit's and
+#                                             the GGUF file's pins of kit.json, the seed's)
 # WORK is created (mode 0700) and keeps everything: config/, ivk/ (public), isk/ (the provider's
 # directory, which stays on the host), in/, out.N/, the logs, cp_commit's worst-case table, and
 # public/ with the files a client needs, filled only after cp_verify's YES. PROOFS (default 1) is
 # the number of cp_prove calls on the same request, each timed apart from the commitment; 0 stops
 # after the commitment.
-# Exit status: 0 after a YES; 3 if the host does not fit (no SHA instructions, no sm_90 GPU, a
-# missing file); otherwise the failing step's.
+# Exit status: 0 after every YES, or after the commitment alone if PROOFS is 0; 3 if the call or the
+# host does not fit (PROOFS is no whole number, a missing or unexpected file, no SHA instructions,
+# no nvidia-smi, the first GPU is not sm_90), before WORK is made, or if a marker beside the model
+# file names another file; otherwise the failing step's.
+# No step has a time limit: the caller's controller must end a host that hangs.
 set -euo pipefail
 stage=$(cd -- "${1:?usage: gpu_job.sh STAGE WORK [PROOFS]}" && pwd)
 work=${2:?usage: gpu_job.sh STAGE WORK [PROOFS]}
 proofs=${3:-1}
+[[ $proofs =~ ^[0-9]+$ ]] || { echo "gpu_job.sh: PROOFS must be a whole number" >&2; exit 3; }
 seed=$stage/public-seed.bin
 programs=(cp_commit cp_verify)
 [ "$proofs" -eq 0 ] || programs+=(cp_prove)
@@ -32,20 +39,28 @@ done
 gguf=("$stage"/weights/*.gguf)
 [ "${#gguf[@]}" -eq 1 ] && [ -f "${gguf[0]}" ] || { echo "gpu_job.sh: one .gguf file is needed" >&2; exit 3; }
 [ "$(stat -c %s "$seed")" -eq 32 ] || { echo "gpu_job.sh: the seed file is not 32 bytes" >&2; exit 3; }
-mkdir -m 700 "$work"
+if [ -f "$stage/expected.sha256" ]; then
+  (cd "$stage" && sha256sum -c --quiet expected.sha256) ||
+    { echo "gpu_job.sh: a file of STAGE is not the one that expected.sha256 names" >&2; exit 3; }
+fi
+# The host must fit before WORK is made.
+grep -qw sha_ni /proc/cpuinfo || { echo "gpu_job.sh: this CPU has no SHA instructions" >&2; exit 3; }
+command -v nvidia-smi > /dev/null || { echo "gpu_job.sh: nvidia-smi is not found" >&2; exit 3; }
+# The programs use the first GPU that they see.
+[ "$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader | head -n 1 | tr -d ' ')" = 9.0 ] ||
+  { echo "gpu_job.sh: the first GPU is not sm_90" >&2; exit 3; }
+mkdir -m 700 -- "$work"
 cd -- "$work"
 work=$PWD # cp_prove takes absolute paths
 mkdir config in home tmp public
 
-# The host, before any long step.
-grep -m1 -ow sha_ni /proc/cpuinfo > sha_ni.txt || { echo "gpu_job.sh: this CPU has no SHA instructions" >&2; exit 3; }
-grep -m1 'model name' /proc/cpuinfo > cpu.txt
+# The host, recorded before any long step.
+grep -m1 -ow sha_ni /proc/cpuinfo > sha_ni.txt
+grep -m1 'model name' /proc/cpuinfo > cpu.txt || true
 nproc >> cpu.txt
 grep -E '^(MemTotal|MemAvailable):' /proc/meminfo > memory.txt
 nvidia-smi --query-gpu=name,compute_cap,driver_version,memory.used,memory.total --format=csv,noheader > gpu.txt
 cat cpu.txt memory.txt gpu.txt
-# The programs use the first GPU that they see.
-[ "$(head -n 1 gpu.txt | cut -d, -f2 | tr -d ' ')" = 9.0 ] || { echo "gpu_job.sh: the first GPU is not sm_90" >&2; exit 3; }
 (cd "$stage/hc" && sha256sum "${programs[@]}") > binaries.sha256
 (cd "$stage" && sha256sum config/policy.txt config/KL.bin config/layout.txt weights/wsums.txt weights/fold.txt \
   example.req public-seed.bin "weights/$(basename "${gguf[0]}")") > inputs.sha256
@@ -54,9 +69,14 @@ echo "1. the public configuration and the request"
 cp "$stage"/config/policy.txt "$stage"/config/KL.bin "$stage"/config/layout.txt config/
 cp "$stage/example.req" in/example.req
 # The declaration that the weights are public (examples/maverick/README.md, "Run it").
+# A marker that is there already must name this file's SHA-256.
 marker=${gguf[0]}.weights-are-public
-[ -e "$marker" ] || (umask 022; set -C
-  printf '%s  %s\n' "$(sha256sum "${gguf[0]}" | cut -d' ' -f1)" "$(basename "${gguf[0]}")" > "$marker")
+sum=$(tail -n 1 inputs.sha256 | cut -d' ' -f1)
+if [ -e "$marker" ]; then
+  [ "$(cut -d' ' -f1 "$marker")" = "$sum" ] || { echo "gpu_job.sh: $marker names another file" >&2; exit 3; }
+else
+  (umask 022; set -C; printf '%s  %s\n' "$sum" "$(basename "${gguf[0]}")" > "$marker")
+fi
 
 echo "2. cp_commit: the worst-case check, then the commitment"
 status=0
