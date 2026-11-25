@@ -44,7 +44,8 @@ nproc >> cpu.txt
 grep -E '^(MemTotal|MemAvailable):' /proc/meminfo > memory.txt
 nvidia-smi --query-gpu=name,compute_cap,driver_version,memory.used,memory.total --format=csv,noheader > gpu.txt
 cat cpu.txt memory.txt gpu.txt
-[ "$(cut -d, -f2 gpu.txt | tr -d ' ')" = 9.0 ] || { echo "gpu_job.sh: the GPU is not sm_90" >&2; exit 3; }
+# The programs use the first GPU that they see.
+[ "$(head -n 1 gpu.txt | cut -d, -f2 | tr -d ' ')" = 9.0 ] || { echo "gpu_job.sh: the first GPU is not sm_90" >&2; exit 3; }
 (cd "$stage/hc" && sha256sum "${programs[@]}") > binaries.sha256
 (cd "$stage" && sha256sum config/policy.txt config/KL.bin config/layout.txt weights/wsums.txt weights/fold.txt \
   example.req public-seed.bin "weights/$(basename "${gguf[0]}")") > inputs.sha256
@@ -89,6 +90,7 @@ for n in $(seq 1 "$proofs"); do
   echo "$status" > "cp_verify.$n.status"
   tail -n 2 "cp_verify.$n.log" | cut -c1-600
   [ "$status" -eq 0 ] || exit "$status"
+  [ "$(tail -n 1 "cp_verify.$n.log")" = YES ] || { echo "gpu_job.sh: cp_verify's last line is not YES" >&2; exit 1; }
   stat -c '%n %s' "out.$n/example.proof" ivk/key.bin ivk/leaf/0.bin
 done
 

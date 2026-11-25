@@ -30,6 +30,8 @@ def table_sites(text):
         cells = line.split(" | ")
         if cells[0] == "site":
             _, site, layer, word, value, bound, limit, short = cells
+            if (site, int(layer)) in sites:
+                sys.exit(f"compare_worst_case.py: the table lists {site} of layer {layer} twice")
             sites[site, int(layer)] = (word, value, float(bound), float(limit), int(short))
     return sites
 
@@ -38,7 +40,7 @@ def compare(table, port):
     gpu = table_sites(table)
     cpu = {(row["site"], row["layer"]): row for row in port["lines"]}
     missed = []
-    if set(gpu) != set(cpu):
+    if set(gpu) != set(cpu) or len(cpu) != len(port["lines"]):
         return dict(sites=len(gpu)), ["the two list other sites"]
     if "verdict fits" not in table.splitlines():
         missed.append("the GPU's verdict is not 'fits'")
