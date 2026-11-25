@@ -85,3 +85,45 @@ def test_the_gate_table_bound_rises_to_smax():
 
 def test_pairs_without_rope_take_the_larger_row():
     assert wc.pair_bounds([3, 9, 4, 2], [0] * 4, [0, 0], 1.0, 0, 4096.0) == [4096 * 9, 4096 * 4]
+
+
+def test_the_gpu_table_is_compared_site_by_site_with_the_port():
+    import compare_worst_case as cmp
+
+    def table(gate="25.536", short="0", verdict="verdict fits"):
+        return "\n".join(
+            [
+                "worst-case 1",
+                "site | stream at norm 1 | 0 | e_res | 0 | 11.043 | 38.994 | 0",
+                f"site | gate | 21 | kg | 11 | {gate} | 25.994 | {short}",
+                verdict,
+            ]
+        )
+
+    def port(stream=2109.84, gate=48620674.0):
+        row = dict(shortfall=0)
+        return dict(
+            lines=[
+                row
+                | dict(site="stream at norm 1", layer=0, word="e_res", value=0)
+                | dict(bound=stream, limit=547599908735.0),
+                row
+                | dict(site="gate", layer=21, word="kg", value=11)
+                | dict(bound=gate, limit=66845695.0),
+            ]
+        )
+
+    found, missed = cmp.compare(table(), port())
+    assert not missed and found["sites"] == 2
+    assert found["tightest_gpu_sites"][0] == (0.458, "gate", 21)
+    # The port's stream bound may be above the GPU's (Frobenius norms), never below it.
+    assert not cmp.compare(table(), port(stream=2109.84 * 200))[1]
+    assert cmp.compare(table(), port(stream=2109.84 / 2))[1]
+    # A row site must agree within the table's three decimals.
+    assert cmp.compare(table(), port(gate=48620674.0 * 1.01))[1]
+    assert cmp.compare(table(gate="25.600"), port())[1]
+    assert cmp.compare(table(short="1"), port())[1]
+    assert cmp.compare(table(verdict="verdict short"), port())[1]
+    other = port()
+    other["lines"][1]["layer"] = 20
+    assert cmp.compare(table(), other)[1] == ["the two list other sites"]
