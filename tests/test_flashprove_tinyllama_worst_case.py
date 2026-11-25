@@ -127,3 +127,12 @@ def test_the_gpu_table_is_compared_site_by_site_with_the_port():
     other = port()
     other["lines"][1]["layer"] = 20
     assert cmp.compare(table(), other)[1] == ["the two list other sites"]
+    # A limit, a parameter or a value that differs, the port's own shortfall and a site that the
+    # port lists twice are each a difference.
+    for key, value in (("limit", 66845695.0 * 2), ("word", "ku"), ("value", 12), ("shortfall", 1)):
+        other = port()
+        other["lines"][1][key] = value
+        assert cmp.compare(table(), other)[1], key
+    other = port()
+    other["lines"].append(dict(other["lines"][1]))
+    assert cmp.compare(table(), other)[1] == ["the two list other sites"]

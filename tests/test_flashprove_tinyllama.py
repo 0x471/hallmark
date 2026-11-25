@@ -135,6 +135,19 @@ def test_a_differing_constant_in_any_implementation_fails(tmp_path):
         harness.check_constants(fake_tree(tmp_path, wide=(0x3FB504F2, 0x3E3504F3)))
 
 
+def test_a_differing_constant_in_one_implementation_alone_fails(tmp_path):
+    tree = fake_tree(tmp_path)
+    files = [p for p in tree.rglob("*") if p.is_file() and "3FB504F3" in p.read_text().upper()]
+    assert len(files) == 4
+    for path in files:
+        text = path.read_text()
+        path.write_text(re.sub("3FB504F3", "3FB504F2", text, count=1, flags=re.I))
+        with pytest.raises(ValueError, match="other fold constants"):
+            harness.check_constants(tree)
+        path.write_text(text)
+    harness.check_constants(tree)
+
+
 def test_the_caller_takes_a_patched_result_only_with_the_patched_build():
     def output(build):
         line = f"outcome=verified commitment_id={ID} range=24:32 claim=exact-match build={build}"
@@ -451,11 +464,11 @@ def test_the_table_rule_refuses_what_the_provers_refuse(rows, fb, fnm, lkw):
 
 
 # The same TinyLlama-shaped file without its digest lines, as the unpatched build plans it.
-UNMET_THREE = (
+UNMET_BARE = (
     "plan: not the standard parameter form (routed-experts, both-clamps, table-digests,"
     " no-range-words): no run with these public inputs can be a verification (at best status 14)"
 )
-BARE = changed(THREE, [UNMET_THREE])
+BARE = changed(THREE, [UNMET_BARE])
 WITHOUT_DIGESTS = harness.PINS["tinyllama_plan"]["unmet_without_digests"]
 
 
@@ -472,7 +485,11 @@ def test_planner_ending_names_the_unmet_conditions():
         (BARE, (), False),
         (BARE, WITHOUT_DIGESTS["unpatched"], True),
         (BARE, ["routed-experts", "table-digests", "both-clamps"], False),
-        (changed(THREE, [UNMET_THREE, UNMET_THREE]), WITHOUT_DIGESTS["unpatched"], False),
+        (
+            changed(THREE, [UNMET_BARE, UNMET_BARE]),
+            WITHOUT_DIGESTS["unpatched"],
+            False,
+        ),
         (PLANNED, WITHOUT_DIGESTS["unpatched"], True),
     ],
 )

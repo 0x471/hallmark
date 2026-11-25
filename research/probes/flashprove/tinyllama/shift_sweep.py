@@ -67,8 +67,9 @@ def main(run_dir, out_json):
             subprocess.run(args, env=env, check=True, capture_output=True)
             answer = json.loads(found.read_text())
             missed = target.failures(answer)
-            slopes = [p["slope"] for p in answer["positions"]]
-            least = min((p["correlation"] for p in answer["positions"]), default=None)
+            positions = answer.get("positions", [])  # absent after a range failure
+            slopes = [p["slope"] for p in positions]
+            least = min((p["correlation"] for p in positions), default=None)
             # Caught by the correlation floor alone, and at least 0.99: the earlier floor passes it.
             floor_only = bool(missed) and all(
                 m.startswith("the logits' correlation") for m in missed
@@ -79,7 +80,7 @@ def main(run_dir, out_json):
                     caught=bool(missed),
                     missed=missed,
                     passes_a_floor_of_0_99=not missed or (floor_only and least >= 0.99),
-                    tokens_same=answer["matches"],
+                    tokens_same=answer.get("matches", False),
                     range_failure=answer["range_failure"],
                     min_correlation=least,
                     slope_range=[min(slopes), max(slopes)] if slopes else None,

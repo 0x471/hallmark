@@ -289,9 +289,11 @@ def test_the_lock_files_are_pinned_and_hold_the_pinned_versions():
             )
             hashed = re.findall(r"^[a-z][^ ]*==[^ ]+ \\\n +--hash=sha256:[0-9a-f]{64}", text, re.M)
             assert len(hashed) == len(pins), lock["file"]  # every pin is followed by its hashes
-            assert len(answer.locked(path)) == len(
-                pins
-            )  # what the target compares with uv pip freeze
+            # What the target compares with uv pip freeze: every pin, by name and version.
+            assert answer.locked(path) == sorted(
+                re.sub(r"[-_.]+", "-", name).lower() + "==" + version
+                for name, version in pins.items()
+            )
             for package, version in spec["packages"].items():
                 assert pins[package].split("+")[0] == version, (env, platform_key, package)
             assert not any(p.startswith(("nvidia", "triton")) for p in pins), lock["file"]
