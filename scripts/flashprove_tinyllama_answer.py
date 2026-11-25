@@ -84,6 +84,7 @@ LAYER_WORDS = ("kq", "kk", "kv", "ko", "kg", "ku", "kd", "M1", "K1", "M2", "K2",
 SETUP_FILES = ("wsums.txt", "fold.txt")  # beside the weights
 FIT_FILES = ("words.json", "maxima.json")
 CPU_TORCH = "https://download.pytorch.org/whl/cpu"
+GATE_KEY_MOST = 32639  # a gate key without the clamp gcl (docs/model.md of the pinned source)
 
 
 def sha(path):
@@ -612,13 +613,14 @@ def failures(answer):
     if answer["range_failure"] is not None:
         return [f"a range condition fails: {answer['range_failure']}"]
     missed = []
-    if not answer["matches"]:
-        missed.append(f"the choices are {answer['choices']}, not SASH's {CASE['answer_ids']}")
-    if not answer["gate_key_within_limit"]:
-        reached = answer["peaks"].get("key")
-        missed.append(
-            "the gate key is not recorded" if reached is None else f"the gate key reaches {reached}"
-        )
+    # The choices and the key's peak are judged here too, not only by answer_check.py's own flags.
+    if not answer["matches"] or answer.get("choices") != CASE["answer_ids"]:
+        missed.append(f"the choices are {answer.get('choices')}, not SASH's {CASE['answer_ids']}")
+    reached = answer["peaks"].get("key")
+    if reached is None:
+        missed.append("the gate key is not recorded")
+    elif not answer["gate_key_within_limit"] or not 0 <= reached <= GATE_KEY_MOST:
+        missed.append(f"the gate key reaches {reached}")
     req, ids = KIT["request"], CASE["prompt_ids"] + CASE["answer_ids"]
     if (answer["T"], answer["r"], answer["e"]) != (req["T"], req["r"], req["e"]):
         missed.append("the window or its range is not kit.json's request")
@@ -753,6 +755,17 @@ def worst_case_findings(port, floats):
     fail (none: as kit.json records)."""
     expected = KIT["worst_case"]
     missed = []
+    # Both results must be whole: every layer once, every site's line, and a summary that is the
+    # lines' own (nine sites a layer, and four of the output head).
+    count = len((KIT_DIR / "KL.bin").read_bytes()) // (4 * len(LAYER_WORDS))
+    for what, rows in (("the port", port["layers"]), ("the float bound", floats["layers"])):
+        if [row.get("layer") for row in rows] != list(range(count)):
+            missed.append(f"{what} does not list layers 0 to {count - 1} once each")
+    lines = port.get("lines", [])
+    if len(lines) != 9 * count + 4:
+        missed.append(f"the port lists {len(lines)} sites, not {9 * count + 4}")
+    if sorted([r["site"], r["layer"]] for r in lines if r["shortfall"]) != port["short"]:
+        missed.append("the port's list of short sites is not its lines'")
     if port["short"] != expected["short"]:
         missed.append(f"the sites that do not fit are {port['short']}, not {expected['short']}")
     gates = [layer for site, layer in port["short"] if site == "gate"]

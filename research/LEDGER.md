@@ -3392,7 +3392,7 @@ Retained failures: the verifier build refused a clone below a group-writable dir
 (cause not established); a command line of the controller's own ended with status 127 before
 anything ran and held pod 2 for about ten minutes (about USD 0.75).
 
-Not shown: anything beyond one request, one kit and one machine; a benchmark (only `table` is
+Not shown: anything beyond one request, one kit and two pods of one type; a benchmark (only `table` is
 sized for the model); hiding (public seed); soundness of the patched code; an enrolled commitment ID. Only Hallmark's patched verifier answers
 `YES`.
 

@@ -238,6 +238,10 @@ def test_failures_passes_only_an_answer_that_meets_every_condition():
     }
     for what, change in cases.items():
         assert answer.failures(a_passing_answer() | change), what
+    # The flags alone do not pass an answer whose own values say otherwise.
+    assert answer.failures(a_passing_answer() | dict(choices=[0] * 8))
+    assert answer.failures(a_passing_answer() | dict(peaks=dict(key=40000)))
+    assert answer.failures(a_passing_answer() | dict(peaks=dict()))
     unrecorded = a_passing_answer() | dict(gate_key_within_limit=False, peaks=dict())
     assert answer.failures(unrecorded) == ["the gate key is not recorded"]
     for field, value in (
@@ -333,7 +337,9 @@ def test_suite_rows_are_applied_as_suite_md_defines_them():
 def a_worst_case(short=(), ratio=1.0, floats_over=(), key_21=22703.0):
     """A port result and a float result as for the kit at eg 7: every site fits."""
     radius = 2141.6
-    port = dict(short=[list(x) for x in short], layers=[])
+    lines = [dict(site="q", layer=n, shortfall=0) for n in range(202 - len(short))]
+    lines += [dict(site=site, layer=layer, shortfall=1) for site, layer in short]
+    port = dict(short=sorted(list(x) for x in short), layers=[], lines=lines)
     floats = dict(layers_over_the_limit=list(floats_over), layers=[])
     for layer in range(22):
         key = key_21 if layer == 21 else 7000.0
@@ -356,4 +362,19 @@ def test_worst_case_findings_require_kit_json_and_two_agreeing_computations():
     assert answer.worst_case_findings(*a_worst_case(ratio=float("nan")))
     port, floats = a_worst_case()
     floats["layers"].pop()
+    assert answer.worst_case_findings(port, floats)
+    # Results that are not whole fail, however well they agree: no layers at all, both cut alike,
+    # a site's line missing, and a summary that is not the lines'.
+    assert answer.worst_case_findings(
+        dict(short=[], layers=[], lines=[]), dict(layers_over_the_limit=[], layers=[])
+    )
+    port, floats = a_worst_case()
+    port["layers"].pop()
+    floats["layers"].pop()
+    assert answer.worst_case_findings(port, floats)
+    port, floats = a_worst_case()
+    port["lines"].pop()
+    assert answer.worst_case_findings(port, floats)
+    port, floats = a_worst_case()
+    port["lines"][5]["shortfall"] = 1
     assert answer.worst_case_findings(port, floats)

@@ -133,6 +133,10 @@ def test_the_gpu_table_is_compared_site_by_site_with_the_port():
         other = port()
         other["lines"][1][key] = value
         assert cmp.compare(table(), other)[1], key
+    # Nothing to compare, or a bound that is no number, is a difference too.
+    assert cmp.compare("verdict fits", dict(lines=[]))[1]
+    assert cmp.compare(table(gate="nan"), port())[1]
+    assert cmp.compare(table(), port(gate=float("nan")))[1]
     other = port()
     other["lines"].append(dict(other["lines"][1]))
     assert cmp.compare(table(), other)[1] == ["the two list other sites"]

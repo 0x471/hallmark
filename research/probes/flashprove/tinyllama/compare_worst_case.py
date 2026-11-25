@@ -42,6 +42,8 @@ def compare(table, port):
     missed = []
     if set(gpu) != set(cpu) or len(cpu) != len(port["lines"]):
         return dict(sites=len(gpu)), ["the two list other sites"]
+    if not gpu:
+        return dict(sites=0), ["the table lists no site"]
     if "verdict fits" not in table.splitlines():
         missed.append("the GPU's verdict is not 'fits'")
     kinds = {}
@@ -51,6 +53,10 @@ def compare(table, port):
             missed.append(f"{key}: another parameter or value")
         if short or row["shortfall"]:
             missed.append(f"{key}: short")
+        numbers = (bound, limit, row["bound"], row["limit"])
+        if not (all(math.isfinite(x) for x in numbers) and row["bound"] > 0 and row["limit"] > 0):
+            missed.append(f"{key}: a bound or a limit is no positive finite number")
+            continue
         above = math.log2(row["bound"]) - bound
         if abs(math.log2(row["limit"]) - limit) > RESOLUTION:
             missed.append(f"{key}: the limits differ")
