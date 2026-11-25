@@ -9,9 +9,16 @@
 // in CUDA files are copied here, each marked with its source. A refusal prints upstream's message
 // and ends with status 2; an admitted kit ends with the line "prover set-up: admitted ..." and
 // status 0.
-// Not run here: anything on a GPU or a commitment, the memory that a table of this size takes,
-// the forward kernels' layer_words_fit() (prover/prover/forward.cuh) and the hiding conditions,
-// which are only printed (a commitment made with -test-seed is not held to them).
+// The layers' scale words are held to layer_words_fit() (prover/prover/forward.cuh), which
+// read_inputs() calls on the host for every layer, and attention to two rules of AForkHid
+// (prover/attn/fork.cuh): the column lengths of its five committed matrices, and lt and lg.
+// Not run here, although each needs only the kit: the rest of AForkHid::setup() (5 <= lmbA <= kT + 5,
+// the pad tree's size), AFront::plan()'s limit on a lookup call's pieces of one segment kind
+// (prover/attn/front.cuh) and the output head's set-up (prover/head/). A kit that one of these
+// refuses is admitted here and stops at cp_prove's start.
+// Not run here either: anything on a GPU or a commitment, the memory that a table of this size
+// takes, and the hiding conditions, which are only printed (a commitment made with -test-seed is not
+// held to them).
 // usage: prover_setup <kit folder>
 // Build (from the patched tree's prover/ folder): c++ -std=c++17 -O2 -DBLK_FIELD=2 -DBLK_HASH=1
 //   -I . -I ../blocks prover_setup.cpp
@@ -44,6 +51,43 @@ static int log2_ceil(size_t x) { // l2i() of prover/hiding/tail.cuh
   int l = 0;
   while (((size_t)1 << l) < x) l++;
   return l;
+}
+
+// Copied from prover/prover/forward.cuh, a CUDA file: LayerScaleSet, norm_words_fit() and
+// layer_words_fit(), which read_inputs() (prover/prover/inputs.cuh) calls on the host.
+struct LayerScaleSet {
+  int kq, kk, kv, ko, kg, ku, kd, M1, K1, M2, K2, kr, kgR, kuR, rp = 1, sh = 8; // M1: first norm
+};
+static inline bool norm_words_fit(int M, int K, int xl) {
+  return M >= 24 && M <= 47 && K >= 17 && K <= 32 && K >= M - (xl == 5 && K <= 23 ? 13 : 14);
+}
+static inline bool layer_words_fit(const LayerScaleSet &w, int l, const LayerShape &s) {
+  auto shift = [&](const char *n, int k, int form) {
+    const int hi = form == 0 ? 16 : form == 1 ? 24 : 32;
+    if (k >= 1 && k <= hi) return true;
+    printf("layer constants: layer %d: shift %s = %d is outside the range for digit form %d, which is 1 to %d\n", l, n,
+           k, form, hi);
+    return false;
+  };
+  auto norm = [&](int n, int M, int K) {
+    if (norm_words_fit(M, K, s.xl)) return true;
+    printf("layer constants: layer %d: M%d and K%d refused; they must satisfy 24 <= M%d <= 47, 17 <= K%d <= 32 and K%d "
+           ">= M%d - 14 (M%d - 13 with five limbs and K%d <= 23)\n",
+           l, n, n, n, n, n, n, n, n);
+    return false;
+  };
+  if (!shift("kg", w.kg, s.hg) || !shift("ku", w.ku, s.hu) || !shift("kd", w.kd, s.hdn) || !norm(2, w.M2, w.K2))
+    return false;
+  if (s.prof >= 2) {
+    if (!shift("kq", w.kq, s.hqk) || !shift("kk", w.kk, s.hqk) || !shift("kv", w.kv, s.hv) || !shift("ko", w.ko, s.ho))
+      return false;
+    if (w.kq != w.kk && (w.kq < 16 || w.kk < 16)) {
+      printf("layer constants: layer %d: kq and kk must be equal when either of them is below 16\n", l);
+      return false;
+    }
+    if (!norm(1, w.M1, w.K1)) return false;
+  }
+  return !moe_at_layer(s.prof, l) || (shift("kr", w.kr, s.hr) && shift("kgR", w.kgR, s.hg) && shift("kuR", w.kuR, s.hu));
 }
 
 int main(int argc, char **argv) {
@@ -116,6 +160,25 @@ int main(int argc, char **argv) {
         return 2;
       }
   }
+  { // The layers' scale words: read_inputs(), with Prover::layer_constants() and digit_forms().
+    LayerShape s;
+    s.prof = mo ? 3 : 2;
+    s.xl = xl;
+    s.hqk = policy["hq"];
+    s.hv = policy["hv"];
+    s.ho = policy["ho"];
+    s.hg = policy["hgD"];
+    s.hu = policy["huD"];
+    s.hdn = policy["hdD"];
+    s.hr = mo ? (int)policy["hr"] : 0;
+    for (int l = 0; l < Lr; l++) {
+      const u32 none[3] = {0, 0, 0}, *w = &KL[(size_t)KLW * l];
+      const u32 *e = (mo && (l & 1)) ? &KL[(size_t)KLW * Lr + 3 * (l / 2)] : none;
+      const LayerScaleSet words{(int)w[0], (int)w[1], (int)w[2],  (int)w[3], (int)w[4], (int)w[5], (int)w[6],  (int)w[7],
+                                (int)w[8], (int)w[9], (int)w[10], (int)e[0], (int)e[1], (int)e[2], (int)w[12], (int)w[11]};
+      if (!layer_words_fit(words, l, s)) return 2;
+    }
+  }
   // Attention: one plan for each distinct list of the groups' shifts (other_setup.cuh).
   std::map<std::vector<int>, int> plans;
   for (int g = 0; g < NGr; g++) {
@@ -163,6 +226,22 @@ int main(int argc, char **argv) {
     }
     if (p.iota != 32 + P.dT) { // AFront::plan()
       printf("policy: policy-iotaA: the line iotaA_0 must be 32 + %d; it is %d\n", P.dT, p.iota);
+      return 2;
+    }
+    { // AForkHid::layoutMatrices(), prover/attn/fork.cuh: each committed matrix has whole columns of D.
+      const size_t mm[5] = {(size_t)1 << p.lmS, (size_t)p.T << p.lwH, (size_t)p.T << p.lwO, (size_t)1 << p.lmb,
+                            (size_t)p.T << p.lwQ};
+      for (size_t m : mm)
+        if (m % (size_t)p.D) {
+          printf("attention: the column length of a committed matrix (2^lmS, 2^lmh, 2^lmo, 2^lmbA or 2^lmq) is not a "
+                 "multiple of the ring degree D\n");
+          return 2;
+        }
+    }
+    if (p.lt > 14 || 2 * p.lt + p.lgk > 32) { // AForkHid::countSlots()
+      printf("attention: this prover needs lt <= 14 (at most 2^14 tokens) and 2 lt + lg <= 32, where 2^lg is the "
+             "number of key-value heads; this parameter file has lt = %d and lg = %d\n",
+             p.lt, p.lgk);
       return 2;
     }
     plans[sh] = P.dT;

@@ -18,10 +18,13 @@ them), applies the three pinned patches and scales.patch, and then requires, in 
    and for SASH's request, with the pinned h_par and configuration; the unpatched one refuses it
    (policy-tables); the provers' parameter-file reader admits it; and the part of cp_commit's and
    cp_prove's set-up that needs only the kit, run on a CPU with upstream's code
-   (tinyllama/prover_setup.cpp: the weight table's parameters for W's rows, the plan of attention
-   of each layer group and each group's layer layout), admits it, while the same kit with kFM one
-   higher is refused by the plan of attention and with one step less of the table's message
-   entries by the table's own check; the kit's line table must be the one that
+   (tinyllama/prover_setup.cpp: the weight table's parameters for W's rows, the ranges of each
+   layer's scale words, the plan of attention of each layer group and each group's layer layout;
+   its header lists the set-up rules that it does not run), admits it, while four changed kits are
+   each refused for their own reason: kFM one higher by the plan of attention, one step less of the
+   table's message entries by the table's own check, lmh 10 by the column rule of attention's
+   committed matrices, and layer 1's kd 25 by the range of its digit form; the kit's line table
+   must be the one that
    tinyllama_plan.table_numbers() gives for the rows that upstream's layoutW() counts;
 4. upstream's scale-tool tests pass on the patched tree, run as SUITE.md runs its two scales rows
    (the other two tests have no row); status 77 means passed in part: this target builds no
@@ -44,7 +47,8 @@ No commitment, proof or GPU run is made. Equal tokens show that the integer mode
 SASH's answer on this request; they do not show that FlashProve's and SASH's integer functions are
 equal.
 Set FLASHPROVE_TINYLLAMA_INPUTS to a folder holding the pinned model files and parquet file to skip
-the downloads; each file is checked against its pin before it is read.
+the downloads; each file is checked against its pin before its first read. The folder must not
+change during the run: the float reference and the float gate bound read the model files again.
 """
 
 import argparse
@@ -83,7 +87,11 @@ CPU_TORCH = "https://download.pytorch.org/whl/cpu"
 
 
 def sha(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    digest = hashlib.sha256()
+    with open(path, "rb") as stream:
+        for block in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def run(args, log, cwd=None, env=None, timeout=3600):
@@ -153,10 +161,15 @@ def environment(output, name):
         )
     code, frozen = run(["uv", "pip", "freeze", "-p", python], output / f"venv-{name}-freeze.log")
     require(code == 0, f"uv pip freeze failed ({name})")
+    lines = [y.strip() for y in frozen.splitlines() if y.strip()]
+    # A distribution installed from a file or a URL is printed as `name @ ...`: no such line may
+    # be skipped, or the comparison below would not see it.
+    require(
+        all(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*==[^=@\s]+", x) for x in lines),
+        f"the {name} environment holds a distribution that is not name==version",
+    )
     installed = sorted(
-        re.sub(r"[-_.]+", "-", x.split("==")[0]).lower() + "==" + x.split("==")[1]
-        for x in (y.strip() for y in frozen.splitlines())
-        if "==" in x
+        re.sub(r"[-_.]+", "-", x.split("==")[0]).lower() + "==" + x.split("==")[1] for x in lines
     )
     require(installed == locked(path), f"the {name} environment is not exactly its lock file")
     versions["lock_file"] = lock["file"]
@@ -478,11 +491,12 @@ def check_planning(tree, output, verifiers):
         "the kit's line table is not the one its criteria give",
     )
 
-    def control(name, change, wanted):
-        """The kit with one line changed must be refused by upstream's set-up code."""
+    def control(name, change, wanted, scales=None):
+        """The kit with one line (or, with `scales`, one word of KL.bin) changed must be refused
+        by upstream's set-up code, with the refusal `wanted`."""
         folder_c = output / f"kit-{name}"
         folder_c.mkdir()
-        shutil.copyfile(folder / "KL.bin", folder_c / "KL.bin")
+        (folder_c / "KL.bin").write_bytes(scales or (folder / "KL.bin").read_bytes())
         (folder_c / "policy.txt").write_text("".join(change(x) + "\n" for x in policy))
         code, text = ft.stdout_of([setup, folder_c], output / f"prover-setup-{name}.log")
         refused = text.rstrip().splitlines()[-1] if text.strip() else ""
@@ -503,12 +517,29 @@ def check_planning(tree, output, verifiers):
         lambda x: "table " + short if x.startswith("table ") else x,
         "policy-pad-place",
     )
+    # Two rules that cp_verify and the provers' reader do not have: a committed matrix of
+    # attention has whole columns of D = 2,048, and a shift fits its digit form.
+    short_columns = control(
+        "lmh-10",
+        lambda x: "lmh 10" if x.startswith("lmh ") else x,
+        "attention: the column length of a committed matrix",
+    )
+    words = bytearray((folder / "KL.bin").read_bytes())
+    struct.pack_into("<I", words, 4 * (len(LAYER_WORDS) + LAYER_WORDS.index("kd")), 25)
+    wide_shift = control(
+        "layer-1-kd-25",
+        lambda x: x,
+        "layer constants: layer 1: shift kd = 25 is outside the range for digit form",
+        bytes(words),
+    )
     found["prover_setup"] = dict(
         kit=last,
         hiding=hiding,
         weight_table=tables[0],
         control_kFM_plus_1=refused,
         control_table_one_step_short=too_short,
+        control_lmh_10=short_columns,
+        control_layer_1_kd_25=wide_shift,
     )
     return found
 
