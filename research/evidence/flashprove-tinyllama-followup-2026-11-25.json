@@ -3853,7 +3853,31 @@
     "shows": "the script's own control flow, nothing about the real programs or a GPU"
   },
   "gates": {
-    "note": "see the ledger entry of this follow-up; run at the commit that first holds this file"
+    "commit": "0b5b46e, the commit that first holds this file; this section and the ledger entry were added one commit later",
+    "macos_arm64": {
+      "host": "macOS arm64, a clean clone, uv 0.9.18 with uv's own Python",
+      "make_check": {
+        "3.12.12": "passed: pytest 2,371 passed, 102 skipped",
+        "3.13.15": "passed: pytest 2,371 passed, 102 skipped",
+        "3.14.7": "passed: pytest 2,371 passed, 102 skipped"
+      },
+      "make_package_check": "passed on all three",
+      "make_docs": "passed: 176 pages, 14,753 local links and assets"
+    },
+    "linux_x86_64": {
+      "host": "Ubuntu 24.04 x86_64, a clean clone, uv 0.9.18 with uv's own Python (UV_MANAGED_PYTHON=1)",
+      "make_check": {
+        "3.12.12": "ruff, format and mypy passed; pytest 2,357 passed, 2 failed, 114 skipped",
+        "3.13.15": "ruff, format and mypy passed; pytest 2,357 passed, 2 failed, 114 skipped",
+        "3.14.2": "ruff, format and mypy passed; pytest 2,358 passed, 1 failed, 114 skipped"
+      },
+      "failing_tests": "tests/test_worker.py::test_stream_copy_retains_rejected_output[modified] and tests/test_manifests.py::test_file_changed_during_read[abd]",
+      "note": "the two tests fail intermittently on this host on main too (flashprove-tinyllama-2026-11-24.json, make_check.linux_x86_64_main: in 5 and in 4 of 7 full runs on e2cc6d6); the branch touches neither; no FlashProve test failed. make check therefore ends with a non-zero status on this host",
+      "earlier_at_6f90c02": "3.12.12 and 3.13.15: 1 failed (test_stream_copy_retains_rejected_output[modified]), 2,303 passed, 114 skipped; 3.14.2: 2 failed, 2,302 passed; make package-check and make docs passed",
+      "make_package_check": "passed on all three",
+      "make_docs": "passed: 176 pages, 14,753 local links and assets"
+    },
+    "not_run": "GitHub's own CI: the fork has no workflow runs"
   },
   "not_run": [
     "any GPU, commitment or proof: gpu_job.sh as it now stands has run only against stand-in programs",

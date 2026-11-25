@@ -3395,3 +3395,52 @@ anything ran and held pod 2 for about ten minutes (about USD 0.75).
 Not shown: anything beyond one request, one kit and one machine; a benchmark (only `table` is
 sized for the model); hiding (public seed); soundness of the patched code; an enrolled commitment ID. Only Hallmark's patched verifier answers
 `YES`.
+
+## 2026-11-25: dense TinyLlama on FlashProve: three reviews, fixes and reruns (proposed; no GPU)
+
+Question: after three reviews of the branch at `6f90c02` (one by Claude Mythos, two rounds by
+Claude Fable reviewers; all AI, none independent of the contributor), what in the records and the
+tooling was wrong, and do the targets still pass once it is fixed? Pass criterion: both CPU targets
+and the caller's check of the first dense proof pass on Linux and macOS at one code head, with the
+patches, the kit's files and the GPU run's files unchanged. No GPU, no paid service.
+
+Found, and what was done ([evidence](evidence/flashprove-tinyllama-followup-2026-11-25.json)):
+
+- No way to a wrong `YES` was found in the patches, by reading and by an enumeration of the
+  digest-line scan. Upstream's own text counts a model without routed experts among the forms that
+  cannot pass and marks that as read, not tested; the README now says so. The patches are unchanged.
+- `prover_setup.cpp` admitted kits that `cp_prove` refuses at its start: it did not run
+  `layer_words_fit()` or attention's column rule. Both are ported now, with two more controls in the
+  answer target; its header names the set-up rules that it still leaves out.
+- The caller's check took any `NO:` as a refusal and compared the worker's folder before copying
+  it. It now requires each altered copy's own refusal and compares the copy. Of the eight copies,
+  seven are refused by checks that read the proof, the key or the ID; the token file's copy is
+  refused on the statement's form.
+- `gpu_job.sh` took any `PROOFS` and compared no input with a pin. It now refuses a `PROOFS` that is
+  no whole number below 1,000, checks the host before it makes its work folder, and compares an
+  optional `expected.sha256`. It has run only against stand-in programs since.
+- Records: three evidence files that `4df5ab3` had removed are restored; the balance readings and
+  the Linux runs that `83b2aaa` had replaced in the GPU evidence are in the follow-up evidence,
+  with both `result.json` files of the caller's check, the pods' `inputs.sha256` and
+  `binaries.sha256`, the seed's SHA-256 and the scripts that ran on the pods. The authority
+  statement now names #184, #186's out-of-scope line, `docs/OPERATIONS.md` and
+  `research/AUTHORITY.json`. A dependency review of the two environments is added
+  ([record](evidence/flashprove-tinyllama-dependencies-2026-11-25.json)).
+
+Result: passed at `6ba957c`. Linux x86_64: the caller's check 775 s, the answer target 2,092 s, the
+patch target 1,737 s (108 calls equal). macOS arm64: 147 s, 335 s and 500 s. Both hosts give SASH's
+eight tokens, the kit byte for byte, and the four changed kits each refused for its own reason.
+Gates at `0b5b46e`: on macOS `make check` passed on Python 3.12.12, 3.13.15 and 3.14.7 (2,371 passed,
+102 skipped), with `make package-check` and `make docs` (176 pages). On Linux `make package-check`
+and `make docs` passed and `make check` ended with one or two failures on each Python, both in
+tests that the branch does not touch and that fail on that host on `main` too
+(`test_stream_copy_retains_rejected_output[modified]`, `test_file_changed_during_read[abd]`).
+
+Retained failure: at `0aaf5e2` the answer target stopped on both hosts at the first environment. A
+check added one commit earlier read uv's own first line of `uv pip freeze` as a distribution, and
+had no test; `30b2b3d` and `1f42684` fix it with one.
+
+Not shown: anything on a GPU since the first run; that `cp_prove` refuses what the port now
+refuses (the refusals are upstream's code, run on a CPU); soundness of the patched code. Left
+open and listed in the README: the test gaps of the patches, the free line `fe`, the worker's
+missing time limit, and thin tests of Hallmark's own scripts.
