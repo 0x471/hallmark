@@ -1,4 +1,4 @@
-.PHONY: demo-web demo-tui check-demo e2e e2e-llm benchmark-llm-gpu e2e-composed verify-llm verify-flashprove verify-flashprove-tinyllama verify-flashprove-tinyllama-answer e2e-flashprove compare-provers check check-train check-llm check-guard check-comparison check-conformance check-spec check-admission test package-check package-check-train package-check-guard package-check-comparison smoke docs docs-serve
+.PHONY: demo-web demo-tui check-demo e2e e2e-llm benchmark-llm-gpu e2e-composed verify-llm verify-flashprove verify-flashprove-tinyllama verify-flashprove-tinyllama-answer verify-flashprove-tinyllama-request verify-flashprove-tinyllama-proof e2e-flashprove e2e-flashprove-tinyllama compare-provers check check-train check-llm check-guard check-comparison check-conformance check-spec check-admission test package-check package-check-train package-check-guard package-check-comparison smoke docs docs-serve
 
 check:
 	uv lock --check
@@ -31,7 +31,7 @@ benchmark-llm-gpu:
 	uv run --locked --python 3.12.12 --extra llm python scripts/run_llm_gpu.py --llm-run "$(LLM_RUN)" --credit-balance-usd "$(GPU_CREDIT_BALANCE_USD)" --max-cost-usd 5.00 $(if $(GPU_BUILD_RUN),--build-run "$(GPU_BUILD_RUN)")
 
 e2e-composed:
-	uv run --locked --python 3.12.12 --extra train --extra llm python scripts/run_circle_composed.py $(if $(LLM_RUN),--llm-run "$(LLM_RUN)") $(if $(CLASSIFIER_RUN),--classifier-run "$(CLASSIFIER_RUN)")
+	uv run --locked --python 3.12.12 --extra train --extra llm python scripts/run_circle_composed.py $(if $(LLM_RUN),--llm-run "$(LLM_RUN)") $(if $(CLASSIFIER_RUN),--classifier-run "$(CLASSIFIER_RUN)") $(if $(FLASHPROVE_TINYLLAMA_CASE),--llm-backend flashprove --flashprove-case "$(FLASHPROVE_TINYLLAMA_CASE)")
 
 verify-llm:
 	uv run --locked --python 3.12.12 python scripts/verify_llm.py --run "$(LLM_RUN)"
@@ -44,6 +44,15 @@ verify-flashprove-tinyllama:
 
 verify-flashprove-tinyllama-answer:
 	uv run --locked --python 3.12.12 python scripts/flashprove_tinyllama_answer.py
+
+verify-flashprove-tinyllama-request:
+	uv run --locked --python 3.12.12 python scripts/flashprove_tinyllama_request.py
+
+verify-flashprove-tinyllama-proof:
+	uv run --locked --python 3.12.12 python scripts/flashprove_tinyllama_proof.py --case "$(FLASHPROVE_TINYLLAMA_CASE)"
+
+e2e-flashprove-tinyllama:
+	uv run --locked --python 3.12.12 python scripts/run_flashprove_tinyllama_gpu.py --credit-balance-usd "$(GPU_CREDIT_BALANCE_USD)" --max-cost-usd 3.00 --build "$(FLASHPROVE_TINYLLAMA_BUILD)" --gguf "$(FLASHPROVE_TINYLLAMA_GGUF)"
 
 e2e-flashprove:
 	uv run --locked --python 3.12.12 --extra llm python scripts/run_flashprove_gpu.py --credit-balance-usd "$(GPU_CREDIT_BALANCE_USD)" --max-cost-usd 3.50 $(if $(FLASHPROVE_BUILD_RUN),--build-run "$(FLASHPROVE_BUILD_RUN)")

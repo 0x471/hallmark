@@ -1,4 +1,9 @@
-"""Default all-Circle integrity composition; retained inputs require no paid work."""
+"""Default all-Circle integrity composition; retained inputs require no paid work.
+
+With --llm-backend flashprove the LLM side is one dense TinyLlama proof of FlashProve, checked
+afresh from the public files in --flashprove-case (scripts/flashprove_composed.py); the three
+classifier proofs then bind that path's model identity. SASH stays the default.
+"""
 
 import argparse
 import json
@@ -23,14 +28,31 @@ from hallmark._worker import RunBudget, invoke, read_regular, write_new
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def run(*, llm_run=None, classifier_run=None, enrollment=None, trusted_key=None):
-    required = 32 if llm_run is None else 12
+def run(
+    *,
+    llm_run=None,
+    classifier_run=None,
+    enrollment=None,
+    trusted_key=None,
+    llm_backend="sash",
+    flashprove_case=None,
+):
+    if llm_backend not in composed_input.BACKENDS:
+        raise ValueError("unknown LLM backend")
+    flash = llm_backend == "flashprove"
+    if flash != (flashprove_case is not None) or (flash and llm_run is not None):
+        raise ValueError("the FlashProve backend takes --flashprove-case and no --llm-run")
+    required = 32 if llm_run is None and not flash else 12
     if shutil.disk_usage(ROOT).free < required * 1024**3:
         raise ValueError(f"Circle composition requires {required} GiB free storage")
     case = composed_input.case()
     signed, key = verify_llm.read_enrollment(enrollment, trusted_key)
-    inventory = verify_llm.source_inventory()
-    verifier_id = verify_llm.verifier_identity(inventory)
+    if flash:
+        import flashprove_composed as llm_side
+    else:
+        llm_side = verify_llm
+    inventory = llm_side.source_inventory()
+    verifier_id = llm_side.verifier_identity(inventory)
     (ROOT / "runs").mkdir(exist_ok=True)
     output = Path(tempfile.mkdtemp(prefix="composed-circle-", dir=ROOT / "runs"))
     print(f"Composed evidence: {output}", flush=True)
@@ -41,7 +63,8 @@ def run(*, llm_run=None, classifier_run=None, enrollment=None, trusted_key=None)
         dict(
             schema_id="hallmark.circle-composed-protocol/1",
             sources=sources,
-            fresh_llm_proving=llm_run is None,
+            fresh_llm_proving=llm_run is None and not flash,
+            llm_backend=llm_backend,
             classifier_backend="circle",
             llm_case_sha256=composed_input.CASE_SHA256,
             circle_enrollment=circle_inputs.ENROLLMENT_PIN,
@@ -68,26 +91,38 @@ def run(*, llm_run=None, classifier_run=None, enrollment=None, trusted_key=None)
         if signed is not None:
             frozen = output / "enrollment.cbor"
             write_new(frozen, signed)
-        if llm_run is None:
-            llm_run = run_llm_e2e.run("2.50")
-        verified = verify_llm.run(
-            Path(llm_run).resolve(), enrollment=frozen, trusted_key=trusted_key
-        )
-        llm = json.loads(read_regular(verified / "result.json", 1024**2))
-        if (
-            llm.get("passed") is not True
-            or llm.get("proofs") != 23
-            or llm.get("residual_links") != 22
-            or llm.get("fresh_verifications") != 2
-            or llm.get("response") != case["response"]
-        ):
-            raise ValueError("incomplete fresh LLM verification")
-        observed = llm["parameter_authority"]
-        if {k: v for k, v in observed.items() if k not in ("stage", "checked_at")} != {
-            k: v for k, v in initial.items() if k not in ("stage", "checked_at")
-        }:
-            raise ValueError("LLM parameter authority changed")
-        classifier = run_circle_e2e.run(classifier_run, llm=True)
+        if flash:
+            verified = llm_side.verify(Path(flashprove_case).resolve(), output / "llm")
+            llm = json.loads(read_regular(verified / "result.json", 1024**2))
+            if (
+                llm.get("passed") is not True
+                or llm.get("proofs") != 1
+                or llm.get("fresh_verifications") != 1
+                or llm.get("altered_copies_rejected") != 8
+                or llm.get("response") != case["response"]
+            ):
+                raise ValueError("incomplete fresh LLM verification")
+        else:
+            if llm_run is None:
+                llm_run = run_llm_e2e.run("2.50")
+            verified = verify_llm.run(
+                Path(llm_run).resolve(), enrollment=frozen, trusted_key=trusted_key
+            )
+            llm = json.loads(read_regular(verified / "result.json", 1024**2))
+            if (
+                llm.get("passed") is not True
+                or llm.get("proofs") != 23
+                or llm.get("residual_links") != 22
+                or llm.get("fresh_verifications") != 2
+                or llm.get("response") != case["response"]
+            ):
+                raise ValueError("incomplete fresh LLM verification")
+            observed = llm["parameter_authority"]
+            if {k: v for k, v in observed.items() if k not in ("stage", "checked_at")} != {
+                k: v for k, v in initial.items() if k not in ("stage", "checked_at")
+            }:
+                raise ValueError("LLM parameter authority changed")
+        classifier = run_circle_e2e.run(classifier_run, llm=True, llm_backend=llm_backend)
         report = json.loads(read_regular(classifier / "result.json", 1024**2))
         _, originals, policy = circle_inputs.admit(classifier, report["native_preparation_pin"])
         proof_root = classifier / "proofs"
@@ -102,6 +137,7 @@ def run(*, llm_run=None, classifier_run=None, enrollment=None, trusted_key=None)
             opened,
             expected,
             bundle,
+            llm_backend,
         )
         binary = (ROOT / "research/probes/circle/target/release/circle-verify").resolve()
         proof_protocol = json.loads(read_regular(proof_root / "protocol.json", 1024**2))
@@ -141,20 +177,36 @@ def run(*, llm_run=None, classifier_run=None, enrollment=None, trusted_key=None)
             opened,
             expected,
             bundle,
+            llm_backend,
         )
         if (
             len(jobs) != 3
             or len(rejected) != 16
             or sources != run_e2e.source_pins()
-            or inventory != verify_llm.source_inventory()
+            or inventory != llm_side.source_inventory()
         ):
             raise ValueError("incomplete composition or changed source")
         final = authority("after-composition")
         verdicts = [p["public"][99] for p in bundle["proofs"]]
+        if flash:
+            schema = "hallmark.circle-composed-flashprove-request-result/1"
+            llm_fields = dict(
+                llm_backend="flashprove",
+                llm_proofs_verified=1,
+                fresh_llm_verifications=1,
+                llm_altered_copies_rejected=8,
+                llm_commitment_id=llm["commitment_id"],
+                llm_commitment_id_source=llm["commitment_id_source"],
+                llm_checked_tokens=llm["checked_tokens"],
+                llm_verifier="Hallmark's patched cp_verify; upstream's refuses this proof",
+            )
+        else:
+            schema = "hallmark.circle-composed-request-result/1"
+            llm_fields = dict(llm_proofs_verified=23, residual_links=22, fresh_llm_verifications=2)
         run_e2e.write_json(
             output / "result.json",
             dict(
-                schema_id="hallmark.circle-composed-request-result/1",
+                schema_id=schema,
                 status="passed",
                 backend="circle",
                 prompt=opened.prompt,
@@ -165,9 +217,7 @@ def run(*, llm_run=None, classifier_run=None, enrollment=None, trusted_key=None)
                 classifier_run=str(classifier),
                 llm_result_sha256=run_e2e.sha(verified / "result.json"),
                 classifier_result_sha256=run_e2e.sha(classifier / "result.json"),
-                llm_proofs_verified=23,
-                residual_links=22,
-                fresh_llm_verifications=2,
+                **llm_fields,
                 classifier_proofs_verified=3,
                 classifier_verdicts=verdicts,
                 policy_release=all(verdicts),
@@ -184,8 +234,8 @@ def run(*, llm_run=None, classifier_run=None, enrollment=None, trusted_key=None)
             ),
         )
         print(
-            "INTEGRITY PASS: 23 SASH + 3 Circle classifier proofs. "
-            f"Results: {output / 'result.json'}",
+            f"INTEGRITY PASS: {'1 FlashProve' if flash else '23 SASH'} + 3 Circle classifier "
+            f"proofs. Results: {output / 'result.json'}",
             flush=True,
         )
         return output
@@ -208,10 +258,14 @@ if __name__ == "__main__":
     parser.add_argument("--classifier-run", type=Path)
     parser.add_argument("--enrollment", type=Path, default=os.environ.get("LLM_ENROLLMENT"))
     parser.add_argument("--trusted-key", default=os.environ.get("LLM_TRUST_KEY"))
+    parser.add_argument("--llm-backend", choices=composed_input.BACKENDS, default="sash")
+    parser.add_argument("--flashprove-case", type=Path, help="public files of one dense proof")
     args = parser.parse_args()
     run(
         llm_run=args.llm_run,
         classifier_run=args.classifier_run,
         enrollment=args.enrollment,
         trusted_key=args.trusted_key,
+        llm_backend=args.llm_backend,
+        flashprove_case=args.flashprove_case,
     )

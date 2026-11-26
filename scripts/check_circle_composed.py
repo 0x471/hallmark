@@ -6,12 +6,14 @@ import circle_backend as circle
 import composed_input
 
 
-def joined_jobs(enrollment, pin, originals, old_policy, opening, expected, bundle):
-    composed_input.check_request(opening, expected)
+def joined_jobs(enrollment, pin, originals, old_policy, opening, expected, bundle, backend="sash"):
+    composed_input.check_request(opening, expected, backend)
     return circle.check_bundle(enrollment, pin, originals, old_policy, opening, expected, bundle)
 
 
-def binding_negatives(enrollment, pin, originals, policy, opening, expected, bundle):
+def binding_negatives(
+    enrollment, pin, originals, policy, opening, expected, bundle, backend="sash"
+):
     rejected = []
     for field in (
         "prompt",
@@ -32,7 +34,7 @@ def binding_negatives(enrollment, pin, originals, policy, opening, expected, bun
             value = getattr(expected, field)
             request = expected.model_copy(update={field: bytes([value[0] ^ 1]) + value[1:]})
         try:
-            joined_jobs(enrollment, pin, originals, policy, opened, request, bundle)
+            joined_jobs(enrollment, pin, originals, policy, opened, request, bundle, backend)
         except ValueError:
             rejected.append(field)
         else:
@@ -49,21 +51,23 @@ def binding_negatives(enrollment, pin, originals, policy, opening, expected, bun
     ]
     for name, changed in variants:
         try:
-            joined_jobs(enrollment, pin, originals, policy, opening, expected, changed)
+            joined_jobs(enrollment, pin, originals, policy, opening, expected, changed, backend)
         except ValueError:
             rejected.append(name)
         else:
             raise ValueError("changed composed roster accepted: " + name)
     _, enrolled_policy, _ = circle.resolve(enrollment, pin, originals, policy)
-    other_expected, other_opening = composed_input.request(enrolled_policy)
+    other_expected, other_opening = composed_input.request(enrolled_policy, backend)
     try:
-        joined_jobs(enrollment, pin, originals, policy, other_opening, other_expected, bundle)
+        joined_jobs(
+            enrollment, pin, originals, policy, other_opening, other_expected, bundle, backend
+        )
     except ValueError:
         rejected.append("cross-request")
     else:
         raise ValueError("cross-request composed evidence accepted")
     try:
-        joined_jobs(enrollment + b" ", pin, originals, policy, opening, expected, bundle)
+        joined_jobs(enrollment + b" ", pin, originals, policy, opening, expected, bundle, backend)
     except ValueError:
         rejected.append("changed-enrollment")
     else:

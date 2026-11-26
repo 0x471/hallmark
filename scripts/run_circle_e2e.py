@@ -20,7 +20,7 @@ from hallmark._worker import read_regular, write_new
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def run(classifier_run=None, *, llm=False):
+def run(classifier_run=None, *, llm=False, llm_backend="sash"):
     if (platform.system(), platform.machine()) != ("Darwin", "arm64"):
         raise ValueError("Circle demo requires an Apple Silicon Mac; see docs/DEMO.md")
     uv = subprocess.check_output(["uv", "--version"], text=True, timeout=10).split()[:2]
@@ -142,6 +142,7 @@ def run(classifier_run=None, *, llm=False):
             run_e2e.sha(verifier),
             output / "proofs",
             llm=llm,
+            llm_backend=llm_backend,
         )
         expected_count = 3 if llm else 9
         if (

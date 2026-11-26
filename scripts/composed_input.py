@@ -11,6 +11,9 @@ from hallmark.wire import H
 
 ROOT = Path(__file__).resolve().parents[1]
 CASE_SHA256 = "2ca533976d119b656a987bd1750472132b22abb71eb59593b64f53413eb70075"
+# The LLM proof systems that can stand behind the case: SASH (the default) or FlashProve.
+BACKENDS = ("sash", "flashprove")
+FLASHPROVE_ENROLLMENT = ROOT / "research/probes/flashprove/tinyllama/enrollment.json"
 
 
 def case():
@@ -20,7 +23,31 @@ def case():
     return parse_json(raw.decode())
 
 
-def model_identity(value):
+def flashprove_identity(value):
+    """The model as the FlashProve path names it: the checkpoint, and the commitment, kit and
+    verifier that a caller of that path enrolled (decision 0094). Another proof system's proof of
+    the same text does not carry this identity."""
+    enrolled = parse_json(read_regular(FLASHPROVE_ENROLLMENT, 65536).decode())
+    if enrolled["case_sha256"] != CASE_SHA256:
+        raise ValueError("FlashProve enrollment is for another case")
+    return H(
+        "model",
+        dict(
+            schema_id="hallmark/flashprove-research-model/1",
+            checkpoint=value["model"],
+            commitment_id=enrolled["commitment_id"],
+            h_par=enrolled["h_par"],
+            configuration=enrolled["configuration"],
+            verifier_source_digest=enrolled["verifier_source_digest"],
+        ),
+    )
+
+
+def model_identity(value, backend="sash"):
+    if backend == "flashprove":
+        return flashprove_identity(value)
+    if backend != "sash":
+        raise ValueError("unknown LLM backend")
     return H(
         "model",
         dict(
@@ -33,14 +60,14 @@ def model_identity(value):
     )
 
 
-def request(policy):
+def request(policy, backend="sash"):
     value = case()
     expected = RequestExpectation(
         schema_id="hallmark/request-expectation/1",
         audience="local-proved-request",
         nonce=secrets.token_bytes(32),
         interaction_id=secrets.token_bytes(32),
-        model=model_identity(value),
+        model=model_identity(value, backend),
         policy=policy.identity(),
         continuity=None,
     )
@@ -54,7 +81,7 @@ def request(policy):
     return expected, opening
 
 
-def check_request(opening, expected):
+def check_request(opening, expected, backend="sash"):
     """Bind opened text to the enrolled tokens; tokenization was enrolled separately."""
     value = case()
     opening, expected = opening._validated(), expected._validated()
@@ -62,6 +89,6 @@ def check_request(opening, expected):
         opening.prompt != value["prompt"]
         or opening.response != value["response"]
         or opening.system_ref != bytes(32)
-        or expected.model != model_identity(value)
+        or expected.model != model_identity(value, backend)
     ):
         raise ValueError("LLM/classifier request mismatch")

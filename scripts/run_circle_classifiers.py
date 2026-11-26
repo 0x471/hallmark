@@ -62,6 +62,7 @@ def run(
     output,
     *,
     llm=False,
+    llm_backend="sash",
 ):
     for binary, pin in ((prover, prover_pin), (verifier, verifier_pin)):
         if comparison.sha(read_regular(binary, 128 * 1024**2)) != pin:
@@ -150,8 +151,8 @@ def run(
         if llm:
             import composed_input
 
-            expected, opening = composed_input.request(old_policy)
-            composed_input.check_request(opening, expected)
+            expected, opening = composed_input.request(old_policy, llm_backend)
+            composed_input.check_request(opening, expected, llm_backend)
             originals_by_case["llm-response"] = (opening, expected)
             initial = common.evaluate(originals, old_policy, opening, expected)
             requested_cases = [dict(id="llm-response", verdicts=[r["public"][99] for r in initial])]
@@ -325,7 +326,14 @@ def run(
             from check_circle_composed import binding_negatives
 
             binding_rejections = binding_negatives(
-                enrollment, enrollment_pin, originals, old_policy, opening, expected, bundle
+                enrollment,
+                enrollment_pin,
+                originals,
+                old_policy,
+                opening,
+                expected,
+                bundle,
+                llm_backend,
             )
         result = dict(
             schema_id="hallmark.circle-classifier-acceptance/1",

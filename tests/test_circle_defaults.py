@@ -1,6 +1,7 @@
 """Native enrollment parity and default dispatch; synthetic fixtures make no proof claim."""
 
 import copy
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -99,3 +100,52 @@ def test_composition_rejects_authority_or_incomplete_llm_before_classifier_provi
         composed.run(llm_run=tmp_path)
     assert invoked == []
     assert len(list((tmp_path / "runs").glob("composed-circle-*/failure.json"))) == 1
+
+
+def test_flashprove_composition_stops_on_an_incomplete_check_before_classifier_proving(
+    tmp_path, monkeypatch
+):
+    from types import SimpleNamespace
+
+    import flashprove_composed
+    import run_circle_composed as composed
+
+    monkeypatch.setattr(composed, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        composed.shutil, "disk_usage", lambda _: SimpleNamespace(free=128 * 1024**3)
+    )
+    monkeypatch.setattr(composed.verify_llm, "read_enrollment", lambda *a: (None, None))
+    monkeypatch.setattr(composed.run_e2e, "source_pins", lambda: {})
+    invoked = []
+
+    def checked(case_dir, output):
+        output.mkdir()
+        (output / "result.json").write_text(
+            '{"passed": true, "proofs": 1, "fresh_verifications": 1, "altered_copies_rejected": 7}'
+        )
+        return output
+
+    monkeypatch.setattr(flashprove_composed, "verify", checked)
+    monkeypatch.setattr(composed.run_circle_e2e, "run", lambda *a, **k: invoked.append("prove"))
+    with pytest.raises(ValueError, match="incomplete fresh LLM"):
+        composed.run(llm_backend="flashprove", flashprove_case=tmp_path)
+    assert invoked == []
+    (failure,) = (tmp_path / "runs").glob("composed-circle-*/failure.json")
+    protocol = json.loads((failure.parent / "protocol.json").read_text())
+    assert protocol["llm_backend"] == "flashprove" and protocol["fresh_llm_proving"] is False
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        dict(llm_backend="flashprove"),
+        dict(flashprove_case=Path("x")),
+        dict(llm_backend="flashprove", flashprove_case=Path("x"), llm_run=Path("y")),
+        dict(llm_backend="other"),
+    ],
+)
+def test_composition_refuses_a_mixed_choice_of_llm_backend(arguments):
+    import run_circle_composed as composed
+
+    with pytest.raises(ValueError, match="FlashProve backend takes|unknown LLM backend"):
+        composed.run(**arguments)
