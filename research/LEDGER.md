@@ -3448,3 +3448,34 @@ Not shown: anything on a GPU since the first run; that `cp_prove` refuses what t
 refuses (the refusals are upstream's code, run on a CPU); soundness of the patched code. Left
 open and listed in the README: the test gaps of the patches, the free line `fe`, the worker's
 missing time limit, and thin tests of Hallmark's own scripts.
+
+## 2026-11-26: the first dense proof's files as a download; the caller's check from it (proposed; contributor's own upload)
+
+Question: can someone who has only this branch and a download repeat the caller's check of the first
+dense proof? Pass criterion: in a clone of the branch, the README's commands as written fetch one
+archive without an account, its SHA-256 is the recorded one, and
+`scripts/flashprove_tinyllama_proof.py` passes on its files, on Linux and on macOS. No GPU, no paid
+service; no patch, kit file or script is changed.
+
+Done ([evidence](evidence/flashprove-tinyllama-proof-files-2026-11-26.json)): the first proof's
+eight public files, each compared with the SHA-256 that the pod wrote (follow-up evidence,
+`public_sha256`), were packed into one archive (17,587,571 bytes, SHA-256 `16fe65dd…0d0e`; the same
+command gave the same bytes twice) and tried from a copy on both hosts. The contributor then uploaded
+it as the release `flashprove-tinyllama-proof-2026-11-25` of the contributor's fork. It is not a
+release of this repository: `docs/OPERATIONS.md` says to stop before an upload for which no authority
+exists, and no authority record covers this one. A search of the eight files' readable strings for
+keys, addresses, paths and account names found none.
+
+Result: passed. At `dafa782`, the README's commands passed on Linux x86_64 (804 s) and on macOS
+arm64 (228 s by the script's own clock; the laptop slept during the run) on the archive as
+downloaded: `YES` from the patched verifier, `NO: policy-tables` from upstream's, the eight refusals
+as before, and the eight file hashes of the pod.
+
+Retained failures, both on Linux at upstream's verifier build, which refuses to build below a
+group-writable directory: before the upload the commands had no `umask` line and made `runs/` under
+umask 002 (42 s); after it, the session had made the folder above the clone in the same way (32 s).
+The commands now begin with `umask 022` and the README names the folders above the clone.
+
+Not shown: anything new about the proof, whose files passed the same script on 2026-11-25. The
+commitment ID is still the pod's print, not recomputed. The three later proofs are not in the
+archive. The fork's owner can remove the release; the recorded SHA-256 then still names the archive.

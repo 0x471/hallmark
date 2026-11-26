@@ -1,0 +1,661 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-proof-files-evidence/1",
+  "recorded_at": "2026-11-26",
+  "decision": "docs/decisions/0094-flashprove-tinyllama.md",
+  "decision_status": "proposed",
+  "purpose": "The first dense TinyLlama proof's eight public files as one download, and the caller's check repeated from it in fresh clones on two hosts. No GPU and no paid service; no patch, kit file or script is changed. Nothing new is shown about the proof: the same files passed the same script on 2026-11-25",
+  "commit": {
+    "code": "dafa782",
+    "note": "the head of every run here, in fresh clones of the fork's branch; the commit that adds this file changes records only"
+  },
+  "made_by": "the contributor's AI-assisted session, on the contributor's laptop (macOS arm64) and on a Linux x86_64 host of the contributor's; no independent reviewer",
+  "authority": {
+    "owner_approved": false,
+    "statement": "The contributor uploaded the archive on 2026-11-26 as a release of the contributor's own fork. It is not a release of this repository. docs/OPERATIONS.md says to stop before an upload for which no authority exists, and AGENTS.md leaves release to the owner; the repository's own proof release (decision 0086) was made at the owner's request. No authority record was made or changed for this upload, and the owner had not asked for it",
+    "cost": "none"
+  },
+  "release": {
+    "repository": "0x471/hallmark, the contributor's fork",
+    "tag": "flashprove-tinyllama-proof-2026-11-25",
+    "tag_commit": "dafa7828dedc85972b70b14786fb30a2871a9e51",
+    "page": "https://github.com/0x471/hallmark/releases/tag/flashprove-tinyllama-proof-2026-11-25",
+    "asset": "https://github.com/0x471/hallmark/releases/download/flashprove-tinyllama-proof-2026-11-25/flashprove-tinyllama-proof-2026-11-25.tar.gz",
+    "uploaded_at_utc": "2026-11-26T16:28:58Z",
+    "can_be_removed": "the fork's owner can delete the release; the SHA-256 recorded here then still names the archive for anyone who holds a copy"
+  },
+  "archive": {
+    "name": "flashprove-tinyllama-proof-2026-11-25.tar.gz",
+    "bytes": 17587571,
+    "sha256": "16fe65dd2b499e2e5ddb61d132ff7370bca25b64dfcd7390921ad2ec6fce0d0e",
+    "built": {
+      "host": "Linux x86_64, GNU tar 1.35, gzip 1.12",
+      "from_files": "the pod's folder public/ of the run pod2/work2, each file compared first with the pod's own public.sha256 (follow-up evidence, gpu_run_files.public_sha256)",
+      "command": "files 644 and directories 755, then: tar --sort=name --format=ustar --owner=0 --group=0 --numeric-owner --mtime='2026-11-25 00:00:00Z' -C stage -cf - flashprove-tinyllama-proof-2026-11-25 | gzip -n -9",
+      "twice": "the same command on the same files gave the same bytes twice on that host",
+      "times_note": "the members' time is a fixed value, not the files' own; other versions of tar or gzip were not tried"
+    },
+    "members": [
+      {
+        "path": "config/KL.bin",
+        "bytes": 1144,
+        "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+      },
+      {
+        "path": "config/layout.txt",
+        "bytes": 126322,
+        "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+      },
+      {
+        "path": "config/policy.txt",
+        "bytes": 2422,
+        "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+      },
+      {
+        "path": "example.proof",
+        "bytes": 13238500,
+        "sha256": "1874fc9308d278808d608b9b0de1e31da53963657d2129c1d2814c5069650713"
+      },
+      {
+        "path": "example.req",
+        "bytes": 264,
+        "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+      },
+      {
+        "path": "example.y",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      },
+      {
+        "path": "ivk/key.bin",
+        "bytes": 2148512,
+        "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+      },
+      {
+        "path": "ivk/leaf/0.bin",
+        "bytes": 2181432,
+        "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+      }
+    ],
+    "members_total_bytes": 17698600,
+    "members_note": "each below the one folder flashprove-tinyllama-proof-2026-11-25/; the three config files are the committed kit's, byte for byte (kit.json), and the script requires that",
+    "not_in_the_archive": [
+      "the commitment ID: the commands take it from this repository's records (flashprove-tinyllama-gpu-2026-11-25.json), where it is the pod's print",
+      "the seed: upstream's examples/maverick/public-seed.bin",
+      "the three later proofs of the same request, held by the contributor",
+      "the pods' logs and programs, and any weights"
+    ],
+    "searched_for": {
+      "how": "strings of six or more characters in each of the eight files, without regard to case, for: the key forms of RunPod, Anthropic, OpenAI and Hugging Face, 'api key', 'token=', 'secret', 'passw', 'bearer', 'ssh-', a private-key header, a mail address, a dotted IPv4 address, /home/, /root, /Users/, /workspace, 'runpod', and the contributor's account and user names; the unpacked archive stream for the building host's user name and paths",
+      "found": "nothing in the text files or in KL.bin, the request, the token file and the key; four matches of the mail-address form in the proof (3) and the leaf file (1), each five or six bytes such as '@I.Hs' in binary data, not an address",
+      "limit": "a search of readable strings: it cannot show that a binary file encodes nothing else. The proof was made from public weights and upstream's public seed"
+    }
+  },
+  "commands": {
+    "where": "research/probes/flashprove/tinyllama/README.md, 'To repeat the caller's check'",
+    "sha256_of_the_block": "d84443a5fe54be32552c8f8a9b03339f859ada62dc3c07e7c282c52a3a80abc8",
+    "text": [
+      "umask 022",
+      "mkdir -p runs/flashprove-tinyllama-files",
+      "cd runs/flashprove-tinyllama-files",
+      "curl -fL -O https://github.com/0x471/hallmark/releases/download/flashprove-tinyllama-proof-2026-11-25/flashprove-tinyllama-proof-2026-11-25.tar.gz",
+      "echo \"16fe65dd2b499e2e5ddb61d132ff7370bca25b64dfcd7390921ad2ec6fce0d0e  flashprove-tinyllama-proof-2026-11-25.tar.gz\" | shasum -a 256 -c - &&",
+      "  tar -xzf flashprove-tinyllama-proof-2026-11-25.tar.gz",
+      "cd ../..",
+      "uv run --locked --python 3.12.12 python scripts/flashprove_tinyllama_proof.py \\",
+      "  --case runs/flashprove-tinyllama-files/flashprove-tinyllama-proof-2026-11-25 \\",
+      "  --commitment-id 5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd"
+    ]
+  },
+  "downloads": {
+    "how": "curl -fL without credentials, after the upload",
+    "github_asset_digest": "sha256:16fe65dd2b499e2e5ddb61d132ff7370bca25b64dfcd7390921ad2ec6fce0d0e",
+    "linux_x86_64": "16fe65dd2b499e2e5ddb61d132ff7370bca25b64dfcd7390921ad2ec6fce0d0e",
+    "macos_arm64": "16fe65dd2b499e2e5ddb61d132ff7370bca25b64dfcd7390921ad2ec6fce0d0e",
+    "compared": "on Linux the download was also compared byte for byte with the archive as built"
+  },
+  "runs": {
+    "linux_x86_64": {
+      "host": "Ubuntu 24.04 x86_64, g++ 13.3.0, uv 0.12.7 with uv's own Python 3.12.12",
+      "clone": "a clone of the fork's branch at dafa782 made for this run; the passing run is the second in it, after the first stopped at the build (retained_failures) and its runs/ was moved away",
+      "how": "the README's commands as written, on the archive downloaded without an account",
+      "wall_seconds": 804,
+      "result_json": {
+        "sha256": "c86aabfec3777c43bc70c4973697d621b9db31aa160f2b86291309e9599561dc",
+        "as_written": {
+          "altered_copies": [
+            {
+              "altered": "proof-middle-bit",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "proof-last-bit",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "token-file",
+              "exit_code": 1,
+              "expected": "NO: statement-range",
+              "last_line": "NO: statement-range"
+            },
+            {
+              "altered": "request-first-token",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "request-answer-token",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "key-bit",
+              "exit_code": 1,
+              "expected": "NO: key-refused",
+              "last_line": "NO: key-refused"
+            },
+            {
+              "altered": "leaf-bit",
+              "exit_code": 1,
+              "expected": "NO: entry-refused",
+              "last_line": "NO: entry-refused"
+            },
+            {
+              "altered": "commitment-id",
+              "exit_code": 1,
+              "expected": "NO: model-statement",
+              "last_line": "NO: model-statement"
+            }
+          ],
+          "altered_copies_refused_on_the_statement_s_form": 1,
+          "altered_copies_rejected": 8,
+          "builds": {
+            "patched": {
+              "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+              "recipe": "upstream verifier/build.sh",
+              "seconds": 229.32815134711564,
+              "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+              "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+            },
+            "upstream": {
+              "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+              "recipe": "upstream verifier/build.sh",
+              "seconds": 247.06524506025016,
+              "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+              "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+            }
+          },
+          "check_proof": {
+            "exit_code": 0,
+            "result": [
+              "result: outcome=verified commitment_id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd range=24:32 checked_tokens=8 end_token=2 claim=exact-match policy=exact next_token=none C=256 theta=256 cap=0 s=17 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=63 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+              "check_proof: verified: exact match: every checked token (tokens 25 to 32 of the request) is the model's greedy choice; the last checked token is the end token 2; commitment: 63 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 69 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+            ],
+            "seconds": 48.52672303235158
+          },
+          "checked_tokens": [
+            1576,
+            7483,
+            310,
+            3444,
+            338,
+            3681,
+            29889,
+            2
+          ],
+          "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+          "commitment_id_source": "stated by the caller; not recomputed here",
+          "files": {
+            "config/KL.bin": {
+              "bytes": 1144,
+              "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+            },
+            "config/layout.txt": {
+              "bytes": 126322,
+              "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+            },
+            "config/policy.txt": {
+              "bytes": 2422,
+              "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+            },
+            "example.proof": {
+              "bytes": 13238500,
+              "sha256": "1874fc9308d278808d608b9b0de1e31da53963657d2129c1d2814c5069650713"
+            },
+            "example.req": {
+              "bytes": 264,
+              "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+            },
+            "example.y": {
+              "bytes": 4,
+              "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+            },
+            "ivk/key.bin": {
+              "bytes": 2148512,
+              "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+            },
+            "ivk/leaf/0.bin": {
+              "bytes": 2181432,
+              "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+            }
+          },
+          "gpu_used_here": false,
+          "hiding_claim": false,
+          "host": {
+            "machine": "x86_64",
+            "system": "Linux"
+          },
+          "kit": {
+            "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+            "files": {
+              "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+              "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+              "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+              "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+              "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+              "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+              "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+            },
+            "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652"
+          },
+          "passed": true,
+          "patched_verdict": "YES",
+          "patches": {
+            "prover.patch": {
+              "bytes": 13205,
+              "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+            },
+            "tools.patch": {
+              "bytes": 37858,
+              "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+            },
+            "verifier.patch": {
+              "bytes": 16739,
+              "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+            }
+          },
+          "proof_made_here": false,
+          "qualified_backend": false,
+          "range": "24:32",
+          "result_line": {
+            "C": "256",
+            "build": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+            "cap": "0",
+            "checked_tokens": "8",
+            "claim": "exact-match",
+            "commitment_assumed_rounds": "63",
+            "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+            "end_token": "2",
+            "leaf": "0",
+            "least_round": "128.00",
+            "least_round_without_work": "96.23",
+            "limits": "exact",
+            "next_token": "none",
+            "outcome": "verified",
+            "policy": "exact",
+            "range": "24:32",
+            "record": "1",
+            "request_tokens": "64",
+            "s": "17",
+            "theta": "256",
+            "work": "32"
+          },
+          "schema_id": "hallmark.flashprove-tinyllama-proof/1",
+          "seconds": 800.6790666780435,
+          "source": {
+            "bytes": 157799758,
+            "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+            "examples": {
+              "accepted-proof": {
+                "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+                "next_token": 199,
+                "range": "60:64"
+              },
+              "full-size": {
+                "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+                "next_token": 52599,
+                "range": "23:1024"
+              }
+            },
+            "gpu_kit": {
+              "name": "target_small_f2_roomy",
+              "range": "15:64"
+            },
+            "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+            "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+            "licence": "Apache-2.0",
+            "nvcc_release": "V13.2.86",
+            "rejection_tables": [
+              [
+                "accepted-proof",
+                "altered_copies.tsv",
+                10
+              ],
+              [
+                "accepted-proof",
+                "every_kind_of_item.tsv",
+                79
+              ],
+              [
+                "accepted-proof-clipped-gap",
+                "altered_copies_clipped_gap.tsv",
+                10
+              ]
+            ],
+            "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "schema_id": "hallmark.flashprove-source/1",
+            "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+            "upstream": "https://github.com/anthropics/FlashProve",
+            "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+            "version": "0.16.0"
+          },
+          "unpatched_verdict": "NO: policy-tables"
+        }
+      }
+    },
+    "macos_arm64": {
+      "host": "macOS arm64, Apple clang 17.0.0, uv 0.12.7 with uv's own Python 3.12.12",
+      "clone": "a fresh clone of the fork's branch at dafa782",
+      "how": "the README's commands as written, on the archive downloaded without an account",
+      "wall_seconds": null,
+      "wall_seconds_note": "not usable: the laptop slept during the run; the script's own seconds are in result_json",
+      "result_json": {
+        "sha256": "67d4299d5699e09ceb7e227b78715de57df304850a141b9b956e0a9b2a76c4de",
+        "as_written": {
+          "altered_copies": [
+            {
+              "altered": "proof-middle-bit",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "proof-last-bit",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "token-file",
+              "exit_code": 1,
+              "expected": "NO: statement-range",
+              "last_line": "NO: statement-range"
+            },
+            {
+              "altered": "request-first-token",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "request-answer-token",
+              "exit_code": 1,
+              "expected": "NO: proof-refused",
+              "last_line": "NO: proof-refused"
+            },
+            {
+              "altered": "key-bit",
+              "exit_code": 1,
+              "expected": "NO: key-refused",
+              "last_line": "NO: key-refused"
+            },
+            {
+              "altered": "leaf-bit",
+              "exit_code": 1,
+              "expected": "NO: entry-refused",
+              "last_line": "NO: entry-refused"
+            },
+            {
+              "altered": "commitment-id",
+              "exit_code": 1,
+              "expected": "NO: model-statement",
+              "last_line": "NO: model-statement"
+            }
+          ],
+          "altered_copies_refused_on_the_statement_s_form": 1,
+          "altered_copies_rejected": 8,
+          "builds": {
+            "patched": {
+              "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+              "recipe": "apple-clang",
+              "seconds": 42.13054383295821,
+              "sha256": "c5d95ec0d68a7779204fdd3fa694e8dec7a20a2f6d22e8cd1db0ee9bd0a5de5c",
+              "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+            },
+            "upstream": {
+              "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+              "recipe": "apple-clang",
+              "seconds": 32.883673917036504,
+              "sha256": "72fd877a6db7453bb7af79b18261ac56893638deeb6d9049ec85e128ed330034",
+              "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+            }
+          },
+          "check_proof": {
+            "exit_code": 0,
+            "result": [
+              "result: outcome=verified commitment_id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd range=24:32 checked_tokens=8 end_token=2 claim=exact-match policy=exact next_token=none C=256 theta=256 cap=0 s=17 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=63 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+              "check_proof: verified: exact match: every checked token (tokens 25 to 32 of the request) is the model's greedy choice; the last checked token is the end token 2; commitment: 63 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 69 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+            ],
+            "seconds": 13.686464375001378
+          },
+          "checked_tokens": [
+            1576,
+            7483,
+            310,
+            3444,
+            338,
+            3681,
+            29889,
+            2
+          ],
+          "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+          "commitment_id_source": "stated by the caller; not recomputed here",
+          "files": {
+            "config/KL.bin": {
+              "bytes": 1144,
+              "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+            },
+            "config/layout.txt": {
+              "bytes": 126322,
+              "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+            },
+            "config/policy.txt": {
+              "bytes": 2422,
+              "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+            },
+            "example.proof": {
+              "bytes": 13238500,
+              "sha256": "1874fc9308d278808d608b9b0de1e31da53963657d2129c1d2814c5069650713"
+            },
+            "example.req": {
+              "bytes": 264,
+              "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+            },
+            "example.y": {
+              "bytes": 4,
+              "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+            },
+            "ivk/key.bin": {
+              "bytes": 2148512,
+              "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+            },
+            "ivk/leaf/0.bin": {
+              "bytes": 2181432,
+              "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+            }
+          },
+          "gpu_used_here": false,
+          "hiding_claim": false,
+          "host": {
+            "machine": "arm64",
+            "system": "Darwin"
+          },
+          "kit": {
+            "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+            "files": {
+              "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+              "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+              "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+              "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+              "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+              "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+              "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+            },
+            "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652"
+          },
+          "passed": true,
+          "patched_verdict": "YES",
+          "patches": {
+            "prover.patch": {
+              "bytes": 13205,
+              "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+            },
+            "tools.patch": {
+              "bytes": 37858,
+              "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+            },
+            "verifier.patch": {
+              "bytes": 16739,
+              "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+            }
+          },
+          "proof_made_here": false,
+          "qualified_backend": false,
+          "range": "24:32",
+          "result_line": {
+            "C": "256",
+            "build": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+            "cap": "0",
+            "checked_tokens": "8",
+            "claim": "exact-match",
+            "commitment_assumed_rounds": "63",
+            "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+            "end_token": "2",
+            "leaf": "0",
+            "least_round": "128.00",
+            "least_round_without_work": "96.23",
+            "limits": "exact",
+            "next_token": "none",
+            "outcome": "verified",
+            "policy": "exact",
+            "range": "24:32",
+            "record": "1",
+            "request_tokens": "64",
+            "s": "17",
+            "theta": "256",
+            "work": "32"
+          },
+          "schema_id": "hallmark.flashprove-tinyllama-proof/1",
+          "seconds": 228.22881829197286,
+          "source": {
+            "bytes": 157799758,
+            "cuda_toolkit": "cuda-toolkit[nvcc,cublas,cccl,crt,nvvm,cudart]==13.2.2",
+            "examples": {
+              "accepted-proof": {
+                "commitment_id": "79a5a2bc7a469b40df73dedf40abeb740671e8ae8077738bd3743897aeb22183",
+                "next_token": 199,
+                "range": "60:64"
+              },
+              "full-size": {
+                "commitment_id": "7a285919b43961861d9839530c26725accf26aa6d74e3c2afa31b9dc6bcd18fe",
+                "next_token": 52599,
+                "range": "23:1024"
+              }
+            },
+            "gpu_kit": {
+              "name": "target_small_f2_roomy",
+              "range": "15:64"
+            },
+            "image": "nvidia/cuda@sha256:0e1f7b8e96fa9ec5e36d4709a38c62df7b5665977446081811c12b8234d874bf",
+            "image_tag": "13.2.1-devel-ubuntu24.04 linux/amd64",
+            "licence": "Apache-2.0",
+            "nvcc_release": "V13.2.86",
+            "rejection_tables": [
+              [
+                "accepted-proof",
+                "altered_copies.tsv",
+                10
+              ],
+              [
+                "accepted-proof",
+                "every_kind_of_item.tsv",
+                79
+              ],
+              [
+                "accepted-proof-clipped-gap",
+                "altered_copies_clipped_gap.tsv",
+                10
+              ]
+            ],
+            "revision": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "schema_id": "hallmark.flashprove-source/1",
+            "sha256": "564eaf75ba9a2d3ebefa1bc35aa45b3f4990e4be74009bf8121641c7314e1a19",
+            "upstream": "https://github.com/anthropics/FlashProve",
+            "url": "https://codeload.github.com/anthropics/FlashProve/tar.gz/9e2bdd8ff5bf9c62f18263d7dac189b0400b260c",
+            "verifier_source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595",
+            "version": "0.16.0"
+          },
+          "unpatched_verdict": "NO: policy-tables"
+        }
+      }
+    }
+  },
+  "before_upload": {
+    "why": "the upload cannot be fully undone, so the archive was tried first",
+    "how": "the same commands with a copy of the archive (the same SHA-256) in place of the download, in other clones of the same head on the same two hosts",
+    "linux_x86_64": {
+      "wall_seconds": 759,
+      "result_json_sha256": "e23a8bf25f6dcb7e31ec0f665356507fb20262dd8926c1c90747877b263e8780",
+      "passed": true,
+      "patched_verdict": "YES",
+      "unpatched_verdict": "NO: policy-tables",
+      "altered_copies_rejected": 8,
+      "script_seconds": 758.4
+    },
+    "macos_arm64": {
+      "wall_seconds": 151,
+      "result_json_sha256": "add37876970832c9e6e298244ce6ce74eb6c14ccee7062b122873b75e1016bef",
+      "passed": true,
+      "patched_verdict": "YES",
+      "unpatched_verdict": "NO: policy-tables",
+      "altered_copies_rejected": 8,
+      "script_seconds": 150.3
+    }
+  },
+  "retained_failures": [
+    {
+      "what": "the first try on Linux, before the upload and without the umask line, stopped after 42 s at upstream's verifier build with status 2",
+      "cause": "the commands' own mkdir made runs/ group-writable under that host's umask 002, and upstream's verifier/build.sh refuses to build below such a directory (known: README, 'Checks')",
+      "fix": "the commands begin with umask 022; the run's folder is kept by the contributor",
+      "build_message": "build.sh: nothing was built: the output directory <clone>/runs/flashprove-tinyllama-proof-0a659qa6/bin-upstream is, or lies below, <clone>/runs, which another account may be able to change (its group or others can write in it, and it has no sticky bit): it could put another directory in its place while the build runs and choose what you later run as cp_verify: name a directory of your own below directories that only you or root can change (such as one in your home directory): end the call with \"- DIRECTORY\"; if <clone>/runs is yours, close it with chmod go-w"
+    },
+    {
+      "what": "the first try of the commands as written on Linux, after the upload, stopped after 32 s at the same build with status 2",
+      "cause": "the session had made the folder above the clone under umask 002; the commands were not at fault. The README's note now names the folders above the clone",
+      "fix": "chmod go-w on that folder; the same commands then passed in the same clone"
+    }
+  ],
+  "what_a_pass_says": {
+    "says": "the downloaded files are the eight that the pod wrote, and they fit the patched verifier's checks for SASH's request under the commitment ID that the command states; upstream's verifier refuses them; each of eight altered copies is refused for its own reason",
+    "does_not_say": [
+      "that the commitment is TinyLlama's: the ID is cp_commit's print on the pod and is not recomputed (that needs an sm_90 GPU)",
+      "anything of hiding (the seed is public), of soundness of the patched code, or of SASH's integer function",
+      "that the SHA-256 check is a proof check: it only names the archive"
+    ]
+  },
+  "not_run": [
+    "the three later proofs from a download",
+    "another version of tar, gzip, curl or uv than those named",
+    "a clone made under umask 002 without chmod go-w: upstream's build refuses it"
+  ],
+  "proof_made_here": false,
+  "gpu_used": false,
+  "paid_service_used": false,
+  "hiding_claim": false
+}

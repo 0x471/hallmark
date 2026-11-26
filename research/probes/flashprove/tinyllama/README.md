@@ -508,8 +508,9 @@ evidence for the proposal, not an approved Hallmark run.
   ([follow-up evidence](../../../evidence/flashprove-tinyllama-followup-2026-11-25.json), which also holds both
   earlier `result.json` files and the pods' `inputs.sha256` and `binaries.sha256`). The commitment
   ID that the check is given is `cp_commit`'s own print on the pod: the check does not recompute it,
-  so a pass does not tie the proof to TinyLlama's weights. The proof, key and leaf files are held by
-  the contributor and are not published, so nobody else can repeat the check yet.
+  so a pass does not tie the proof to TinyLlama's weights. The first proof's eight public files are
+  published as one archive ([below](#to-repeat-the-callers-check)); those of the three later proofs
+  are held by the contributor.
 
 What a pass shows is in decision 0094, "What a patched `YES` means". These times are those of two pods of one type,
 on lines of which only `table` is sized for this model: not a benchmark.
@@ -520,6 +521,47 @@ directories that only the caller can change; `chmod go-w`); the first pod's firs
 stopped silently at the package step and passed when run again (cause not established); a command
 line of the controlling session's own for the three timed proofs ended with status 127 before anything ran
 and held the pod for about ten minutes (about USD 0.75 of the spend).
+
+### To repeat the caller's check
+
+The first proof's eight public files (`public_sha256`, `pod2/work2`, in the
+[follow-up evidence](../../../evidence/flashprove-tinyllama-followup-2026-11-25.json)) are one
+archive of 17,587,571 bytes, SHA-256
+`16fe65dd2b499e2e5ddb61d132ff7370bca25b64dfcd7390921ad2ec6fce0d0e`, in the release
+[`flashprove-tinyllama-proof-2026-11-25`](https://github.com/0x471/hallmark/releases/tag/flashprove-tinyllama-proof-2026-11-25)
+of the contributor's fork. **It is the contributor's own upload of 2026-11-26, not a release of this
+repository**: `docs/OPERATIONS.md` says to stop before an upload for which no authority exists, and
+no authority record covers this one. In a clone of this branch, with a C++17 compiler, git, `uv`
+and `curl`:
+
+```sh
+umask 022
+mkdir -p runs/flashprove-tinyllama-files
+cd runs/flashprove-tinyllama-files
+curl -fL -O https://github.com/0x471/hallmark/releases/download/flashprove-tinyllama-proof-2026-11-25/flashprove-tinyllama-proof-2026-11-25.tar.gz
+echo "16fe65dd2b499e2e5ddb61d132ff7370bca25b64dfcd7390921ad2ec6fce0d0e  flashprove-tinyllama-proof-2026-11-25.tar.gz" | shasum -a 256 -c - &&
+  tar -xzf flashprove-tinyllama-proof-2026-11-25.tar.gz
+cd ../..
+uv run --locked --python 3.12.12 python scripts/flashprove_tinyllama_proof.py \
+  --case runs/flashprove-tinyllama-files/flashprove-tinyllama-proof-2026-11-25 \
+  --commitment-id 5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd
+```
+
+The last line must be `{"passed": true, "patched_verdict": "YES", "altered_copies_rejected": 8}`;
+the line `Outputs:` names the folder that holds `result.json`. The SHA-256 says only that the
+archive is the one recorded here; the pass is the script's, which builds both verifiers from the
+pinned source and requires everything listed above. The commitment ID in the command is this
+record's (the pod's print), not the archive's, which holds none. `umask 022` is for a host that
+makes new directories group-writable: upstream's `verifier/build.sh` refuses to build below one,
+and the same holds for the clone's own folder and each folder above it (`chmod go-w`).
+
+On 2026-11-26 these commands, as written here, passed at `dafa782` in clones of the fork made for it, on
+Linux x86_64 (804 s) and macOS arm64 (228 s, the script's own time: the laptop slept during
+the run), on the archive as downloaded without an account
+([evidence](../../../evidence/flashprove-tinyllama-proof-files-2026-11-26.json)). Two tries on
+Linux stopped at upstream's build for that reason and are retained there: one before the upload,
+without the `umask` line, and one in a clone below a group-writable folder. Not in the archive: the three later proofs, the pods' logs and programs, the seed (upstream's
+`examples/maverick/public-seed.bin`) and any weights.
 
 ## Not checked
 

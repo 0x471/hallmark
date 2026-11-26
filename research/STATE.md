@@ -33,9 +33,14 @@ CPU set-up check also holds the kit to the ranges of the layers' scale words and
 of attention's committed matrices, the caller's check requires each altered copy's own refusal
 (seven read the proof, the key or the ID; the token file's is refused on the statement's form),
 and three evidence files that an earlier commit had removed are back; both targets and the caller's
-check passed again on Linux and macOS ([follow-up evidence](evidence/flashprove-tinyllama-followup-2026-11-25.json)). Next, for the owner: decision 0094, the
+check passed again on Linux and macOS ([follow-up evidence](evidence/flashprove-tinyllama-followup-2026-11-25.json)). On 2026-11-26 the
+contributor uploaded the first proof's eight public files as a release of the contributor's fork (not
+a release of this repository; no authority record covers the upload), and the caller's check passed
+from the download on Linux and macOS
+([evidence](evidence/flashprove-tinyllama-proof-files-2026-11-26.json),
+[commands](probes/flashprove/tinyllama/README.md#to-repeat-the-callers-check)). Next, for the owner: decision 0094, the
 calibration text's licence, the record of the unbudgeted run and a budget for any repeat, the
-dependency review, and how a verifier gets the commitment ID.
+dependency review, where the proof's files should be kept, and how a verifier gets the commitment ID.
 
 ## SASH and FlashProve comparison — recorded
 

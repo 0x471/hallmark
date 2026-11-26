@@ -180,7 +180,10 @@ by the patched verifier,
 `NO: policy-tables` from the unpatched one, and eight altered copies each `NO:` with status 1 (seven
 by the checks of the proof, the key, the leaf file or the ID; the token file's on the statement's
 form, by a rule that does not depend on the proof's content). The ID is the pod's own print and is not recomputed by the check,
-and the proof's files are held by the contributor, not published. The
+and the first proof's eight public files are an archive in a release of the contributor's fork (the
+contributor's own upload of 2026-11-26, not a release of this repository; the check passed again from
+the download on Linux and macOS:
+[README](../../research/probes/flashprove/tinyllama/README.md#to-repeat-the-callers-check)). The
 GPU's worst-case table agrees with the CPU port at every site that the port computes as the GPU
 does (within 0.001 bits; the gate of layer 21 keeps 0.458 bits). Spend: USD 1.61 on the
 contributor's account. #184 says that paid GPU runs need an owner-approved budget, #186 puts
