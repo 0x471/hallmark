@@ -1,0 +1,12 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-pod/1",
+  "provider": "RunPod (api.runpod.io/graphql); not among the compute providers of research/AUTHORITY.json",
+  "image": "ubuntu:24.04",
+  "image_note": "by tag, not by digest: the host is not trusted, and what it returns is judged again by the caller's own verifier",
+  "gpus": ["NVIDIA H100 80GB HBM3", "NVIDIA H200"],
+  "container_disk_gb": 40,
+  "min_vcpu": 8,
+  "min_memory_gb": 60,
+  "seconds": {"boot": 420, "host": 240, "upload": 900, "libraries": 240, "prove": 420, "fetch": 180},
+  "grace": 300
+}

@@ -1,0 +1,17 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-enrollment/1",
+  "what": "What a caller of the dense TinyLlama path accepts, fixed before any proving: the model's commitment, the kit, the request and the verifier. scripts/run_flashprove_tinyllama_gpu.py refuses a run whose cp_commit prints another commitment ID",
+  "case": "research/probes/sash/response-case.json",
+  "case_sha256": "2ca533976d119b656a987bd1750472132b22abb71eb59593b64f53413eb70075",
+  "kit_json_sha256": "ad0881d5597af8c842ffbdd497310e25a804618027caa1ba190b134733a4817b",
+  "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+  "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+  "verifier_source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+  "seed": {
+    "path": "examples/maverick/public-seed.bin",
+    "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd",
+    "note": "upstream's published seed: with -public-weights nothing is hidden"
+  },
+  "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+  "commitment_id_source": "cp_commit's own print in the contributor's GPU run of 2026-11-24 and 25, the same three times (research/evidence/flashprove-tinyllama-gpu-2026-11-25.json). No CPU program recomputes it: a caller without an sm_90 GPU takes it from this file. It covers the weights, the kit and the seed"
+}

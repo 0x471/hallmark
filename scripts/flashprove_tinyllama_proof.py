@@ -1,11 +1,12 @@
 """Check a dense TinyLlama proof from a GPU run with caller-held values, and its altered copies.
 
-usage: python scripts/flashprove_tinyllama_proof.py --case DIR --commitment-id ID
+usage: python scripts/flashprove_tinyllama_proof.py --case DIR [--commitment-id ID]
 
 DIR holds the public files of one run of research/probes/flashprove/tinyllama/gpu_job.sh (its
 folder public/): config/policy.txt, KL.bin and layout.txt, ivk/key.bin, ivk/leaf/0.bin,
 example.req, example.y and example.proof. ID is the commitment ID that cp_commit printed in that
-run: valid only for a commitment the caller made itself, from the public weights, as here. This
+run: valid only for a commitment the caller made itself, from the public weights, as here. Without
+it the enrolled one is taken (research/probes/flashprove/tinyllama/enrollment.json). This
 script makes no commitment or proof and uses no GPU. It downloads the pinned archive, builds both
 verifiers and requires, in order:
 
@@ -51,6 +52,7 @@ from run_llm_e2e import require
 ROOT, PROBE = ft.ROOT, ft.PROBE
 KIT = json.loads((PROBE / "kit.json").read_text())
 CASE = json.loads((ROOT / KIT["model"]["case"]).read_text())
+ENROLLED = json.loads((PROBE / "enrollment.json").read_text())
 CONFIG = ("policy.txt", "KL.bin", "layout.txt")
 PUBLIC = (
     *(f"config/{name}" for name in CONFIG),
@@ -168,11 +170,10 @@ def rejections(verifier, case, commitment_id, output):
     return rows
 
 
-def verify(case, commitment_id, output):
-    require(re.fullmatch("[0-9a-f]{64}", commitment_id), "the commitment ID is 64 hex digits")
-    started = time.monotonic()
+def built_verifiers(output):
+    """The pinned source and both verifiers, built here: (tree, verifiers, builds). The tree is
+    left with the four patches applied."""
     copies = ft.checked_patches(output)
-    held = checked_case(case, output)
     tree = fp.source_tree(output)
     verifiers, builds = {}, {}
     verifiers["upstream"], builds["upstream"] = fp.build_verifier(
@@ -182,6 +183,15 @@ def verify(case, commitment_id, output):
     verifiers["patched"], builds["patched"] = fp.build_verifier(
         tree, output, ft.PINS["verifier_source_digest"], "bin-patched"
     )
+    return tree, verifiers, builds
+
+
+def verify(case, commitment_id, output, built=None):
+    """built: built_verifiers()'s return, for a caller that built them before a paid step."""
+    require(re.fullmatch("[0-9a-f]{64}", commitment_id), "the commitment ID is 64 hex digits")
+    started = time.monotonic()
+    tree, verifiers, builds = built or built_verifiers(output)
+    held = checked_case(case, output)
     ok, checked = check_proof(
         tree, verifiers["patched"], held, commitment_id, output / "check-proof.log"
     )
@@ -226,7 +236,7 @@ def verify(case, commitment_id, output):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--case", type=Path, required=True)
-    p.add_argument("--commitment-id", required=True)
+    p.add_argument("--commitment-id", default=ENROLLED["commitment_id"])
     a = p.parse_args()
     (ROOT / "runs").mkdir(exist_ok=True)
     output = Path(tempfile.mkdtemp(prefix="flashprove-tinyllama-proof-", dir=ROOT / "runs"))
