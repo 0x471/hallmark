@@ -3433,12 +3433,11 @@ judges were made stricter (the last review found that they accepted an empty wor
 trusted the helper's own flags): 1,953 s on Linux, 356 s on macOS. The GPU's worst-case table was
 compared again with that run's port: 202 sites, none differing. Both hosts give SASH's
 eight tokens, the kit byte for byte, and the four changed kits each refused for its own reason.
-Gates at `2d22a74`: on macOS `make check` passed on Python 3.12.12, 3.13.15 and 3.14.7 (2,371 passed,
+Gates at `c4d0f05`: on macOS `make check` passed on Python 3.12.12, 3.13.15 and 3.14.7 (2,371 passed,
 102 skipped), with `make package-check` and `make docs` (176 pages). On Linux `make package-check`
-and `make docs` passed and `make check` ended with one failure on each Python
-(`test_file_changed_during_read[abd]`; at `0b5b46e` also
-`test_stream_copy_retains_rejected_output[modified]`), in tests that the branch does not touch and
-that fail on that host on `main` too. The caller's check also passed on Linux on a second proof,
+and `make docs` passed and `make check` ended with one or two failures on each Python
+(`test_stream_copy_retains_rejected_output[modified]`, `test_file_changed_during_read[abd]`), in
+tests that the branch does not touch and that fail on that host on `main` too. The caller's check also passed on Linux on a second proof,
 the first of the three later ones, with the same eight refusals.
 
 Retained failure: at `0aaf5e2` the answer target stopped on both hosts at the first environment. A

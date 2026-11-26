@@ -4268,7 +4268,7 @@
     "as_at": "the worker of the commit that holds this record"
   },
   "gates": {
-    "commit": "2d22a74; this section was written one commit later, which changes this file, the ledger and no code",
+    "commit": "c4d0f05; this section was written one commit later, which changes this file, the ledger and no code",
     "macos_arm64": {
       "host": "macOS arm64, a clean clone, uv 0.9.18 with uv's own Python",
       "make_check": {
@@ -4282,16 +4282,17 @@
     "linux_x86_64": {
       "host": "Ubuntu 24.04 x86_64, a clean clone, uv 0.9.18 with uv's own Python (UV_MANAGED_PYTHON=1)",
       "make_check": {
-        "3.12.12": "ruff, format and mypy passed; pytest 2,358 passed, 1 failed, 114 skipped",
+        "3.12.12": "ruff, format and mypy passed; pytest 2,357 passed, 2 failed, 114 skipped",
         "3.13.15": "ruff, format and mypy passed; pytest 2,358 passed, 1 failed, 114 skipped",
-        "3.14.2": "ruff, format and mypy passed; pytest 2,358 passed, 1 failed, 114 skipped"
+        "3.14.2": "ruff, format and mypy passed; pytest 2,357 passed, 2 failed, 114 skipped"
       },
-      "failing_tests": "tests/test_manifests.py::test_file_changed_during_read[abd]",
-      "note": "that test and tests/test_worker.py::test_stream_copy_retains_rejected_output[modified] fail intermittently on this host on main too (flashprove-tinyllama-2026-11-24.json, make_check.linux_x86_64_main: in 4 and in 5 of 7 full runs on e2cc6d6); the branch touches neither; no FlashProve test failed. make check therefore ends with a non-zero status on this host",
+      "failing_tests": "tests/test_worker.py::test_stream_copy_retains_rejected_output[modified] on all three, and tests/test_manifests.py::test_file_changed_during_read[abd] on 3.12.12 and 3.14.2",
+      "note": "the two tests fail intermittently on this host on main too (flashprove-tinyllama-2026-11-24.json, make_check.linux_x86_64_main: in 5 and in 4 of 7 full runs on e2cc6d6); the branch touches neither; no FlashProve test failed. make check therefore ends with a non-zero status on this host",
       "earlier_at_6f90c02": "3.12.12 and 3.13.15: 1 failed (test_stream_copy_retains_rejected_output[modified]), 2,303 passed, 114 skipped; 3.14.2: 2 failed, 2,302 passed; make package-check and make docs passed",
       "make_package_check": "passed on all three",
       "make_docs": "passed: 176 pages, 14,756 local links and assets",
-      "earlier_at_0b5b46e": "3.12.12 and 3.13.15: 2 failed (both tests), 2,357 passed; 3.14.2: 1 failed, 2,358 passed; make package-check and make docs passed. On macOS at 0b5b46e all three passed"
+      "earlier_at_0b5b46e": "at 0b5b46e and 2d22a74 the same one or two tests failed and nothing else; on macOS all three passed at both",
+      "retained_failure": "a first run of these gates at c4d0f05, started detached from the session (setsid nohup), also failed tests/test_e2e.py::test_timeout_allows_controller_to_reap_separate_worker on all three: a process started so inherits an ignored SIGINT, which that test needs. The run above was attached, as CI's is"
     },
     "not_run": "GitHub's own CI: the fork has no workflow runs"
   },
