@@ -5,7 +5,8 @@ usage: python scripts/run_flashprove_tinyllama_gpu.py --credit-balance-usd USD -
 
 One paid host, one attempt, no retry. Before anything is paid for, the caller's enrollment is
 written (enrollment.json: the kit, the request, the commitment ID and the patched verifier's
-digest that this caller will accept), the patched and the unpatched cp_verify are built here from
+digest that this caller will accept), the pinned tokenizer and chat template must give the
+request's ids for the case's text, the patched and the unpatched cp_verify are built here from
 the pinned source, and the worst case of the charge (the hourly price times every time limit) must
 fit both the cap and the balance that the caller states. The host runs gpu_job.sh on public files
 only; the provider's secret directory never leaves it and the host is deleted in every case: by
@@ -43,6 +44,7 @@ from pathlib import Path
 import flashprove as fp
 import flashprove_tinyllama as ft
 import flashprove_tinyllama_proof as proof
+import flashprove_tinyllama_request as request_text
 from run_e2e import sha, write_json
 from run_llm_e2e import require
 
@@ -389,6 +391,8 @@ def run(balance, maximum, build, gguf, proofs, gpu, cloud, provider=None, remote
     try:
         # Free steps first: what the caller accepts, and the verifiers that will judge the proof.
         record = enrollment(build, gguf)
+        # The request's ids are the pinned tokenizer's and chat template's for the case's text.
+        record["request"]["text"] = request_text.check_text(output)
         write_json(output / "enrollment.json", record)
         local = output / "local"
         local.mkdir()

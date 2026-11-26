@@ -98,6 +98,7 @@ def inputs(tmp_path, monkeypatch):
     runs = tmp_path / "runs"
     monkeypatch.setattr(gpu, "RUNS", runs)
     monkeypatch.setattr(gpu.proof, "built_verifiers", lambda output: (tree, {}, {}))
+    monkeypatch.setattr(gpu.request_text, "check_text", lambda output: dict(prompt_tokens=25))
     monkeypatch.setattr(gpu.time, "sleep", lambda seconds: None)
     started = []
 
