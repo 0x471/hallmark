@@ -119,6 +119,9 @@ def test_flashprove_composition_stops_on_an_incomplete_check_before_classifier_p
     invoked = []
 
     def checked(case_dir, output):
+        # Outside the composed evidence folder: the join's output budget counts all of that one.
+        assert output.parent.parent == tmp_path / "runs"
+        assert output.parent.name.startswith("flashprove-composed-")
         output.mkdir()
         record = dict(passed=True, proofs=1, fresh_verifications=1, altered_copies_rejected=7)
         record["response"] = composed.composed_input.case()["response"]  # all but the count holds

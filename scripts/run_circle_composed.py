@@ -92,7 +92,10 @@ def run(
             frozen = output / "enrollment.cbor"
             write_new(frozen, signed)
         if flash:
-            verified = llm_side.verify(Path(flashprove_case).resolve(), output / "llm")
+            # Its own run folder, as verify_llm.run takes: the builds are far larger than the
+            # join's output budget, which counts every file below `output`.
+            checks = Path(tempfile.mkdtemp(prefix="flashprove-composed-", dir=ROOT / "runs"))
+            verified = llm_side.verify(Path(flashprove_case).resolve(), checks / "check")
             llm = json.loads(read_regular(verified / "result.json", 1024**2))
             if (
                 llm.get("passed") is not True
