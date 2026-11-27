@@ -128,8 +128,9 @@ def only_run(inputs):
 
 def test_the_worst_case_is_the_price_times_every_limit():
     most, seconds = gpu.ceiling(Decimal("4.39"))
-    assert seconds == sum(gpu.LIMITS.values()) == 2400
-    assert most == Decimal("2.93")  # 4.39 * 2400 / 3600 = 2.9267, rounded up
+    assert seconds == sum(gpu.LIMITS.values()) == 2400 and gpu.POD["end_seconds"] == 60
+    assert most == Decimal("3.00")  # 4.39 * 2460 / 3600 = 2.9998, rounded up
+    assert gpu.ceiling(Decimal("4.40"))[0] == Decimal("3.01")
 
 
 @pytest.mark.parametrize("text", ["abc", "0", "-1", "nan", "inf", None])
@@ -153,8 +154,9 @@ def test_a_passing_run_ends_the_host_and_records_the_spend(inputs):
     protocol = json.loads((output / "protocol.json").read_text())
     assert result["passed"] is True and result["worker_verdicts"] == ["YES"]
     assert result["spend"] == spend and spend["host_deleted"] and spend["within_cap"]
-    assert spend["balance_fall_usd"] == "0.25" and spend["cap_usd"] == "3.00"
-    assert protocol["cost_ceiling_usd"] == "2.93" and protocol["owner_approved"] is False
+    assert spend["balance_fall_usd"] == "0.2500" and spend["cap_usd"] == "3.00"
+    assert spend["price_usd_per_hour"] == "4.39"
+    assert protocol["cost_ceiling_usd"] == "3.00" and protocol["owner_approved"] is False
     assert ("terminate", "pod1") in provider.calls and provider.pods == []
     assert inputs["guard"][-1] == "stopped"
     # The enrollment is written before the host is made, and nothing names the host in the result.
@@ -167,10 +169,10 @@ def test_a_passing_run_ends_the_host_and_records_the_spend(inputs):
 @pytest.mark.parametrize(
     ("provider", "cap", "balance", "why"),
     [
-        (Provider(), "2.92", "50.00", "over the cap"),
+        (Provider(), "2.99", "50.00", "over the cap"),
         (Provider(pods=["other"]), "3.00", "50.00", "another host"),
-        (Provider(), "3.00", "2.00", "does not cover"),
-        (Provider(balance="1.00"), "3.00", "50.00", "does not cover"),
+        (Provider(), "3.00", "2.99", "does not cover"),
+        (Provider(balance="2.99"), "3.00", "50.00", "does not cover"),
         (Provider(price="5.29"), "3.00", "50.00", "over the cap"),
     ],
 )
@@ -286,3 +288,38 @@ def test_a_host_left_by_a_failed_create_is_ended(inputs):
     with pytest.raises(ValueError, match="timeout"):
         go(inputs, provider, host())
     assert ("terminate", "left") in provider.calls and provider.pods == []
+
+
+def test_the_balance_is_read_until_the_charge_shows(monkeypatch):
+    monkeypatch.setattr(gpu.time, "sleep", lambda seconds: None)
+
+    class Late(Provider):
+        def account(self):
+            self.calls.append("account")
+            return (self.balance - (1 if len(self.calls) >= 3 else 0)), []
+
+    late = Late(balance="10")
+    assert gpu.settled_balance(late, Decimal("10")) == Decimal("9") and len(late.calls) == 3
+    never = Provider(balance="10")
+    assert gpu.settled_balance(never, Decimal("10"), tries=4) == Decimal("10")
+    assert len(never.calls) == 4
+
+
+def test_a_step_gets_no_more_time_than_the_deadline_leaves(inputs, monkeypatch):
+    remote = host()
+    # The host starts at once; 2,395 s later five seconds are left for the step "host".
+    clock = iter([1000.0, 1000.0, 3395.0])
+    monkeypatch.setattr(gpu.time, "time", lambda: next(clock, 3401.0))
+    limits = []
+    plain = remote.run
+
+    def timed(self, command, log, seconds):
+        limits.append((command, seconds))
+        return plain(self, command, log, seconds)
+
+    remote.run = timed
+    provider = Provider()
+    with pytest.raises(ValueError, match="no time is left for the host's step upload"):
+        go(inputs, provider, remote)
+    assert limits == [("true", 30), ("bash /root/pod_job.sh host", 5)]
+    assert provider.pods == [] and ("terminate", "pod1") in provider.calls

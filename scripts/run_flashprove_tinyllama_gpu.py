@@ -8,9 +8,10 @@ written (enrollment.json: the kit, the request, the commitment ID and the patche
 digest that this caller will accept), the pinned tokenizer and chat template must give the
 request's ids for the case's text, the patched and the unpatched cp_verify are built here from
 the pinned source, and the worst case of the charge (the hourly price times every time limit) must
-fit both the cap and the balance that the caller states. The host runs gpu_job.sh on public files
-only; the provider's secret directory never leaves it and the host is deleted in every case: by
-this process, by a second process that outlives it, and by the provider at the time limit. Then
+fit the cap, the balance that the caller states and the balance that the provider reports. The
+host runs gpu_job.sh on public files only; the provider's secret directory never leaves it. The
+host is deleted by this process in every case; a second process that outlives this one deletes it
+at the deadline; and the provider is asked to end it itself some minutes later. Then
 scripts/flashprove_tinyllama_proof.py's checks run here on the returned files, under the enrolled
 commitment ID: a commitment with another ID fails the run.
 
@@ -186,9 +187,11 @@ def dollars(text, what):
 
 
 def ceiling(price):
-    """The most the host can cost: the hourly price times every time limit, rounded up to a cent."""
+    """The most the host can cost, rounded up to a cent, and the seconds its steps may take: the
+    hourly price times every step's limit and the time allowed for deleting the host."""
     seconds = sum(LIMITS.values())
-    return (price * seconds / 3600).quantize(Decimal("0.01"), rounding="ROUND_UP"), seconds
+    most = price * (seconds + POD["end_seconds"]) / 3600
+    return most.quantize(Decimal("0.01"), rounding="ROUND_UP"), seconds
 
 
 def enrollment(build, gguf):
@@ -308,6 +311,21 @@ def end_host(provider, pod_id, attempts=5, wait=10):
     return False
 
 
+def settled_balance(provider, before, tries=9, wait=10):
+    """The balance once the provider has charged the host: the charge follows the deletion by
+    some seconds. None if the provider does not answer."""
+    value = None
+    for _ in range(tries):
+        try:
+            value = provider.account()[0]
+        except (ValueError, OSError):
+            value = None
+        if value is not None and value < before:
+            break
+        time.sleep(wait)
+    return value
+
+
 def watchdog(pod_id, deadline, log):
     """A second process: at the deadline it deletes the host, whatever became of the first."""
     provider = RunPod(os.environ.get("RUNPOD_API_KEY"))
@@ -333,7 +351,15 @@ def step(code, name):
 
 
 def on_host(provider, remote_of, output, staged, proofs, pod_id, started):
-    """Every paid step, each under its limit; returns the folder with what came back."""
+    """Every paid step, each under its limit and all of them under the deadline; returns the
+    folder with what came back."""
+    deadline = started + sum(LIMITS.values())
+
+    def within(name):
+        left = int(min(LIMITS[name], deadline - time.time()))
+        require(left > 0, f"no time is left for the host's step {name}")
+        return left
+
     boot = started + LIMITS["boot"]
     address = None
     while address is None:
@@ -346,11 +372,11 @@ def on_host(provider, remote_of, output, staged, proofs, pod_id, started):
         require(time.time() < boot, "the host's SSH service did not start in time")
         time.sleep(10)
     step(remote.copy([PROBE / "pod_job.sh"], "/root/pod_job.sh", log, 60), "copy")
-    step(remote.run("bash /root/pod_job.sh host", log, LIMITS["host"]), "host")
-    step(remote.copy([staged], BASE + "/stage", log, LIMITS["upload"]), "upload")
-    step(remote.run("bash /root/pod_job.sh libraries", log, LIMITS["libraries"]), "libraries")
+    step(remote.run("bash /root/pod_job.sh host", log, within("host")), "host")
+    step(remote.copy([staged], BASE + "/stage", log, within("upload")), "upload")
+    step(remote.run("bash /root/pod_job.sh libraries", log, within("libraries")), "libraries")
     proving = f"runuser -u fp -- bash {BASE}/stage/pod_job.sh prove {proofs}"
-    code = remote.run(proving, output / "prove.log", LIMITS["prove"])
+    code = remote.run(proving, output / "prove.log", within("prove"))
     back = output / "prove"
     back.mkdir()
     work = BASE + "/run/work/"
@@ -358,7 +384,7 @@ def on_host(provider, remote_of, output, staged, proofs, pod_id, started):
     numbers = range(1, proofs + 1)
     names += [work + f"cp_prove.{n}.{kind}" for n in numbers for kind in ("log", "time")]
     names += [work + f"cp_verify.{n}.log" for n in numbers]
-    fetched = remote.copy(names, back, log, LIMITS["fetch"], back=True)
+    fetched = remote.copy(names, back, log, within("fetch"), back=True)
     step(code, "prove")
     step(fetched, "fetch")
     return back
@@ -454,14 +480,13 @@ def run(balance, maximum, build, gguf, proofs, gpu, cloud, provider=None, remote
         finally:
             ended = end_host(provider, pod_id)
             paid = time.time() - started
-            try:
-                after = provider.account()[0] if ended else None
-            except (ValueError, OSError):
-                after = None
+            after = settled_balance(provider, before) if ended else None
+            fall = None if after is None else (before - after).quantize(Decimal("0.0001"))
             spend = dict(
                 host_seconds=round(paid, 1),
+                price_usd_per_hour=str(price),
                 bound_usd=str((price * Decimal(paid) / 3600).quantize(Decimal("0.0001"))),
-                balance_fall_usd=None if after is None else str(before - after),
+                balance_fall_usd=None if fall is None else str(fall),
                 cap_usd=str(cap),
                 within_cap=price * Decimal(paid) / 3600 <= cap,
                 host_deleted=ended,
