@@ -8,7 +8,7 @@
 #                  pod_job.sh libraries      the CUDA runtime libraries (upstream's documented pip
 #                                            install, as research/probes/flashprove/job.sh), the
 #                                            loader's configuration, and STAGE handed to the account
-#        as fp:    pod_job.sh prove PROOFS   gpu_job.sh on BASE/stage, into BASE/work
+#        as fp:    pod_job.sh prove PROOFS   gpu_job.sh on BASE/stage, into BASE/run/work
 # The packages come from the image's own archive and from PyPI, as in decision 0093's worker; the
 # host is one rented container that is deleted after the run.
 set -euo pipefail
@@ -46,13 +46,20 @@ libraries)
   # can write in), so the loader finds the runtime libraries and the driver's libcuda.so.1 by its
   # configuration.
   echo "$cuda/nvidia/cu13/lib" > /etc/ld.so.conf.d/fp-cuda.conf
-  if ! ldconfig -p | grep -q 'libcuda.so.1 '; then
-    dirname "$(find / -xdev -name 'libcuda.so.1' 2> /dev/null | head -n 1)" > /etc/ld.so.conf.d/fp-driver.conf
+  listed=$(ldconfig -p)
+  if [[ $listed != *"libcuda.so.1 "* ]]; then
+    driver=$(find / -xdev -name 'libcuda.so.1' 2> /dev/null | head -n 1 || true)
+    [ -n "$driver" ] || { echo "pod_job.sh: the driver's libcuda.so.1 is not found" >&2; exit 4; }
+    dirname "$driver" > /etc/ld.so.conf.d/fp-driver.conf
   fi
   ldconfig
-  ldconfig -p | grep -E 'libcuda\.so\.1 |libcudart\.so\.13 |libcublas\.so\.13 '
+  listed=$(ldconfig -p)
+  for library in libcuda.so.1 libcudart.so.13 libcublas.so.13; do
+    [[ $listed == *"$library "* ]] || { echo "pod_job.sh: the loader does not list $library" >&2; exit 4; }
+  done
   for program in cp_commit cp_prove; do
-    if ldd "$base/stage/hc/$program" | grep 'not found'; then
+    needs=$(ldd "$base/stage/hc/$program") || { echo "pod_job.sh: ldd failed on $program" >&2; exit 4; }
+    if [[ $needs == *"not found"* ]]; then
       echo "pod_job.sh: $program lacks a library" >&2
       exit 4
     fi

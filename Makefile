@@ -31,7 +31,7 @@ benchmark-llm-gpu:
 	uv run --locked --python 3.12.12 --extra llm python scripts/run_llm_gpu.py --llm-run "$(LLM_RUN)" --credit-balance-usd "$(GPU_CREDIT_BALANCE_USD)" --max-cost-usd 5.00 $(if $(GPU_BUILD_RUN),--build-run "$(GPU_BUILD_RUN)")
 
 e2e-composed:
-	uv run --locked --python 3.12.12 --extra train --extra llm python scripts/run_circle_composed.py $(if $(LLM_RUN),--llm-run "$(LLM_RUN)") $(if $(CLASSIFIER_RUN),--classifier-run "$(CLASSIFIER_RUN)") $(if $(FLASHPROVE_TINYLLAMA_CASE),--llm-backend flashprove --flashprove-case "$(FLASHPROVE_TINYLLAMA_CASE)")
+	uv run --locked --python 3.12.12 --extra train --extra llm python scripts/run_circle_composed.py $(if $(LLM_RUN),--llm-run "$(LLM_RUN)") $(if $(CLASSIFIER_RUN),--classifier-run "$(CLASSIFIER_RUN)") $(if $(filter flashprove,$(LLM_BACKEND)),--llm-backend flashprove --flashprove-case "$(FLASHPROVE_TINYLLAMA_CASE)")
 
 verify-llm:
 	uv run --locked --python 3.12.12 python scripts/verify_llm.py --run "$(LLM_RUN)"
@@ -52,7 +52,7 @@ verify-flashprove-tinyllama-proof:
 	uv run --locked --python 3.12.12 python scripts/flashprove_tinyllama_proof.py --case "$(FLASHPROVE_TINYLLAMA_CASE)"
 
 e2e-flashprove-tinyllama:
-	uv run --locked --python 3.12.12 python scripts/run_flashprove_tinyllama_gpu.py --credit-balance-usd "$(GPU_CREDIT_BALANCE_USD)" --max-cost-usd 3.00 --build "$(FLASHPROVE_TINYLLAMA_BUILD)" --gguf "$(FLASHPROVE_TINYLLAMA_GGUF)"
+	uv run --locked --python 3.12.12 python scripts/run_flashprove_tinyllama_gpu.py --credit-balance-usd "$(GPU_CREDIT_BALANCE_USD)" --max-cost-usd "$(or $(GPU_MAX_COST_USD),3.00)" --build "$(FLASHPROVE_TINYLLAMA_BUILD)" --gguf "$(FLASHPROVE_TINYLLAMA_GGUF)"
 
 e2e-flashprove:
 	uv run --locked --python 3.12.12 --extra llm python scripts/run_flashprove_gpu.py --credit-balance-usd "$(GPU_CREDIT_BALANCE_USD)" --max-cost-usd 3.50 $(if $(FLASHPROVE_BUILD_RUN),--build-run "$(FLASHPROVE_BUILD_RUN)")

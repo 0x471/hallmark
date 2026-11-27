@@ -120,9 +120,9 @@ def test_flashprove_composition_stops_on_an_incomplete_check_before_classifier_p
 
     def checked(case_dir, output):
         output.mkdir()
-        (output / "result.json").write_text(
-            '{"passed": true, "proofs": 1, "fresh_verifications": 1, "altered_copies_rejected": 7}'
-        )
+        record = dict(passed=True, proofs=1, fresh_verifications=1, altered_copies_rejected=7)
+        record["response"] = composed.composed_input.case()["response"]  # all but the count holds
+        (output / "result.json").write_text(json.dumps(record))
         return output
 
     monkeypatch.setattr(flashprove_composed, "verify", checked)

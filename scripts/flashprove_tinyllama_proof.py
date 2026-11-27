@@ -26,8 +26,8 @@ verifiers and requires, in order:
 
 A pass says that these files fit the patched verifier's checks for this request under the
 commitment ID that the caller states. The ID is not recomputed here: it is cp_commit's own print
-on the GPU host, so a pass does not tie the proof to TinyLlama's weights, and nothing enrols that
-commitment. It says nothing of hiding (the seed
+on the GPU host, so a pass does not tie the proof to TinyLlama's weights; enrollment.json holds
+it as a value. It says nothing of hiding (the seed
 is public), of the checkpoint the weights were converted from, or of SASH's integer function
 (decision 0094).
 """
@@ -172,7 +172,7 @@ def rejections(verifier, case, commitment_id, output):
 
 def built_verifiers(output):
     """The pinned source and both verifiers, built here: (tree, verifiers, builds). The tree is
-    left with the four patches applied."""
+    left with the three program patches applied."""
     copies = ft.checked_patches(output)
     tree = fp.source_tree(output)
     verifiers, builds = {}, {}
@@ -190,8 +190,10 @@ def verify(case, commitment_id, output, built=None):
     """built: built_verifiers()'s return, for a caller that built them before a paid step."""
     require(re.fullmatch("[0-9a-f]{64}", commitment_id), "the commitment ID is 64 hex digits")
     started = time.monotonic()
-    tree, verifiers, builds = built or built_verifiers(output)
+    # The case is looked at before the minutes of building; a caller that built before a paid
+    # step has the case only afterwards.
     held = checked_case(case, output)
+    tree, verifiers, builds = built or built_verifiers(output)
     ok, checked = check_proof(
         tree, verifiers["patched"], held, commitment_id, output / "check-proof.log"
     )

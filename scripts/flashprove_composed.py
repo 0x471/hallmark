@@ -37,8 +37,12 @@ SOURCES = (
             "flashprove_tinyllama_request.py",
             "flashprove_composed.py",
             "composed_input.py",
+            "run_e2e.py",
+            "run_llm_e2e.py",
         )
     ),
+    *sorted((ROOT / "src/hallmark").glob("*.py")),
+    ROOT / "uv.lock",
     fp.PROBE / "source.json",
     *(
         ft.PROBE / name
@@ -71,6 +75,13 @@ def verify(case_dir, output):
     case = composed_input.case()
     enrolled = proof.ENROLLED
     require(enrolled["case_sha256"] == composed_input.CASE_SHA256, "enrolled for another case")
+    require(
+        enrolled["kit_json_sha256"] == sha(ft.PROBE / "kit.json")
+        and (enrolled["h_par"], enrolled["configuration"])
+        == (proof.KIT["h_par"], proof.KIT["configuration"])
+        and enrolled["verifier_source_digest"] == ft.PINS["verifier_source_digest"],
+        "the enrollment is not for the committed kit and patches",
+    )
     output.mkdir()
     text = request_text.check_text(output)
     checked = proof.verify(Path(case_dir), enrolled["commitment_id"], output)

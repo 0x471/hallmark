@@ -9,7 +9,9 @@
   "min_memory_gb": 60,
   "seconds": {"boot": 420, "host": 240, "upload": 900, "libraries": 240, "prove": 420, "fetch": 180},
   "end_seconds": 60,
+  "late_seconds": 45,
+  "guard_seconds": 1800,
   "grace": 300,
-  "seconds_note": "seconds: one limit for each paid step, all under one deadline (their sum). end_seconds: allowed for deleting the host, counted in the worst case. grace: after the deadline the provider is asked to end the host itself (terminateAfter); in a drill it did not within 3.5 minutes of the time asked, so the run does not rely on it",
+  "seconds_note": "seconds: one limit for each paid step, all under one deadline (their sum). end_seconds: the controller tries to delete the host for this long, and this is counted in the planned worst case; a deletion that fails costs more. late_seconds: after a failed request for a host the controller looks again this much later. guard_seconds: the second process keeps trying this long. grace: after the deadline the provider is asked to end the host itself (terminateAfter); in a drill it did not within 3.5 minutes of the time asked, so the run does not rely on it",
   "gpus_note": "the two sm_90 types asked for by name; only the first, in the provider's SECURE cloud, has been run"
 }
