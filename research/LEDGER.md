@@ -3556,15 +3556,19 @@ Done ([evidence](evidence/flashprove-tinyllama-composed-run-2026-11-27.json)), o
 with 24 GB, between 14:15 and 14:35 UTC:
 
 - Attempt 1, with fresh training: failed with `selected quantization pin mismatch:
-  mlp-training/seed-17/quantization.json`. The branch changes nothing that training reads, so this
-  looks like a dependence of training on the host; `make e2e` was not run on `main` there, so it is
-  not confirmed.
+  mlp-training/seed-17/quantization.json`. Not from this branch: `make e2e` on `main` then failed
+  there in the same way with the same file hash. One field differs from the reference's file, the
+  float checkpoint's hash; the integer weights are equal.
 - Attempt 2, with the two frozen quantizations of the owner's reference records
   (`CLASSIFIER_RUN`): the FlashProve check and three fresh classifier proofs passed, then the join
   failed with `MemoryError: qualification storage budget`. A fault of this branch: the FlashProve
   check wrote about 1.5 GB of builds below the composed evidence folder. Fixed by giving the check
   its own run folder.
 - Attempt 3, after the fix: `INTEGRITY PASS: 1 FlashProve + 3 Circle classifier proofs` in 257 s.
+
+- Afterwards, the default SASH path at the same head with the owner's published proofs:
+  `INTEGRITY PASS: 23 SASH + 3 Circle classifier proofs`, model identity equal to the reference's.
+  `scripts/verify_reference.py` stops with an identity mismatch on `main` and on the branch alike.
 
 Result: passed once. The tests' stand-in checks had hidden the second failure; only the real run
 found it.

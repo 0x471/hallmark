@@ -44,7 +44,7 @@
       "error": "ValueError: selected quantization pin mismatch: mlp-training/seed-17/quantization.json",
       "observed_sha256": "1f5295e407788c8967d62b5a462b4417b8fb9e8aeae55aea08ae468396ab36fa",
       "pinned_sha256": "f8090161455ee56cdcd73eaab44437efa3b278a786d7c246491da5f1e1431a9c",
-      "reading": "Fresh MLP training on this host did not give the pinned quantization. The branch changes none of uv.lock, pyproject.toml, scripts/run_e2e.py or src/ against main (e2cc6d6), and the reference run was on an Apple M4 Max, so this looks like a dependence of training on the host. Not confirmed: make e2e was not run on main on this host."
+      "reading": "Not from this branch: see training_on_main. Fresh MLP training on this host gives the pinned integer weights but another checkpoint hash, which the quantization file carries."
     },
     {
       "n": 2,
@@ -149,10 +149,53 @@
     }
   ],
   "not_shown": [
-    "fresh classifier training on this host: the passing run reused the two frozen quantizations",
+    "fresh classifier training that passes the pin on this host: the passing runs reused the two frozen quantizations",
     "more than one run, host or request",
     "anything about the commitment ID: it is an enrolled value that no CPU program recomputes",
     "a release decision: policy_release is false and the backend is not qualified",
     "an independent rerun or review"
-  ]
+  ],
+  "training_on_main": {
+    "what": "make e2e on main (e2cc6d67a0868fb21e9e6ff3bc9aa71567d5e161), unchanged, on the same host, after the three attempts",
+    "outcome": "failed",
+    "error": "ValueError: selected quantization pin mismatch: mlp-training/seed-17/quantization.json",
+    "mlp_quantization_sha256": "1f5295e407788c8967d62b5a462b4417b8fb9e8aeae55aea08ae468396ab36fa",
+    "same_as_attempt_1": true,
+    "mlp_difference_from_the_reference_file": "one field: checkpoint (a867779eacd1723539f7e445c16f79a7b6dec8336f73419fc72129606419f11e here, 060b55ad36e0ad5f7ea9eb6eae2a6054a8294c6fa11b2dba636cd5ce5d4d76ad in the reference); every integer weight is equal",
+    "same_as_the_reference_log": [
+      "first_epoch_loss and final_loss of the three seeds, to every printed digit",
+      "the seven integer scores of each seed",
+      "the three program digests"
+    ],
+    "cnn_quantization_sha256": "8de31ae0215178f5c74aa43e58dd63511bc3b6a881c2045cc96def9e149b8f0b",
+    "cnn_equals_pin": true,
+    "hosts": {
+      "this": "Apple M4 Pro, macOS 15.7.1",
+      "reference": "Apple M4 Max, macOS 26.6.2 (its protocol.json)"
+    },
+    "reading": "The float checkpoint differs in bits that neither the printed losses nor the quantized weights show. numpy 2.5.4 is built against Apple's Accelerate here, which comes with the system, so the system version is the likelier cause than the chip. Neither was isolated: no second host was tried."
+  },
+  "sash_path_on_this_branch": {
+    "why": "The branch gives five scripts of the SASH composed path a backend argument. Until this run only tests had shown that the default path still works.",
+    "command": "make e2e-composed LLM_RUN=<proofs.tar.gz and proof-inventory.json of the owner's release circle-reference-2026-10-28> CLASSIFIER_RUN=<its classifiers/composed>",
+    "source_commit": "3ad41adc16e5f8e7870753cf2d96c7fce9d9cbeb",
+    "outcome": "passed",
+    "wall_seconds": 430.38,
+    "final_line": "INTEGRITY PASS: 23 SASH + 3 Circle classifier proofs.",
+    "llm_proofs_verified": 23,
+    "residual_links": 22,
+    "fresh_llm_verifications": 2,
+    "classifier_proofs_verified": 3,
+    "binding_rejections": 16,
+    "model": "6e4bbf5af998722143be658312ab4abbc7ad05745436ebedaaa0174f30cffc2f",
+    "model_equals_reference_composition": true,
+    "result_sha256": "01e780338d02bd49ebedfa605fff26359b596fab0a1257bc641a5660a2f9167f",
+    "largest_process_max_rss_bytes": 10288300032
+  },
+  "reference_verification_command": {
+    "command": "scripts/verify_reference.py --directory ... --expected-manifest 2ea625c25d8305d6f006f6b492cffb066e93b5d7e8d92d7da6269156c5c1e6e8 (docs/REFERENCE-RUN.md)",
+    "outcome": "stops with 'reference verifier source identity mismatch' at this branch and at main alike",
+    "detail": "circle_backend_identity equals the manifest's on both; llm_verifier_identity is 39d2ee50ef0c38cd... on both against the manifest's 8567c911d686b13b...; verify_llm.source_inventory() is identical on main and on this branch, so the branch changes none of its files",
+    "reading": "main has moved since the reference release; not a fault of this branch, and not usable as its regression check"
+  }
 }

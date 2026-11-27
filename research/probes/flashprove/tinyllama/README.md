@@ -712,15 +712,24 @@ FlashProve check
 failed first, and both are in that record:
 
 1. With fresh training, `selected quantization pin mismatch: mlp-training/seed-17/quantization.json`.
-   The branch changes nothing that training reads, and the reference run was on an M4 Max, so this
-   looks like training that depends on the host. It is not confirmed: `make e2e` was not run on
-   `main` on that Mac. The passing run therefore took the two frozen quantizations from the owner's
-   reference records (`CLASSIFIER_RUN`, the documented reuse); its three classifier proofs are fresh.
+   Not from this branch: `make e2e` on `main` fails in the same way on that Mac, with the same
+   file hash. The file differs from the reference's in one field, the float checkpoint's hash;
+   every integer weight, the printed losses and the program digests are equal, and the CNN's file
+   equals its pin. The reference host ran macOS 26.6.2 and this one runs 15.7.1, and numpy uses the
+   system's Accelerate there, so the system version is the likelier cause; no second host was
+   tried. The passing run therefore took the two frozen quantizations from the owner's reference
+   records (`CLASSIFIER_RUN`, the documented reuse); its three classifier proofs are fresh.
 2. `MemoryError: qualification storage budget`, a fault of this branch: the FlashProve check wrote
    its builds below the composed evidence folder, whose size the join limits. The tests' stand-in
    checks had hidden it. The check now has its own run folder.
 
 This is one run on one host with retained quantizations, and the owner has not accepted it.
+
+**The SASH path on this branch.** The default path was then run for real at the same head, with
+the owner's published proofs: `INTEGRITY PASS: 23 SASH + 3 Circle classifier proofs`, and the
+result's model identity equals the reference composition's. `scripts/verify_reference.py` could
+not serve as that check: it stops with `reference verifier source identity mismatch` on `main`
+and on this branch alike, with equal identities on both (same record).
 
 ## Not checked
 
