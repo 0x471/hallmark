@@ -10,8 +10,9 @@ request's ids for the case's text, the patched and the unpatched cp_verify are b
 the pinned source, and the worst case of the charge (the hourly price times every time limit) must
 fit the cap, the balance that the caller states and the balance that the provider reports. The
 host runs gpu_job.sh on public files only; the provider's secret directory never leaves it. The
-host is deleted by this process in every case; a second process that outlives this one deletes it
-at the deadline; and the provider is asked to end it itself some minutes later. Then
+host is deleted by this process in every case, and a second process that outlives this one
+deletes it at the deadline. The provider is also asked to end it itself some minutes later
+(terminateAfter), but in a drill it did not, so nothing here relies on that. Then
 scripts/flashprove_tinyllama_proof.py's checks run here on the returned files, under the enrolled
 commitment ID: a commitment with another ID fails the run.
 
@@ -290,7 +291,8 @@ def pod_spec(public_key, gpu, cloud, deadline):
             dict(key="PUBLIC_KEY", value=public_key),
             dict(key="NVIDIA_DRIVER_CAPABILITIES", value="compute,utility"),
         ],
-        # The provider's own end of the host, should both of this caller's processes be gone.
+        # Asked of the provider for the case that both of this caller's processes are gone. In a
+        # drill of 2026-11-27 the provider left a host running past this time: not relied upon.
         terminateAfter=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(deadline + POD["grace"])),
     )
 

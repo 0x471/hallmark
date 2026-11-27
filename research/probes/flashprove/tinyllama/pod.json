@@ -10,6 +10,6 @@
   "seconds": {"boot": 420, "host": 240, "upload": 900, "libraries": 240, "prove": 420, "fetch": 180},
   "end_seconds": 60,
   "grace": 300,
-  "seconds_note": "seconds: one limit for each paid step, all under one deadline (their sum). end_seconds: allowed for deleting the host, counted in the worst case. grace: after the deadline the provider is asked to end the host itself (terminateAfter)",
+  "seconds_note": "seconds: one limit for each paid step, all under one deadline (their sum). end_seconds: allowed for deleting the host, counted in the worst case. grace: after the deadline the provider is asked to end the host itself (terminateAfter); in a drill it did not within 3.5 minutes of the time asked, so the run does not rely on it",
   "gpus_note": "the two sm_90 types asked for by name; only the first, in the provider's SECURE cloud, has been run"
 }
