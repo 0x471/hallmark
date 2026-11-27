@@ -23,8 +23,9 @@ target rebuilds it). The provider's API key is read from the environment (RUNPOD
 never written anywhere.
 
 The cap is the caller's own: this script makes no claim that an owner approved it. Its spend
-figure is a bound from the provider's hourly price and this process's clock, with the fall of the
-account's balance beside it; neither is an invoice.
+figure is a bound from the provider's hourly price and this process's clock, from just before the
+host is asked for until it is seen deleted. The fall of the account's balance is read once beside
+it, but the provider charges late and in steps. Neither is an invoice.
 """
 
 import argparse
@@ -313,19 +314,14 @@ def end_host(provider, pod_id, attempts=5, wait=10):
     return False
 
 
-def settled_balance(provider, before, tries=9, wait=10):
-    """The balance once the provider has charged the host: the charge follows the deletion by
-    some seconds. None if the provider does not answer."""
-    value = None
-    for _ in range(tries):
-        try:
-            value = provider.account()[0]
-        except (ValueError, OSError):
-            value = None
-        if value is not None and value < before:
-            break
-        time.sleep(wait)
-    return value
+def balance_fall(provider, before):
+    """The fall of the account's balance since `before`, read once after the host is deleted, or
+    None. The provider charges in steps and late: this can miss a part of this host's charge and
+    can hold an earlier host's. The bound from the price and the clock is the figure to go by."""
+    try:
+        return (before - provider.account()[0]).quantize(Decimal("0.0001"))
+    except (ValueError, OSError):
+        return None
 
 
 def watchdog(pod_id, deadline, log):
@@ -482,13 +478,13 @@ def run(balance, maximum, build, gguf, proofs, gpu, cloud, provider=None, remote
         finally:
             ended = end_host(provider, pod_id)
             paid = time.time() - started
-            after = settled_balance(provider, before) if ended else None
-            fall = None if after is None else (before - after).quantize(Decimal("0.0001"))
+            fall = balance_fall(provider, before) if ended else None
             spend = dict(
                 host_seconds=round(paid, 1),
                 price_usd_per_hour=str(price),
                 bound_usd=str((price * Decimal(paid) / 3600).quantize(Decimal("0.0001"))),
-                balance_fall_usd=None if fall is None else str(fall),
+                balance_fall_at_end_usd=None if fall is None else str(fall),
+                balance_fall_note="read once at the end; the provider charges late and in steps",
                 cap_usd=str(cap),
                 within_cap=price * Decimal(paid) / 3600 <= cap,
                 host_deleted=ended,

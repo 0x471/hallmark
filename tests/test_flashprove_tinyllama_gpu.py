@@ -154,7 +154,7 @@ def test_a_passing_run_ends_the_host_and_records_the_spend(inputs):
     protocol = json.loads((output / "protocol.json").read_text())
     assert result["passed"] is True and result["worker_verdicts"] == ["YES"]
     assert result["spend"] == spend and spend["host_deleted"] and spend["within_cap"]
-    assert spend["balance_fall_usd"] == "0.2500" and spend["cap_usd"] == "3.00"
+    assert spend["balance_fall_at_end_usd"] == "0.2500" and spend["cap_usd"] == "3.00"
     assert spend["price_usd_per_hour"] == "4.39"
     assert protocol["cost_ceiling_usd"] == "3.00" and protocol["owner_approved"] is False
     assert ("terminate", "pod1") in provider.calls and provider.pods == []
@@ -290,19 +290,13 @@ def test_a_host_left_by_a_failed_create_is_ended(inputs):
     assert ("terminate", "left") in provider.calls and provider.pods == []
 
 
-def test_the_balance_is_read_until_the_charge_shows(monkeypatch):
-    monkeypatch.setattr(gpu.time, "sleep", lambda seconds: None)
-
-    class Late(Provider):
+def test_a_balance_that_cannot_be_read_leaves_the_bound_alone():
+    class Silent(Provider):
         def account(self):
-            self.calls.append("account")
-            return (self.balance - (1 if len(self.calls) >= 3 else 0)), []
+            raise ValueError("the provider refused the call: timeout")
 
-    late = Late(balance="10")
-    assert gpu.settled_balance(late, Decimal("10")) == Decimal("9") and len(late.calls) == 3
-    never = Provider(balance="10")
-    assert gpu.settled_balance(never, Decimal("10"), tries=4) == Decimal("10")
-    assert len(never.calls) == 4
+    assert gpu.balance_fall(Silent(), Decimal("10")) is None
+    assert gpu.balance_fall(Provider(balance="9.5"), Decimal("10")) == Decimal("0.5000")
 
 
 def test_a_step_gets_no_more_time_than_the_deadline_leaves(inputs, monkeypatch):
