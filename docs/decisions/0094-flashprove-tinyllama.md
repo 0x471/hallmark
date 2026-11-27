@@ -215,7 +215,7 @@ asks for now exist as code, and each stops short of the issue's box:
   the tokenizer's end token (`make verify-flashprove-tinyllama-request`; the end token is also
   checked on the proof). Short of SASH's: the commitment ID is `cp_commit`'s print in the first
   run, enrolled as a value, where SASH's caller derives its roots on a CPU.
-- *The composed demo.* `make e2e-composed FLASHPROVE_TINYLLAMA_CASE=DIR` checks a FlashProve
+- *The composed demo.* `make e2e-composed LLM_BACKEND=flashprove FLASHPROVE_TINYLLAMA_CASE=DIR` checks a FlashProve
   proof afresh in place of SASH's 23, and the three classifier proofs bind this path's model
   identity (the checkpoint, the commitment ID, `h_par`, the configuration digest and the patched
   verifier's digest), so that they do not join SASH's proof and SASH's do not join this one.

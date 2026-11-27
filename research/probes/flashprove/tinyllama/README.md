@@ -608,21 +608,27 @@ RUNPOD_API_KEY=... make e2e-flashprove-tinyllama GPU_CREDIT_BALANCE_USD=... \
    are those that SASH's case pins, read in the kit's hash-locked `scales` environment, with the
    call that SASH's own preparation makes.
 3. Both verifiers are built from the pinned source: the ones that will judge the paid proof.
-4. The worst case of the charge must fit the cap, the balance that the caller states and the
-   balance that the provider reports: the provider's hourly price times the six steps' time
-   limits and the minute allowed for deleting the host (2,460 s; USD 3.00 at USD 4.39 an hour).
-   No other host of the account may exist.
+4. The planned worst case of the charge must fit the cap, the balance that the caller states and
+   the balance that the provider reports: the provider's hourly price times the six steps' time
+   limits and the minute that the controller spends at most on deleting the host (2,460 s; USD
+   3.00 at USD 4.39 an hour). A host that cannot be deleted in that minute costs more: that case
+   is the second process's. No other host of the account may exist.
 
 **The paid part** is one host and one attempt. Its steps (start, host checks and packages, upload
 of the staged public files, runtime libraries, `gpu_job.sh`, download) each have a time limit and
 together one deadline. Only public files go up and only public files and logs come back; the
-provider's secret directory stays on the host. The controller deletes the host in every case and
-checks that the account no longer lists it. A second process, started with the host, deletes it
-at the deadline if the controller is gone. The provider is also asked to end the host itself
-(`terminateAfter`); a drill showed that it does not, so nothing relies on that.
+provider's secret directory stays on the host. The controller deletes the host after the last
+step or the first failure, with signals held off, and checks that the account no longer lists
+it. A second process is started before the host is asked for: once the controller is gone or the
+deadline has passed it deletes every host of the run's name and keeps trying for half an hour.
+Both processes run on the caller's machine, so a machine that sleeps or loses its network can
+delete nothing, and the host is billed until someone deletes it by hand. The provider is also
+asked to end the host itself (`terminateAfter`); in the one drill made it did not, so nothing
+relies on that.
 
 **Afterwards**, on the caller's machine: `cp_commit`'s commitment ID must be the enrolled one,
-the host's record of the programs and of every input must name the caller's own files, and
+the host's record of its three programs and of its eight inputs must name exactly the caller's
+own files, the host's own `cp_verify` must have accepted every proof, and
 `scripts/flashprove_tinyllama_proof.py`'s checks run on the returned files (patched `YES`,
 unpatched `NO: policy-tables`, eight altered copies each refused for its own reason).
 
@@ -662,7 +668,7 @@ on five hosts, six times, shows that `cp_commit` repeats itself, not that the ID
 
 ## In the composed demo
 
-`make e2e-composed FLASHPROVE_TINYLLAMA_CASE=DIR` takes a FlashProve proof of the LLM answer in
+`make e2e-composed LLM_BACKEND=flashprove FLASHPROVE_TINYLLAMA_CASE=DIR` takes a FlashProve proof of the LLM answer in
 place of SASH's 23 proofs ([`scripts/flashprove_composed.py`](../../../../scripts/flashprove_composed.py),
 `--llm-backend flashprove` of `scripts/run_circle_composed.py`). `DIR` holds the eight public
 files of one dense proof. The controller then:

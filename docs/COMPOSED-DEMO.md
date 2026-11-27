@@ -113,7 +113,7 @@ See [decision 0075](decisions/0075-signed-composed-enrollment.md).
 LLM side can be one FlashProve proof of dense TinyLlama in place of SASH's 23 proofs:
 
 ```sh
-make e2e-composed FLASHPROVE_TINYLLAMA_CASE=/path/to/public-files
+make e2e-composed LLM_BACKEND=flashprove FLASHPROVE_TINYLLAMA_CASE=/path/to/public-files
 ```
 
 The folder holds the eight public files of one dense proof. The controller checks the request's
