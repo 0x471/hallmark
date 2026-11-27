@@ -120,9 +120,9 @@ The folder holds the eight public files of one dense proof. The controller check
 text against its token ids and the proof under the enrolled commitment ID, both afresh, and the
 three classifier proofs bind that path's model identity instead of SASH's; the host join and its
 16 changed bindings are the same. Only Hallmark's patched `cp_verify` accepts such a proof, and
-the commitment ID is an enrolled value that no CPU program recomputes. **No composed run with a
-FlashProve proof has been made end to end yet**: its FlashProve side ran on Linux and the join is
-tested with stand-in proof bytes
+the commitment ID is an enrolled value that no CPU program recomputes. It has run end to end **once**, on
+the contributor's Mac with the two frozen classifier quantizations of the reference records
+(`CLASSIFIER_RUN`); fresh training on that Mac did not give the pinned quantization
 ([details](../research/probes/flashprove/tinyllama/README.md#in-the-composed-demo)).
 
 ## Read the outcome

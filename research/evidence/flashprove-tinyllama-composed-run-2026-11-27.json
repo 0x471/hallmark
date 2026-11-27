@@ -1,0 +1,158 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-composed-run-evidence/1",
+  "recorded_at": "2026-11-27",
+  "decision": "docs/decisions/0094-flashprove-tinyllama.md",
+  "decision_status": "proposed",
+  "purpose": "One end-to-end run of make e2e-composed with a FlashProve proof of the LLM answer in place of SASH's, and the two failed attempts before it. It replaces the statement 'end_to_end: not run' in flashprove-tinyllama-capped-runs-2026-11-27.json.",
+  "made_by": "the contributor's AI-assisted session on the contributor's laptop; no independent reviewer",
+  "authority": {
+    "owner_approved": false,
+    "cost_usd": 0,
+    "statement": "Local CPU work only; nothing paid, no hosted job. The owner has not reviewed or accepted this run."
+  },
+  "command": "make e2e-composed CLASSIFIER_RUN=<classifiers/composed of the owner's reference records> LLM_BACKEND=flashprove FLASHPROVE_TINYLLAMA_CASE=<the published proof files>",
+  "host": {
+    "chip": "Apple M4 Pro",
+    "memory_gib": 24,
+    "system": "macOS 15.7.1, Darwin arm64",
+    "uv": "0.9.18",
+    "python": "3.12.12",
+    "rust": "nightly-2025-07-14"
+  },
+  "inputs": {
+    "flashprove_case": {
+      "archive": "https://github.com/0x471/hallmark/releases/tag/flashprove-tinyllama-proof-2026-11-25",
+      "sha256": "16fe65dd2b499e2e5ddb61d132ff7370bca25b64dfcd7390921ad2ec6fce0d0e"
+    },
+    "classifier_run": {
+      "source": "reference-records.tar.gz of the owner's release circle-reference-2026-10-28, folder classifiers/composed",
+      "archive_sha256": "8fcee7279b7d5ef5581407e917959b86ca174683468ee341dd2690bd736c5dcb",
+      "quantizations": {
+        "mlp-training/seed-17/quantization.json": "f8090161455ee56cdcd73eaab44437efa3b278a786d7c246491da5f1e1431a9c",
+        "cnn-training/17/quantization.json": "8de31ae0215178f5c74aa43e58dd63511bc3b6a881c2045cc96def9e149b8f0b"
+      },
+      "note": "docs/COMPOSED-DEMO.md's documented reuse: only the two frozen quantizations are taken; the three classifier proofs were made and verified afresh"
+    }
+  },
+  "attempts": [
+    {
+      "n": 1,
+      "source_commit": "0291868c1c725f3dbd6777b877d1a71b963c5ffc",
+      "classifier_run": null,
+      "outcome": "failed",
+      "seconds": 454,
+      "error": "ValueError: selected quantization pin mismatch: mlp-training/seed-17/quantization.json",
+      "observed_sha256": "1f5295e407788c8967d62b5a462b4417b8fb9e8aeae55aea08ae468396ab36fa",
+      "pinned_sha256": "f8090161455ee56cdcd73eaab44437efa3b278a786d7c246491da5f1e1431a9c",
+      "reading": "Fresh MLP training on this host did not give the pinned quantization. The branch changes none of uv.lock, pyproject.toml, scripts/run_e2e.py or src/ against main (e2cc6d6), and the reference run was on an Apple M4 Max, so this looks like a dependence of training on the host. Not confirmed: make e2e was not run on main on this host."
+    },
+    {
+      "n": 2,
+      "source_commit": "0291868c1c725f3dbd6777b877d1a71b963c5ffc",
+      "classifier_run": "retained quantizations",
+      "outcome": "failed",
+      "seconds": 315,
+      "passed_before_failing": [
+        "the FlashProve check",
+        "three classifier proofs made and freshly verified"
+      ],
+      "error": "MemoryError: qualification storage budget",
+      "cause": "A fault of this branch: the FlashProve check wrote its builds (about 1.5 GB) below the composed evidence folder, and the join's output budget of 256 MiB counts every file there. The tests used stand-in checks and did not see it.",
+      "fix": "aeab4a9b16cc57de3f1ce2b77f7c925cdd608ecc gives the check its own run folder, as verify_llm.run has"
+    },
+    {
+      "n": 3,
+      "source_commit": "aeab4a9b16cc57de3f1ce2b77f7c925cdd608ecc",
+      "classifier_run": "retained quantizations",
+      "outcome": "passed",
+      "wall_seconds": 256.81,
+      "final_line": "INTEGRITY PASS: 1 FlashProve + 3 Circle classifier proofs.",
+      "largest_process_max_rss_bytes": 8623980544,
+      "result_sha256": {
+        "composed": "db3da64b31514c4fae096f86531d3fcdafdb1bbb7574220920c98d7a5d42a54b",
+        "classifier": "e8531a2693bc465ce86be4a61110745986bb4d8abd2f33e2d5692727a9ebf403",
+        "flashprove_check": "37f482ba66b5539ebb1fd4a37891ec4828e5c9e5afc5404785fb83edf51b6a69"
+      },
+      "classifier": {
+        "proofs_verified": 3,
+        "direct_public_mutations_rejected": 21,
+        "roster_rejections": 3,
+        "intermediate_parity": true,
+        "elapsed_seconds": 83.37887979095103
+      },
+      "result": {
+        "backend": "circle",
+        "binding_rejections": [
+          "prompt",
+          "response",
+          "system_ref",
+          "salt",
+          "model",
+          "nonce",
+          "interaction_id",
+          "policy",
+          "classifier-0",
+          "classifier-1",
+          "classifier-2",
+          "missing",
+          "duplicate",
+          "reordered",
+          "cross-request",
+          "changed-enrollment"
+        ],
+        "classifier_proofs_verified": 3,
+        "classifier_result_sha256": "e8531a2693bc465ce86be4a61110745986bb4d8abd2f33e2d5692727a9ebf403",
+        "classifier_run": "runs/e2e-circle-mo6g8ndr",
+        "classifier_scope": "prompt",
+        "classifier_verdicts": [
+          1,
+          1,
+          0
+        ],
+        "context": "4691461eef273ffe01192e7209e2be4a645e9495dd0adbc634a7f53fff17eec7",
+        "elapsed_seconds": 256.44846558297286,
+        "fresh_llm_verifications": 1,
+        "hardware_claim": "not-accepted",
+        "hiding_claim": false,
+        "host_join": true,
+        "llm_altered_copies_rejected": 8,
+        "llm_backend": "flashprove",
+        "llm_checked_tokens": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "llm_commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+        "llm_commitment_id_source": "stated by the caller; not recomputed here",
+        "llm_proofs_verified": 1,
+        "llm_result_sha256": "37f482ba66b5539ebb1fd4a37891ec4828e5c9e5afc5404785fb83edf51b6a69",
+        "llm_verification": "runs/flashprove-composed-zm673f0u/check",
+        "llm_verifier": "Hallmark's patched cp_verify; upstream's refuses this proof",
+        "model": "22962ec51675824862283a21a2c5a6877dad64d3367a7ee68eb31cd0c8132f97",
+        "parameter_authority": {
+          "kind": "checkout-case"
+        },
+        "policy_release": false,
+        "prompt": "Name the capital of France in one short sentence.",
+        "qualified_backend": false,
+        "recursion": false,
+        "response": "The capital of France is Paris.",
+        "safety_quality_claim": false,
+        "schema_id": "hallmark.circle-composed-flashprove-request-result/1",
+        "status": "passed"
+      }
+    }
+  ],
+  "not_shown": [
+    "fresh classifier training on this host: the passing run reused the two frozen quantizations",
+    "more than one run, host or request",
+    "anything about the commitment ID: it is an enrolled value that no CPU program recomputes",
+    "a release decision: policy_release is false and the backend is not qualified",
+    "an independent rerun or review"
+  ]
+}

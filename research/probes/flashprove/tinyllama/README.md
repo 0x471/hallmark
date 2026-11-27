@@ -6,8 +6,8 @@ commitment and four proofs of SASH's request have been made with these patches o
 the contributor's own account and at the contributor's cost, with no owner-approved budget
 ("[The first dense proof](#the-first-dense-proof)"). In the night of 2026-11-26 to 27 (UTC) four more commitments and
 six more proofs were made under a controller with a spend cap that the contributor set
-("[The capped run](#the-capped-run)"), and the composed demo can take such a proof in code, though
-no composed run has been made ("[In the composed demo](#in-the-composed-demo)"). Nothing here
+("[The capped run](#the-capped-run)"), and the composed demo takes such a proof: one
+composed run has passed ("[In the composed demo](#in-the-composed-demo)"). Nothing here
 changes `make verify-flashprove` or decision 0093's pins.
 
 Upstream FlashProve at the pinned commit `9e2bdd8` ([`source.json`](../source.json)) reads real model
@@ -703,12 +703,24 @@ backend as an argument that defaults to SASH.
 **What ran, and what did not.** On Linux x86-64 the FlashProve side ran for real on the second
 capped run's files (741 s by its own clock, beside another job on that host: text, patched `YES`, unpatched `NO: policy-tables`, eight refusals). The join itself is tested with real bindings and stand-in proof
 bytes, as SASH's is (`tests/test_circle_composed.py`: the 16 changed bindings are refused, and
-each path's classifier bundle is refused under the other path's identity). **No composed run has
-been made end to end**: the classifier proofs need an Apple Silicon Mac with 12 GiB of free disk
-(`run_circle_e2e.py` refuses other hosts), and the reference classifier run sampled up to
-23.45 GB of memory. The contributor's Mac had under 7 GiB of free disk and has 24 GB of memory in
-all, and the Linux host is refused. #186's box for the composed demo is therefore open until someone runs that one command
-on such a Mac. It costs nothing.
+each path's classifier bundle is refused under the other path's identity). **One composed run has passed end to end**, on the contributor's Mac (Apple M4 Pro, 24 GB,
+macOS arm64) at `aeab4a9`, in 257 s and at no cost: `INTEGRITY PASS: 1 FlashProve + 3 Circle
+classifier proofs`, with the 16 changed bindings refused, 21 changed public statements and three
+invalid rosters refused by the classifier driver, and eight altered copies refused by the
+FlashProve check
+([evidence](../../../evidence/flashprove-tinyllama-composed-run-2026-11-27.json)). Two attempts
+failed first, and both are in that record:
+
+1. With fresh training, `selected quantization pin mismatch: mlp-training/seed-17/quantization.json`.
+   The branch changes nothing that training reads, and the reference run was on an M4 Max, so this
+   looks like training that depends on the host. It is not confirmed: `make e2e` was not run on
+   `main` on that Mac. The passing run therefore took the two frozen quantizations from the owner's
+   reference records (`CLASSIFIER_RUN`, the documented reuse); its three classifier proofs are fresh.
+2. `MemoryError: qualification storage budget`, a fault of this branch: the FlashProve check wrote
+   its builds below the composed evidence folder, whose size the join limits. The tests' stand-in
+   checks had hidden it. The check now has its own run folder.
+
+This is one run on one host with retained quantizations, and the owner has not accepted it.
 
 ## Not checked
 

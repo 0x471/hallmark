@@ -46,9 +46,10 @@ run against a cap of USD 3.00 that the contributor set, about USD 2.20 with thre
 contributor's cost and with no owner-approved budget or provider. Before paying, the controller
 writes the caller's enrollment and requires that the pinned tokenizer and chat template give the
 request's ids. `make e2e-composed` can take such a proof in place of SASH's and binds this path's
-model identity into the classifier proofs; its FlashProve side ran on Linux, its join is tested
-with stand-in proofs, and **no composed run has been made** (it needs a supported Mac with free
-disk and memory) ([evidence](evidence/flashprove-tinyllama-capped-runs-2026-11-27.json)). Of #186's
+model identity into the classifier proofs; it ran end to end once on the contributor's Mac
+with the reference records' frozen classifier quantizations, after two failed attempts
+([evidence](evidence/flashprove-tinyllama-composed-run-2026-11-27.json); the capped runs are in
+[this record](evidence/flashprove-tinyllama-capped-runs-2026-11-27.json)). Of #186's
 five boxes, none is closed by the contributor alone: the decision is proposed, the proving target's
 cap is not an owner's and it does not build the provers, altered copies are refused for one request,
 and the composed run is not made. Next, for the owner: decision 0094, the

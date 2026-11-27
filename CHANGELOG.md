@@ -24,8 +24,8 @@ deletes the host and rechecks here; before paying it writes the caller's enrollm
 request's token ids to the pinned tokenizer and chat template
 (`make verify-flashprove-tinyllama-request`). `make verify-flashprove-tinyllama-proof` is the free
 check of such a proof, and `make e2e-composed LLM_BACKEND=flashprove FLASHPROVE_TINYLLAMA_CASE=…` takes one in place of
-SASH's proofs, with its own model identity in the classifier proofs; no composed run with it has
-been made. SASH stays the default of the composed demo. The answer target also holds the kit to the ranges
+SASH's proofs, with its own model identity in the classifier proofs; one composed run with it has
+passed, on the contributor's Mac with the reference records' frozen classifier quantizations. SASH stays the default of the composed demo. The answer target also holds the kit to the ranges
 of the layers' scale words and to the column rule of attention's committed matrices, as `cp_prove`
 does at its start, and the caller's check requires each altered copy's own refusal. `make verify-flashprove` (decision 0093) is
 unchanged.

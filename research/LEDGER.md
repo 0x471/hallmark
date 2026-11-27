@@ -3545,3 +3545,29 @@ Spend: about USD 2.20 by the bounds of the four runs (USD 1.60) and the three dr
 Not shown: a composed run; a build of the provers by the target; another GPU type or cloud; a
 machine that sleeps or loses its network during a run; soundness of the patched code; anything of
 hiding or speed. The commitment ID is still `cp_commit`'s print, enrolled as a value.
+
+## 2026-11-27: one composed run with a FlashProve proof (proposed; contributor's Mac, no cost)
+
+Question: does `make e2e-composed LLM_BACKEND=flashprove` pass end to end, which the entry above
+left unshown? Pass criterion: the controller's own final line and result, on a supported Mac, from
+the published proof files.
+
+Done ([evidence](evidence/flashprove-tinyllama-composed-run-2026-11-27.json)), on an Apple M4 Pro
+with 24 GB, between 14:15 and 14:35 UTC:
+
+- Attempt 1, with fresh training: failed with `selected quantization pin mismatch:
+  mlp-training/seed-17/quantization.json`. The branch changes nothing that training reads, so this
+  looks like a dependence of training on the host; `make e2e` was not run on `main` there, so it is
+  not confirmed.
+- Attempt 2, with the two frozen quantizations of the owner's reference records
+  (`CLASSIFIER_RUN`): the FlashProve check and three fresh classifier proofs passed, then the join
+  failed with `MemoryError: qualification storage budget`. A fault of this branch: the FlashProve
+  check wrote about 1.5 GB of builds below the composed evidence folder. Fixed by giving the check
+  its own run folder.
+- Attempt 3, after the fix: `INTEGRITY PASS: 1 FlashProve + 3 Circle classifier proofs` in 257 s.
+
+Result: passed once. The tests' stand-in checks had hidden the second failure; only the real run
+found it.
+
+Not shown: fresh classifier training on this host; a second run, host or request; anything about
+the commitment ID, still an enrolled value; acceptance by the owner; an independent rerun.

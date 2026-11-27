@@ -220,10 +220,12 @@ asks for now exist as code, and each stops short of the issue's box:
   proof afresh in place of SASH's 23, and the three classifier proofs bind this path's model
   identity (the checkpoint, the commitment ID, `h_par`, the configuration digest and the patched
   verifier's digest), so that they do not join SASH's proof and SASH's do not join this one.
-  SASH stays the default. Short of the box: **no composed run has been made**. The FlashProve
-  side ran on Linux and the join is tested with stand-in proof bytes; the classifier proofs need
-  an Apple Silicon Mac with 12 GiB of free disk and about 24 GB of memory, which the contributor
-  did not have free.
+  SASH stays the default. It ran end to end **once**, on the contributor's Mac (Apple M4 Pro),
+  with the two frozen classifier quantizations of the owner's reference records: one FlashProve
+  proof and three fresh classifier proofs, joined, with the 16 changed bindings refused
+  ([evidence](../../research/evidence/flashprove-tinyllama-composed-run-2026-11-27.json)). Short of
+  the box: one run on one host, not accepted by the owner, and fresh classifier training on that
+  host did not give the pinned quantization.
 
 In one drill the provider did not end a host at the time it was asked to (`terminateAfter`), so
 the controller relies on its own deletion and on a second process on the same machine; with the
