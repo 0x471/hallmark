@@ -671,8 +671,8 @@ deletion ignores signals and survives any error for a bounded time, and the reco
 exactly the expected files. What it cannot answer is said above: both processes share one
 machine.
 
-**Spend, all at the contributor's cost:** USD 1.60 by the bounds of the four runs and about USD
-0.60 for the three drills, about USD 2.20 in all; the account's balance had fallen by USD 2.17 at the last reading. Before
+**Spend, all at the contributor's cost:** USD 1.59 by the bounds of the four runs and about USD
+0.59 for the three drills, about USD 2.19 in all; the account's balance had fallen by USD 2.17 at the last reading. Before
 the first paid run the controller was run once with a cap of one cent: it made its free steps
 and refused at the cap, with no host.
 
@@ -725,8 +725,8 @@ failed first, and both are in that record:
 
 This is one run on one host with retained quantizations, and the owner has not accepted it.
 
-**The SASH path on this branch.** The default path was then run for real at the same head, with
-the owner's published proofs: `INTEGRITY PASS: 23 SASH + 3 Circle classifier proofs`, and the
+**The SASH path on this branch.** The default path was then run for real at `3ad41ad` (the passing
+run's code; only documents and records differ), in 430 s, with the owner's published proofs: `INTEGRITY PASS: 23 SASH + 3 Circle classifier proofs`, and the
 result's model identity equals the reference composition's. `scripts/verify_reference.py` could
 not serve as that check: it stops with `reference verifier source identity mismatch` on `main`
 and on this branch alike, with equal identities on both (same record).
@@ -757,7 +757,7 @@ and on this branch alike, with equal identities on both (same record).
   (`tinyllama_plan.py`, `softmax_rows()`; `cp_verify` does not read `kFM`). The fit changes only
   the scales and the six lines that depend on them. They are placeholders that `cp_prove` has
   now judged on one request (above). Only the line `table` is sized for this model, by criteria read off upstream's kits and
-  not for speed; the times above are two like pods' on these lines, not a benchmark, and #187 may
+  not for speed; the times above are those of rented hosts of one GPU type on these lines, not a benchmark, and #187 may
   want smaller lines.
 - **One request.** The answer check covers SASH's one prompt in one window of T = 64. On it one value
   cell clamps (`v` in layer 2, 2,241 to 2,047, at position 32, the final EOS, after the checked
@@ -827,7 +827,8 @@ and on this branch alike, with equal identities on both (same record).
     run is not in the repository). A few tests
     were added since; `export_gguf.py`, `fit_eg.py`, `float_reference.py`, `answer_check.py`,
     `gate_float_bound.py`, `gpu_job.sh` and `prover_setup.cpp` still have none of their own and
-    are exercised only by the targets.
+    are exercised only by the targets; `pod_job.sh`, written since, has none either and has run
+    only under the capped controller.
   - A checkout whose path holds a space breaks the stand-in verifier of the first target and four
     tests (the interpreter line of a generated script).
   - `worst_case_cpu.py` does not itself repeat the refusals of `cp_commit`'s reader of the scale

@@ -14,8 +14,8 @@ models only, so Hallmark's dense TinyLlama response stays on
 [SASH](LLM-PROOF.md). [SASH and FlashProve compared](PROVER-COMPARISON.md) sets
 the two side by side. Proposed, not adopted:
 [decision 0094](decisions/0094-flashprove-tinyllama.md) adds small pinned
-patches so that the same FlashProve can take dense TinyLlama-1.1B. Four dense proofs
-of one request, SASH's, have been made with them on a rented H100, at the contributor's
+patches so that the same FlashProve can take dense TinyLlama-1.1B. Ten dense proofs
+of one request, SASH's, have been made with them on rented H100 hosts, at the contributor's
 own cost and with no owner-approved budget; only the patched verifier accepts them
 ([details](../research/probes/flashprove/tinyllama/README.md#the-first-dense-proof)).
 

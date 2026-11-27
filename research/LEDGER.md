@@ -3539,8 +3539,8 @@ changed their ids. A drill then killed the controller outright during the upload
 no host was listed four seconds later. What no fix answers: both processes run on the caller's
 machine.
 
-Spend: about USD 2.20 by the bounds of the four runs (USD 1.60) and the three drills (about USD
-0.60); the balance had fallen by USD 2.17 at the last reading.
+Spend: about USD 2.19 by the bounds of the four runs (USD 1.59) and the three drills (about USD
+0.59); the balance had fallen by USD 2.17 at the last reading.
 
 Not shown: a composed run; a build of the provers by the target; another GPU type or cloud; a
 machine that sleeps or loses its network during a run; soundness of the patched code; anything of
@@ -3566,12 +3566,24 @@ with 24 GB, between 14:15 and 14:35 UTC:
   its own run folder.
 - Attempt 3, after the fix: `INTEGRITY PASS: 1 FlashProve + 3 Circle classifier proofs` in 257 s.
 
-- Afterwards, the default SASH path at the same head with the owner's published proofs:
+- Afterwards, the default SASH path at `3ad41ad` (the same code; only documents and records differ) with the owner's published proofs:
   `INTEGRITY PASS: 23 SASH + 3 Circle classifier proofs`, model identity equal to the reference's.
   `scripts/verify_reference.py` stops with an identity mismatch on `main` and on the branch alike.
 
 Result: passed once. The tests' stand-in checks had hidden the second failure; only the real run
 found it.
+
+Correction to the entry above: it named about 24 GB of memory as a need of the composed run. That
+figure was not measured. The passing run's largest process took 8.6 GB and the SASH run's 10.3 GB.
+
+Gates at `3ad41ad` (the later commits change documents and records only), run locally with uv 0.9.18: every
+`make` step of the Python jobs of `.github/workflows/check.yml`, and `make docs`. On macOS arm64
+all passed on Python 3.12, 3.13 and 3.14 (`make check`: 2,432 passed, 103 skipped). On Linux
+x86_64 all passed but `make check` on 3.12.12 (2 failed, 2,418 passed) and 3.13.15 (1 failed,
+2,419 passed), in `tests/test_manifests.py::test_file_changed_during_read[abd]` and
+`tests/test_worker.py::test_stream_copy_retains_rejected_output[modified]`, which the branch does
+not touch and which fail on `main` on that host too (the entry of 2026-11-25); on 3.14.2 it
+passed (2,420 passed, 115 skipped). GitHub's CI has not run on this branch.
 
 Not shown: fresh classifier training on this host; a second run, host or request; anything about
 the commitment ID, still an enrolled value; acceptance by the owner; an independent rerun.

@@ -5,7 +5,7 @@ Date: 2026-11-21, revised 2026-11-25 and 2026-11-27. Status: **proposed**
 proofs on a rented H100, on the contributor's own account and at the contributor's cost
 (USD 1.61), with no owner-approved budget and no owner-set cap ("The first dense proof" below).
 In the night of 2026-11-26 to 27 (UTC) four more commitments and six more proofs followed under a
-controller with a cap that the contributor set (about USD 2.20 with three drills, again the
+controller with a cap that the contributor set (about USD 2.19 with three drills, again the
 contributor's cost; "The capped run, the enrollment and the composed join" below).
 
 **Context.** #186 asks how Hallmark's LLM case, dense TinyLlama-1.1B, can be proved with FlashProve,
@@ -73,9 +73,11 @@ criteria read off upstream's three example kits and `HfTableParams::table_derive
 records no rule for that line
 ([README](../../research/probes/flashprove/tinyllama/README.md#the-tinyllama-kit-and-the-answer-check)).
 
-Decision 0093 and `make verify-flashprove` stay as they are. The patched verifier is a second build
-with its own source digest, `33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1`.
-SASH stays Hallmark's LLM proof path, and its code is unchanged. A switch to FlashProve needs it to
+Decision 0093 and what `make verify-flashprove` does stay as they are (three functions of its
+script get optional arguments whose defaults are the old values). The patched verifier is a second
+build with its own source digest, `33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1`.
+SASH stays Hallmark's LLM proof path: its prover and verifier are unchanged, and five scripts of
+the composed demo take a backend argument that defaults to SASH. A switch to FlashProve needs it to
 match SASH first and gets its own decision (#186).
 
 **What a patched `YES` means.** Upstream's proof checks passed on a dense model's statement under
@@ -223,9 +225,10 @@ asks for now exist as code, and each stops short of the issue's box:
   SASH stays the default. It ran end to end **once**, on the contributor's Mac (Apple M4 Pro),
   with the two frozen classifier quantizations of the owner's reference records: one FlashProve
   proof and three fresh classifier proofs, joined, with the 16 changed bindings refused
-  ([evidence](../../research/evidence/flashprove-tinyllama-composed-run-2026-11-27.json)). Short of
-  the box: one run on one host, not accepted by the owner, and fresh classifier training on that
-  host did not give the pinned quantization.
+  ([evidence](../../research/evidence/flashprove-tinyllama-composed-run-2026-11-27.json)). The
+  default SASH path then passed on this branch too, with the owner's published proofs (same
+  record). Short of the box: one run on one host, not accepted by the owner, and fresh classifier
+  training on that host did not give the pinned quantization, on `main` either.
 
 In one drill the provider did not end a host at the time it was asked to (`terminateAfter`), so
 the controller relies on its own deletion and on a second process on the same machine; with the
@@ -244,14 +247,15 @@ controller answers them. Figures, the drills, the review and what was not run:
    `research/AUTHORITY.json` excludes ambiguous licences, so the owner decides; a no means refitting
    on another text. The three program patches do not depend on it; `scales.patch` pins the
    calibration set's SHA-256 and would change with the text.
-2. **GPU jobs for #187, only with owner approval and a ceiling.** The run above was the
-   contributor's, with no owner-approved budget. What it measured, for sizing a ceiling: one pod of 17
+2. **GPU jobs for #187, only with owner approval and a ceiling.** Every run above was the
+   contributor's, with no owner-approved budget. What they measured, for sizing a ceiling: a capped
+   run with one or two proofs held its host for 294 to 352 s and cost USD 0.36 to 0.43 at USD 4.39
+   an hour (the commitment 35 to 44 s, a proof 9 to 12 s); the first run's second pod, of 17
    minutes (upload of 2.2 GB, two commitments, four proofs, with about ten idle minutes of the
-   controller's own mistake) cost USD 1.27 at USD 4.39 an hour; the commitment takes about 35 s and
-   a proof under 10 s. That run's only limit was a watchdog on the controlling
-   host, set to terminate the pods after 2,700 s and 3,600 s. A controller with a cap in code now
-   exists (above); what it lacks for #187 is an owner's cap, an authorised provider and a build
-   step, and it has made at most two proofs on a host.
+   controller's own mistake), cost USD 1.27. The first run's only limit was a watchdog on the
+   controlling host, set to terminate the pods after 2,700 s and 3,600 s. A controller with a cap
+   in code now exists (above); what it lacks for #187 is an owner's cap, an authorised provider
+   and a build step, and it has made at most two proofs on a host.
 3. **More altered copies.** Eight altered copies of one dense proof are refused, seven of them by
    checks that read the proof, the key or the ID; upstream's tables
    have 99 altered sets for its MoE proofs, and no table of altered items exists for a dense one.
@@ -268,8 +272,10 @@ controller answers them. Figures, the drills, the review and what was not run:
    GPU, and only in the mode that hides nothing. `enrollment.json` now holds the ID that a caller
    of this path accepts, as a value taken from the first run; how a Hallmark verifier ties the ID
    to the public TinyLlama checkpoint is still undecided.
-7. **A composed run.** `make e2e-composed` with a FlashProve proof has not been run end to end
-   (above). It costs nothing and needs a Mac that the classifier demo supports.
+7. **A composed run with fresh classifier training, and a second one.** `make e2e-composed` with a
+   FlashProve proof has passed once, on one host, with the reference records' frozen quantizations
+   (above). Fresh training on that host does not give the pinned MLP quantization, on `main`
+   either, so no run with fresh training exists; nor one on another host or by the owner.
 8. **A build step for the provers.** The capped target takes built programs. Decision 0093's
    worker builds upstream's provers on a rented CPU host in a pinned image; the same step with
    the four patches applied is not written.

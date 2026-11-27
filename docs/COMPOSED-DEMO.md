@@ -122,7 +122,7 @@ three classifier proofs bind that path's model identity instead of SASH's; the h
 16 changed bindings are the same. Only Hallmark's patched `cp_verify` accepts such a proof, and
 the commitment ID is an enrolled value that no CPU program recomputes. It has run end to end **once**, on
 the contributor's Mac with the two frozen classifier quantizations of the reference records
-(`CLASSIFIER_RUN`); fresh training on that Mac did not give the pinned quantization
+(`CLASSIFIER_RUN`); fresh training on that Mac did not give the pinned quantization, on `main` either
 ([details](../research/probes/flashprove/tinyllama/README.md#in-the-composed-demo)).
 
 ## Read the outcome
