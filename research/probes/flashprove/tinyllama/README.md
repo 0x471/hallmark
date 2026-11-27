@@ -4,8 +4,8 @@ Status: **proposed** ([#186](https://github.com/AbdelStark/hallmark/issues/186),
 option 3; decision draft [0094](../../../../docs/decisions/0094-flashprove-tinyllama.md)). One dense
 commitment and four proofs of SASH's request have been made with these patches on a rented H100, on
 the contributor's own account and at the contributor's cost, with no owner-approved budget
-("[The first dense proof](#the-first-dense-proof)"). On 2026-11-27 three more commitments and
-five more proofs were made under a controller with a spend cap that the contributor set
+("[The first dense proof](#the-first-dense-proof)"). In the night of 2026-11-26 to 27 (UTC) four more commitments and
+six more proofs were made under a controller with a spend cap that the contributor set
 ("[The capped run](#the-capped-run)"), and the composed demo can take such a proof in code, though
 no composed run has been made ("[In the composed demo](#in-the-composed-demo)"). Nothing here
 changes `make verify-flashprove` or decision 0093's pins.
@@ -632,31 +632,47 @@ own files, the host's own `cp_verify` must have accepted every proof, and
 `scripts/flashprove_tinyllama_proof.py`'s checks run on the returned files (patched `YES`,
 unpatched `NO: policy-tables`, eight altered copies each refused for its own reason).
 
-**Three runs of 2026-11-27**, each on its own host (RunPod, SECURE cloud, USD 4.39 an hour), each
-passed on its one attempt ([evidence](../../../evidence/flashprove-tinyllama-capped-runs-2026-11-27.json)):
+**Four runs in the night of 2026-11-26 to 27 (UTC)**, each on its own host (RunPod, SECURE cloud,
+USD 4.39 an hour), each passed on its one attempt
+([evidence](../../../evidence/flashprove-tinyllama-capped-runs-2026-11-27.json)). The first three
+were calls of the script as it then stood, two of them with `--proofs 2`; the fourth is
+`make e2e-flashprove-tinyllama` itself, with the controller as committed:
 
 | Controller at | Proofs | Host | `cp_commit` | `cp_prove` | First proof, bytes | Host, s | Bound, USD |
 |---|---:|---|---:|---:|---:|---:|---:|
-| `3942704` | 1 | H100 SXM, 29 vCPU, 287 GB | 35.34 s | 8.80 s | 13,245,476 | 294.2 | 0.3588 |
-| `9dc599a` | 2 | H100 SXM, 26 vCPU, 251 GB | 38.85 s | 8.83 s, 11.89 s | 13,242,036 | 352.4 | 0.4297 |
-| `3dd1b2f` | 2 | H100 SXM, 26 vCPU, 251 GB | 43.76 s | 8.70 s, 10.17 s | 13,251,172 | 341.1 | 0.4159 |
+| `092bd62` | 1 | H100 SXM, 29 vCPU, 287 GB | 35.34 s | 8.80 s | 13,245,476 | 294.2 | 0.3588 |
+| `9652470` | 2 | H100 SXM, 26 vCPU, 251 GB | 38.85 s | 8.83 s, 11.89 s | 13,242,036 | 352.4 | 0.4297 |
+| `cb8eed1` | 2 | H100 SXM, 26 vCPU, 251 GB | 43.76 s | 8.70 s, 10.17 s | 13,251,172 | 341.1 | 0.4159 |
+| `3299bfd`, by `make` | 1 | H100 SXM, 26 vCPU, 251 GB | 36.44 s | 9.28 s | 13,249,532 | 317.6 | 0.3874 |
 
 In each, `cp_commit` printed the enrolled commitment ID `5ffd1aa3…06bd`, the host's `cp_verify`
 answered `YES` to every proof, and the caller's check of the first proof passed on Linux x86-64
-(265 to 278 s): patched `YES`, unpatched `NO: policy-tables`, the eight refusals of the table
+(265 to 293 s): patched `YES`, unpatched `NO: policy-tables`, the eight refusals of the table
 above. A second proof of a run is checked on the host alone and does not come back. The first
 run's files also passed `make verify-flashprove-tinyllama-proof` on macOS arm64 (155 s). The
 bound is the hourly price times this process's clock from before the host is asked for until it
-is seen deleted; the third run is that of the controller as it now stands. A whole run took
-1,074 to 1,194 s, most of it the two verifier builds and the local check.
+is seen deleted. A whole run took 1,074 to 1,194 s, most of it the two verifier builds and the
+local check.
 
-**Two drills on real hosts**, with nothing run on them. The second process alone, with a deadline
-45 s after the host was asked for, had deleted it 47 s after. A host that the provider was asked
-to end after two minutes (`terminateAfter`) was still listed 332 s after it was made, and the
-drill deleted it: the provider's own limit did not act.
+**Three drills on real hosts.** With the first version of the second process: alone, with a
+deadline 45 s after the host was asked for, it had deleted the host 47 s after. A host that the
+provider was asked to end after two minutes (`terminateAfter`) was still listed 332 s after it
+was made, and the drill deleted it: in that one try the provider's own limit did not act. With
+the second process as committed: the controller was killed outright (SIGKILL) during the upload
+of a real run, and no host was listed four seconds later.
 
-**Spend of 2026-11-27, all at the contributor's cost:** USD 1.20 by the bounds of the three runs
-and USD 0.46 for the two drills, USD 1.67 in all; the account's balance fell by USD 1.66. Before
+**An AI review of the first three runs' controller** (not an independent reviewer) found no way
+to a false pass, and found that a host could be left billed: after a request for a host that
+failed on the caller's side, after an error of an unexpected kind while deleting, or after a
+second interrupt during the deletion; that the worst case did not bound the deletion; and that
+the host's record of its inputs was accepted empty. The controller of the fourth run answers
+these: the second process starts before the host is asked for and deletes by the run's name, the
+deletion ignores signals and survives any error for a bounded time, and the records must name
+exactly the expected files. What it cannot answer is said above: both processes share one
+machine.
+
+**Spend, all at the contributor's cost:** USD 1.60 by the bounds of the four runs and about USD
+0.60 for the three drills, about USD 2.20 in all; the account's balance had fallen by USD 2.17 at the last reading. Before
 the first paid run the controller was run once with a cap of one cent: it made its free steps
 and refused at the cap, with no host.
 
@@ -664,7 +680,7 @@ What these runs do not show: a build of the provers by the target; another GPU t
 provider's other cloud (the script names two types, one was run); a host that hangs for the full
 time limit; anything about hiding (public weights, public seed) or speed (the times are those of
 single calls on rented hosts, on lines not sized for this model). A commitment ID that is equal
-on five hosts, six times, shows that `cp_commit` repeats itself, not that the ID is TinyLlama's.
+on six hosts, seven times, shows that `cp_commit` repeats itself, not that the ID is TinyLlama's.
 
 ## In the composed demo
 
@@ -696,8 +712,8 @@ on such a Mac. It costs nothing.
 
 ## Not checked
 
-- **The prover patch has run on one request, one kit and two pods of one type.** `cp_commit` and `cp_prove`
-  made a commitment and four proofs at NE 0 (above). Another prompt, window length or model can
+- **The prover patch has run on one request, one kit and hosts of one type.** `cp_commit` and `cp_prove`
+  made a commitment and ten proofs at NE 0, on six hosts (above). Another prompt, window length or model can
   reach code that this run did not: the pinned repository holds no NE 0 kit, and nothing here
   tests the patched CUDA code beyond that run.
 - **The patched tree's own documents still state upstream's rules.** No patch touches
@@ -749,13 +765,13 @@ on such a Mac. It costs nothing.
   version, and only for macOS arm64 and Linux x86_64. They are installed from PyPI and, for torch on
   Linux, from PyTorch's CPU index.
 - **The dense proofs' checks are few.** The 108 equal calls of `make verify-flashprove-tinyllama`
-  are all on upstream's MoE proofs. The verifier's NE 0 branches have checked four proofs of one
+  are all on upstream's MoE proofs. The verifier's NE 0 branches have checked ten proofs of one
   request and refused eight altered copies of one of them (above). That is far from upstream's 99
   altered sets, and no table of altered items has been made for a dense proof.
 - **Only the patched verifier answers `YES`.** Upstream's `cp_verify` refuses the same files
   (`NO: policy-tables`), and Lean covers neither form. Whoever relies on a dense `YES` relies on
   Hallmark's patch.
-- **The worker as it now stands ran on a GPU only on 2026-11-27**, three times, under the capped
+- **The worker as it now stands ran on a GPU only in the night of 2026-11-26 to 27**, four times, under the capped
   controller, with `expected.sha256` given and under the controller's time limits
   ("[The capped run](#the-capped-run)"). Before that: the first run's pods ran `gpu_job.sh` as at `bddda05`
   (pod 1 ran the working-tree file that was committed as `bddda05` one minute after that pod

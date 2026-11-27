@@ -3,11 +3,11 @@
   "recorded_at": "2026-11-27",
   "decision": "docs/decisions/0094-flashprove-tinyllama.md",
   "decision_status": "proposed",
-  "purpose": "Three runs of make e2e-flashprove-tinyllama's controller on rented hosts under a cap that the contributor set, two drills of its safety nets, the request's text check, and the FlashProve side of the composed demo. No composed run was made. No patch and no kit file is changed",
+  "purpose": "Four runs of make e2e-flashprove-tinyllama's controller on rented hosts under a cap that the contributor set (the fourth through the target as committed), three drills of its safety nets, an AI review and its fixes, the request's text check, and the FlashProve side of the composed demo. No composed run was made. No patch and no kit file is changed",
   "made_by": "the contributor's AI-assisted session, on a Linux x86_64 host of the contributor's and on the contributor's laptop (macOS arm64); no independent reviewer",
   "authority": {
     "owner_approved": false,
-    "statement": "The contributor, to whom issue #186 is assigned, paid for these runs on the contributor's own RunPod account and set the cap. No owner approved a budget, a cap or the provider: #184 says that paid GPU runs need an owner-approved budget, #186 puts unbudgeted GPU runs out of scope, and research/AUTHORITY.json lists Modal, Vast.ai and Hugging Face Jobs, not RunPod. No authority record was made or changed. #186's box 'GPU spend recorded against an owner-approved cap' is not met by a contributor's cap",
+    "statement": "The contributor, to whom issue #186 is assigned, paid for these runs on the contributor's own RunPod account and set the cap. No owner approved a budget, a cap or the provider: #184 says that paid GPU runs need an owner-approved budget, #186 puts unbudgeted GPU runs out of scope, and research/AUTHORITY.json lists Modal, Vast.ai and Hugging Face Jobs, not RunPod; docs/OPERATIONS.md says to stop before a paid job for which no authority exists. No authority record was made or changed. #186's box 'GPU spend recorded against an owner-approved cap' is not met by a contributor's cap",
     "cap_usd": "3.00 for each run, passed by the make target"
   },
   "programs": {
@@ -20,7 +20,8 @@
   },
   "runs": {
     "run_1": {
-      "controller_commit": "3942704",
+      "controller_commit": "092bd62",
+      "started_by": "a call of the script as it then stood",
       "protocol": {
         "automatic_retries": 0,
         "balance_check_usd": "left out of this record",
@@ -135,7 +136,8 @@
       "enrollment_json_sha256": "0f89c6e158c119a08bc846d3c2583e00fbef0a1c717417d251070abafb6294a1"
     },
     "run_2": {
-      "controller_commit": "9dc599a",
+      "controller_commit": "9652470",
+      "started_by": "a call of the script as it then stood, with --proofs 2",
       "protocol": {
         "automatic_retries": 0,
         "balance_check_usd": "left out of this record",
@@ -256,7 +258,8 @@
       "enrollment_json_sha256": "0f89c6e158c119a08bc846d3c2583e00fbef0a1c717417d251070abafb6294a1"
     },
     "run_3": {
-      "controller_commit": "3dd1b2f",
+      "controller_commit": "cb8eed1",
+      "started_by": "a call of the script as it then stood, with --proofs 2",
       "protocol": {
         "automatic_retries": 0,
         "balance_check_usd": "left out of this record",
@@ -375,10 +378,133 @@
       "seconds_in_all": 1128.3,
       "result_json_sha256": "1fe74cc01940fabff13eecb4b508bf06285bb9f857a3f47026ec802a3108287b",
       "enrollment_json_sha256": "0f89c6e158c119a08bc846d3c2583e00fbef0a1c717417d251070abafb6294a1"
+    },
+    "run_4": {
+      "controller_commit": "3299bfd",
+      "started_by": "make e2e-flashprove-tinyllama, as committed",
+      "protocol": {
+        "automatic_retries": 0,
+        "balances_cover_the_worst_case": true,
+        "cap_set_by": "the caller of this run",
+        "cloud": "SECURE",
+        "cost_cap_usd": "3.00",
+        "gpu": "NVIDIA H100 80GB HBM3",
+        "hiding_claim": false,
+        "owner_approved": false,
+        "planned_worst_case_note": "if the host can be deleted within pod.end_seconds",
+        "planned_worst_case_usd": "3.00",
+        "pod": {
+          "container_disk_gb": 40,
+          "end_seconds": 60,
+          "gpus": [
+            "NVIDIA H100 80GB HBM3",
+            "NVIDIA H200"
+          ],
+          "gpus_note": "the two sm_90 types asked for by name; only the first, in the provider's SECURE cloud, has been run",
+          "grace": 300,
+          "guard_seconds": 1800,
+          "image": "ubuntu:24.04",
+          "image_note": "by tag, not by digest: the host is not trusted, and what it returns is judged again by the caller's own verifier",
+          "late_seconds": 45,
+          "min_memory_gb": 60,
+          "min_vcpu": 8,
+          "provider": "RunPod (api.runpod.io/graphql); not among the compute providers of research/AUTHORITY.json",
+          "schema_id": "hallmark.flashprove-tinyllama-pod/1",
+          "seconds": {
+            "boot": 420,
+            "fetch": 180,
+            "host": 240,
+            "libraries": 240,
+            "prove": 420,
+            "upload": 900
+          },
+          "seconds_note": "seconds: one limit for each paid step, all under one deadline (their sum). end_seconds: the controller tries to delete the host for this long, and this is counted in the planned worst case; a deletion that fails costs more. late_seconds: after a failed request for a host the controller looks again this much later. guard_seconds: the second process keeps trying this long. grace: after the deadline the provider is asked to end the host itself (terminateAfter); in a drill it did not within 3.5 minutes of the time asked, so the run does not rely on it"
+        },
+        "price_usd_per_hour": "4.39",
+        "proofs": 1,
+        "public_weights": true,
+        "qualified_backend": false,
+        "schema_id": "hallmark.flashprove-tinyllama-gpu/2",
+        "seconds_limit": 2400,
+        "source_files": {
+          "research/probes/flashprove/tinyllama/gpu_job.sh": "b52aae4effb3b6c81d1fc8d19e6c2e7fb30dbce75a1e9140a14e4f2d1e401559",
+          "research/probes/flashprove/tinyllama/pod_job.sh": "b1ca2cdc46e7891a96cbffe2f7410633e9c1ff30ea54d70f938c08733a28bb03",
+          "scripts/run_flashprove_tinyllama_gpu.py": "d8792a49ca8367c2bf1723c5960efbd0cf33c9d62265054f1c6c49e5763027d6"
+        }
+      },
+      "spend": {
+        "bound_usd": "0.3874",
+        "cap_usd": "3.00",
+        "host_deleted": true,
+        "host_seconds": 317.6,
+        "price_usd_per_hour": "4.39",
+        "within_cap": true
+      },
+      "host": {
+        "gpu": "H100 SXM",
+        "gpuCount": 1,
+        "memoryInGb": 251,
+        "vcpuCount": 26
+      },
+      "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+      "cp_commit_seconds": 36.44,
+      "cp_prove_seconds": [
+        9.28
+      ],
+      "worker_verdicts": [
+        "YES"
+      ],
+      "first_proof": {
+        "bytes": 13249532,
+        "sha256": "22df4eb1aa2f47944f559b98e69f5a870affa84e9dc84ebfb79f39a104f38781"
+      },
+      "local_check": {
+        "host": "Linux x86_64",
+        "seconds": 293.0,
+        "patched_verdict": "YES",
+        "unpatched_verdict": "NO: policy-tables",
+        "altered_copies": [
+          [
+            "proof-middle-bit",
+            "NO: proof-refused"
+          ],
+          [
+            "proof-last-bit",
+            "NO: proof-refused"
+          ],
+          [
+            "token-file",
+            "NO: statement-range"
+          ],
+          [
+            "request-first-token",
+            "NO: proof-refused"
+          ],
+          [
+            "request-answer-token",
+            "NO: proof-refused"
+          ],
+          [
+            "key-bit",
+            "NO: key-refused"
+          ],
+          [
+            "leaf-bit",
+            "NO: entry-refused"
+          ],
+          [
+            "commitment-id",
+            "NO: model-statement"
+          ]
+        ]
+      },
+      "seconds_in_all": 1126.9,
+      "result_json_sha256": "beeaacbb8c9aa4d90fb70d7e2ad7266f4c4e720882239f8879ea5a37c4f3672d",
+      "enrollment_json_sha256": "0f89c6e158c119a08bc846d3c2583e00fbef0a1c717417d251070abafb6294a1"
     }
   },
   "final_run": {
-    "which": "run_3: its controller, gpu_job.sh and pod_job.sh are the files of this commit",
+    "which": "run_4: its controller, gpu_job.sh and pod_job.sh are the files of this commit",
     "result_json_as_written": {
       "altered_copies": [
         {
@@ -436,14 +562,14 @@
         "patched": {
           "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
           "recipe": "upstream verifier/build.sh",
-          "seconds": 217.69416043022648,
+          "seconds": 211.3323137620464,
           "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
           "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
         },
         "upstream": {
           "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
           "recipe": "upstream verifier/build.sh",
-          "seconds": 207.95218655792996,
+          "seconds": 214.01568297110498,
           "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
           "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
         }
@@ -454,7 +580,7 @@
           "result: outcome=verified commitment_id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd range=24:32 checked_tokens=8 end_token=2 claim=exact-match policy=exact next_token=none C=256 theta=256 cap=0 s=17 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=63 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
           "check_proof: verified: exact match: every checked token (tokens 25 to 32 of the request) is the model's greedy choice; the last checked token is the end token 2; commitment: 63 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 69 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
         ],
-        "seconds": 43.09530791500583
+        "seconds": 48.700948101934046
       },
       "checked_tokens": [
         1576,
@@ -483,8 +609,8 @@
           "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
         },
         "example.proof": {
-          "bytes": 13251172,
-          "sha256": "2aa549e1009a8f603af2c9f5ca17d4ec0cedb1065a3662347758768067797dd1"
+          "bytes": 13249532,
+          "sha256": "22df4eb1aa2f47944f559b98e69f5a870affa84e9dc84ebfb79f39a104f38781"
         },
         "example.req": {
           "bytes": 264,
@@ -515,7 +641,8 @@
       "passed": true,
       "patched_verdict": "YES",
       "proof_made_here": false,
-      "proofs": 2,
+      "proofs_checked_here": 1,
+      "proofs_made_on_the_host": 1,
       "qualified_backend": false,
       "range": "24:32",
       "result_line": {
@@ -541,22 +668,21 @@
         "theta": "256",
         "work": "32"
       },
-      "schema_id": "hallmark.flashprove-tinyllama-gpu-result/1",
-      "seconds": 264.611420199275,
-      "seconds_in_all": 1128.3229193170555,
+      "schema_id": "hallmark.flashprove-tinyllama-gpu-result/2",
+      "seconds": 292.9924033698626,
+      "seconds_in_all": 1126.8793828273192,
       "spend": {
-        "balance_fall_at_end_usd": "0.1047",
+        "balance_fall_at_end_usd": "0.1331",
         "balance_fall_note": "read once at the end; the provider charges late and in steps",
-        "bound_usd": "0.4159",
+        "bound_usd": "0.3874",
         "cap_usd": "3.00",
         "host_deleted": true,
-        "host_seconds": 341.1,
+        "host_seconds": 317.6,
         "price_usd_per_hour": "4.39",
         "within_cap": true
       },
       "unpatched_verdict": "NO: policy-tables",
       "worker_verdicts": [
-        "YES",
         "YES"
       ]
     },
@@ -642,30 +768,59 @@
       },
       "schema_id": "hallmark.flashprove-tinyllama-run-enrollment/1",
       "source": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c"
-    }
+    },
+    "cuda_packages_on_the_host": [
+      {
+        "name": "cuda-toolkit",
+        "version": "13.2.2"
+      },
+      {
+        "name": "nvidia-cublas",
+        "version": "13.4.1.3"
+      },
+      {
+        "name": "nvidia-cuda-nvrtc",
+        "version": "13.2.86"
+      },
+      {
+        "name": "nvidia-cuda-runtime",
+        "version": "13.2.86"
+      }
+    ]
   },
   "returned": "from each host: public/ of the first proof (the eight files), cp_commit's log, time and worst-case table, each proof's log and time, each cp_verify log, the host's records. A second proof of a run is checked by the host's cp_verify alone and is not returned",
   "drills": {
-    "when": "2026-11-27, between the first and the second run; nothing ran on these hosts",
-    "second_process": {
+    "second_process_first_version": {
+      "when": "between the first and the second run; nothing ran on this host",
       "what": "a host was asked for, the second process was started with a deadline 45 s later and the controller did nothing more",
       "host_gone_after_seconds": 47.2,
-      "bound_usd": "0.0582"
+      "bound_usd": "0.0582",
+      "bound_note": "for the 47.7 s until the drill had seen the host gone"
+    },
+    "controller_killed": {
+      "when": "between the third and the fourth run, with the controller and second process of the fourth",
+      "what": "a real run through the make target; during the upload the controller process was killed with SIGKILL",
+      "no_host_listed_after_seconds": 4,
+      "second_process_log": "ended=True",
+      "host_lived_seconds": "about 110",
+      "bound_usd": "about 0.13",
+      "note": "a first try killed the wrong process (the launcher above the controller): the run went on and nothing was deleted, as it should be"
     },
     "provider_time_limit": {
+      "when": "between the first and the second run; nothing ran on this host",
       "what": "a host was asked for with terminateAfter two minutes later, with no second process",
       "still_listed_after_seconds": 332.3,
       "ended_by": "the drill itself",
-      "finding": "the provider did not end the host at the time asked; the controller does not rely on it",
+      "finding": "in this one try the provider did not end the host within 3.5 minutes of the time asked; the controller does not rely on it",
       "bound_usd": "0.4052"
     }
   },
   "spend_in_all": {
-    "runs_bound_usd": "1.2044",
-    "drills_bound_usd": "0.4634",
-    "bound_usd": "1.6678",
-    "balance_fall_usd": "1.6625",
-    "balance_note": "the fall of the account's balance from before the first run to after the third; the balances themselves are left out. Neither figure is an invoice",
+    "runs_bound_usd": "1.5918",
+    "drills_bound_usd": "about 0.5934",
+    "bound_usd": "about 2.1852",
+    "balance_fall_usd": "2.1723 at the last reading, some minutes after the fourth run",
+    "balance_note": "the fall of the account's balance since before the first run; the balances themselves are left out, and the provider charges late. Neither figure is an invoice",
     "dry_run": "before the first run, with a cap of USD 0.01: its free steps passed and it refused at the cap; no host"
   },
   "request_text": {
@@ -825,6 +980,30 @@
     "end_to_end": "not run",
     "why": "the classifier proofs run only on an Apple Silicon Mac (scripts/run_circle_e2e.py refuses other hosts) with 12 GiB of free disk, and the reference classifier run sampled up to 23.45 GB of memory; the contributor's Mac had under 7 GiB of free disk and has 24 GB of memory. #186's box for the composed demo is open"
   },
+  "review": {
+    "by": "a Claude subagent with no part in the work, on the branch after the third run; not an independent human reviewer",
+    "verdict": "no path to a false pass; several to a host left billed; records that said more than the code held",
+    "found_and_changed": [
+      "a request for a host that fails on the caller's side could leave a host with no deletion and no second process: the second process now starts before the request and deletes by the run's name, and the controller looks again later",
+      "the failed-request handler deleted every host of the account: only this run's name now",
+      "the deletion stopped at an error of an unexpected kind or at a second interrupt: it now survives any error for end_seconds and holds signals off",
+      "the second process gave up after five tries and waited for the deadline even when the controller had failed: it now acts once the controller is gone and keeps trying for guard_seconds",
+      "the worst case did not bound the deletion: the controller now gives up after end_seconds, and the figure is called planned",
+      "an empty or oddly named record of the host's inputs passed, and a host verdict other than YES could stand beside a pass: exact names and YES for every proof are now required",
+      "ssh read the caller's configuration, and the key stayed in the environment of child processes: neither now",
+      "the tests used the account's balance as a sample value, and protocol.json held the stated balance: neither now; the unpushed commits were rewritten, which changed their ids",
+      "the composed target switched backend on a variable that the proof target also reads: LLM_BACKEND=flashprove now",
+      "the FlashProve verifier identity left out the fetch code, the package modules and the lock file; the enrollment was not checked against the kit at run time; pod_job.sh passed with one of three libraries listed",
+      "wording: 'in every case', 'worst case', 'ran three times' of the make target, 'a drill showed'"
+    ],
+    "found_and_left": [
+      "both processes run on the caller's machine: a machine that sleeps or loses its network deletes nothing; no timer runs on the host itself",
+      "the provider may list a host later than the controller looks after a failed request (one later look is made; the second process covers the rest while it runs)",
+      "cp_verify runs here without the sandbox that SASH's verifier has",
+      "no test drives the RunPod calls against the provider, the SSH class against a host, or the composed flash branch past the LLM check; a signed enrollment is untested with this backend",
+      "container disk may be billed beyond the hourly price: not looked into"
+    ]
+  },
   "findings": [
     "the provider's terminateAfter did not end a host (drills)",
     "the controller's first two versions wrote a fall of the balance that was read too early (USD 0 after run_1, USD 0.1246 after run_2, against bounds of USD 0.3588 and 0.4297): the provider charges late and in steps. The reading is now taken once and named as unreliable; those two fields are left out of this record",
@@ -835,7 +1014,8 @@
     "a build of the provers by the target",
     "the second GPU type that pod.json names, and the provider's other cloud",
     "a host that hangs until the deadline, other than in the drill of the second process",
-    "the controller from macOS"
+    "the controller from macOS",
+    "a controlling machine that sleeps or loses its network during a run"
   ],
   "hiding_claim": false,
   "qualified_backend": false

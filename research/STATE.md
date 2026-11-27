@@ -1,6 +1,6 @@
 # Research state
 
-Updated: 2026-11-25. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
+Updated: 2026-11-27. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
 
 ## TinyLlama on FlashProve (dense-model patches) — proposed; dense proofs of one request, at the contributor's cost and under no owner's cap
 
@@ -38,10 +38,11 @@ contributor uploaded the first proof's eight public files as a release of the co
 a release of this repository; no authority record covers the upload), and the caller's check passed
 from the download on Linux and macOS
 ([evidence](evidence/flashprove-tinyllama-proof-files-2026-11-26.json),
-[commands](probes/flashprove/tinyllama/README.md#to-repeat-the-callers-check)). On 2026-11-27
-`make e2e-flashprove-tinyllama` ran three times: one rented H100 each time, a commitment with the
+[commands](probes/flashprove/tinyllama/README.md#to-repeat-the-callers-check)). In the night of
+2026-11-26 to 27 (UTC) the controller of `make e2e-flashprove-tinyllama` ran four times, the last
+time through the target as committed: one rented H100 each time, a commitment with the
 enrolled ID, one or two proofs, the host deleted, the caller's check passed here; USD 0.36 to 0.43 a
-run against a cap of USD 3.00 that the contributor set, USD 1.67 with two drills, again at the
+run against a cap of USD 3.00 that the contributor set, about USD 2.20 with three drills, again at the
 contributor's cost and with no owner-approved budget or provider. Before paying, the controller
 writes the caller's enrollment and requires that the pinned tokenizer and chat template give the
 request's ids. `make e2e-composed` can take such a proof in place of SASH's and binds this path's

@@ -4,9 +4,9 @@ Date: 2026-11-21, revised 2026-11-25 and 2026-11-27. Status: **proposed**
 ([#186](https://github.com/AbdelStark/hallmark/issues/186), option 3). On 2026-11-24 and 25 (UTC) the contributor made a dense commitment and four
 proofs on a rented H100, on the contributor's own account and at the contributor's cost
 (USD 1.61), with no owner-approved budget and no owner-set cap ("The first dense proof" below).
-On 2026-11-27 three more commitments and five more proofs followed under a controller with a cap
-that the contributor set (USD 1.67 with two drills, again the contributor's cost; "The capped run,
-the enrollment and the composed join" below).
+In the night of 2026-11-26 to 27 (UTC) four more commitments and six more proofs followed under a
+controller with a cap that the contributor set (about USD 2.20 with three drills, again the
+contributor's cost; "The capped run, the enrollment and the composed join" below).
 
 **Context.** #186 asks how Hallmark's LLM case, dense TinyLlama-1.1B, can be proved with FlashProve,
 which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama 4 Maverick's widths. #187 asks for
@@ -197,15 +197,16 @@ RunPod: this run had no budget, and no authority record was made or changed for 
 [README](../../research/probes/flashprove/tinyllama/README.md#the-first-dense-proof). The times are
 two like pods' on lines of which only `table` is sized for this model: not a benchmark.
 
-**The capped run, the enrollment and the composed join (2026-11-27).** Three things that #186
+**The capped run, the enrollment and the composed join (2026-11-26 and 27).** Three things that #186
 asks for now exist as code, and each stops short of the issue's box:
 
 - *A target that proves and verifies.* `make e2e-flashprove-tinyllama` rents one sm_90 host,
   runs `gpu_job.sh` there under time limits, deletes the host and runs the caller's check here.
-  The worst case of the charge must fit a cap before a host is made. It ran three times, each on
-  its one attempt, for USD 0.36, 0.43 and 0.42 against a cap of USD 3.00; each printed the
-  enrolled commitment ID, and each first proof passed the caller's check with its eight altered
-  copies. `make verify-flashprove-tinyllama-proof` is the free local check. Short of the box: the
+  The planned worst case of the charge must fit a cap before a host is asked for. Its controller
+  ran four times, each on its one attempt, for USD 0.36, 0.43, 0.42 and 0.39 against a cap of
+  USD 3.00; the first three were calls of the script as it then stood, the fourth the target as
+  committed. Each printed the enrolled commitment ID, and each first proof passed the caller's
+  check with its eight altered copies. `make verify-flashprove-tinyllama-proof` is the free local check. Short of the box: the
   cap is the contributor's and not an owner's, the provider (RunPod) is not one of
   `research/AUTHORITY.json`'s, and the target takes the provers built beforehand.
 - *The caller checks of the SASH path.* `enrollment.json` is written into each run before
@@ -224,9 +225,12 @@ asks for now exist as code, and each stops short of the issue's box:
   an Apple Silicon Mac with 12 GiB of free disk and about 24 GB of memory, which the contributor
   did not have free.
 
-A drill showed that the provider does not end a host at the time it is asked to
-(`terminateAfter`), so the controller relies on its own deletion and on a second process, which a
-second drill showed to work. Figures, the drills and what was not run:
+In one drill the provider did not end a host at the time it was asked to (`terminateAfter`), so
+the controller relies on its own deletion and on a second process on the same machine; with the
+controller killed outright in a real run, that process had the host deleted within seconds. A
+machine that sleeps or loses its network deletes nothing. An AI review between the third and the
+fourth run found ways to leave a host billed and none to a false pass; the fourth run's
+controller answers them. Figures, the drills, the review and what was not run:
 [evidence](../../research/evidence/flashprove-tinyllama-capped-runs-2026-11-27.json),
 [README](../../research/probes/flashprove/tinyllama/README.md#the-capped-run).
 

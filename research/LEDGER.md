@@ -3482,28 +3482,31 @@ archive. The fork's owner can remove the release; the recorded SHA-256 then stil
 
 ## 2026-11-27: a capped run of dense TinyLlama, its enrollment, and the composed join in code (proposed; contributor's own runs)
 
+The paid runs were made between 2026-11-26 23:33 and 2026-11-27 02:14 UTC.
+
 Question: can the rest of #186 be built on the first dense proof: a target that proves and verifies
 under a spend cap, the caller checks that the SASH path has, and the composed demo with a
-FlashProve proof? Pass criteria, written before the first paid run: the controller refuses before
-any host when the worst case does not fit the cap; a paid run ends with its host deleted, the
-enrolled commitment ID printed again, and the caller's check passed here; the request's text gives
-its ids under the pinned tokenizer and chat template; the join refuses classifier proofs made for
-the other proof system.
+FlashProve proof? Pass criteria: the controller refuses before any host when the planned worst case
+does not fit the cap; a paid run ends with its host deleted, the enrolled commitment ID printed
+again, and the caller's check passed here; the request's text gives its ids under the pinned
+tokenizer and chat template; the join refuses classifier proofs made for the other proof system.
 
 Authority: the contributor, to whom #186 is assigned, paid and set the cap (USD 3.00 a run). No
 owner approved a budget, a cap or the provider, RunPod, which `research/AUTHORITY.json` does not
-list. #184 and #186's out-of-scope line stand as before.
+list. `docs/OPERATIONS.md` says to stop before a paid job for which no authority exists; #184 and
+#186's out-of-scope line stand as before.
 
 Done ([evidence](evidence/flashprove-tinyllama-capped-runs-2026-11-27.json)):
 
 - `scripts/run_flashprove_tinyllama_gpu.py` (`make e2e-flashprove-tinyllama`): enrollment, text
-  check and both verifier builds before paying; the worst case (price times every limit and the
-  deletion time) against the cap and two balances; one host with a deadline; deletion by the
-  controller and by a second process. With a cap of one cent it refused with no host. Then three
-  paid runs, each passed on its one attempt: hosts of 294, 352 and 341 s, bounds of USD 0.3588,
-  0.4297 and 0.4159, one, two and two proofs, `cp_commit` in 35 to 44 s and `cp_prove` in 8.7 to
-  11.9 s, the same commitment ID `5ffd1aa3…06bd` each time, and each first proof accepted here
-  with its eight altered copies refused. The third run is the controller's as committed.
+  check and both verifier builds before paying; the planned worst case against the cap and two
+  balances; one host with a deadline; deletion by the controller and by a second process. With a
+  cap of one cent it refused with no host. Then four paid runs, each passed on its one attempt:
+  hosts of 294, 352, 341 and 318 s, bounds of USD 0.3588, 0.4297, 0.4159 and 0.3874, one, two, two
+  and one proofs, `cp_commit` in 35 to 44 s and `cp_prove` in 8.7 to 11.9 s, the same commitment
+  ID `5ffd1aa3…06bd` each time, and each first proof accepted here with its eight altered copies
+  refused. The first three were calls of the script as it then stood; the fourth is the target as
+  committed.
 - `scripts/flashprove_tinyllama_request.py`: passed on Linux and macOS (25 prompt ids, the response,
   end token 2).
 - `scripts/flashprove_composed.py` and `--llm-backend flashprove` of the composed controller: the
@@ -3514,15 +3517,31 @@ Result: the controller and the caller checks pass. **The composed run was not ma
 classifier proofs need an Apple Silicon Mac with 12 GiB of free disk and about 24 GB of memory,
 which was not at hand. The cap is not an owner's. So no box of #186 is closed by this entry alone.
 
-Findings: the provider's `terminateAfter` left a host running 332 s after it was made, with the
-end asked for at 120 s (a drill; USD 0.41), so the controller does not rely on it; the second
-process alone deleted a host 47 s after it was made, with its deadline at 45 s (a drill; USD
-0.06). The controller's first two versions read the fall of the balance too early (USD 0 and
-USD 0.12 against bounds of USD 0.36 and 0.43): the provider charges late, and the reading is now
-named as unreliable. The first run's worst case left out the time for deleting the host.
+Findings. In one drill the provider's `terminateAfter` left a host running 332 s after it was
+made, with the end asked for at 120 s, so the controller does not rely on it. The first second
+process alone deleted a host 47 s after it was made, with its deadline at 45 s. The controller's
+first two versions read the fall of the balance too early (USD 0 and USD 0.12 against bounds of
+USD 0.36 and 0.43): the provider charges late. The first run's worst case left out the time for
+deleting the host.
 
-Spend: USD 1.67 by the bounds of the three runs and the two drills; the balance fell by USD 1.66.
+Review and its fixes. After the third run an AI review of the branch (a Claude subagent with no
+part in the work; not an independent human reviewer) found no way to a false pass and several to a
+host left billed: a request for a host that fails on the caller's side while the provider makes
+the host; an error of an unexpected kind, or a second interrupt, during the deletion; a deletion
+that the worst case did not bound; a second process that started after the host and gave up after
+five tries. It also found that an empty record of the host's inputs passed, that the records said
+"in every case" and "worst case" of things the code did not hold, and that the tests used a real
+balance figure. The controller of the fourth run starts the second process before the host is
+asked for and deletes by the run's name; its deletion holds signals off and survives any error
+for a bounded time; the host's records must name exactly the expected files; the records say
+what they can. The unpushed commits were rewritten so that no balance figure is in them, which
+changed their ids. A drill then killed the controller outright during the upload of a real run:
+no host was listed four seconds later. What no fix answers: both processes run on the caller's
+machine.
 
-Not shown: a composed run; a build of the provers by the target; another GPU type or cloud; a host
-that hangs to the deadline with the controller alive; soundness of the patched code; anything of
+Spend: about USD 2.20 by the bounds of the four runs (USD 1.60) and the three drills (about USD
+0.60); the balance had fallen by USD 2.17 at the last reading.
+
+Not shown: a composed run; a build of the provers by the target; another GPU type or cloud; a
+machine that sleeps or loses its network during a run; soundness of the patched code; anything of
 hiding or speed. The commitment ID is still `cp_commit`'s print, enrolled as a value.
