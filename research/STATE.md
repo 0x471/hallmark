@@ -2,60 +2,29 @@
 
 Updated: 2026-11-27. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
 
-## TinyLlama on FlashProve (dense-model patches) — proposed; dense proofs of one request, at the contributor's cost and under no owner's cap
+## TinyLlama on FlashProve (dense-model patches) — proposed, at the contributor's cost and under no owner's cap
 
-2026-11-25. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed) adds four
-pinned patches on FlashProve `9e2bdd8`
-([`research/probes/flashprove/tinyllama/`](probes/flashprove/tinyllama/README.md)). Three let a dense
-model such as TinyLlama-1.1B reach the verifier's standard form and give the provers and CPU tools
-the constants for width 2,048; the fourth lets upstream's scale tools fit a dense `llama` model, and
-`kit/` holds a TinyLlama-1.1B kit fitted by upstream's route. `make verify-flashprove-tinyllama`
-passed on Linux and macOS: on upstream's stored proofs and altered copies the patched verifier gives
-the unpatched one's results; separately, the prover patch compiles with nvcc
-([evidence](evidence/flashprove-tinyllama-2026-11-24.json)). `make
-verify-flashprove-tinyllama-answer` rebuilds the export and the kit byte for byte, and upstream's
-integer model with the kit gives SASH's eight answer tokens on SASH's prompt; the part of
-`cp_prove`'s set-up that needs only the kit, run on a CPU with upstream's code, admits it; `cp_commit`'s
-mandatory worst-case check, computed on a CPU by a port of upstream's code, finds every site within
-its limit. At the default `eg 8` one gate row of layer 21 is over it, so the kit uses `eg 7`, a key
-one bit coarser, which `verifier.patch` admits at NE 0. It passed on Linux and macOS
-([evidence](evidence/flashprove-tinyllama-answer-2026-11-24.json)). The kit's committed table is
-now sized for TinyLlama's 10,240 weight rows (`table 11 24 1376256 65535 0 18`; the full kit's line
-would encode Maverick's table), by criteria read off upstream's kits, and both targets passed again
-on Linux with it. On 2026-11-24 and 25 (UTC) the contributor ran the patched programs on a rented H100, on the
-contributor's own RunPod account and at the contributor's cost (USD 1.61), with no owner-approved budget
-and no owner-set cap: `cp_commit` passed its worst-case check and committed in about 35 s,
-`cp_prove` made four proofs of SASH's request in under 10 s each, and the patched `cp_verify`
-answered `YES` to each on the pod; for the first of them, on a CPU, it accepted under caller-held
-values, upstream's verifier refused, and eight altered copies were refused ([evidence](evidence/flashprove-tinyllama-gpu-2026-11-25.json)). One request, two pods of one type,
-public seed: no benchmark, no hiding, no owner-approved run. After three reviews on 2026-11-25 the
-CPU set-up check also holds the kit to the ranges of the layers' scale words and to the column rule
-of attention's committed matrices, the caller's check requires each altered copy's own refusal
-(seven read the proof, the key or the ID; the token file's is refused on the statement's form),
-and three evidence files that an earlier commit had removed are back; both targets and the caller's
-check passed again on Linux and macOS ([follow-up evidence](evidence/flashprove-tinyllama-followup-2026-11-25.json)). On 2026-11-26 the
-contributor uploaded the first proof's eight public files as a release of the contributor's fork (not
-a release of this repository; no authority record covers the upload), and the caller's check passed
-from the download on Linux and macOS
-([evidence](evidence/flashprove-tinyllama-proof-files-2026-11-26.json),
-[commands](probes/flashprove/tinyllama/README.md#to-repeat-the-callers-check)). In the night of
-2026-11-26 to 27 (UTC) the controller of `make e2e-flashprove-tinyllama` ran four times, the last
-time through the target as committed: one rented H100 each time, a commitment with the
-enrolled ID, one or two proofs, the host deleted, the caller's check passed here; USD 0.36 to 0.43 a
-run against a cap of USD 3.00 that the contributor set, about USD 2.20 with three drills, again at the
-contributor's cost and with no owner-approved budget or provider. Before paying, the controller
-writes the caller's enrollment and requires that the pinned tokenizer and chat template give the
-request's ids. `make e2e-composed` can take such a proof in place of SASH's and binds this path's
-model identity into the classifier proofs; it ran end to end once on the contributor's Mac
-with the reference records' frozen classifier quantizations, after two failed attempts
-([evidence](evidence/flashprove-tinyllama-composed-run-2026-11-27.json); the capped runs are in
-[this record](evidence/flashprove-tinyllama-capped-runs-2026-11-27.json)). Of #186's
-five boxes, none is closed by the contributor alone: the decision is proposed, the proving target's
-cap is not an owner's and it does not build the provers, altered copies are refused for one request,
-and the composed run is not made. Next, for the owner: decision 0094, the
-calibration text's licence, the record of the unbudgeted runs, a cap and a provider for any repeat, the
-dependency review, where the proof's files should be kept, and how a verifier gets the commitment ID.
-Next, for anyone with a supported Mac: the composed run.
+2026-11-27. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed) adds four
+pinned patches on FlashProve `9e2bdd8` and a TinyLlama-1.1B kit fitted by upstream's route
+([`research/probes/flashprove/tinyllama/`](probes/flashprove/tinyllama/README.md)). The free CPU
+targets pass on Linux and macOS: the patched verifier gives the unpatched one's results on
+upstream's stored cases, the kit rebuilds byte for byte, and upstream's integer model gives SASH's
+eight answer tokens ([evidence](evidence/flashprove-tinyllama-followup-2026-11-25.json)). On a
+rented H100 `cp_commit` commits in about 40 s and `cp_prove` proves SASH's request in about 10 s;
+on the caller's CPU the patched `cp_verify` accepts, upstream's refuses, and eight altered copies
+are refused ([first run](evidence/flashprove-tinyllama-gpu-2026-11-25.json)). `make
+e2e-flashprove-tinyllama` passed four times under a cap of USD 3.00 that the contributor set
+([record](evidence/flashprove-tinyllama-capped-runs-2026-11-27.json)). Every GPU run was on the
+contributor's own RunPod account, about USD 3.80 in all, with no owner-approved budget or provider.
+`make e2e-composed` accepted one such proof with three classifier proofs once on the contributor's
+Mac, with the reference records' frozen classifier quantizations and after two failed attempts; the
+SASH composed path also passed on this branch
+([record](evidence/flashprove-tinyllama-composed-run-2026-11-27.json)). One request, public seed:
+no benchmark, no hiding; the README lists
+[what is not checked](probes/flashprove/tinyllama/README.md#not-checked). Next, for the owner:
+decision 0094, the calibration text's licence, the record of the unbudgeted runs, a cap and a
+provider for any repeat, the dependency review, where the proof's files are kept, and how a
+verifier gets the commitment ID.
 
 ## SASH and FlashProve comparison — recorded
 
