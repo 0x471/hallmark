@@ -1,9 +1,12 @@
 # 0094: Dense TinyLlama on pinned FlashProve through Hallmark's own patches
 
-Date: 2026-11-21, revised 2026-11-25. Status: **proposed**
+Date: 2026-11-21, revised 2026-11-25 and 2026-11-27. Status: **proposed**
 ([#186](https://github.com/AbdelStark/hallmark/issues/186), option 3). On 2026-11-24 and 25 (UTC) the contributor made a dense commitment and four
 proofs on a rented H100, on the contributor's own account and at the contributor's cost
 (USD 1.61), with no owner-approved budget and no owner-set cap ("The first dense proof" below).
+On 2026-11-27 three more commitments and five more proofs followed under a controller with a cap
+that the contributor set (USD 1.67 with two drills, again the contributor's cost; "The capped run,
+the enrollment and the composed join" below).
 
 **Context.** #186 asks how Hallmark's LLM case, dense TinyLlama-1.1B, can be proved with FlashProve,
 which decision 0093 pins at `9e2bdd8` and which reads real weights only at Llama 4 Maverick's widths. #187 asks for
@@ -194,6 +197,39 @@ RunPod: this run had no budget, and no authority record was made or changed for 
 [README](../../research/probes/flashprove/tinyllama/README.md#the-first-dense-proof). The times are
 two like pods' on lines of which only `table` is sized for this model: not a benchmark.
 
+**The capped run, the enrollment and the composed join (2026-11-27).** Three things that #186
+asks for now exist as code, and each stops short of the issue's box:
+
+- *A target that proves and verifies.* `make e2e-flashprove-tinyllama` rents one sm_90 host,
+  runs `gpu_job.sh` there under time limits, deletes the host and runs the caller's check here.
+  The worst case of the charge must fit a cap before a host is made. It ran three times, each on
+  its one attempt, for USD 0.36, 0.43 and 0.42 against a cap of USD 3.00; each printed the
+  enrolled commitment ID, and each first proof passed the caller's check with its eight altered
+  copies. `make verify-flashprove-tinyllama-proof` is the free local check. Short of the box: the
+  cap is the contributor's and not an owner's, the provider (RunPod) is not one of
+  `research/AUTHORITY.json`'s, and the target takes the provers built beforehand.
+- *The caller checks of the SASH path.* `enrollment.json` is written into each run before
+  anything is paid for: the case, the kit, the patched verifier's digest and the commitment ID
+  that the caller accepts. The pinned tokenizer and chat template must give the request's ids
+  for the case's prompt and the case's response for the answer ids, and the answer must end at
+  the tokenizer's end token (`make verify-flashprove-tinyllama-request`; the end token is also
+  checked on the proof). Short of SASH's: the commitment ID is `cp_commit`'s print in the first
+  run, enrolled as a value, where SASH's caller derives its roots on a CPU.
+- *The composed demo.* `make e2e-composed FLASHPROVE_TINYLLAMA_CASE=DIR` checks a FlashProve
+  proof afresh in place of SASH's 23, and the three classifier proofs bind this path's model
+  identity (the checkpoint, the commitment ID, `h_par`, the configuration digest and the patched
+  verifier's digest), so that they do not join SASH's proof and SASH's do not join this one.
+  SASH stays the default. Short of the box: **no composed run has been made**. The FlashProve
+  side ran on Linux and the join is tested with stand-in proof bytes; the classifier proofs need
+  an Apple Silicon Mac with 12 GiB of free disk and about 24 GB of memory, which the contributor
+  did not have free.
+
+A drill showed that the provider does not end a host at the time it is asked to
+(`terminateAfter`), so the controller relies on its own deletion and on a second process, which a
+second drill showed to work. Figures, the drills and what was not run:
+[evidence](../../research/evidence/flashprove-tinyllama-capped-runs-2026-11-27.json),
+[README](../../research/probes/flashprove/tinyllama/README.md#the-capped-run).
+
 **Not done; each needs its own step.**
 
 1. **The calibration text's licence**: WikiText-2 (CC BY-SA; its dataset card's tags name 3.0 and
@@ -206,9 +242,10 @@ two like pods' on lines of which only `table` is sized for this model: not a ben
    contributor's, with no owner-approved budget. What it measured, for sizing a ceiling: one pod of 17
    minutes (upload of 2.2 GB, two commitments, four proofs, with about ten idle minutes of the
    controller's own mistake) cost USD 1.27 at USD 4.39 an hour; the commitment takes about 35 s and
-   a proof under 10 s. A controller like `make e2e-flashprove`'s, with a cap in code, is not
-   written: `gpu_job.sh` is the worker alone. The run's only limit was a watchdog on the controlling
-   host, set to terminate the pods after 2,700 s and 3,600 s.
+   a proof under 10 s. That run's only limit was a watchdog on the controlling
+   host, set to terminate the pods after 2,700 s and 3,600 s. A controller with a cap in code now
+   exists (above); what it lacks for #187 is an owner's cap, an authorised provider and a build
+   step, and it has made at most two proofs on a host.
 3. **More altered copies.** Eight altered copies of one dense proof are refused, seven of them by
    checks that read the proof, the key or the ID; upstream's tables
    have 99 altered sets for its MoE proofs, and no table of altered items exists for a dense one.
@@ -222,10 +259,17 @@ two like pods' on lines of which only `table` is sized for this model: not a ben
 6. **How a verifier gets the commitment ID.** Upstream says to take it "from a party your user
    trusts"; SASH's caller derives its roots from the public weights on a CPU. Here the ID can be
    recomputed from the public weights, the kit and the published seed, but only with an sm_90
-   GPU, and only in the mode that hides nothing. How a Hallmark verifier ties the ID to the
-   public TinyLlama checkpoint is undecided.
+   GPU, and only in the mode that hides nothing. `enrollment.json` now holds the ID that a caller
+   of this path accepts, as a value taken from the first run; how a Hallmark verifier ties the ID
+   to the public TinyLlama checkpoint is still undecided.
+7. **A composed run.** `make e2e-composed` with a FlashProve proof has not been run end to end
+   (above). It costs nothing and needs a Mac that the classifier demo supports.
+8. **A build step for the provers.** The capped target takes built programs. Decision 0093's
+   worker builds upstream's provers on a rented CPU host in a pinned image; the same step with
+   the four patches applied is not written.
 
-**Not claimed.** One request's proofs exist, made with no owner-approved budget. There is no claim of
+**Not claimed.** One request's proofs exist, made with no owner-approved budget and under no
+owner's cap. There is no claim of
 soundness of the patched C++ or CUDA code, no Lean coverage, no hiding (the seed is public), no
 benchmark and no like-for-like numbers yet. Equal tokens are a smoke test, not a
 proof that the two integer functions are equal; #187's like-for-like section must name each

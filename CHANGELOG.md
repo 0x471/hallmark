@@ -18,7 +18,14 @@ on an sm_90 GPU, and `scripts/flashprove_tinyllama_proof.py` checks such a proof
 caller-held values and altered copies. Four dense proofs of one request, SASH's, were made on a
 rented H100 and the first checked this way, at the contributor's own cost and with no owner-approved budget (decision 0094); the
 targets themselves make no commitment or proof. The first proof's public files are a release of the
-contributor's fork, and the probe's README gives the commands that repeat the check from it. The answer target also holds the kit to the ranges
+contributor's fork, and the probe's README gives the commands that repeat the check from it.
+`make e2e-flashprove-tinyllama` rents one sm_90 host under a caller-set spend cap, proves there,
+deletes the host and rechecks here; before paying it writes the caller's enrollment and holds the
+request's token ids to the pinned tokenizer and chat template
+(`make verify-flashprove-tinyllama-request`). `make verify-flashprove-tinyllama-proof` is the free
+check of such a proof, and `make e2e-composed FLASHPROVE_TINYLLAMA_CASE=…` takes one in place of
+SASH's proofs, with its own model identity in the classifier proofs; no composed run with it has
+been made. SASH stays the default of the composed demo. The answer target also holds the kit to the ranges
 of the layers' scale words and to the column rule of attention's committed matrices, as `cp_prove`
 does at its start, and the caller's check requires each altered copy's own refusal. `make verify-flashprove` (decision 0093) is
 unchanged.

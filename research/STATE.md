@@ -2,7 +2,7 @@
 
 Updated: 2026-11-25. Phase: MIT-licensed research software in a public repository, with dedicated classifier and quantized LLM proofs, not a deployed or fully verified hybrid system. AI-assisted code and research initialization.
 
-## TinyLlama on FlashProve (dense-model patches) — proposed; four dense proofs of one request, at the contributor's cost
+## TinyLlama on FlashProve (dense-model patches) — proposed; dense proofs of one request, at the contributor's cost and under no owner's cap
 
 2026-11-25. Decision [0094](../docs/decisions/0094-flashprove-tinyllama.md) (proposed) adds four
 pinned patches on FlashProve `9e2bdd8`
@@ -38,9 +38,22 @@ contributor uploaded the first proof's eight public files as a release of the co
 a release of this repository; no authority record covers the upload), and the caller's check passed
 from the download on Linux and macOS
 ([evidence](evidence/flashprove-tinyllama-proof-files-2026-11-26.json),
-[commands](probes/flashprove/tinyllama/README.md#to-repeat-the-callers-check)). Next, for the owner: decision 0094, the
-calibration text's licence, the record of the unbudgeted run and a budget for any repeat, the
+[commands](probes/flashprove/tinyllama/README.md#to-repeat-the-callers-check)). On 2026-11-27
+`make e2e-flashprove-tinyllama` ran three times: one rented H100 each time, a commitment with the
+enrolled ID, one or two proofs, the host deleted, the caller's check passed here; USD 0.36 to 0.43 a
+run against a cap of USD 3.00 that the contributor set, USD 1.67 with two drills, again at the
+contributor's cost and with no owner-approved budget or provider. Before paying, the controller
+writes the caller's enrollment and requires that the pinned tokenizer and chat template give the
+request's ids. `make e2e-composed` can take such a proof in place of SASH's and binds this path's
+model identity into the classifier proofs; its FlashProve side ran on Linux, its join is tested
+with stand-in proofs, and **no composed run has been made** (it needs a supported Mac with free
+disk and memory) ([evidence](evidence/flashprove-tinyllama-capped-runs-2026-11-27.json)). Of #186's
+five boxes, none is closed by the contributor alone: the decision is proposed, the proving target's
+cap is not an owner's and it does not build the provers, altered copies are refused for one request,
+and the composed run is not made. Next, for the owner: decision 0094, the
+calibration text's licence, the record of the unbudgeted runs, a cap and a provider for any repeat, the
 dependency review, where the proof's files should be kept, and how a verifier gets the commitment ID.
+Next, for anyone with a supported Mac: the composed run.
 
 ## SASH and FlashProve comparison — recorded
 

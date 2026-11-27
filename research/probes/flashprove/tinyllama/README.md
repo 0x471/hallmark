@@ -4,8 +4,11 @@ Status: **proposed** ([#186](https://github.com/AbdelStark/hallmark/issues/186),
 option 3; decision draft [0094](../../../../docs/decisions/0094-flashprove-tinyllama.md)). One dense
 commitment and four proofs of SASH's request have been made with these patches on a rented H100, on
 the contributor's own account and at the contributor's cost, with no owner-approved budget
-("[The first dense proof](#the-first-dense-proof)"). Nothing here changes `make verify-flashprove`
-or decision 0093's pins.
+("[The first dense proof](#the-first-dense-proof)"). On 2026-11-27 three more commitments and
+five more proofs were made under a controller with a spend cap that the contributor set
+("[The capped run](#the-capped-run)"), and the composed demo can take such a proof in code, though
+no composed run has been made ("[In the composed demo](#in-the-composed-demo)"). Nothing here
+changes `make verify-flashprove` or decision 0093's pins.
 
 Upstream FlashProve at the pinned commit `9e2bdd8` ([`source.json`](../source.json)) reads real model
 weights only at Llama 4 Maverick's widths, 5,120 and head width 128. Its own test kits are smaller
@@ -563,6 +566,128 @@ Linux stopped at upstream's build for that reason and are retained there: one be
 without the `umask` line, and one in a clone below a group-writable folder. Not in the archive: the three later proofs, the pods' logs and programs, the seed (upstream's
 `examples/maverick/public-seed.bin`) and any weights.
 
+## The capped run
+
+`make e2e-flashprove-tinyllama` ([`scripts/run_flashprove_tinyllama_gpu.py`](../../../../scripts/run_flashprove_tinyllama_gpu.py))
+rents one sm_90 GPU host, makes a commitment and its proofs there with [`gpu_job.sh`](gpu_job.sh),
+deletes the host, and judges what came back on the caller's own machine. It is #186's "`make`
+target that proves and verifies", with these limits said first:
+
+- **The cap is the caller's.** The target passes USD 3.00; nobody but the contributor set it, and
+  no owner approved these runs. The provider is RunPod, which `research/AUTHORITY.json` does not
+  list. #186's box "GPU spend recorded against an owner-approved cap" is therefore open: the spend
+  is recorded against a cap, and the cap is not the owner's.
+- **It does not build the provers.** `FLASHPROVE_TINYLLAMA_BUILD` names a folder with
+  `hc/cp_commit`, `hc/cp_prove` and `hc/cp_verify`, built by upstream's `prover/build.sh`
+  (`serving_cp_commit`, `serving_cp_prove`) and `verifier/build.sh` on the pinned source with the
+  patches applied. That took over an hour on six cores and needs `nvcc` 13.2.86 on Linux
+  x86-64. The runs below used the programs of the first dense proof, by their SHA-256.
+  `FLASHPROVE_TINYLLAMA_GGUF` is the exported model, which the answer target leaves in its run
+  folder under `weights/`.
+- **The host is not trusted and its image is named by tag** (`ubuntu:24.04`, [`pod.json`](pod.json)).
+  [`pod_job.sh`](pod_job.sh) installs packages from the image's archive and the CUDA runtime
+  libraries from PyPI, as decision 0093's worker does. What decides is the caller's check afterwards.
+
+```sh
+RUNPOD_API_KEY=... make e2e-flashprove-tinyllama GPU_CREDIT_BALANCE_USD=... \
+  FLASHPROVE_TINYLLAMA_BUILD=/path/to/build FLASHPROVE_TINYLLAMA_GGUF=/path/to/tinyllama-1.1b-chat-v1.0-bf16.gguf
+```
+
+**Before anything is paid for**, in this order:
+
+1. The caller's enrollment is written to the run folder: [`enrollment.json`](enrollment.json)
+   (the case, `kit.json`, `h_par`, the configuration digest, the patched verifier's digest, the
+   seed and the commitment ID that this caller accepts), the model file's and the three programs'
+   SHA-256, and the request. The commitment ID is the one that `cp_commit` printed in the first
+   run. No CPU program recomputes it, so the enrollment takes it from that run's record.
+2. The pinned tokenizer and its chat template must turn the case's prompt into the case's 25
+   prompt ids, the eight answer ids must decode to the case's response, and the last answer id
+   must be the tokenizer's end token
+   ([`scripts/flashprove_tinyllama_request.py`](../../../../scripts/flashprove_tinyllama_request.py),
+   also `make verify-flashprove-tinyllama-request`). The tokenizer's four files and `config.json`
+   are those that SASH's case pins, read in the kit's hash-locked `scales` environment, with the
+   call that SASH's own preparation makes.
+3. Both verifiers are built from the pinned source: the ones that will judge the paid proof.
+4. The worst case of the charge must fit the cap, the balance that the caller states and the
+   balance that the provider reports: the provider's hourly price times the six steps' time
+   limits and the minute allowed for deleting the host (2,460 s; USD 3.00 at USD 4.39 an hour).
+   No other host of the account may exist.
+
+**The paid part** is one host and one attempt. Its steps (start, host checks and packages, upload
+of the staged public files, runtime libraries, `gpu_job.sh`, download) each have a time limit and
+together one deadline. Only public files go up and only public files and logs come back; the
+provider's secret directory stays on the host. The controller deletes the host in every case and
+checks that the account no longer lists it. A second process, started with the host, deletes it
+at the deadline if the controller is gone. The provider is also asked to end the host itself
+(`terminateAfter`); a drill showed that it does not, so nothing relies on that.
+
+**Afterwards**, on the caller's machine: `cp_commit`'s commitment ID must be the enrolled one,
+the host's record of the programs and of every input must name the caller's own files, and
+`scripts/flashprove_tinyllama_proof.py`'s checks run on the returned files (patched `YES`,
+unpatched `NO: policy-tables`, eight altered copies each refused for its own reason).
+
+**Three runs of 2026-11-27**, each on its own host (RunPod, SECURE cloud, USD 4.39 an hour), each
+passed on its one attempt ([evidence](../../../evidence/flashprove-tinyllama-capped-runs-2026-11-27.json)):
+
+| Controller at | Proofs | Host | `cp_commit` | `cp_prove` | First proof, bytes | Host, s | Bound, USD |
+|---|---:|---|---:|---:|---:|---:|---:|
+| `3942704` | 1 | H100 SXM, 29 vCPU, 287 GB | 35.34 s | 8.80 s | 13,245,476 | 294.2 | 0.3588 |
+| `9dc599a` | 2 | H100 SXM, 26 vCPU, 251 GB | 38.85 s | 8.83 s, 11.89 s | 13,242,036 | 352.4 | 0.4297 |
+| `3dd1b2f` | 2 | H100 SXM, 26 vCPU, 251 GB | 43.76 s | 8.70 s, 10.17 s | 13,251,172 | 341.1 | 0.4159 |
+
+In each, `cp_commit` printed the enrolled commitment ID `5ffd1aa3…06bd`, the host's `cp_verify`
+answered `YES` to every proof, and the caller's check of the first proof passed on Linux x86-64
+(265 to 278 s): patched `YES`, unpatched `NO: policy-tables`, the eight refusals of the table
+above. A second proof of a run is checked on the host alone and does not come back. The first
+run's files also passed `make verify-flashprove-tinyllama-proof` on macOS arm64 (155 s). The
+bound is the hourly price times this process's clock from before the host is asked for until it
+is seen deleted; the third run is that of the controller as it now stands. A whole run took
+1,074 to 1,194 s, most of it the two verifier builds and the local check.
+
+**Two drills on real hosts**, with nothing run on them. The second process alone, with a deadline
+45 s after the host was asked for, had deleted it 47 s after. A host that the provider was asked
+to end after two minutes (`terminateAfter`) was still listed 332 s after it was made, and the
+drill deleted it: the provider's own limit did not act.
+
+**Spend of 2026-11-27, all at the contributor's cost:** USD 1.20 by the bounds of the three runs
+and USD 0.46 for the two drills, USD 1.67 in all; the account's balance fell by USD 1.66. Before
+the first paid run the controller was run once with a cap of one cent: it made its free steps
+and refused at the cap, with no host.
+
+What these runs do not show: a build of the provers by the target; another GPU type or the
+provider's other cloud (the script names two types, one was run); a host that hangs for the full
+time limit; anything about hiding (public weights, public seed) or speed (the times are those of
+single calls on rented hosts, on lines not sized for this model). A commitment ID that is equal
+on five hosts, six times, shows that `cp_commit` repeats itself, not that the ID is TinyLlama's.
+
+## In the composed demo
+
+`make e2e-composed FLASHPROVE_TINYLLAMA_CASE=DIR` takes a FlashProve proof of the LLM answer in
+place of SASH's 23 proofs ([`scripts/flashprove_composed.py`](../../../../scripts/flashprove_composed.py),
+`--llm-backend flashprove` of `scripts/run_circle_composed.py`). `DIR` holds the eight public
+files of one dense proof. The controller then:
+
+- checks the text against the ids and the proof under the enrolled commitment ID, both afresh
+  (the two checks above; a saved result is not read);
+- has the three classifier proofs bind **this path's model identity**
+  (`hallmark/flashprove-research-model/1`: the checkpoint, the commitment ID, `h_par`, the
+  configuration digest and the patched verifier's digest) instead of SASH's, so that classifier
+  proofs made for one LLM proof system do not join the other's proof;
+- runs the same host join and the same 16 changed bindings as with SASH.
+
+SASH stays the default and its path is unchanged; `composed_input.py`'s functions take the
+backend as an argument that defaults to SASH.
+
+**What ran, and what did not.** On Linux x86-64 the FlashProve side ran for real on the second
+capped run's files (741 s by its own clock, beside another job on that host: text, patched `YES`, unpatched `NO: policy-tables`, eight refusals). The join itself is tested with real bindings and stand-in proof
+bytes, as SASH's is (`tests/test_circle_composed.py`: the 16 changed bindings are refused, and
+each path's classifier bundle is refused under the other path's identity). **No composed run has
+been made end to end**: the classifier proofs need an Apple Silicon Mac with 12 GiB of free disk
+(`run_circle_e2e.py` refuses other hosts), and the reference classifier run sampled up to
+23.45 GB of memory. The contributor's Mac had under 7 GiB of free disk and has 24 GB of memory in
+all, and the Linux host is refused. #186's box for the composed demo is therefore open until someone runs that one command
+on such a Mac. It costs nothing.
+
 ## Not checked
 
 - **The prover patch has run on one request, one kit and two pods of one type.** `cp_commit` and `cp_prove`
@@ -578,8 +703,9 @@ without the `umask` line, and one in a clone below a group-writable folder. Not 
   - `integer_model`'s `tests/test_gguf_files.py` (it builds `make_model`);
   - the prover rows `parameter_file_one_bits_test` and `parameter_file_one_place_test`.
 - **The commitment is a test commitment.** It was made with `-public-weights` and upstream's
-  published seed file, so it hides nothing, and its ID (`5ffd1aa3…`) is the caller's own: nothing
-  enrols it, and how a verifier would tie an ID to the public checkpoint is not designed (decision
+  published seed file, so it hides nothing. Its ID (`5ffd1aa3…`) is now a caller's enrolled value
+  ([`enrollment.json`](enrollment.json)), taken from `cp_commit`'s print: no CPU program derives
+  it, and how a verifier would tie an ID to the public checkpoint is not designed (decision
   0094). The kit's `fe` (below) and its proof-system lines enter that ID and may still change.
 - **The kit's proof-system lines are check 6's**, not sized for speed: the full kit's values, with
   the lines that TinyLlama's shape forces (`ll`, which 22 layers force from 2 to 1; `la`, `lB`,
@@ -623,15 +749,17 @@ without the `umask` line, and one in a clone below a group-writable folder. Not 
 - **Only the patched verifier answers `YES`.** Upstream's `cp_verify` refuses the same files
   (`NO: policy-tables`), and Lean covers neither form. Whoever relies on a dense `YES` relies on
   Hallmark's patch.
-- **The worker as it now stands has not run on a GPU.** The pods ran `gpu_job.sh` as at `bddda05`
+- **The worker as it now stands ran on a GPU only on 2026-11-27**, three times, under the capped
+  controller, with `expected.sha256` given and under the controller's time limits
+  ("[The capped run](#the-capped-run)"). Before that: the first run's pods ran `gpu_job.sh` as at `bddda05`
   (pod 1 ran the working-tree file that was committed as `bddda05` one minute after that pod
   ended). `35c7dde` then made it require that the first GPU is sm_90 and that `cp_verify`'s last
   line is `YES`, and later commits made it refuse a `PROOFS` that is no whole number below 1,000, check the
   host before it makes its work folder, compare an optional `expected.sha256` (strictly, and it
   must name the kit's three files, the GGUF file and the seed) and an existing marker file. The changed script has run only against stand-in programs on a Linux host without a
-  GPU ([follow-up evidence](../../../evidence/flashprove-tinyllama-followup-2026-11-25.json)). It
-  still has no time limit of its own, and unless `expected.sha256` is given it compares no input
-  with a pin.
+  GPU until then ([follow-up evidence](../../../evidence/flashprove-tinyllama-followup-2026-11-25.json)). The
+  script itself still has no time limit, and unless `expected.sha256` is given it compares no
+  input with a pin: both come from the controller.
 - **What three reviews of 2026-11-25 found and this branch does not fix** (the patches are left as
   they were when the proofs were made, so that the recorded runs stay those of the pinned files):
   - Upstream's own text counts a model without routed experts among the forms that "cannot pass"

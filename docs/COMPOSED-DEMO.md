@@ -107,6 +107,24 @@ and preprocessing enrollment remain separate; no persistent revocation/rollback 
 operational signer custody or independent security qualification is supplied.
 See [decision 0075](decisions/0075-signed-composed-enrollment.md).
 
+## With a FlashProve proof of the LLM answer (proposed)
+
+[Decision 0094](decisions/0094-flashprove-tinyllama.md) is proposed, not adopted. With it, the
+LLM side can be one FlashProve proof of dense TinyLlama in place of SASH's 23 proofs:
+
+```sh
+make e2e-composed FLASHPROVE_TINYLLAMA_CASE=/path/to/public-files
+```
+
+The folder holds the eight public files of one dense proof. The controller checks the request's
+text against its token ids and the proof under the enrolled commitment ID, both afresh, and the
+three classifier proofs bind that path's model identity instead of SASH's; the host join and its
+16 changed bindings are the same. Only Hallmark's patched `cp_verify` accepts such a proof, and
+the commitment ID is an enrolled value that no CPU program recomputes. **No composed run with a
+FlashProve proof has been made end to end yet**: its FlashProve side ran on Linux and the join is
+tested with stand-in proof bytes
+([details](../research/probes/flashprove/tinyllama/README.md#in-the-composed-demo)).
+
 ## Read the outcome
 
 A successful `runs/composed-circle-*/result.json` includes:

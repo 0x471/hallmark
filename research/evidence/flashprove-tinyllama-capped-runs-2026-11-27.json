@@ -1,0 +1,842 @@
+{
+  "schema_id": "hallmark.flashprove-tinyllama-capped-runs-evidence/1",
+  "recorded_at": "2026-11-27",
+  "decision": "docs/decisions/0094-flashprove-tinyllama.md",
+  "decision_status": "proposed",
+  "purpose": "Three runs of make e2e-flashprove-tinyllama's controller on rented hosts under a cap that the contributor set, two drills of its safety nets, the request's text check, and the FlashProve side of the composed demo. No composed run was made. No patch and no kit file is changed",
+  "made_by": "the contributor's AI-assisted session, on a Linux x86_64 host of the contributor's and on the contributor's laptop (macOS arm64); no independent reviewer",
+  "authority": {
+    "owner_approved": false,
+    "statement": "The contributor, to whom issue #186 is assigned, paid for these runs on the contributor's own RunPod account and set the cap. No owner approved a budget, a cap or the provider: #184 says that paid GPU runs need an owner-approved budget, #186 puts unbudgeted GPU runs out of scope, and research/AUTHORITY.json lists Modal, Vast.ai and Hugging Face Jobs, not RunPod. No authority record was made or changed. #186's box 'GPU spend recorded against an owner-approved cap' is not met by a contributor's cap",
+    "cap_usd": "3.00 for each run, passed by the make target"
+  },
+  "programs": {
+    "note": "the three programs are those of the first dense proof, by SHA-256 (flashprove-tinyllama-followup-2026-11-25.json, gpu_run_files.binaries_sha256); the controller does not build them",
+    "sha256": {
+      "cp_commit": "4475eaf7d696caad7347469c68e440c89ece22525e1734d59394b7410116a4f4",
+      "cp_prove": "5e2e809f8cee32a1ac2de0d2e3e6ef26befac8dc74b45f14b72289687c53fa2b",
+      "cp_verify": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1"
+    }
+  },
+  "runs": {
+    "run_1": {
+      "controller_commit": "3942704",
+      "protocol": {
+        "automatic_retries": 0,
+        "balance_check_usd": "left out of this record",
+        "cap_set_by": "the caller of this run",
+        "cloud": "SECURE",
+        "cost_cap_usd": "3.00",
+        "cost_ceiling_usd": "2.93",
+        "gpu": "NVIDIA H100 80GB HBM3",
+        "hiding_claim": false,
+        "owner_approved": false,
+        "pod": {
+          "container_disk_gb": 40,
+          "gpus": [
+            "NVIDIA H100 80GB HBM3",
+            "NVIDIA H200"
+          ],
+          "grace": 300,
+          "image": "ubuntu:24.04",
+          "image_note": "by tag, not by digest: the host is not trusted, and what it returns is judged again by the caller's own verifier",
+          "min_memory_gb": 60,
+          "min_vcpu": 8,
+          "provider": "RunPod (api.runpod.io/graphql); not among the compute providers of research/AUTHORITY.json",
+          "schema_id": "hallmark.flashprove-tinyllama-pod/1",
+          "seconds": {
+            "boot": 420,
+            "fetch": 180,
+            "host": 240,
+            "libraries": 240,
+            "prove": 420,
+            "upload": 900
+          }
+        },
+        "price_usd_per_hour": "4.39",
+        "proofs": 1,
+        "public_weights": true,
+        "qualified_backend": false,
+        "schema_id": "hallmark.flashprove-tinyllama-gpu/1",
+        "seconds_limit": 2400,
+        "source_files": {
+          "research/probes/flashprove/tinyllama/gpu_job.sh": "b52aae4effb3b6c81d1fc8d19e6c2e7fb30dbce75a1e9140a14e4f2d1e401559",
+          "research/probes/flashprove/tinyllama/pod_job.sh": "2e915c56a3e0b15c36158699e9a57871677566fe3fa2951fe4daced8a9728be9",
+          "scripts/run_flashprove_tinyllama_gpu.py": "35a93bb97da37836852bc381868ebb06aa83b433fc2289c1608a384333025210"
+        }
+      },
+      "spend": {
+        "bound_usd": "0.3588",
+        "cap_usd": "3.00",
+        "host_deleted": true,
+        "host_seconds": 294.2,
+        "within_cap": true
+      },
+      "host": {
+        "gpu": "H100 SXM",
+        "gpuCount": 1,
+        "memoryInGb": 287,
+        "vcpuCount": 29
+      },
+      "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+      "cp_commit_seconds": 35.34,
+      "cp_prove_seconds": [
+        8.8
+      ],
+      "worker_verdicts": [
+        "YES"
+      ],
+      "first_proof": {
+        "bytes": 13245476,
+        "sha256": "b97d3c99758df3b1201baa7dec20332177a62f81f0cb77f7e6c1dc40f0d259bc"
+      },
+      "local_check": {
+        "host": "Linux x86_64",
+        "seconds": 272.3,
+        "patched_verdict": "YES",
+        "unpatched_verdict": "NO: policy-tables",
+        "altered_copies": [
+          [
+            "proof-middle-bit",
+            "NO: proof-refused"
+          ],
+          [
+            "proof-last-bit",
+            "NO: proof-refused"
+          ],
+          [
+            "token-file",
+            "NO: statement-range"
+          ],
+          [
+            "request-first-token",
+            "NO: proof-refused"
+          ],
+          [
+            "request-answer-token",
+            "NO: proof-refused"
+          ],
+          [
+            "key-bit",
+            "NO: key-refused"
+          ],
+          [
+            "leaf-bit",
+            "NO: entry-refused"
+          ],
+          [
+            "commitment-id",
+            "NO: model-statement"
+          ]
+        ]
+      },
+      "seconds_in_all": 1074.1,
+      "result_json_sha256": "29d0d3fa292ae2cf3e19fcaa69e6c9e2354c0b8eae69c1190958d66880030ef7",
+      "enrollment_json_sha256": "0f89c6e158c119a08bc846d3c2583e00fbef0a1c717417d251070abafb6294a1"
+    },
+    "run_2": {
+      "controller_commit": "9dc599a",
+      "protocol": {
+        "automatic_retries": 0,
+        "balance_check_usd": "left out of this record",
+        "cap_set_by": "the caller of this run",
+        "cloud": "SECURE",
+        "cost_cap_usd": "3.00",
+        "cost_ceiling_usd": "3.00",
+        "gpu": "NVIDIA H100 80GB HBM3",
+        "hiding_claim": false,
+        "owner_approved": false,
+        "pod": {
+          "container_disk_gb": 40,
+          "end_seconds": 60,
+          "gpus": [
+            "NVIDIA H100 80GB HBM3",
+            "NVIDIA H200"
+          ],
+          "gpus_note": "the two sm_90 types asked for by name; only the first, in the provider's SECURE cloud, has been run",
+          "grace": 300,
+          "image": "ubuntu:24.04",
+          "image_note": "by tag, not by digest: the host is not trusted, and what it returns is judged again by the caller's own verifier",
+          "min_memory_gb": 60,
+          "min_vcpu": 8,
+          "provider": "RunPod (api.runpod.io/graphql); not among the compute providers of research/AUTHORITY.json",
+          "schema_id": "hallmark.flashprove-tinyllama-pod/1",
+          "seconds": {
+            "boot": 420,
+            "fetch": 180,
+            "host": 240,
+            "libraries": 240,
+            "prove": 420,
+            "upload": 900
+          },
+          "seconds_note": "seconds: one limit for each paid step, all under one deadline (their sum). end_seconds: allowed for deleting the host, counted in the worst case. grace: after the deadline the provider is asked to end the host itself (terminateAfter); in a drill it did not within 3.5 minutes of the time asked, so the run does not rely on it"
+        },
+        "price_usd_per_hour": "4.39",
+        "proofs": 2,
+        "public_weights": true,
+        "qualified_backend": false,
+        "schema_id": "hallmark.flashprove-tinyllama-gpu/1",
+        "seconds_limit": 2400,
+        "source_files": {
+          "research/probes/flashprove/tinyllama/gpu_job.sh": "b52aae4effb3b6c81d1fc8d19e6c2e7fb30dbce75a1e9140a14e4f2d1e401559",
+          "research/probes/flashprove/tinyllama/pod_job.sh": "2e915c56a3e0b15c36158699e9a57871677566fe3fa2951fe4daced8a9728be9",
+          "scripts/run_flashprove_tinyllama_gpu.py": "af954cb85b6ea70e0eb72a9bb63e470c7444880384f3b3a8c7a60b46953ff838"
+        }
+      },
+      "spend": {
+        "bound_usd": "0.4297",
+        "cap_usd": "3.00",
+        "host_deleted": true,
+        "host_seconds": 352.4,
+        "price_usd_per_hour": "4.39",
+        "within_cap": true
+      },
+      "host": {
+        "gpu": "H100 SXM",
+        "gpuCount": 1,
+        "memoryInGb": 251,
+        "vcpuCount": 26
+      },
+      "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+      "cp_commit_seconds": 38.85,
+      "cp_prove_seconds": [
+        8.83,
+        11.89
+      ],
+      "worker_verdicts": [
+        "YES",
+        "YES"
+      ],
+      "first_proof": {
+        "bytes": 13242036,
+        "sha256": "3b115a3a06d5ceab7d87a6459453da7311ddae88a0e17028c5c20d4d11063ea2"
+      },
+      "local_check": {
+        "host": "Linux x86_64",
+        "seconds": 278.4,
+        "patched_verdict": "YES",
+        "unpatched_verdict": "NO: policy-tables",
+        "altered_copies": [
+          [
+            "proof-middle-bit",
+            "NO: proof-refused"
+          ],
+          [
+            "proof-last-bit",
+            "NO: proof-refused"
+          ],
+          [
+            "token-file",
+            "NO: statement-range"
+          ],
+          [
+            "request-first-token",
+            "NO: proof-refused"
+          ],
+          [
+            "request-answer-token",
+            "NO: proof-refused"
+          ],
+          [
+            "key-bit",
+            "NO: key-refused"
+          ],
+          [
+            "leaf-bit",
+            "NO: entry-refused"
+          ],
+          [
+            "commitment-id",
+            "NO: model-statement"
+          ]
+        ]
+      },
+      "seconds_in_all": 1194.1,
+      "result_json_sha256": "5d5a4bc8becfcb9297111bcce0ef913b2946f70bc266865fd7665bd886acf957",
+      "enrollment_json_sha256": "0f89c6e158c119a08bc846d3c2583e00fbef0a1c717417d251070abafb6294a1"
+    },
+    "run_3": {
+      "controller_commit": "3dd1b2f",
+      "protocol": {
+        "automatic_retries": 0,
+        "balance_check_usd": "left out of this record",
+        "cap_set_by": "the caller of this run",
+        "cloud": "SECURE",
+        "cost_cap_usd": "3.00",
+        "cost_ceiling_usd": "3.00",
+        "gpu": "NVIDIA H100 80GB HBM3",
+        "hiding_claim": false,
+        "owner_approved": false,
+        "pod": {
+          "container_disk_gb": 40,
+          "end_seconds": 60,
+          "gpus": [
+            "NVIDIA H100 80GB HBM3",
+            "NVIDIA H200"
+          ],
+          "gpus_note": "the two sm_90 types asked for by name; only the first, in the provider's SECURE cloud, has been run",
+          "grace": 300,
+          "image": "ubuntu:24.04",
+          "image_note": "by tag, not by digest: the host is not trusted, and what it returns is judged again by the caller's own verifier",
+          "min_memory_gb": 60,
+          "min_vcpu": 8,
+          "provider": "RunPod (api.runpod.io/graphql); not among the compute providers of research/AUTHORITY.json",
+          "schema_id": "hallmark.flashprove-tinyllama-pod/1",
+          "seconds": {
+            "boot": 420,
+            "fetch": 180,
+            "host": 240,
+            "libraries": 240,
+            "prove": 420,
+            "upload": 900
+          },
+          "seconds_note": "seconds: one limit for each paid step, all under one deadline (their sum). end_seconds: allowed for deleting the host, counted in the worst case. grace: after the deadline the provider is asked to end the host itself (terminateAfter); in a drill it did not within 3.5 minutes of the time asked, so the run does not rely on it"
+        },
+        "price_usd_per_hour": "4.39",
+        "proofs": 2,
+        "public_weights": true,
+        "qualified_backend": false,
+        "schema_id": "hallmark.flashprove-tinyllama-gpu/1",
+        "seconds_limit": 2400,
+        "source_files": {
+          "research/probes/flashprove/tinyllama/gpu_job.sh": "b52aae4effb3b6c81d1fc8d19e6c2e7fb30dbce75a1e9140a14e4f2d1e401559",
+          "research/probes/flashprove/tinyllama/pod_job.sh": "2e915c56a3e0b15c36158699e9a57871677566fe3fa2951fe4daced8a9728be9",
+          "scripts/run_flashprove_tinyllama_gpu.py": "b362999bc51c8a69005ee4999d6fd2c475541b44d03f3d8c8c6738b87959d333"
+        }
+      },
+      "spend": {
+        "bound_usd": "0.4159",
+        "cap_usd": "3.00",
+        "host_deleted": true,
+        "host_seconds": 341.1,
+        "price_usd_per_hour": "4.39",
+        "within_cap": true
+      },
+      "host": {
+        "gpu": "H100 SXM",
+        "gpuCount": 1,
+        "memoryInGb": 251,
+        "vcpuCount": 26
+      },
+      "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+      "cp_commit_seconds": 43.76,
+      "cp_prove_seconds": [
+        8.7,
+        10.17
+      ],
+      "worker_verdicts": [
+        "YES",
+        "YES"
+      ],
+      "first_proof": {
+        "bytes": 13251172,
+        "sha256": "2aa549e1009a8f603af2c9f5ca17d4ec0cedb1065a3662347758768067797dd1"
+      },
+      "local_check": {
+        "host": "Linux x86_64",
+        "seconds": 264.6,
+        "patched_verdict": "YES",
+        "unpatched_verdict": "NO: policy-tables",
+        "altered_copies": [
+          [
+            "proof-middle-bit",
+            "NO: proof-refused"
+          ],
+          [
+            "proof-last-bit",
+            "NO: proof-refused"
+          ],
+          [
+            "token-file",
+            "NO: statement-range"
+          ],
+          [
+            "request-first-token",
+            "NO: proof-refused"
+          ],
+          [
+            "request-answer-token",
+            "NO: proof-refused"
+          ],
+          [
+            "key-bit",
+            "NO: key-refused"
+          ],
+          [
+            "leaf-bit",
+            "NO: entry-refused"
+          ],
+          [
+            "commitment-id",
+            "NO: model-statement"
+          ]
+        ]
+      },
+      "seconds_in_all": 1128.3,
+      "result_json_sha256": "1fe74cc01940fabff13eecb4b508bf06285bb9f857a3f47026ec802a3108287b",
+      "enrollment_json_sha256": "0f89c6e158c119a08bc846d3c2583e00fbef0a1c717417d251070abafb6294a1"
+    }
+  },
+  "final_run": {
+    "which": "run_3: its controller, gpu_job.sh and pod_job.sh are the files of this commit",
+    "result_json_as_written": {
+      "altered_copies": [
+        {
+          "altered": "proof-middle-bit",
+          "exit_code": 1,
+          "expected": "NO: proof-refused",
+          "last_line": "NO: proof-refused"
+        },
+        {
+          "altered": "proof-last-bit",
+          "exit_code": 1,
+          "expected": "NO: proof-refused",
+          "last_line": "NO: proof-refused"
+        },
+        {
+          "altered": "token-file",
+          "exit_code": 1,
+          "expected": "NO: statement-range",
+          "last_line": "NO: statement-range"
+        },
+        {
+          "altered": "request-first-token",
+          "exit_code": 1,
+          "expected": "NO: proof-refused",
+          "last_line": "NO: proof-refused"
+        },
+        {
+          "altered": "request-answer-token",
+          "exit_code": 1,
+          "expected": "NO: proof-refused",
+          "last_line": "NO: proof-refused"
+        },
+        {
+          "altered": "key-bit",
+          "exit_code": 1,
+          "expected": "NO: key-refused",
+          "last_line": "NO: key-refused"
+        },
+        {
+          "altered": "leaf-bit",
+          "exit_code": 1,
+          "expected": "NO: entry-refused",
+          "last_line": "NO: entry-refused"
+        },
+        {
+          "altered": "commitment-id",
+          "exit_code": 1,
+          "expected": "NO: model-statement",
+          "last_line": "NO: model-statement"
+        }
+      ],
+      "altered_copies_refused_on_the_statement_s_form": 1,
+      "altered_copies_rejected": 8,
+      "builds": {
+        "patched": {
+          "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+          "recipe": "upstream verifier/build.sh",
+          "seconds": 217.69416043022648,
+          "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+          "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+        },
+        "upstream": {
+          "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+          "recipe": "upstream verifier/build.sh",
+          "seconds": 207.95218655792996,
+          "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+          "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+        }
+      },
+      "check_proof": {
+        "exit_code": 0,
+        "result": [
+          "result: outcome=verified commitment_id=5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd range=24:32 checked_tokens=8 end_token=2 claim=exact-match policy=exact next_token=none C=256 theta=256 cap=0 s=17 limits=exact request_tokens=64 leaf=0 commitment_assumed_rounds=63 record=1 work=32 least_round=128.00 least_round_without_work=96.23 build=33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+          "check_proof: verified: exact match: every checked token (tokens 25 to 32 of the request) is the model's greedy choice; the last checked token is the end token 2; commitment: 63 closeness rounds of the one-time files rest on another source than the bound within a third of the distance; the table has a record: the binding of the weights rests on the theorem on codes (ePrint 2025/2055, Theorem 4.6), taken as given; proof of work: up to 32 bits counted in 69 rounds; with it the least round has 128.00 bits, without it 96.23 bits (cp_verify's own figures, not a security level; --show-all has its caveats)"
+        ],
+        "seconds": 43.09530791500583
+      },
+      "checked_tokens": [
+        1576,
+        7483,
+        310,
+        3444,
+        338,
+        3681,
+        29889,
+        2
+      ],
+      "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+      "commitment_id_source": "stated by the caller; not recomputed here",
+      "enrollment_sha256": "0f89c6e158c119a08bc846d3c2583e00fbef0a1c717417d251070abafb6294a1",
+      "files": {
+        "config/KL.bin": {
+          "bytes": 1144,
+          "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+        },
+        "config/layout.txt": {
+          "bytes": 126322,
+          "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+        },
+        "config/policy.txt": {
+          "bytes": 2422,
+          "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+        },
+        "example.proof": {
+          "bytes": 13251172,
+          "sha256": "2aa549e1009a8f603af2c9f5ca17d4ec0cedb1065a3662347758768067797dd1"
+        },
+        "example.req": {
+          "bytes": 264,
+          "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+        },
+        "example.y": {
+          "bytes": 4,
+          "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+        },
+        "ivk/key.bin": {
+          "bytes": 2148512,
+          "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+        },
+        "ivk/leaf/0.bin": {
+          "bytes": 2181432,
+          "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+        }
+      },
+      "gpu_used_here": false,
+      "hiding_claim": false,
+      "host": {
+        "gpu": "H100 SXM",
+        "gpuCount": 1,
+        "memoryInGb": 251,
+        "vcpuCount": 26
+      },
+      "invoice": false,
+      "passed": true,
+      "patched_verdict": "YES",
+      "proof_made_here": false,
+      "proofs": 2,
+      "qualified_backend": false,
+      "range": "24:32",
+      "result_line": {
+        "C": "256",
+        "build": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+        "cap": "0",
+        "checked_tokens": "8",
+        "claim": "exact-match",
+        "commitment_assumed_rounds": "63",
+        "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+        "end_token": "2",
+        "leaf": "0",
+        "least_round": "128.00",
+        "least_round_without_work": "96.23",
+        "limits": "exact",
+        "next_token": "none",
+        "outcome": "verified",
+        "policy": "exact",
+        "range": "24:32",
+        "record": "1",
+        "request_tokens": "64",
+        "s": "17",
+        "theta": "256",
+        "work": "32"
+      },
+      "schema_id": "hallmark.flashprove-tinyllama-gpu-result/1",
+      "seconds": 264.611420199275,
+      "seconds_in_all": 1128.3229193170555,
+      "spend": {
+        "balance_fall_at_end_usd": "0.1047",
+        "balance_fall_note": "read once at the end; the provider charges late and in steps",
+        "bound_usd": "0.4159",
+        "cap_usd": "3.00",
+        "host_deleted": true,
+        "host_seconds": 341.1,
+        "price_usd_per_hour": "4.39",
+        "within_cap": true
+      },
+      "unpatched_verdict": "NO: policy-tables",
+      "worker_verdicts": [
+        "YES",
+        "YES"
+      ]
+    },
+    "enrollment_json_as_written": {
+      "enrolled": {
+        "case": "research/probes/sash/response-case.json",
+        "case_sha256": "2ca533976d119b656a987bd1750472132b22abb71eb59593b64f53413eb70075",
+        "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+        "commitment_id_source": "cp_commit's own print in the contributor's GPU run of 2026-11-24 and 25, the same three times (research/evidence/flashprove-tinyllama-gpu-2026-11-25.json). No CPU program recomputes it: a caller without an sm_90 GPU takes it from this file. It covers the weights, the kit and the seed",
+        "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+        "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652",
+        "kit_json_sha256": "ad0881d5597af8c842ffbdd497310e25a804618027caa1ba190b134733a4817b",
+        "schema_id": "hallmark.flashprove-tinyllama-enrollment/1",
+        "seed": {
+          "note": "upstream's published seed: with -public-weights nothing is hidden",
+          "path": "examples/maverick/public-seed.bin",
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        "verifier_source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1",
+        "what": "What a caller of the dense TinyLlama path accepts, fixed before any proving: the model's commitment, the kit, the request and the verifier. scripts/run_flashprove_tinyllama_gpu.py refuses a run whose cp_commit prints another commitment ID"
+      },
+      "kit": {
+        "configuration": "4550cdcb814a43b1043d40f431eab56d3667628a435470215ba4aa2f52a663a9",
+        "files": {
+          "KL.bin": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125",
+          "fold.txt": "2fe9b54f031e417ff9daf365147da70a0ca1d12adcd1ab587a50bc615de086fd",
+          "layout.txt": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490",
+          "maxima.json": "13f24c6a5e378fd012d9626f963099c749ab8f017d4bd702377a19b0ea720b31",
+          "policy.txt": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883",
+          "words.json": "5e98e00253e07194bdea4bcb124019880b8d6a6ee5df97669da6d7a8cd5ee4a7",
+          "wsums.txt": "ea8de8b9ffa775000b41837122001839fbd5ba5a3ff4e0b491ea7194fe0aeb3c"
+        },
+        "h_par": "cbcd5045b1434a81f4403d046db5ea318a626736217054432faaa45ba963a652"
+      },
+      "model": {
+        "bytes": 2200293664,
+        "name": "tinyllama-1.1b-chat-v1.0-bf16.gguf",
+        "sha256": "442c1b8566410a3ebddb9651c5d141f1e2847fa1a6474c5f8af103074470cbae"
+      },
+      "patches": {
+        "prover.patch": {
+          "bytes": 13205,
+          "sha256": "c395b1f88ae5d18be9e9cdb1616bfd73399eec7b4dfa8ac45b3cc142dd5fe7c1"
+        },
+        "tools.patch": {
+          "bytes": 37858,
+          "sha256": "1f18542695227c40b992bd8510c882dcc8e2c8919eac2cd1b7eb1697f9305040"
+        },
+        "verifier.patch": {
+          "bytes": 16739,
+          "sha256": "963d4121440710d84c4e02c3a0badaa2617fe93480f17b92786bcdb66e0b39e0"
+        }
+      },
+      "programs": {
+        "cp_commit": "4475eaf7d696caad7347469c68e440c89ece22525e1734d59394b7410116a4f4",
+        "cp_prove": "5e2e809f8cee32a1ac2de0d2e3e6ef26befac8dc74b45f14b72289687c53fa2b",
+        "cp_verify": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1"
+      },
+      "request": {
+        "answer_tokens": 8,
+        "end_token": 2,
+        "prompt_tokens": 25,
+        "range": "24:32",
+        "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903",
+        "text": {
+          "answer_tokens": 8,
+          "chat_template_applied": true,
+          "end_token": 2,
+          "environment": {
+            "lock_file": "scales-linux-x86_64.txt",
+            "tokenizers": "0.22.2",
+            "transformers": "5.15.1"
+          },
+          "prompt_tokens": 25,
+          "tokenizer_files": {
+            "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+            "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+            "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+            "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+            "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+          }
+        }
+      },
+      "schema_id": "hallmark.flashprove-tinyllama-run-enrollment/1",
+      "source": "9e2bdd8ff5bf9c62f18263d7dac189b0400b260c"
+    }
+  },
+  "returned": "from each host: public/ of the first proof (the eight files), cp_commit's log, time and worst-case table, each proof's log and time, each cp_verify log, the host's records. A second proof of a run is checked by the host's cp_verify alone and is not returned",
+  "drills": {
+    "when": "2026-11-27, between the first and the second run; nothing ran on these hosts",
+    "second_process": {
+      "what": "a host was asked for, the second process was started with a deadline 45 s later and the controller did nothing more",
+      "host_gone_after_seconds": 47.2,
+      "bound_usd": "0.0582"
+    },
+    "provider_time_limit": {
+      "what": "a host was asked for with terminateAfter two minutes later, with no second process",
+      "still_listed_after_seconds": 332.3,
+      "ended_by": "the drill itself",
+      "finding": "the provider did not end the host at the time asked; the controller does not rely on it",
+      "bound_usd": "0.4052"
+    }
+  },
+  "spend_in_all": {
+    "runs_bound_usd": "1.2044",
+    "drills_bound_usd": "0.4634",
+    "bound_usd": "1.6678",
+    "balance_fall_usd": "1.6625",
+    "balance_note": "the fall of the account's balance from before the first run to after the third; the balances themselves are left out. Neither figure is an invoice",
+    "dry_run": "before the first run, with a cap of USD 0.01: its free steps passed and it refused at the cap; no host"
+  },
+  "request_text": {
+    "script": "scripts/flashprove_tinyllama_request.py",
+    "linux_x86_64": {
+      "answer_tokens": 8,
+      "chat_template_applied": true,
+      "end_token": 2,
+      "environment": {
+        "lock_file": "scales-linux-x86_64.txt",
+        "tokenizers": "0.22.2",
+        "transformers": "5.15.1"
+      },
+      "passed": true,
+      "prompt_tokens": 25,
+      "schema_id": "hallmark.flashprove-tinyllama-request/1",
+      "tokenizer_files": {
+        "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+        "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+        "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+        "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+        "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+      }
+    },
+    "macos_arm64": {
+      "answer_tokens": 8,
+      "chat_template_applied": true,
+      "end_token": 2,
+      "environment": {
+        "lock_file": "scales-macos-arm64.txt",
+        "tokenizers": "0.22.2",
+        "transformers": "5.15.1"
+      },
+      "passed": true,
+      "prompt_tokens": 25,
+      "schema_id": "hallmark.flashprove-tinyllama-request/1",
+      "tokenizer_files": {
+        "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+        "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+        "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+        "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+        "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+      }
+    }
+  },
+  "free_proof_target": {
+    "target": "make verify-flashprove-tinyllama-proof, on run_1's returned files, under the enrolled commitment ID",
+    "macos_arm64": {
+      "seconds": 155.5,
+      "patched_verdict": "YES",
+      "unpatched_verdict": "NO: policy-tables",
+      "altered_copies_rejected": 8,
+      "result_json_sha256": "171b889207791d3b848be755164f440e67c0d21927548f54f6479695b094e03d"
+    },
+    "linux_x86_64": "the same function is the controller's local check in each run above"
+  },
+  "composed_demo": {
+    "flashprove_side": {
+      "what": "scripts/flashprove_composed.py verify(), on run_2's returned files, on Linux x86_64, beside another job on that host",
+      "result_json_as_written": {
+        "altered_copies_rejected": 8,
+        "builds": {
+          "patched": {
+            "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+            "recipe": "upstream verifier/build.sh",
+            "seconds": 218.99322925508022,
+            "sha256": "a163a90adb6846bcc96f1b9361ff6935f00acdc6549c3df936f47a258e5dccf1",
+            "source_digest": "33e9d53ef4640823782db51318e0024847ef9600ea8d15256e13d5fbc23fbbd1"
+          },
+          "upstream": {
+            "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+            "recipe": "upstream verifier/build.sh",
+            "seconds": 209.52777079306543,
+            "sha256": "7f9efc1e86a848a3715c6cc870e465ac2a1c5e8fd1eac09e4809023de7604394",
+            "source_digest": "93afdaf592393a54ebd17b681d1c03295eb883f0161ff0e6ab872a3b39939595"
+          }
+        },
+        "checked_tokens": [
+          1576,
+          7483,
+          310,
+          3444,
+          338,
+          3681,
+          29889,
+          2
+        ],
+        "cloud_cost_usd": 0,
+        "commitment_id": "5ffd1aa39d64f2211de266442dd69b851b0b1e611a19dbbb6b5f2acf4d0406bd",
+        "commitment_id_source": "stated by the caller; not recomputed here",
+        "files": {
+          "config/KL.bin": {
+            "bytes": 1144,
+            "sha256": "4d4ec6d8f06f93875db1d10140ffa5e703bcfb78525ef1d8ba69ba65a462d125"
+          },
+          "config/layout.txt": {
+            "bytes": 126322,
+            "sha256": "37efa3f6110925f402135f6fdbfc42976635325b8d5964c88e48292a77f0e490"
+          },
+          "config/policy.txt": {
+            "bytes": 2422,
+            "sha256": "fa78c67815bc8df600d1faf87be269cb8ba47d56028a1ac8f0ff0d8307ee5883"
+          },
+          "example.proof": {
+            "bytes": 13242036,
+            "sha256": "3b115a3a06d5ceab7d87a6459453da7311ddae88a0e17028c5c20d4d11063ea2"
+          },
+          "example.req": {
+            "bytes": 264,
+            "sha256": "465efed6e414e23d3d5424f88d610860128079965f9edead25e4fe8385084903"
+          },
+          "example.y": {
+            "bytes": 4,
+            "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+          },
+          "ivk/key.bin": {
+            "bytes": 2148512,
+            "sha256": "cf7cbe3ae16c13739ac898a34348fc6863a8eb01c37add4a91527be83244358d"
+          },
+          "ivk/leaf/0.bin": {
+            "bytes": 2181432,
+            "sha256": "2609060efa96d355c2785e0034788615c6d564d3e352a9c005455dcec47e6ae4"
+          }
+        },
+        "fresh_verifications": 1,
+        "hiding_claim": false,
+        "passed": true,
+        "proofs": 1,
+        "qualified_backend": false,
+        "range": "24:32",
+        "request_text": {
+          "answer_tokens": 8,
+          "chat_template_applied": true,
+          "end_token": 2,
+          "environment": {
+            "lock_file": "scales-linux-x86_64.txt",
+            "tokenizers": "0.22.2",
+            "transformers": "5.15.1"
+          },
+          "prompt_tokens": 25,
+          "tokenizer_files": {
+            "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+            "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+            "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+            "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+            "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+          }
+        },
+        "response": "The capital of France is Paris.",
+        "schema_id": "hallmark.flashprove-llm-result/1",
+        "seconds": 740.8093955242075,
+        "security_review": false,
+        "unpatched_verdict": "NO: policy-tables"
+      }
+    },
+    "join": "tests/test_circle_composed.py runs the real join and its 16 changed bindings with this path's model identity and stand-in proof bytes, and requires that each path's classifier bundle is refused under the other path's identity",
+    "end_to_end": "not run",
+    "why": "the classifier proofs run only on an Apple Silicon Mac (scripts/run_circle_e2e.py refuses other hosts) with 12 GiB of free disk, and the reference classifier run sampled up to 23.45 GB of memory; the contributor's Mac had under 7 GiB of free disk and has 24 GB of memory. #186's box for the composed demo is open"
+  },
+  "findings": [
+    "the provider's terminateAfter did not end a host (drills)",
+    "the controller's first two versions wrote a fall of the balance that was read too early (USD 0 after run_1, USD 0.1246 after run_2, against bounds of USD 0.3588 and 0.4297): the provider charges late and in steps. The reading is now taken once and named as unreliable; those two fields are left out of this record",
+    "run_1's worst case (USD 2.93) left out the time for deleting the host; it is counted since (USD 3.00)"
+  ],
+  "not_run": [
+    "make e2e-composed with a FlashProve proof, end to end",
+    "a build of the provers by the target",
+    "the second GPU type that pod.json names, and the provider's other cloud",
+    "a host that hangs until the deadline, other than in the drill of the second process",
+    "the controller from macOS"
+  ],
+  "hiding_claim": false,
+  "qualified_backend": false
+}
